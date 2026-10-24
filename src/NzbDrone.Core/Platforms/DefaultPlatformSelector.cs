@@ -7,9 +7,18 @@ namespace NzbDrone.Core.Platforms
 {
     public static class DefaultPlatformSelector
     {
+        // Japanese editions of a console that Gamarr keeps as their own platform (IGDB platform id -> western
+        // counterpart). Games often came out in Japan first, but the western platform is the one to offer.
+        private static readonly Dictionary<int, int> RegionalEditions = new Dictionary<int, int>
+        {
+            { 99, 18 }, // Family Computer -> NES
+            { 58, 19 } // Super Famicom -> SNES
+        };
+
         // The platform a search result is offered on first: the platform the search was filtered by, else the
         // platform the game was first released on (Ocarina of Time on N64, not a later Wii port). Platforms that
-        // share the first release date prefer PC, then IGDB's platform order.
+        // share the first release date prefer PC, then IGDB's platform order. A Japanese edition only wins when its
+        // western counterpart isn't available.
         public static Platform Select(IReadOnlyList<Platform> available, GameMetadata metadata, int requestedPlatformId = 0)
         {
             if (available == null || available.Count == 0)
@@ -31,7 +40,11 @@ namespace NzbDrone.Core.Platforms
 
             var igdbOrder = metadata?.AvailablePlatformIgdbIds ?? new List<int>();
 
-            return available
+            var candidates = available
+                .Where(p => !RegionalEditions.TryGetValue(p.IgdbPlatformId, out var western) || available.All(a => a.IgdbPlatformId != western))
+                .ToList();
+
+            return candidates
                 .Select((platform, index) => new
                 {
                     Platform = platform,

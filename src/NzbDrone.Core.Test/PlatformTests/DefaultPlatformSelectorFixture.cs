@@ -18,6 +18,8 @@ namespace NzbDrone.Core.Test.PlatformTests
         private static readonly Platform XboxSeries = new Platform { Id = 4, IgdbPlatformId = 169, Family = PlatformFamily.Microsoft };
         private static readonly Platform Ps4 = new Platform { Id = 5, IgdbPlatformId = 48, Family = PlatformFamily.Sony };
         private static readonly Platform Pc = new Platform { Id = 6, IgdbPlatformId = 6, Family = PlatformFamily.PC };
+        private static readonly Platform Snes = new Platform { Id = 7, IgdbPlatformId = 19, Family = PlatformFamily.Nintendo };
+        private static readonly Platform SuperFamicom = new Platform { Id = 8, IgdbPlatformId = 58, Family = PlatformFamily.Nintendo };
 
         private static GameMetadata GivenReleases(params (Platform Platform, int Year)[] releases)
         {
@@ -69,6 +71,22 @@ namespace NzbDrone.Core.Test.PlatformTests
             var metadata = GivenReleases((WiiU, 0), (Wii, 0));
 
             DefaultPlatformSelector.Select(new List<Platform> { Wii, WiiU }, metadata).Should().Be(WiiU);
+        }
+
+        [Test]
+        public void should_prefer_the_western_console_over_its_earlier_japanese_edition()
+        {
+            var metadata = GivenReleases((SuperFamicom, 1994), (Snes, 1995), (Wii, 2007));
+
+            DefaultPlatformSelector.Select(new List<Platform> { SuperFamicom, Snes, Wii }, metadata).Should().Be(Snes);
+        }
+
+        [Test]
+        public void should_pick_a_japanese_edition_when_it_is_the_only_original()
+        {
+            var metadata = GivenReleases((SuperFamicom, 1994), (Wii, 2007));
+
+            DefaultPlatformSelector.Select(new List<Platform> { SuperFamicom, Wii }, metadata).Should().Be(SuperFamicom);
         }
 
         [Test]
