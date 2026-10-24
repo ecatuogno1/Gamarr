@@ -21,6 +21,11 @@
   margin-bottom: 30px;
 }
 
+.platformsHelpText {
+  margin-top: 5px;
+  color: var(--helpTextColor);
+}
+
 .labelIcon {
   margin-left: 8px;
 }

@@ -44,7 +44,6 @@ function createMapStateToProps() {
         existingGameId,
         platformBadges,
         libraryPlatformNames,
-        existingTitleSlug: existingGame ? existingGame.titleSlug : null,
         addedPlatformIds,
         isExistingGame,
         isSmallScreen: dimensions.isSmallScreen,

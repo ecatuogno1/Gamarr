@@ -7,6 +7,7 @@ interface CssExports {
   'labelIcon': string;
   'modalFooter': string;
   'overview': string;
+  'platformsHelpText': string;
   'poster': string;
   'searchForMissingGameContainer': string;
   'searchForMissingGameInput': string;

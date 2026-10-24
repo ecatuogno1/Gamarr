@@ -59,7 +59,6 @@ class AddNewGameSearchResult extends Component {
       igdbSlug,
       youTubeTrailerId,
       title,
-      titleSlug,
       year,
       platform,
       availablePlatforms,
@@ -75,7 +74,6 @@ class AddNewGameSearchResult extends Component {
       folder,
       images,
       existingGameId,
-      existingTitleSlug,
       isExistingGame,
       isExcluded,
       isSmallScreen,
@@ -90,7 +88,7 @@ class AddNewGameSearchResult extends Component {
 
     const hasGameFile = !!gameFile;
 
-    const linkProps = isExistingGame ? { to: `/game/${existingTitleSlug || titleSlug}` } : { onPress: this.onPress };
+    const linkProps = isExistingGame ? { to: `/game/${igdbId}` } : { onPress: this.onPress };
     const posterWidth = 167;
     const posterHeight = 250;
 
@@ -352,7 +350,6 @@ AddNewGameSearchResult.propTypes = {
   folder: PropTypes.string.isRequired,
   images: PropTypes.arrayOf(PropTypes.object).isRequired,
   existingGameId: PropTypes.number,
-  existingTitleSlug: PropTypes.string,
   isExistingGame: PropTypes.bool.isRequired,
   isExcluded: PropTypes.bool,
   isSmallScreen: PropTypes.bool.isRequired,

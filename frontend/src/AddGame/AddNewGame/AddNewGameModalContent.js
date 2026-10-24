@@ -14,6 +14,7 @@ import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import Popover from 'Components/Tooltip/Popover';
 import GamePoster from 'Game/GamePoster';
+import PlatformCheckList from 'Game/Title/PlatformCheckList';
 import { icons, inputTypes, kinds, tooltipPositions } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import styles from './AddNewGameModalContent.css';
@@ -40,7 +41,7 @@ class AddNewGameModalContent extends Component {
       year,
       overview,
       images,
-      platformId,
+      selectedPlatformIds,
       platformOptions,
       isAdding,
       rootFolderPath,
@@ -54,7 +55,7 @@ class AddNewGameModalContent extends Component {
       isWindows,
       onModalClose,
       onInputChange,
-      onPlatformChange
+      onPlatformsChange
     } = this.props;
 
     return (
@@ -88,16 +89,19 @@ class AddNewGameModalContent extends Component {
 
               <Form>
                 <FormGroup>
-                  <FormLabel>{translate('Platform')}</FormLabel>
+                  <FormLabel>{translate('Platforms')}</FormLabel>
 
-                  <FormInputGroup
-                    type={inputTypes.SELECT}
-                    name="platformId"
-                    value={platformId}
-                    values={platformOptions}
-                    helpText={translate('AddNewGamePlatformHelpText')}
-                    onChange={onPlatformChange}
-                  />
+                  <div>
+                    <PlatformCheckList
+                      options={platformOptions}
+                      selectedIds={selectedPlatformIds}
+                      onChange={onPlatformsChange}
+                    />
+
+                    <div className={styles.platformsHelpText}>
+                      {translate('AddNewGamePlatformsHelpText')}
+                    </div>
+                  </div>
                 </FormGroup>
 
                 <FormGroup>
@@ -206,10 +210,14 @@ class AddNewGameModalContent extends Component {
             className={styles.addButton}
             kind={kinds.SUCCESS}
             isSpinning={isAdding}
-            isDisabled={!platformId}
+            isDisabled={!selectedPlatformIds.length}
             onPress={this.onAddGamePress}
           >
-            {translate('AddGame')}
+            {
+              selectedPlatformIds.length > 1 ?
+                translate('AddGameOnCountPlatforms', { count: selectedPlatformIds.length }) :
+                translate('AddGame')
+            }
           </SpinnerButton>
         </ModalFooter>
       </ModalContent>
@@ -218,9 +226,9 @@ class AddNewGameModalContent extends Component {
 }
 
 AddNewGameModalContent.propTypes = {
-  platformId: PropTypes.number,
+  selectedPlatformIds: PropTypes.arrayOf(PropTypes.number).isRequired,
   platformOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onPlatformChange: PropTypes.func.isRequired,
+  onPlatformsChange: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
   year: PropTypes.number.isRequired,
   overview: PropTypes.string,
