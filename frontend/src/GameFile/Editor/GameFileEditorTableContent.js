@@ -16,6 +16,7 @@ class GameFileEditorTableContent extends Component {
     const {
       items,
       columns,
+      platformNames,
       sortKey,
       sortDirection,
       onSortPress,
@@ -48,6 +49,7 @@ class GameFileEditorTableContent extends Component {
                         key={item.id}
                         columns={columns}
                         {...item}
+                        platformName={platformNames[item.id]}
                         onDeletePress={this.props.onDeletePress}
                       />
                     );
@@ -63,10 +65,10 @@ class GameFileEditorTableContent extends Component {
 }
 
 GameFileEditorTableContent.propTypes = {
-  gameId: PropTypes.number,
   isDeleting: PropTypes.bool.isRequired,
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
+  platformNames: PropTypes.object.isRequired,
   sortKey: PropTypes.string.isRequired,
   sortDirection: PropTypes.oneOf(sortDirections.all),
   onTableOptionChange: PropTypes.func.isRequired,

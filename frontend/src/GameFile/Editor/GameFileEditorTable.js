@@ -5,20 +5,20 @@ import styles from './GameFileEditorTable.css';
 
 function GameFileEditorTable(props) {
   const {
-    gameId
+    gameIds
   } = props;
 
   return (
     <div className={styles.container}>
       <GameFileEditorTableContentConnector
-        gameId={gameId}
+        gameIds={gameIds}
       />
     </div>
   );
 }
 
 GameFileEditorTable.propTypes = {
-  gameId: PropTypes.number.isRequired
+  gameIds: PropTypes.arrayOf(PropTypes.number).isRequired
 };
 
 export default GameFileEditorTable;

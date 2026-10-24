@@ -38,6 +38,11 @@ export const defaultState = {
 
   columns: [
     {
+      name: 'platform',
+      label: () => translate('Platform'),
+      isVisible: true
+    },
+    {
       name: 'relativePath',
       label: () => translate('RelativePath'),
       isVisible: true,

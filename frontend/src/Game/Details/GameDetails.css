@@ -71,6 +71,38 @@
   line-height: 60px;
 }
 
+.platformRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-left: 7px;
+}
+
+.addPlatformButton {
+  composes: button from '~Components/Link/Button.css';
+
+  border-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(0, 0, 0, 0.35);
+  color: var(--white);
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+    color: var(--white);
+  }
+}
+
+.addPlatformLabel {
+  margin-left: 5px;
+}
+
+.filesScope {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
 .toggleMonitoredContainer {
   align-self: center;
   margin-right: 10px;

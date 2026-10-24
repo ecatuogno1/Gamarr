@@ -1,6 +1,7 @@
 import AppSectionState, {
   AppSectionDeleteState,
   AppSectionSaveState,
+  Error,
 } from 'App/State/AppSectionState';
 import Column from 'Components/Table/Column';
 import Game from 'Game/Game';
@@ -56,6 +57,9 @@ interface GamesAppState
     AppSectionDeleteState,
     AppSectionSaveState {
   itemMap: Record<number, number>;
+
+  isAddingPlatforms: boolean;
+  addPlatformsError?: Error;
 
   deleteOptions: {
     addImportExclusion: boolean;
