@@ -120,6 +120,25 @@ Repack/Proper and revisions map onto the existing Revision model.
   categories. There are no imdb/tmdb id parameters.
 - The default download-client category is `gamarr`.
 
+## Stage 4 implementation notes
+
+- Newznab/Torznab default to `1000,1010,1020,1030,1040,1050,1060,1070,1080,1110,1120,1130,1140,1180,4050`
+  (`NewznabStandardCategory.DefaultGameCategories`). The category picker hides Movies/Audio/TV/XXX/Books and falls
+  back to the standard Console and PC trees when the caps can't be fetched.
+- Caps: only the basic `search` element is used. `movie-search`/`tv-search`/any `game-search` and id parameters are
+  ignored, and RSS is `t=search` without `q`. Radarr's "Remove year" setting is gone, the year isn't searched.
+- Search requests: tier 1 is `t=search&q=<title>` for every search title (title, original title, translations and up
+  to 5 latin-script IGDB alternative names). Tier 2, used only if tier 1 found nothing, is `<title> <platform short name>`.
+  Categories are the configured categories that cover one of the platform's categories (a configured parent like
+  1000/4000 covers its subcategories); if none do, all configured categories are used.
+- FileList uses its own categories 9 (Jocuri PC) and 10 (Jocuri Console), mapped to 4050/1000 for the platform filter.
+  Nyaa defaults to `&cats=6_2` (Software - Games). IPTorrents and Torrent RSS are RSS-only, the categories are part
+  of the feed URL.
+- `ReleaseInfo.ImdbId` is removed. `ReleaseInfo.Categories` holds the Newznab/Torznab `category` attributes (FileList
+  maps its category name). `IPlatformCategoryMapper` maps them to platforms: console subcategories to the platforms that
+  list them, 4000/4050 to PC (Windows), the generic 1000 to nothing. `IsCompatible(platform, categories)` is meant for
+  a decision engine check.
+
 ## Integrations
 
 - Metadata consumers write frontend files: an ES-DE / EmulationStation `gamelist.xml` (per platform folder)
