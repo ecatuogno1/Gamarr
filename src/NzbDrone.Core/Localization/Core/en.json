@@ -39,6 +39,7 @@
   "AddNewMessage": "It's easy to add a new game, just start typing the name of the game you want to add",
   "AddNewGame": "Add New Game",
   "AddNewGameRootFolderHelpText": "'{folder}' subfolder will be created automatically",
+  "AddNewGameRootFolderPlatformsHelpText": "One subfolder per platform will be created automatically: {folders}",
   "AddNewRestriction": "Add new restriction",
   "AddNewIgdbIdMessage": "You can also search using IGDB Id of a game. e.g. 'igdb:71663'",
   "AddNotificationError": "Unable to add a new notification, please try again.",

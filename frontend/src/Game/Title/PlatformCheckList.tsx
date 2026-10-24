@@ -10,6 +10,7 @@ export interface PlatformCheckListOption {
   id: number;
   name: string;
   shortName: string;
+  folderName: string;
   // Already in the library on this platform
   isOwned: boolean;
 }
@@ -37,8 +38,34 @@ export function getPlatformOptions(
       id: p.id,
       name: p.name,
       shortName: p.shortName,
+      folderName: p.folderName,
       isOwned: ownedPlatformIds.includes(p.id),
     }));
+}
+
+// The lookup folder is built for the lookup platform ("{Platform Folder}/{Title} ({Year})" by default),
+// swap its platform folder for the folder of the platform the version is added on
+export function getPlatformGameFolder(
+  folder: string,
+  options: PlatformCheckListOption[],
+  platformId: number
+) {
+  const platform = options.find((o) => o.id === platformId);
+  const segments = folder.split(/[\\/]/);
+
+  if (
+    !platform?.folderName ||
+    segments.length < 2 ||
+    !options.some(
+      (o) => o.folderName?.toLowerCase() === segments[0].toLowerCase()
+    )
+  ) {
+    return folder;
+  }
+
+  const separator = folder.charAt(segments[0].length);
+
+  return [platform.folderName, ...segments.slice(1)].join(separator);
 }
 
 export function getPlatformIdsFromIgdbIds(

@@ -14,7 +14,7 @@ import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import Popover from 'Components/Tooltip/Popover';
 import GamePoster from 'Game/GamePoster';
-import PlatformCheckList from 'Game/Title/PlatformCheckList';
+import PlatformCheckList, { getPlatformGameFolder } from 'Game/Title/PlatformCheckList';
 import { icons, inputTypes, kinds, tooltipPositions } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import styles from './AddNewGameModalContent.css';
@@ -57,6 +57,10 @@ class AddNewGameModalContent extends Component {
       onInputChange,
       onPlatformsChange
     } = this.props;
+
+    // Each platform version gets its own platform folder
+    const platformFolders = selectedPlatformIds.map((id) => getPlatformGameFolder(folder, platformOptions, id));
+    const gameFolder = platformFolders.length ? platformFolders[0] : folder;
 
     return (
       <ModalContent onModalClose={onModalClose}>
@@ -111,16 +115,18 @@ class AddNewGameModalContent extends Component {
                     type={inputTypes.ROOT_FOLDER_SELECT}
                     name="rootFolderPath"
                     valueOptions={{
-                      gameFolder: folder,
+                      gameFolder,
                       isWindows
                     }}
                     selectedValueOptions={{
-                      gameFolder: folder,
+                      gameFolder,
                       isWindows
                     }}
-                    helpText={translate('AddNewGameRootFolderHelpText', {
-                      folder
-                    })}
+                    helpText={platformFolders.length > 1 ?
+                      translate('AddNewGameRootFolderPlatformsHelpText', {
+                        folders: platformFolders.map((f) => `'${f}'`).join(', ')
+                      }) :
+                      translate('AddNewGameRootFolderHelpText', { folder: gameFolder })}
                     onChange={onInputChange}
                     {...rootFolderPath}
                   />
