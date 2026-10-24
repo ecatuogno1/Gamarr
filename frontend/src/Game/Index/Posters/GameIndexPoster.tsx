@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { GAME_SEARCH, REFRESH_GAME } from 'Commands/commandNames';
+import { useSelector } from 'react-redux';
 import CriticRating from 'Components/CriticRating';
 import GameTagList from 'Components/GameTagList';
 import Icon from 'Components/Icon';
@@ -10,26 +9,25 @@ import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
 import Popover from 'Components/Tooltip/Popover';
-import DeleteGameModal from 'Game/Delete/DeleteGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
-import EditGameModal from 'Game/Edit/EditGameModal';
-import { Statistics } from 'Game/Game';
 import GamePoster from 'Game/GamePoster';
-import GameIndexProgressBar from 'Game/Index/ProgressBar/GameIndexProgressBar';
 import GameIndexPosterSelect from 'Game/Index/Select/GameIndexPosterSelect';
+import GamePlatformBadges from 'Game/Title/GamePlatformBadges';
+import { getMonitoredText, getTitleLink } from 'Game/Title/gameTitle';
+import GameTitleModals from 'Game/Title/GameTitleModals';
+import GameTitleProgressBar from 'Game/Title/GameTitleProgressBar';
+import useGameTitleIndexItem from 'Game/Title/useGameTitleIndexItem';
 import { icons } from 'Helpers/Props';
-import { executeCommand } from 'Store/Actions/commandActions';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import formatDate from 'Utilities/Date/formatDate';
 import getRelativeDate from 'Utilities/Date/getRelativeDate';
 import translate from 'Utilities/String/translate';
-import createGameIndexItemSelector from '../createGameIndexItemSelector';
 import GameIndexPosterInfo from './GameIndexPosterInfo';
 import selectPosterOptions from './selectPosterOptions';
 import styles from './GameIndexPoster.css';
 
 interface GameIndexPosterProps {
-  gameId: number;
+  gameIds: number[];
   sortKey: string;
   isSelectMode: boolean;
   posterWidth: number;
@@ -37,10 +35,22 @@ interface GameIndexPosterProps {
 }
 
 function GameIndexPoster(props: GameIndexPosterProps) {
-  const { gameId, sortKey, isSelectMode, posterWidth, posterHeight } = props;
+  const { gameIds, sortKey, isSelectMode, posterWidth, posterHeight } = props;
 
-  const { game, qualityProfile, isRefreshingGame, isSearchingGame } =
-    useSelector(createGameIndexItemSelector(props.gameId));
+  const {
+    summary,
+    qualityProfileNames,
+    isRefreshing: isRefreshingGame,
+    isSearching: isSearchingGame,
+    isEditModalOpen: isEditGameModalOpen,
+    isDeleteModalOpen: isDeleteGameModalOpen,
+    onRefreshPress,
+    onSearchPress,
+    onEditPress: onEditGamePress,
+    onEditModalClose: onEditGameModalClose,
+    onDeletePress: onDeleteGamePress,
+    onDeleteModalClose: onDeleteGameModalClose,
+  } = useGameTitleIndexItem(gameIds);
 
   const {
     detailedProgressBar,
@@ -58,54 +68,7 @@ function GameIndexPoster(props: GameIndexPosterProps) {
   const { showRelativeDates, shortDateFormat, longDateFormat, timeFormat } =
     useSelector(createUISettingsSelector());
 
-  const {
-    title,
-    monitored,
-    status,
-    images,
-    titleSlug,
-    igdbId,
-    igdbSlug,
-    youTubeTrailerId,
-    hasFile,
-    isAvailable,
-    platform,
-    added,
-    year,
-    releaseDate,
-    path,
-    gameFile,
-    ratings,
-    statistics = {} as Statistics,
-    originalTitle,
-    originalLanguage,
-    tags = [],
-  } = game;
-
-  const { sizeOnDisk = 0 } = statistics;
-
-  const dispatch = useDispatch();
   const [hasPosterError, setHasPosterError] = useState(false);
-  const [isEditGameModalOpen, setIsEditGameModalOpen] = useState(false);
-  const [isDeleteGameModalOpen, setIsDeleteGameModalOpen] = useState(false);
-
-  const onRefreshPress = useCallback(() => {
-    dispatch(
-      executeCommand({
-        name: REFRESH_GAME,
-        gameIds: [gameId],
-      })
-    );
-  }, [gameId, dispatch]);
-
-  const onSearchPress = useCallback(() => {
-    dispatch(
-      executeCommand({
-        name: GAME_SEARCH,
-        gameIds: [gameId],
-      })
-    );
-  }, [gameId, dispatch]);
 
   const onPosterLoadError = useCallback(() => {
     setHasPosterError(true);
@@ -115,24 +78,34 @@ function GameIndexPoster(props: GameIndexPosterProps) {
     setHasPosterError(false);
   }, [setHasPosterError]);
 
-  const onEditGamePress = useCallback(() => {
-    setIsEditGameModalOpen(true);
-  }, [setIsEditGameModalOpen]);
+  if (!summary) {
+    return null;
+  }
 
-  const onEditGameModalClose = useCallback(() => {
-    setIsEditGameModalOpen(false);
-  }, [setIsEditGameModalOpen]);
+  const {
+    title,
+    status,
+    images,
+    igdbId,
+    igdbSlug,
+    youTubeTrailerId,
+    added,
+    year,
+    releaseDate,
+    path,
+    ratings,
+    originalTitle,
+    originalLanguage,
+    tags = [],
+  } = summary.primary;
 
-  const onDeleteGamePress = useCallback(() => {
-    setIsEditGameModalOpen(false);
-    setIsDeleteGameModalOpen(true);
-  }, [setIsDeleteGameModalOpen]);
+  const qualityProfileName = qualityProfileNames.join(', ');
+  const platformNames = summary.versions
+    .map((v) => v.game.platform?.name)
+    .filter((name) => !!name)
+    .join(', ');
 
-  const onDeleteGameModalClose = useCallback(() => {
-    setIsDeleteGameModalOpen(false);
-  }, [setIsDeleteGameModalOpen]);
-
-  const link = `/game/${titleSlug}`;
+  const link = getTitleLink(igdbId);
 
   const elementStyle = {
     width: `${posterWidth}px`,
@@ -143,7 +116,7 @@ function GameIndexPoster(props: GameIndexPosterProps) {
     <div className={styles.content}>
       <div className={styles.posterContainer} title={title}>
         {isSelectMode ? (
-          <GameIndexPosterSelect gameId={gameId} titleSlug={titleSlug} />
+          <GameIndexPosterSelect gameId={igdbId} titleSlug={`${igdbId}`} />
         ) : null}
 
         <Label className={styles.controls}>
@@ -189,10 +162,11 @@ function GameIndexPoster(props: GameIndexPosterProps) {
           <div className={styles.deleted} title={translate('Deleted')} />
         ) : null}
 
-        {showPlatform && platform ? (
-          <div className={styles.platform} title={platform.name}>
-            {platform.shortName}
-          </div>
+        {showPlatform ? (
+          <GamePlatformBadges
+            className={styles.platforms}
+            versions={summary.versions}
+          />
         ) : null}
 
         <Link className={styles.link} style={elementStyle} to={link}>
@@ -212,13 +186,8 @@ function GameIndexPoster(props: GameIndexPosterProps) {
         </Link>
       </div>
 
-      <GameIndexProgressBar
-        gameId={gameId}
-        gameFile={gameFile}
-        monitored={monitored}
-        hasFile={hasFile}
-        isAvailable={isAvailable}
-        status={status}
+      <GameTitleProgressBar
+        summary={summary}
         width={posterWidth}
         detailedProgressBar={detailedProgressBar}
         bottomRadius={false}
@@ -231,14 +200,12 @@ function GameIndexPoster(props: GameIndexPosterProps) {
       ) : null}
 
       {showMonitored ? (
-        <div className={styles.title}>
-          {monitored ? translate('Monitored') : translate('Unmonitored')}
-        </div>
+        <div className={styles.title}>{getMonitoredText(summary)}</div>
       ) : null}
 
-      {showQualityProfile && !!qualityProfile?.name ? (
+      {showQualityProfile && !!qualityProfileName ? (
         <div className={styles.title} title={translate('QualityProfile')}>
-          {qualityProfile.name}
+          {qualityProfileName}
         </div>
       ) : null}
 
@@ -282,8 +249,8 @@ function GameIndexPoster(props: GameIndexPosterProps) {
       ) : null}
 
       <GameIndexPosterInfo
-        platform={platform?.name}
-        qualityProfile={qualityProfile}
+        platform={platformNames}
+        qualityProfile={{ name: qualityProfileName }}
         added={added}
         year={year}
         showQualityProfile={showQualityProfile}
@@ -294,7 +261,7 @@ function GameIndexPoster(props: GameIndexPosterProps) {
         timeFormat={timeFormat}
         releaseDate={releaseDate}
         ratings={ratings}
-        sizeOnDisk={sizeOnDisk}
+        sizeOnDisk={summary.sizeOnDisk}
         sortKey={sortKey}
         path={path}
         originalTitle={originalTitle}
@@ -305,17 +272,13 @@ function GameIndexPoster(props: GameIndexPosterProps) {
         showTags={showTags}
       />
 
-      <EditGameModal
-        isOpen={isEditGameModalOpen}
-        gameId={gameId}
-        onModalClose={onEditGameModalClose}
-        onDeleteGamePress={onDeleteGamePress}
-      />
-
-      <DeleteGameModal
-        isOpen={isDeleteGameModalOpen}
-        gameId={gameId}
-        onModalClose={onDeleteGameModalClose}
+      <GameTitleModals
+        gameIds={gameIds}
+        isEditModalOpen={isEditGameModalOpen}
+        isDeleteModalOpen={isDeleteGameModalOpen}
+        onEditModalClose={onEditGameModalClose}
+        onDeletePress={onDeleteGamePress}
+        onDeleteModalClose={onDeleteGameModalClose}
       />
     </div>
   );

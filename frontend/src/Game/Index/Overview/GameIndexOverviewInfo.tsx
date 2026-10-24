@@ -34,7 +34,7 @@ interface GameIndexOverviewInfoProps {
   showSizeOnDisk: boolean;
   monitored: boolean;
   platform?: string;
-  qualityProfile?: QualityProfile;
+  qualityProfile?: Pick<QualityProfile, 'name'>;
   added?: string;
   path: string;
   sizeOnDisk?: number;

@@ -1,7 +1,6 @@
-import React, { useCallback, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback } from 'react';
+import { useSelector } from 'react-redux';
 import { useSelect } from 'App/SelectContext';
-import { GAME_SEARCH, REFRESH_GAME } from 'Commands/commandNames';
 import CriticRating from 'Components/CriticRating';
 import GameTagList from 'Components/GameTagList';
 import Icon from 'Components/Icon';
@@ -13,116 +12,55 @@ import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import VirtualTableSelectCell from 'Components/Table/Cells/VirtualTableSelectCell';
 import Column from 'Components/Table/Column';
 import Tooltip from 'Components/Tooltip/Tooltip';
-import DeleteGameModal from 'Game/Delete/DeleteGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
-import EditGameModal from 'Game/Edit/EditGameModal';
-import { Statistics } from 'Game/Game';
 import GamePopularityIndex from 'Game/GamePopularityIndex';
 import GameTitleLink from 'Game/GameTitleLink';
-import createGameIndexItemSelector from 'Game/Index/createGameIndexItemSelector';
+import GamePlatformBadges from 'Game/Title/GamePlatformBadges';
+import GameTitleModals from 'Game/Title/GameTitleModals';
+import GameTitleProgressBar from 'Game/Title/GameTitleProgressBar';
+import useGameTitleIndexItem from 'Game/Title/useGameTitleIndexItem';
 import { formatVersion, getRegionNames } from 'GameFile/releaseDetails';
 import { icons, kinds } from 'Helpers/Props';
-import { executeCommand } from 'Store/Actions/commandActions';
 import { SelectStateInputProps } from 'typings/props';
 import formatBytes from 'Utilities/Number/formatBytes';
 import firstCharToUpper from 'Utilities/String/firstCharToUpper';
 import translate from 'Utilities/String/translate';
-import GameIndexProgressBar from '../ProgressBar/GameIndexProgressBar';
 import GameStatusCell from './GameStatusCell';
 import selectTableOptions from './selectTableOptions';
 import styles from './GameIndexRow.css';
 
 interface GameIndexRowProps {
-  gameId: number;
+  gameIds: number[];
   sortKey: string;
   columns: Column[];
   isSelectMode: boolean;
 }
 
-function GameIndexRow(props: GameIndexRowProps) {
-  const { gameId, columns, isSelectMode } = props;
+function joinUnique(values: (string | undefined)[]) {
+  return [...new Set(values.filter((v) => !!v))].join(', ');
+}
 
-  const { game, qualityProfile, isRefreshingGame, isSearchingGame } =
-    useSelector(createGameIndexItemSelector(props.gameId));
+function GameIndexRow(props: GameIndexRowProps) {
+  const { gameIds, columns, isSelectMode } = props;
+
+  const {
+    summary,
+    qualityProfileNames,
+    isRefreshing: isRefreshingGame,
+    isSearching: isSearchingGame,
+    isEditModalOpen: isEditGameModalOpen,
+    isDeleteModalOpen: isDeleteGameModalOpen,
+    onRefreshPress,
+    onSearchPress,
+    onEditPress: onEditGamePress,
+    onEditModalClose: onEditGameModalClose,
+    onDeletePress: onDeleteGamePress,
+    onDeleteModalClose: onDeleteGameModalClose,
+  } = useGameTitleIndexItem(gameIds);
 
   const { showSearchAction } = useSelector(selectTableOptions);
 
-  const {
-    monitored,
-    titleSlug,
-    title,
-    collection,
-    platform,
-    developers = [],
-    publishers = [],
-    status,
-    originalLanguage,
-    originalTitle,
-    added,
-    statistics = {} as Statistics,
-    year,
-    releaseDate,
-    minimumAvailability,
-    path,
-    genres = [],
-    keywords = [],
-    ratings,
-    popularity,
-    tags = [],
-    igdbId,
-    igdbSlug,
-    isAvailable,
-    hasFile,
-    gameFile,
-    youTubeTrailerId,
-    isSaving = false,
-  } = game;
-
-  const {
-    sizeOnDisk = 0,
-    releaseGroups = [],
-    gameFileQualities = [],
-  } = statistics;
-
-  const dispatch = useDispatch();
-  const [isEditGameModalOpen, setIsEditGameModalOpen] = useState(false);
-  const [isDeleteGameModalOpen, setIsDeleteGameModalOpen] = useState(false);
   const [selectState, selectDispatch] = useSelect();
-
-  const onRefreshPress = useCallback(() => {
-    dispatch(
-      executeCommand({
-        name: REFRESH_GAME,
-        gameIds: [gameId],
-      })
-    );
-  }, [gameId, dispatch]);
-
-  const onSearchPress = useCallback(() => {
-    dispatch(
-      executeCommand({
-        name: GAME_SEARCH,
-        gameIds: [gameId],
-      })
-    );
-  }, [gameId, dispatch]);
-
-  const onEditGamePress = useCallback(() => {
-    setIsEditGameModalOpen(true);
-  }, [setIsEditGameModalOpen]);
-
-  const onEditGameModalClose = useCallback(() => {
-    setIsEditGameModalOpen(false);
-  }, [setIsEditGameModalOpen]);
-
-  const onDeleteGamePress = useCallback(() => {
-    setIsEditGameModalOpen(false);
-    setIsDeleteGameModalOpen(true);
-  }, [setIsDeleteGameModalOpen]);
-
-  const onDeleteGameModalClose = useCallback(() => {
-    setIsDeleteGameModalOpen(false);
-  }, [setIsDeleteGameModalOpen]);
 
   const onSelectedChange = useCallback(
     ({ id, value, shiftKey }: SelectStateInputProps) => {
@@ -136,12 +74,62 @@ function GameIndexRow(props: GameIndexRowProps) {
     [selectDispatch]
   );
 
+  if (!summary) {
+    return null;
+  }
+
+  const versionGames = summary.versions.map((v) => v.game);
+  const files = versionGames
+    .map((game) => game.gameFile)
+    .filter((file) => !!file);
+
+  const {
+    title,
+    collection,
+    developers = [],
+    publishers = [],
+    status,
+    originalLanguage,
+    originalTitle,
+    year,
+    releaseDate,
+    genres = [],
+    keywords = [],
+    ratings,
+    popularity,
+    igdbId,
+    igdbSlug,
+    youTubeTrailerId,
+  } = summary.primary;
+
+  const monitored = summary.monitored;
+  const isSaving = versionGames.some((game) => game.isSaving);
+  const added = versionGames.reduce(
+    (acc, game) => (!acc || game.added < acc ? game.added : acc),
+    ''
+  );
+  const minimumAvailability = joinUnique(
+    versionGames.map((game) =>
+      translate(firstCharToUpper(game.minimumAvailability))
+    )
+  );
+  const paths = versionGames.map((game) => game.path);
+  const tags = [...new Set(versionGames.flatMap((game) => game.tags))];
+  const releaseGroups = [
+    ...new Set(
+      versionGames.flatMap((game) => game.statistics?.releaseGroups ?? [])
+    ),
+  ];
+  const gameFileQualities = versionGames
+    .flatMap((game) => game.statistics?.gameFileQualities ?? [])
+    .filter((q, index, all) => all.findIndex((o) => o.id === q.id) === index);
+
   return (
     <>
       {isSelectMode ? (
         <VirtualTableSelectCell
-          id={gameId}
-          isSelected={selectState.selectedState[gameId]}
+          id={igdbId}
+          isSelected={selectState.selectedState[igdbId]}
           isDisabled={false}
           onSelectedChange={onSelectedChange}
         />
@@ -159,7 +147,8 @@ function GameIndexRow(props: GameIndexRowProps) {
             <GameStatusCell
               key={name}
               className={styles[name]}
-              gameId={gameId}
+              gameId={gameIds[0]}
+              gameIds={gameIds}
               monitored={monitored}
               status={status}
               isSelectMode={isSelectMode}
@@ -172,7 +161,7 @@ function GameIndexRow(props: GameIndexRowProps) {
         if (name === 'sortTitle') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              <GameTitleLink titleSlug={titleSlug} title={title} />
+              <GameTitleLink titleSlug={`${igdbId}`} title={title} />
             </VirtualTableRowCell>
           );
         }
@@ -188,7 +177,7 @@ function GameIndexRow(props: GameIndexRowProps) {
         if (name === 'platform') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              {platform ? platform.name : null}
+              <GamePlatformBadges versions={summary.versions} />
             </VirtualTableRowCell>
           );
         }
@@ -212,7 +201,7 @@ function GameIndexRow(props: GameIndexRowProps) {
         if (name === 'fileRegions') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              {getRegionNames(gameFile?.regions)}
+              {joinUnique(files.map((file) => getRegionNames(file?.regions)))}
             </VirtualTableRowCell>
           );
         }
@@ -220,7 +209,7 @@ function GameIndexRow(props: GameIndexRowProps) {
         if (name === 'fileVersion') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              {formatVersion(gameFile?.version)}
+              {joinUnique(files.map((file) => formatVersion(file?.version)))}
             </VirtualTableRowCell>
           );
         }
@@ -244,7 +233,7 @@ function GameIndexRow(props: GameIndexRowProps) {
         if (name === 'qualityProfileId') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              {qualityProfile?.name ?? ''}
+              {qualityProfileNames.join(', ')}
             </VirtualTableRowCell>
           );
         }
@@ -287,7 +276,7 @@ function GameIndexRow(props: GameIndexRowProps) {
         if (name === 'minimumAvailability') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              {translate(firstCharToUpper(minimumAvailability))}
+              {minimumAvailability}
             </VirtualTableRowCell>
           );
         }
@@ -295,7 +284,7 @@ function GameIndexRow(props: GameIndexRowProps) {
         if (name === 'path') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              <span title={path}>{path}</span>
+              <span title={paths.join('\n')}>{paths.join(', ')}</span>
             </VirtualTableRowCell>
           );
         }
@@ -303,7 +292,7 @@ function GameIndexRow(props: GameIndexRowProps) {
         if (name === 'sizeOnDisk') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              {formatBytes(sizeOnDisk)}
+              {formatBytes(summary.sizeOnDisk)}
             </VirtualTableRowCell>
           );
         }
@@ -335,13 +324,8 @@ function GameIndexRow(props: GameIndexRowProps) {
         if (name === 'gameStatus') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              <GameIndexProgressBar
-                gameId={gameId}
-                gameFile={gameFile}
-                monitored={monitored}
-                hasFile={hasFile}
-                isAvailable={isAvailable}
-                status={status}
+              <GameTitleProgressBar
+                summary={summary}
                 width={125}
                 detailedProgressBar={true}
                 bottomRadius={false}
@@ -462,17 +446,13 @@ function GameIndexRow(props: GameIndexRowProps) {
         return null;
       })}
 
-      <EditGameModal
-        isOpen={isEditGameModalOpen}
-        gameId={gameId}
-        onModalClose={onEditGameModalClose}
-        onDeleteGamePress={onDeleteGamePress}
-      />
-
-      <DeleteGameModal
-        isOpen={isDeleteGameModalOpen}
-        gameId={gameId}
-        onModalClose={onDeleteGameModalClose}
+      <GameTitleModals
+        gameIds={gameIds}
+        isEditModalOpen={isEditGameModalOpen}
+        isDeleteModalOpen={isDeleteGameModalOpen}
+        onEditModalClose={onEditGameModalClose}
+        onDeletePress={onDeleteGamePress}
+        onDeleteModalClose={onDeleteGameModalClose}
       />
     </>
   );

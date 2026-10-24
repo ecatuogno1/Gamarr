@@ -1,16 +1,13 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useSelect } from 'App/SelectContext';
-import ClientSideCollectionAppState from 'App/State/ClientSideCollectionAppState';
-import GamesAppState, { GameIndexAppState } from 'App/State/GamesAppState';
 import { GAME_SEARCH } from 'Commands/commandNames';
 import PageToolbarOverflowMenuItem from 'Components/Page/Toolbar/PageToolbarOverflowMenuItem';
+import { selectGameIndexTitles } from 'Game/Title/createGameTitleCollectionSelector';
+import useSelectedGameIds from 'Game/Title/useSelectedGameIds';
 import { icons } from 'Helpers/Props';
 import { executeCommand } from 'Store/Actions/commandActions';
 import createCommandExecutingSelector from 'Store/Selectors/createCommandExecutingSelector';
-import createGameClientSideCollectionItemsSelector from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import translate from 'Utilities/String/translate';
-import getSelectedIds from 'Utilities/Table/getSelectedIds';
 
 interface GameIndexSearchMenuItemProps {
   isSelectMode: boolean;
@@ -19,25 +16,17 @@ interface GameIndexSearchMenuItemProps {
 
 function GameIndexSearchMenuItem(props: GameIndexSearchMenuItemProps) {
   const isSearching = useSelector(createCommandExecutingSelector(GAME_SEARCH));
-  const {
-    items,
-  }: GamesAppState & GameIndexAppState & ClientSideCollectionAppState =
-    useSelector(createGameClientSideCollectionItemsSelector('gameIndex'));
+  const { items } = useSelector(selectGameIndexTitles);
 
   const dispatch = useDispatch();
 
   const { isSelectMode, selectedFilterKey } = props;
-  const [selectState] = useSelect();
-  const { selectedState } = selectState;
-
-  const selectedGameIds = useMemo(() => {
-    return getSelectedIds(selectedState);
-  }, [selectedState]);
+  const selectedGameIds = useSelectedGameIds();
 
   const gamesToSearch =
     isSelectMode && selectedGameIds.length > 0
       ? selectedGameIds
-      : items.map((m) => m.id);
+      : items.flatMap((m) => m.matchingGameIds);
 
   const searchIndexLabel =
     selectedFilterKey === 'all'

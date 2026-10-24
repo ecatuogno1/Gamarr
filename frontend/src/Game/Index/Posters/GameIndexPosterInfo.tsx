@@ -17,7 +17,7 @@ import styles from './GameIndexPosterInfo.css';
 interface GameIndexPosterInfoProps {
   platform?: string;
   showQualityProfile: boolean;
-  qualityProfile?: QualityProfile;
+  qualityProfile?: Pick<QualityProfile, 'name'>;
   added?: string;
   year: number;
   releaseDate?: string;

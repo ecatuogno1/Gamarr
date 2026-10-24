@@ -70,6 +70,12 @@ $hoverScale: 1.05;
   font-size: 30px;
 }
 
+.platforms {
+  flex: 0 1 auto;
+  align-items: center;
+  margin: 0 10px;
+}
+
 .actions {
   white-space: nowrap;
 }

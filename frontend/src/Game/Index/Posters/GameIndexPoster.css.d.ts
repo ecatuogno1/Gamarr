@@ -11,7 +11,7 @@ interface CssExports {
   'link': string;
   'nextAiring': string;
   'overlayTitle': string;
-  'platform': string;
+  'platforms': string;
   'poster': string;
   'posterContainer': string;
   'tags': string;

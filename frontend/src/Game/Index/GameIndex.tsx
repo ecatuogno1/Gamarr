@@ -8,8 +8,6 @@ import React, {
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
 import { SelectProvider } from 'App/SelectContext';
-import ClientSideCollectionAppState from 'App/State/ClientSideCollectionAppState';
-import GamesAppState, { GameIndexAppState } from 'App/State/GamesAppState';
 import { RSS_SYNC } from 'Commands/commandNames';
 import Alert from 'Components/Alert';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -23,6 +21,7 @@ import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
 import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
 import withScrollPosition from 'Components/withScrollPosition';
 import NoGame from 'Game/NoGame';
+import { selectGameIndexTitles } from 'Game/Title/createGameTitleCollectionSelector';
 import { align, icons, kinds } from 'Helpers/Props';
 import { DESCENDING } from 'Helpers/Props/sortDirections';
 import InteractiveImportModal from 'InteractiveImport/InteractiveImportModal';
@@ -38,7 +37,6 @@ import { fetchQueueDetails } from 'Store/Actions/queueActions';
 import scrollPositions from 'Store/scrollPositions';
 import createCommandExecutingSelector from 'Store/Selectors/createCommandExecutingSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
-import createGameClientSideCollectionItemsSelector from 'Store/Selectors/createGameClientSideCollectionItemsSelector';
 import translate from 'Utilities/String/translate';
 import GameIndexFooter from './GameIndexFooter';
 import GameIndexRefreshGameButton from './GameIndexRefreshGameButton';
@@ -92,8 +90,7 @@ const GameIndex = withScrollPosition((props: GameIndexProps) => {
     sortKey,
     sortDirection,
     view,
-  }: GamesAppState & GameIndexAppState & ClientSideCollectionAppState =
-    useSelector(createGameClientSideCollectionItemsSelector('gameIndex'));
+  } = useSelector(selectGameIndexTitles);
 
   const isRssSyncExecuting = useSelector(
     createCommandExecutingSelector(RSS_SYNC)

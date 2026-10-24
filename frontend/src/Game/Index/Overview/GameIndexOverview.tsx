@@ -1,26 +1,24 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import TextTruncate from 'react-text-truncate';
-import { GAME_SEARCH, REFRESH_GAME } from 'Commands/commandNames';
 import GameTagList from 'Components/GameTagList';
 import Icon from 'Components/Icon';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
 import Popover from 'Components/Tooltip/Popover';
-import DeleteGameModal from 'Game/Delete/DeleteGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
-import EditGameModal from 'Game/Edit/EditGameModal';
-import { Statistics } from 'Game/Game';
 import GamePoster from 'Game/GamePoster';
-import GameIndexProgressBar from 'Game/Index/ProgressBar/GameIndexProgressBar';
 import GameIndexPosterSelect from 'Game/Index/Select/GameIndexPosterSelect';
+import GamePlatformBadges from 'Game/Title/GamePlatformBadges';
+import { getTitleLink } from 'Game/Title/gameTitle';
+import GameTitleModals from 'Game/Title/GameTitleModals';
+import GameTitleProgressBar from 'Game/Title/GameTitleProgressBar';
+import useGameTitleIndexItem from 'Game/Title/useGameTitleIndexItem';
 import { icons } from 'Helpers/Props';
-import { executeCommand } from 'Store/Actions/commandActions';
 import dimensions from 'Styles/Variables/dimensions';
 import fonts from 'Styles/Variables/fonts';
 import translate from 'Utilities/String/translate';
-import createGameIndexItemSelector from '../createGameIndexItemSelector';
 import GameIndexOverviewInfo from './GameIndexOverviewInfo';
 import selectOverviewOptions from './selectOverviewOptions';
 import styles from './GameIndexOverview.css';
@@ -37,7 +35,7 @@ const lineHeight = parseFloat(fonts.lineHeight);
 const titleRowHeight = 42;
 
 interface GameIndexOverviewProps {
-  gameId: number;
+  gameIds: number[];
   sortKey: string;
   posterWidth: number;
   posterHeight: number;
@@ -48,7 +46,7 @@ interface GameIndexOverviewProps {
 
 function GameIndexOverview(props: GameIndexOverviewProps) {
   const {
-    gameId,
+    gameIds,
     sortKey,
     posterWidth,
     posterHeight,
@@ -57,83 +55,52 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
     isSmallScreen,
   } = props;
 
-  const { game, qualityProfile, isRefreshingGame, isSearchingGame } =
-    useSelector(createGameIndexItemSelector(props.gameId));
+  const {
+    summary,
+    qualityProfileNames,
+    isRefreshing: isRefreshingGame,
+    isSearching: isSearchingGame,
+    isEditModalOpen: isEditGameModalOpen,
+    isDeleteModalOpen: isDeleteGameModalOpen,
+    onRefreshPress,
+    onSearchPress,
+    onEditPress: onEditGamePress,
+    onEditModalClose: onEditGameModalClose,
+    onDeletePress: onDeleteGamePress,
+    onDeleteModalClose: onDeleteGameModalClose,
+  } = useGameTitleIndexItem(gameIds);
 
   const overviewOptions = useSelector(selectOverviewOptions);
-
-  const {
-    title,
-    monitored,
-    status,
-    path,
-    titleSlug,
-    overview,
-    statistics = {} as Statistics,
-    images,
-    tags,
-    hasFile,
-    isAvailable,
-    igdbId,
-    igdbSlug,
-    platform,
-    added,
-    youTubeTrailerId,
-  } = game;
-
-  const { sizeOnDisk = 0 } = statistics;
-
-  const dispatch = useDispatch();
-  const [isEditGameModalOpen, setIsEditGameModalOpen] = useState(false);
-  const [isDeleteGameModalOpen, setIsDeleteGameModalOpen] = useState(false);
-
-  const onRefreshPress = useCallback(() => {
-    dispatch(
-      executeCommand({
-        name: REFRESH_GAME,
-        gameIds: [gameId],
-      })
-    );
-  }, [gameId, dispatch]);
-
-  const onSearchPress = useCallback(() => {
-    dispatch(
-      executeCommand({
-        name: GAME_SEARCH,
-        gameIds: [gameId],
-      })
-    );
-  }, [gameId, dispatch]);
-
-  const onEditGamePress = useCallback(() => {
-    setIsEditGameModalOpen(true);
-  }, [setIsEditGameModalOpen]);
-
-  const onEditGameModalClose = useCallback(() => {
-    setIsEditGameModalOpen(false);
-  }, [setIsEditGameModalOpen]);
-
-  const onDeleteGamePress = useCallback(() => {
-    setIsEditGameModalOpen(false);
-    setIsDeleteGameModalOpen(true);
-  }, [setIsDeleteGameModalOpen]);
-
-  const onDeleteGameModalClose = useCallback(() => {
-    setIsDeleteGameModalOpen(false);
-  }, [setIsDeleteGameModalOpen]);
-
-  const link = `/game/${igdbId}`;
-
-  const elementStyle = {
-    width: `${posterWidth}px`,
-    height: `${posterHeight}px`,
-  };
 
   const contentHeight = useMemo(() => {
     const padding = isSmallScreen ? columnPaddingSmallScreen : columnPadding;
 
     return rowHeight - padding;
   }, [rowHeight, isSmallScreen]);
+
+  if (!summary) {
+    return null;
+  }
+
+  const {
+    title,
+    status,
+    path,
+    overview,
+    images,
+    tags,
+    igdbId,
+    igdbSlug,
+    added,
+    youTubeTrailerId,
+  } = summary.primary;
+
+  const link = getTitleLink(igdbId);
+
+  const elementStyle = {
+    width: `${posterWidth}px`,
+    height: `${posterHeight}px`,
+  };
 
   const overviewHeight = contentHeight - titleRowHeight;
 
@@ -143,7 +110,7 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
         <div className={styles.poster}>
           <div className={styles.posterContainer}>
             {isSelectMode ? (
-              <GameIndexPosterSelect gameId={gameId} titleSlug={titleSlug} />
+              <GameIndexPosterSelect gameId={igdbId} titleSlug={`${igdbId}`} />
             ) : null}
 
             {status === 'deleted' ? (
@@ -162,13 +129,8 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
             </Link>
           </div>
 
-          <GameIndexProgressBar
-            gameId={gameId}
-            gameFile={game.gameFile}
-            monitored={monitored}
-            hasFile={hasFile}
-            isAvailable={isAvailable}
-            status={status}
+          <GameTitleProgressBar
+            summary={summary}
             width={posterWidth}
             detailedProgressBar={overviewOptions.detailedProgressBar}
             bottomRadius={false}
@@ -180,6 +142,13 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
             <Link className={styles.title} to={link}>
               {title}
             </Link>
+
+            {overviewOptions.showPlatform ? (
+              <GamePlatformBadges
+                className={styles.platforms}
+                versions={summary.versions}
+              />
+            ) : null}
 
             <div className={styles.actions}>
               <span className={styles.externalLinks}>
@@ -240,10 +209,13 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
             </div>
             <GameIndexOverviewInfo
               height={overviewHeight}
-              monitored={monitored}
-              qualityProfile={qualityProfile}
-              platform={platform?.name}
-              sizeOnDisk={sizeOnDisk}
+              monitored={summary.monitored}
+              qualityProfile={{ name: qualityProfileNames.join(', ') }}
+              platform={summary.versions
+                .map((v) => v.game.platform?.name)
+                .filter((name) => !!name)
+                .join(', ')}
+              sizeOnDisk={summary.sizeOnDisk}
               added={added}
               path={path}
               sortKey={sortKey}
@@ -253,17 +225,13 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
         </div>
       </div>
 
-      <EditGameModal
-        isOpen={isEditGameModalOpen}
-        gameId={gameId}
-        onModalClose={onEditGameModalClose}
-        onDeleteGamePress={onDeleteGamePress}
-      />
-
-      <DeleteGameModal
-        isOpen={isDeleteGameModalOpen}
-        gameId={gameId}
-        onModalClose={onDeleteGameModalClose}
+      <GameTitleModals
+        gameIds={gameIds}
+        isEditModalOpen={isEditGameModalOpen}
+        isDeleteModalOpen={isDeleteGameModalOpen}
+        onEditModalClose={onEditGameModalClose}
+        onDeletePress={onDeleteGamePress}
+        onDeleteModalClose={onDeleteGameModalClose}
       />
     </div>
   );

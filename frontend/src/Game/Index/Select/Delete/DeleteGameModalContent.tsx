@@ -12,6 +12,7 @@ import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import Game from 'Game/Game';
+import { getTitleWithPlatform } from 'Game/Title/gameTitle';
 import { inputTypes, kinds } from 'Helpers/Props';
 import { bulkDeleteGame, setDeleteOption } from 'Store/Actions/gameActions';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
@@ -158,12 +159,12 @@ function DeleteGameModalContent(props: DeleteGameModalContentProps) {
         </div>
 
         <ul>
-          {games.map(({ title, path, statistics = {} }) => {
+          {games.map(({ id, title, platform, path, statistics = {} }) => {
             const { gameFileCount = 0, sizeOnDisk = 0 } = statistics;
 
             return (
-              <li key={title}>
-                <span>{title}</span>
+              <li key={id}>
+                <span>{getTitleWithPlatform(title, platform)}</span>
 
                 {deleteFiles && (
                   <span>

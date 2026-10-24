@@ -96,7 +96,7 @@ export const defaultState = {
     },
     {
       name: 'platform',
-      label: () => translate('Platform'),
+      label: () => translate('Platforms'),
       isSortable: true,
       isVisible: true
     },
