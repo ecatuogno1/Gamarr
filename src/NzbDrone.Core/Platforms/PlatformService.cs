@@ -20,6 +20,7 @@ namespace NzbDrone.Core.Platforms
         List<Platform> FindByIgdbPlatformIds(IEnumerable<int> igdbPlatformIds);
         List<Platform> FindByFolderName(string folderName);
         Platform Update(Platform platform);
+        void ClearCache();
     }
 
     public class PlatformService : IPlatformService, IHandle<ApplicationStartedEvent>
@@ -69,7 +70,11 @@ namespace NzbDrone.Core.Platforms
 
         public Platform FindByIgdbPlatformId(int igdbPlatformId)
         {
-            return GetAll().Values.FirstOrDefault(p => p.IgdbPlatformId == igdbPlatformId);
+            var all = GetAll().Values.ToList();
+
+            // The parser knows platforms by the ids in PlatformDefinitions, an id corrected from IGDB is found by slug
+            return all.FirstOrDefault(p => p.IgdbPlatformId == igdbPlatformId) ??
+                   FindBySlug(all, PlatformDefinitions.Get(igdbPlatformId)?.Slug);
         }
 
         public List<Platform> FindByIgdbPlatformIds(IEnumerable<int> igdbPlatformIds)
@@ -111,15 +116,47 @@ namespace NzbDrone.Core.Platforms
             return existing;
         }
 
+        // Clears the cache after PlatformIgdbSyncService changed platforms
+        public void ClearCache()
+        {
+            _cache.Clear();
+        }
+
+        private static Platform FindBySlug(IEnumerable<Platform> platforms, string slug)
+        {
+            return slug.IsNullOrWhiteSpace() ? null : platforms.FirstOrDefault(p => slug.Equals(p.Slug, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // A definition is the same platform as a row with its slug, or with its IGDB id when the row has no slug yet
+        private static Platform FindExisting(List<Platform> existing, Platform definition)
+        {
+            return FindBySlug(existing, definition.Slug) ??
+                   existing.FirstOrDefault(p => p.IgdbPlatformId == definition.IgdbPlatformId && p.Slug.IsNullOrWhiteSpace());
+        }
+
         private void InsertMissingPlatforms()
         {
             var existing = _repo.All().ToList();
-            var existingIgdbIds = existing.Select(p => p.IgdbPlatformId).ToHashSet();
+            var missing = new List<Platform>();
 
-            var missing = PlatformDefinitions.All
-                .Where(p => !existingIgdbIds.Contains(p.IgdbPlatformId))
-                .Select(PlatformDefinitions.Copy)
-                .ToList();
+            foreach (var definition in PlatformDefinitions.All)
+            {
+                var platform = FindExisting(existing, definition);
+
+                if (platform == null)
+                {
+                    // Another row may hold the IGDB id (unique) after a correction, the definition is outdated then
+                    if (existing.All(p => p.IgdbPlatformId != definition.IgdbPlatformId))
+                    {
+                        missing.Add(PlatformDefinitions.Copy(definition));
+                    }
+                }
+                else if (platform.Slug.IsNullOrWhiteSpace())
+                {
+                    platform.Slug = definition.Slug;
+                    _repo.SetFields(platform, p => p.Slug);
+                }
+            }
 
             if (missing.Any())
             {

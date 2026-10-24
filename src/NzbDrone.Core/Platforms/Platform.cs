@@ -14,6 +14,9 @@ namespace NzbDrone.Core.Platforms
         public string Name { get; set; }
         public string ShortName { get; set; }
         public int IgdbPlatformId { get; set; }
+
+        // IGDB's slug of the platform (igdb.com/platforms/<slug>), used to correct IgdbPlatformId
+        public string Slug { get; set; }
         public PlatformFamily Family { get; set; }
         public int Generation { get; set; }
         public string FolderName { get; set; }
