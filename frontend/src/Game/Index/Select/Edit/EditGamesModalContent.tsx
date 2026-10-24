@@ -76,9 +76,7 @@ function getSaveErrorMessages(saveError: AppState['games']['saveError']) {
 function EditGamesModalContent(props: EditGamesModalContentProps) {
   const { gameIds, onSavePress, onModalClose } = props;
 
-  const { isSaving, saveError } = useSelector(
-    (state: AppState) => state.games
-  );
+  const { isSaving, saveError } = useSelector((state: AppState) => state.games);
   const wasSaving = usePrevious(isSaving);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
