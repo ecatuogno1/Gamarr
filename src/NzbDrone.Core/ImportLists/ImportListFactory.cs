@@ -58,9 +58,8 @@ namespace NzbDrone.Core.ImportLists
 
         public List<IImportList> Discoverable()
         {
-            var enabledImportLists = GetAvailableProviders().Where(n => n.GetType() == typeof(GamarrList.GamarrListImport) || n.GetType() == typeof(IGDB.Popular.IGDBPopularImport));
-
-            return enabledImportLists.ToList();
+            // Gamarr: the movie discovery lists (Radarr list service, TMDb popular) were removed.
+            return new List<IImportList>();
         }
 
         private IEnumerable<IImportList> FilterBlockedImportLists(IEnumerable<IImportList> importLists)
