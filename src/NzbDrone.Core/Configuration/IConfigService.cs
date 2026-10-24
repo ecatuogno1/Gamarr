@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using NzbDrone.Common.Http.Proxy;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MetadataSource.SkyHook.Resource;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Security;
 
@@ -63,8 +62,9 @@ namespace NzbDrone.Core.Configuration
 
         string ListSyncLevel { get; set; }
 
-        // Metadata Provider
-        IGDBCountryCode CertificationCountry { get; set; }
+        // Metadata Provider (IGDB uses Twitch client credentials)
+        string IgdbClientId { get; set; }
+        string IgdbClientSecret { get; set; }
 
         // UI
         int FirstDayOfWeek { get; set; }

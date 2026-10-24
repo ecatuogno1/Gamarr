@@ -47,9 +47,11 @@ namespace NzbDrone.Core.MediaFiles
 
             switch (_configService.FileDate)
             {
+                // Games only have one release date (per platform), so both options use it
                 case FileDateType.Release:
+                case FileDateType.Cinemas:
                     {
-                        var releaseDate = game.GameMetadata.Value.PhysicalRelease ?? game.GameMetadata.Value.DigitalRelease;
+                        var releaseDate = game.GetReleaseDate();
 
                         if (releaseDate.HasValue == false)
                         {
@@ -57,18 +59,6 @@ namespace NzbDrone.Core.MediaFiles
                         }
 
                         return ChangeFileDate(gameFilePath, releaseDate.Value);
-                    }
-
-                case FileDateType.Cinemas:
-                    {
-                        var airDate = game.GameMetadata.Value.InCinemas;
-
-                        if (airDate.HasValue == false)
-                        {
-                            return false;
-                        }
-
-                        return ChangeFileDate(gameFilePath, airDate.Value);
                     }
             }
 

@@ -25,14 +25,9 @@ namespace NzbDrone.Core.Test.IndexerTests.FileListTests
 
             _gameSearchCriteria = new GameSearchCriteria
             {
-                Game = new Games.Game { ImdbId = "tt0076759", Title = "Star Wars", Year = 1977 },
+                Game = new Games.Game { Title = "Star Wars", Year = 1977 },
                 SceneTitles = new List<string> { "Star Wars" }
             };
-        }
-
-        private void GameWithoutIMDB()
-        {
-            _gameSearchCriteria.Game.ImdbId = null;
         }
 
         [Test]
@@ -48,23 +43,8 @@ namespace NzbDrone.Core.Test.IndexerTests.FileListTests
         }
 
         [Test]
-        public void should_not_search_by_imdbid_if_not_supported()
+        public void should_search_by_name_and_year()
         {
-            var results = Subject.GetSearchRequests(_gameSearchCriteria);
-
-            results.GetAllTiers().Should().HaveCount(1);
-
-            var page = results.GetAllTiers().First().First();
-
-            page.Url.Query.Should().Contain("type=imdb");
-            page.Url.Query.Should().Contain("query=tt0076759");
-        }
-
-        [Test]
-        public void should_search_by_name_and_year_if_missing_imdbid()
-        {
-            GameWithoutIMDB();
-
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
             results.GetAllTiers().Should().HaveCount(1);

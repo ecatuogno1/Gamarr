@@ -19,14 +19,11 @@ public static class NotificationMetadataLinkGenerator
         {
             var linkType = (MetadataLinkType)type;
 
-            if (linkType == MetadataLinkType.Imdb && game.ImdbId.IsNotNullOrWhiteSpace())
-            {
-                links.Add(new NotificationMetadataLink(MetadataLinkType.Imdb, "IMDb", $"https://www.imdb.com/title/{game.ImdbId}"));
-            }
+            var igdbUrl = game.GameMetadata?.Value?.IgdbUrl;
 
-            if (linkType == MetadataLinkType.Igdb && game.IgdbId > 0)
+            if (linkType == MetadataLinkType.Igdb && igdbUrl.IsNotNullOrWhiteSpace())
             {
-                links.Add(new NotificationMetadataLink(MetadataLinkType.Igdb, "IGDB", $"https://www.thegamedb.org/game/{game.IgdbId}"));
+                links.Add(new NotificationMetadataLink(MetadataLinkType.Igdb, "IGDB", igdbUrl));
             }
         }
 

@@ -13,6 +13,7 @@ using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Organizer;
+using NzbDrone.Core.Platforms;
 
 namespace Gamarr.Api.V3.Games
 {
@@ -26,6 +27,7 @@ namespace Gamarr.Api.V3.Games
         private readonly IMapCoversToLocal _coverMapper;
         private readonly IConfigService _configService;
         private readonly IImportListExclusionService _importListExclusionService;
+        private readonly IPlatformService _platformService;
 
         public GameLookupController(ISearchForNewGame searchProxy,
                                  IProvideGameInfo gameInfo,
@@ -33,8 +35,10 @@ namespace Gamarr.Api.V3.Games
                                  INamingConfigService namingService,
                                  IMapCoversToLocal coverMapper,
                                  IConfigService configService,
-                                 IImportListExclusionService importListExclusionService)
+                                 IImportListExclusionService importListExclusionService,
+                                 IPlatformService platformService)
         {
+            _platformService = platformService;
             _gameInfo = gameInfo;
             _searchProxy = searchProxy;
             _fileNameBuilder = fileNameBuilder;
@@ -59,30 +63,18 @@ namespace Gamarr.Api.V3.Games
         [Produces("application/json")]
         public Ok<GameResource> SearchByIgdbId(int igdbId)
         {
-            var availDelay = _configService.AvailabilityDelay;
             var result = new Game { GameMetadata = _gameInfo.GetGameInfo(igdbId).Item1 };
-            var translation = result.GameMetadata.Value.Translations.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
 
-            return TypedResults.Ok(result.ToResource(availDelay, translation));
-        }
-
-        [HttpGet("imdb")]
-        [Produces("application/json")]
-        public Ok<GameResource> SearchByImdbId(string imdbId)
-        {
-            var result = new Game { GameMetadata = _gameInfo.GetGameByImdbId(imdbId) };
-
-            var availDelay = _configService.AvailabilityDelay;
-            var translation = result.GameMetadata.Value.Translations.FirstOrDefault(t => t.Language == (Language)_configService.GameInfoLanguage);
-
-            return TypedResults.Ok(result.ToResource(availDelay, translation));
+            return TypedResults.Ok(MapToResource(new[] { result }).First());
         }
 
         [HttpGet]
         [Produces("application/json")]
-        public Ok<IEnumerable<GameResource>> Search([FromQuery] string term)
+        public Ok<IEnumerable<GameResource>> Search([FromQuery] string term, [FromQuery] int? platformId = null)
         {
-            var searchResults = _searchProxy.SearchForNewGame(term);
+            // platformId is a Gamarr platform id, IGDB is filtered by the platform's IGDB id
+            var igdbPlatformId = platformId.HasValue ? _platformService.Find(platformId.Value)?.IgdbPlatformId ?? 0 : 0;
+            var searchResults = _searchProxy.SearchForNewGame(term, igdbPlatformId);
 
             return TypedResults.Ok(MapToResource(searchResults));
         }
@@ -95,8 +87,21 @@ namespace Gamarr.Api.V3.Games
 
             var listExclusions = _importListExclusionService.All();
 
+            var enabledPlatforms = _platformService.Enabled();
+
             foreach (var currentGame in games)
             {
+                var availablePlatforms = _platformService.FindByIgdbPlatformIds(currentGame.GameMetadata.Value.AvailablePlatformIgdbIds)
+                    .Where(p => p.Enabled)
+                    .ToList();
+
+                // Default to the first platform IGDB lists, the folder preview uses it
+                if (currentGame.PlatformId == 0 && availablePlatforms.Any())
+                {
+                    currentGame.PlatformId = availablePlatforms.First().Id;
+                    currentGame.Platform = availablePlatforms.First();
+                }
+
                 var translation = currentGame.GameMetadata.Value.Translations.FirstOrDefault(t => t.Language == gameInfoLanguage);
                 var resource = currentGame.ToResource(availDelay, translation);
 
@@ -109,8 +114,15 @@ namespace Gamarr.Api.V3.Games
                 }
 
                 resource.Folder = _fileNameBuilder.GetGameFolder(currentGame, namingConfig);
+                resource.AvailablePlatforms = availablePlatforms.Select(p => p.Id).ToList();
 
-                resource.IsExcluded = listExclusions.Any(e => e.IgdbId == resource.IgdbId);
+                // IGDB has no platforms for some entries, let the user pick any enabled platform
+                if (!resource.AvailablePlatforms.Any())
+                {
+                    resource.AvailablePlatforms = enabledPlatforms.Select(p => p.Id).ToList();
+                }
+
+                resource.IsExcluded = listExclusions.Any(e => e.Matches(resource.IgdbId, 0));
 
                 yield return resource;
             }

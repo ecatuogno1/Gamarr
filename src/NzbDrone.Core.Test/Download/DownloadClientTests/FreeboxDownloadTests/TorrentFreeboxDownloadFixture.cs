@@ -219,7 +219,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.FreeboxDownloadTests
 
             var remoteGame = CreateRemoteGame();
 
-            remoteGame.Game.GameMetadata.Value.PhysicalRelease = DateTime.UtcNow.AddDays(-ageDay);
+            remoteGame.Game.GameMetadata.Value.ReleaseDate = DateTime.UtcNow.AddDays(-ageDay);
 
             await Subject.Download(remoteGame, CreateIndexer());
 

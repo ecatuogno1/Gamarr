@@ -71,17 +71,17 @@ namespace NzbDrone.Core.Test.GameTests
         }
 
         [Test]
-        public void should_update_imdb_id_if_changed()
+        public void should_update_igdb_slug_if_changed()
         {
             var newGameInfo = _game.JsonClone();
-            newGameInfo.ImdbId = _game.ImdbId + 1;
+            newGameInfo.IgdbSlug = _game.IgdbSlug + "-new";
 
             GivenNewGameInfo(newGameInfo);
 
             Subject.Execute(new RefreshGameCommand(new List<int> { _game.Id }));
 
             Mocker.GetMock<IGameMetadataService>()
-                .Verify(v => v.Upsert(It.Is<GameMetadata>(s => s.ImdbId == newGameInfo.ImdbId)));
+                .Verify(v => v.Upsert(It.Is<GameMetadata>(s => s.IgdbSlug == newGameInfo.IgdbSlug)));
         }
 
         [Test]

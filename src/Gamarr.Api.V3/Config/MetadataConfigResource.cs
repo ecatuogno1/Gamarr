@@ -1,12 +1,12 @@
 using Gamarr.Http.REST;
 using NzbDrone.Core.Configuration;
-using NzbDrone.Core.MetadataSource.SkyHook.Resource;
 
 namespace Gamarr.Api.V3.Config
 {
     public class MetadataConfigResource : RestResource
     {
-        public IGDBCountryCode CertificationCountry { get; set; }
+        public string IgdbClientId { get; set; }
+        public string IgdbClientSecret { get; set; }
     }
 
     public static class MetadataConfigResourceMapper
@@ -15,7 +15,8 @@ namespace Gamarr.Api.V3.Config
         {
             return new MetadataConfigResource
             {
-                CertificationCountry = model.CertificationCountry,
+                IgdbClientId = model.IgdbClientId,
+                IgdbClientSecret = model.IgdbClientSecret,
             };
         }
     }

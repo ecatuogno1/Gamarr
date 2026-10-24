@@ -12,12 +12,6 @@ namespace NzbDrone.Core.Exceptions
             IgdbGameId = igdbGameId;
         }
 
-        public GameNotFoundException(string imdbId)
-            : base(string.Format("Game with IMDBId {0} was not found, it may have been removed from IGDB.", imdbId))
-        {
-            IgdbGameId = 0;
-        }
-
         public GameNotFoundException(int igdbGameId, string message, params object[] args)
             : base(message, args)
         {

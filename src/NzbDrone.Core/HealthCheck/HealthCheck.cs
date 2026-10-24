@@ -64,6 +64,8 @@ namespace NzbDrone.Core.HealthCheck
         DownloadClientSorting,
         DownloadClientStatusAllClients,
         DownloadClientStatusSingleClient,
+        IgdbCredentialsInvalid,
+        IgdbCredentialsMissing,
         ImportListRootFolderMissing,
         ImportListRootFolderMultipleMissing,
         ImportListStatusAllUnavailable,

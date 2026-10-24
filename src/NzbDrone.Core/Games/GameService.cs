@@ -22,8 +22,8 @@ namespace NzbDrone.Core.Games
         PagingSpec<Game> Paged(PagingSpec<Game> pagingSpec);
         Game AddGame(Game newGame);
         List<Game> AddGames(List<Game> newGames);
-        Game FindByImdbId(string imdbid);
-        Game FindByIgdbId(int igdbid);
+        List<Game> FindByIgdbId(int igdbId);
+        Game FindByIgdbIdAndPlatform(int igdbId, int platformId);
         Game FindByTitle(string title);
         Game FindByTitle(string title, int year);
         Game FindByTitle(List<string> titles, int? year, List<string> otherTitles, List<Game> candidates);
@@ -31,7 +31,8 @@ namespace NzbDrone.Core.Games
         Game FindByPath(string path);
         Dictionary<int, string> AllGamePaths();
         List<int> AllGameIgdbIds();
-        bool GameExists(Game game);
+        HashSet<(int IgdbId, int PlatformId)> AllGameIgdbIdsWithPlatform();
+        bool GameExists(int igdbId, int platformId);
         List<Game> GetGamesByFileId(int fileId);
         List<Game> GetGamesByCollectionIgdbId(int collectionId);
         List<Game> GetGamesBetweenDates(DateTime start, DateTime end, bool includeUnmonitored);
@@ -185,14 +186,14 @@ namespace NzbDrone.Core.Games
             return _gameRepository.FindByTitles(lookupTitles);
         }
 
-        public Game FindByImdbId(string imdbid)
+        public List<Game> FindByIgdbId(int igdbId)
         {
-            return _gameRepository.FindByImdbId(imdbid);
+            return _gameRepository.FindByIgdbId(igdbId);
         }
 
-        public Game FindByIgdbId(int igdbid)
+        public Game FindByIgdbIdAndPlatform(int igdbId, int platformId)
         {
-            return _gameRepository.FindByIgdbId(igdbid);
+            return _gameRepository.FindByIgdbIdAndPlatform(igdbId, platformId);
         }
 
         public Game FindByPath(string path)
@@ -208,6 +209,11 @@ namespace NzbDrone.Core.Games
         public List<int> AllGameIgdbIds()
         {
             return _gameRepository.AllGameIgdbIds();
+        }
+
+        public HashSet<(int IgdbId, int PlatformId)> AllGameIgdbIdsWithPlatform()
+        {
+            return _gameRepository.AllGameIgdbIdsWithPlatform().Select(x => (x.Key, x.Value)).ToHashSet();
         }
 
         public void DeleteGame(int gameId, bool deleteFiles, bool addImportListExclusion = false)
@@ -361,49 +367,9 @@ namespace NzbDrone.Core.Games
             return gameResult;
         }
 
-        public bool GameExists(Game game)
+        public bool GameExists(int igdbId, int platformId)
         {
-            Game result = null;
-
-            if (game.IgdbId != 0)
-            {
-                result = _gameRepository.FindByIgdbId(game.IgdbId);
-                if (result != null)
-                {
-                    return true;
-                }
-            }
-
-            if (game.ImdbId.IsNotNullOrWhiteSpace())
-            {
-                result = _gameRepository.FindByImdbId(game.ImdbId);
-                if (result != null)
-                {
-                    return true;
-                }
-            }
-
-            if (game.Title.IsNotNullOrWhiteSpace())
-            {
-                if (game.Year > 1850)
-                {
-                    result = FindByTitle(game.Title.CleanGameTitle(), game.Year);
-                    if (result != null)
-                    {
-                        return true;
-                    }
-                }
-                else
-                {
-                    result = FindByTitle(game.Title.CleanGameTitle());
-                    if (result != null)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+            return igdbId > 0 && _gameRepository.FindByIgdbIdAndPlatform(igdbId, platformId) != null;
         }
 
         public List<int> GetRecommendedIgdbIds()

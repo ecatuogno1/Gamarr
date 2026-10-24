@@ -105,7 +105,7 @@ namespace NzbDrone.Core.ImportLists
                                 var listGames = MapGameReports(importListReports.Games.Where(x => result.Games.All(r => r.IgdbId != x.IgdbId))).Where(x => x.IgdbId > 0).ToList();
 
                                 listGames.AddRange(alreadyMapped);
-                                listGames = listGames.DistinctBy(x => x.IgdbId).ToList();
+                                listGames = listGames.DistinctBy(x => (x.IgdbId, x.PlatformId)).ToList();
                                 listGames.ForEach(m => m.ListId = importList.Definition.Id);
 
                                 result.Games.AddRange(listGames);
@@ -129,7 +129,7 @@ namespace NzbDrone.Core.ImportLists
 
             Task.WaitAll(taskList.ToArray());
 
-            result.Games = result.Games.DistinctBy(r => new { r.IgdbId, r.ImdbId, r.Title }).ToList();
+            result.Games = result.Games.DistinctBy(r => new { r.IgdbId, r.PlatformId, r.Title }).ToList();
 
             _logger.Debug("Found {0} total reports from {1} lists", result.Games.Count, result.SyncedLists);
 
@@ -162,7 +162,7 @@ namespace NzbDrone.Core.ImportLists
                     {
                         var listGames = MapGameReports(importListReports.Games)
                             .Where(x => x.IgdbId > 0)
-                            .DistinctBy(x => x.IgdbId)
+                            .DistinctBy(x => (x.IgdbId, x.PlatformId))
                             .ToList();
 
                         listGames.ForEach(m => m.ListId = importList.Definition.Id);
@@ -181,7 +181,7 @@ namespace NzbDrone.Core.ImportLists
                 _logger.Error(e, "Error during Import List Sync of {0} ({1})", importList.Name, importListLocal.Definition.Name);
             }
 
-            result.Games = result.Games.DistinctBy(r => new { r.IgdbId, r.ImdbId, r.Title }).ToList();
+            result.Games = result.Games.DistinctBy(r => new { r.IgdbId, r.PlatformId, r.Title }).ToList();
 
             _logger.Debug("Found {0} games from {1} ({2})", result.Games.Count, importList.Name, importListLocal.Definition.Name);
 
@@ -190,26 +190,31 @@ namespace NzbDrone.Core.ImportLists
 
         private List<ImportListGame> MapGameReports(IEnumerable<ImportListGame> reports)
         {
-            var mappedGames = reports.Select(m => _gameSearch.MapGameToIgdbGame(new GameMetadata { Title = m.Title, IgdbId = m.IgdbId, ImdbId = m.ImdbId, Year = m.Year }))
-                .Where(x => x != null)
-                .DistinctBy(x => x.IgdbId)
+            var mappedReports = reports.Select(m => new
+                {
+                    m.PlatformId,
+                    Metadata = _gameSearch.MapGameToIgdbGame(new GameMetadata { Title = m.Title, IgdbId = m.IgdbId, Year = m.Year })
+                })
+                .Where(x => x.Metadata != null)
+                .DistinctBy(x => (x.Metadata.IgdbId, x.PlatformId))
                 .ToList();
+
+            var mappedGames = mappedReports.Select(x => x.Metadata).DistinctBy(x => x.IgdbId).ToList();
 
             _gameMetadataService.UpsertMany(mappedGames);
 
             var mappedListGames = new List<ImportListGame>();
 
-            foreach (var gameMeta in mappedGames)
+            foreach (var report in mappedReports)
             {
-                var mappedListGame = new ImportListGame();
+                var gameMeta = mappedGames.First(x => x.IgdbId == report.Metadata.IgdbId);
 
-                if (gameMeta != null)
+                mappedListGames.Add(new ImportListGame
                 {
-                    mappedListGame.GameMetadata = gameMeta;
-                    mappedListGame.GameMetadataId = gameMeta.Id;
-                }
-
-                mappedListGames.Add(mappedListGame);
+                    GameMetadata = gameMeta,
+                    GameMetadataId = gameMeta.Id,
+                    PlatformId = report.PlatformId
+                });
             }
 
             return mappedListGames;

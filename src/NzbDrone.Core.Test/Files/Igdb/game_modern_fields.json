@@ -1,0 +1,64 @@
+[
+  {
+    "id": 119133,
+    "age_ratings": [
+      { "id": 90001, "organization": { "id": 1, "name": "ESRB" }, "rating_category": { "id": 9, "rating": "E10+" } },
+      { "id": 90002, "organization": { "id": 2, "name": "PEGI" }, "rating_category": { "id": 3, "rating": "12" } }
+    ],
+    "aggregated_rating": 95.0,
+    "aggregated_rating_count": 30,
+    "alternative_names": [
+      { "id": 6001, "name": "Zelda: Breath of the Wild 2" }
+    ],
+    "collections": [
+      { "id": 106, "name": "The Legend of Zelda" }
+    ],
+    "cover": { "id": 200, "image_id": "co5vmg" },
+    "first_release_date": 1683849600,
+    "game_modes": [
+      { "id": 1, "name": "Single player" }
+    ],
+    "game_status": { "id": 1, "status": "Released" },
+    "game_type": { "id": 0, "type": "Main Game" },
+    "genres": [
+      { "id": 31, "name": "Adventure" }
+    ],
+    "involved_companies": [
+      {
+        "id": 4001,
+        "company": { "id": 70, "name": "Nintendo" },
+        "developer": false,
+        "publisher": true,
+        "porting": false,
+        "supporting": false
+      },
+      {
+        "id": 4002,
+        "company": { "id": 9999, "name": "Nintendo EPD" },
+        "developer": true,
+        "publisher": false,
+        "porting": false,
+        "supporting": false
+      }
+    ],
+    "name": "The Legend of Zelda: Tears of the Kingdom",
+    "platforms": [130, 508],
+    "rating": 90.0,
+    "rating_count": 400,
+    "release_dates": [
+      { "id": 10, "date": 1683849600, "platform": 130 },
+      { "id": 11, "date": 1749168000, "platform": 508 }
+    ],
+    "screenshots": [
+      { "id": 601, "image_id": "sc2aaa" }
+    ],
+    "slug": "the-legend-of-zelda-tears-of-the-kingdom",
+    "summary": "The sequel to Breath of the Wild.",
+    "total_rating_count": 430,
+    "videos": [],
+    "websites": [
+      { "id": 20, "type": { "id": 1, "type": "Official Website" }, "url": "https://zelda.nintendo.com/tears-of-the-kingdom/" },
+      { "id": 21, "type": { "id": 13, "type": "Steam" }, "url": "https://store.steampowered.com/app/0" }
+    ]
+  }
+]

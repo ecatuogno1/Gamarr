@@ -24,11 +24,7 @@ namespace NzbDrone.Core.Indexers.FileList
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
-            if (searchCriteria.Game.GameMetadata.Value.ImdbId.IsNotNullOrWhiteSpace())
-            {
-                pageableRequests.Add(GetRequest("search-torrents", $"&type=imdb&query={searchCriteria.Game.GameMetadata.Value.ImdbId}"));
-            }
-            else if (searchCriteria.Game.Year > 0)
+            if (searchCriteria.Game.Year > 0)
             {
                 foreach (var queryTitle in searchCriteria.CleanSceneTitles)
                 {

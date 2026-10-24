@@ -10,6 +10,7 @@ namespace Gamarr.Api.V3.Collections
         public bool? MonitorGames { get; set; }
         public bool? SearchOnAdd { get; set; }
         public int? QualityProfileId { get; set; }
+        public int? PlatformId { get; set; }
         public string RootFolderPath { get; set; }
         public GameStatusType? MinimumAvailability { get; set; }
     }

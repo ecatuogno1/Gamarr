@@ -104,27 +104,31 @@ namespace NzbDrone.Core.Games
             }
 
             gameMetadata.Title = gameInfo.Title;
-            gameMetadata.ImdbId = gameInfo.ImdbId;
+            gameMetadata.IgdbSlug = gameInfo.IgdbSlug;
             gameMetadata.Overview = gameInfo.Overview;
+            gameMetadata.Storyline = gameInfo.Storyline;
             gameMetadata.Status = gameInfo.Status;
             gameMetadata.Images = gameInfo.Images;
             gameMetadata.CleanTitle = gameInfo.CleanTitle;
             gameMetadata.SortTitle = gameInfo.SortTitle;
             gameMetadata.LastInfoSync = DateTime.UtcNow;
-            gameMetadata.Runtime = gameInfo.Runtime;
             gameMetadata.Ratings = gameInfo.Ratings;
             gameMetadata.Genres = gameInfo.Genres;
+            gameMetadata.Themes = gameInfo.Themes;
+            gameMetadata.GameModes = gameInfo.GameModes;
             gameMetadata.Keywords = gameInfo.Keywords;
-            gameMetadata.Certification = gameInfo.Certification;
-            gameMetadata.InCinemas = gameInfo.InCinemas;
+            gameMetadata.Developers = gameInfo.Developers;
+            gameMetadata.Publishers = gameInfo.Publishers;
+            gameMetadata.AgeRatings = gameInfo.AgeRatings;
+            gameMetadata.Websites = gameInfo.Websites;
             gameMetadata.Website = gameInfo.Website;
 
             gameMetadata.Year = gameInfo.Year;
             gameMetadata.SecondaryYear = gameInfo.SecondaryYear;
-            gameMetadata.PhysicalRelease = gameInfo.PhysicalRelease;
-            gameMetadata.DigitalRelease = gameInfo.DigitalRelease;
+            gameMetadata.ReleaseDate = gameInfo.ReleaseDate;
+            gameMetadata.PlatformReleaseDates = gameInfo.PlatformReleaseDates;
+            gameMetadata.AvailablePlatformIgdbIds = gameInfo.AvailablePlatformIgdbIds;
             gameMetadata.YouTubeTrailerId = gameInfo.YouTubeTrailerId;
-            gameMetadata.Studio = gameInfo.Studio;
             gameMetadata.OriginalTitle = gameInfo.OriginalTitle;
             gameMetadata.CleanOriginalTitle = gameInfo.CleanOriginalTitle;
             gameMetadata.OriginalLanguage = gameInfo.OriginalLanguage;
@@ -141,6 +145,7 @@ namespace NzbDrone.Core.Games
                     Monitored = game.AddOptions?.Monitor == MonitorTypes.GameAndCollection,
                     SearchOnAdd = game.AddOptions?.SearchForGame ?? false,
                     QualityProfileId = game.QualityProfileId,
+                    PlatformId = game.PlatformId,
                     MinimumAvailability = game.MinimumAvailability,
                     RootFolderPath = _folderService.GetBestRootFolderPath(game.Path).GetCleanPath(),
                     Tags = game.Tags
@@ -262,7 +267,7 @@ namespace NzbDrone.Core.Games
 
                 if (message.LastStartTime.HasValue && message.LastStartTime.Value.AddDays(14) > DateTime.UtcNow)
                 {
-                    updatedIgdbGames = _gameInfo.GetChangedGames(message.LastStartTime.Value);
+                    updatedIgdbGames = _gameInfo.GetChangedGames(message.LastStartTime.Value, allGames.Select(g => g.IgdbId));
                 }
 
                 foreach (var game in allGames)

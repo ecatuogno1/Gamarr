@@ -11,6 +11,7 @@ using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Parser;
+using NzbDrone.Core.Platforms;
 
 namespace NzbDrone.Core.Games
 {
@@ -27,6 +28,7 @@ namespace NzbDrone.Core.Games
         private readonly IProvideGameInfo _gameInfo;
         private readonly IBuildFileNames _fileNameBuilder;
         private readonly IAddGameValidator _addGameValidator;
+        private readonly IPlatformService _platformService;
         private readonly Logger _logger;
 
         public AddGameService(IGameService gameService,
@@ -34,6 +36,7 @@ namespace NzbDrone.Core.Games
                                 IProvideGameInfo gameInfo,
                                 IBuildFileNames fileNameBuilder,
                                 IAddGameValidator addGameValidator,
+                                IPlatformService platformService,
                                 Logger logger)
         {
             _gameService = gameService;
@@ -41,6 +44,7 @@ namespace NzbDrone.Core.Games
             _gameInfo = gameInfo;
             _fileNameBuilder = fileNameBuilder;
             _addGameValidator = addGameValidator;
+            _platformService = platformService;
             _logger = logger;
         }
 
@@ -48,7 +52,7 @@ namespace NzbDrone.Core.Games
         {
             Ensure.That(newGame, () => newGame).IsNotNull();
 
-            newGame = AddSkyhookData(newGame);
+            newGame = AddIgdbData(newGame);
             newGame = SetPropertiesAndValidate(newGame);
 
             _logger.Info("Adding Game {0} Path: [{1}]", newGame, newGame.Path);
@@ -67,6 +71,7 @@ namespace NzbDrone.Core.Games
         {
             var added = DateTime.UtcNow;
             var gamesToAdd = new List<Game>();
+            var keysToAdd = new HashSet<(int IgdbId, int PlatformId)>();
 
             foreach (var m in newGames)
             {
@@ -81,10 +86,16 @@ namespace NzbDrone.Core.Games
 
                 try
                 {
-                    var game = AddSkyhookData(m);
+                    var game = AddIgdbData(m);
                     game = SetPropertiesAndValidate(game);
 
                     game.Added = added;
+
+                    if (!keysToAdd.Add((game.IgdbId, game.PlatformId)))
+                    {
+                        _logger.Debug("IgdbId {0} on platform {1} is already being added, skipping duplicate", game.IgdbId, game.PlatformId);
+                        continue;
+                    }
 
                     gamesToAdd.Add(game);
                 }
@@ -105,7 +116,7 @@ namespace NzbDrone.Core.Games
             return _gameService.AddGames(gamesToAdd);
         }
 
-        private Game AddSkyhookData(Game newGame)
+        private Game AddIgdbData(Game newGame)
         {
             var game = new Game();
 
@@ -124,6 +135,25 @@ namespace NzbDrone.Core.Games
             }
 
             game.ApplyChanges(newGame);
+
+            if (game.PlatformId == 0)
+            {
+                // Lists and collections don't know the platform, so pick the first enabled platform IGDB lists for the game
+                var platform = (_platformService.FindByIgdbPlatformIds(game.GameMetadata.Value.AvailablePlatformIgdbIds) ?? new List<Platform>())
+                    .FirstOrDefault(p => p.Enabled);
+
+                if (platform == null)
+                {
+                    throw new ValidationException(new List<ValidationFailure>
+                                                  {
+                                                      new ValidationFailure("PlatformId", "A platform is required and none of the game's IGDB platforms are enabled", newGame.PlatformId)
+                                                  });
+                }
+
+                game.PlatformId = platform.Id;
+            }
+
+            game.Platform = _platformService.Find(game.PlatformId);
 
             return game;
         }

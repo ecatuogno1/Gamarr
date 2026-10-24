@@ -7,6 +7,7 @@ using NzbDrone.Core.Games.AlternativeTitles;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Messaging.Events;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
 
@@ -16,8 +17,8 @@ namespace NzbDrone.Core.Games
     {
         bool GamePathExists(string path);
         List<Game> FindByTitles(List<string> titles);
-        Game FindByImdbId(string imdbid);
-        Game FindByIgdbId(int igdbid);
+        List<Game> FindByIgdbId(int igdbId);
+        Game FindByIgdbIdAndPlatform(int igdbId, int platformId);
         List<Game> FindByIgdbId(List<int> igdbids);
         List<Game> GamesBetweenDates(DateTime start, DateTime end, bool includeUnmonitored);
         PagingSpec<Game> GamesWithoutFiles(PagingSpec<Game> pagingSpec);
@@ -27,6 +28,7 @@ namespace NzbDrone.Core.Games
         Game FindByPath(string path);
         Dictionary<int, string> AllGamePaths();
         List<int> AllGameIgdbIds();
+        List<KeyValuePair<int, int>> AllGameIgdbIdsWithPlatform();
         Dictionary<int, List<int>> AllGameTags();
         List<int> GetRecommendations();
         bool ExistsByMetadataId(int metadataId);
@@ -37,21 +39,25 @@ namespace NzbDrone.Core.Games
     {
         private readonly IQualityProfileRepository _profileRepository;
         private readonly IAlternativeTitleRepository _alternativeTitleRepository;
+        private readonly IPlatformService _platformService;
 
         public GameRepository(IMainDatabase database,
                                IQualityProfileRepository profileRepository,
                                IAlternativeTitleRepository alternativeTitleRepository,
+                               IPlatformService platformService,
                                IEventAggregator eventAggregator)
             : base(database, eventAggregator)
         {
             _profileRepository = profileRepository;
             _alternativeTitleRepository = alternativeTitleRepository;
+            _platformService = platformService;
         }
 
         protected override IEnumerable<Game> PagedQuery(SqlBuilder builder) =>
             _database.QueryJoined<Game, GameMetadata>(builder, (game, gameMetadata) =>
             {
                 game.GameMetadata = gameMetadata;
+                game.Platform = _platformService.Find(game.PlatformId);
                 return game;
             });
 
@@ -69,6 +75,7 @@ namespace NzbDrone.Core.Games
                 gameEntry.GameMetadata = metadata;
                 gameEntry.QualityProfile = qualityProfile;
                 gameEntry.GameFile = gameFile;
+                gameEntry.Platform = _platformService.Find(game.PlatformId);
                 dict.Add(gameEntry.Id, gameEntry);
             }
 
@@ -116,6 +123,7 @@ namespace NzbDrone.Core.Games
                     game.GameMetadata = metadata;
                     game.GameFile = file;
                     game.QualityProfile = qualityProfiles[game.QualityProfileId];
+                    game.Platform = _platformService.Find(game.PlatformId);
 
                     if (alternativeTitles.TryGetValue(game.GameMetadataId, out var altTitles))
                     {
@@ -207,15 +215,14 @@ namespace NzbDrone.Core.Games
             return gameDictionary.Values.ToList();
         }
 
-        public Game FindByImdbId(string imdbid)
+        public List<Game> FindByIgdbId(int igdbId)
         {
-            var imdbIdWithPrefix = Parser.Parser.NormalizeImdbId(imdbid);
-            return imdbIdWithPrefix == null ? null : Query(x => x.GameMetadata.Value.ImdbId == imdbIdWithPrefix).FirstOrDefault();
+            return Query(x => x.GameMetadata.Value.IgdbId == igdbId);
         }
 
-        public Game FindByIgdbId(int igdbid)
+        public Game FindByIgdbIdAndPlatform(int igdbId, int platformId)
         {
-            return Query(x => x.GameMetadata.Value.IgdbId == igdbid).FirstOrDefault();
+            return Query(Builder().Where<GameMetadata>(m => m.IgdbId == igdbId).Where<Game>(g => g.PlatformId == platformId)).FirstOrDefault();
         }
 
         public List<Game> FindByIgdbId(List<int> igdbids)
@@ -237,9 +244,7 @@ namespace NzbDrone.Core.Games
         {
             var builder = Builder()
                 .Where<Game>(m =>
-                              (m.GameMetadata.Value.InCinemas >= start && m.GameMetadata.Value.InCinemas <= end) ||
-                              (m.GameMetadata.Value.PhysicalRelease >= start && m.GameMetadata.Value.PhysicalRelease <= end) ||
-                              (m.GameMetadata.Value.DigitalRelease >= start && m.GameMetadata.Value.DigitalRelease <= end));
+                              m.GameMetadata.Value.ReleaseDate >= start && m.GameMetadata.Value.ReleaseDate <= end);
 
             if (!includeUnmonitored)
             {
@@ -311,6 +316,14 @@ namespace NzbDrone.Core.Games
             using (var conn = _database.OpenConnection())
             {
                 return conn.Query<int>("SELECT \"IgdbId\" FROM \"GameMetadata\" JOIN \"Games\" ON (\"Games\".\"GameMetadataId\" = \"GameMetadata\".\"Id\")").ToList();
+            }
+        }
+
+        public List<KeyValuePair<int, int>> AllGameIgdbIdsWithPlatform()
+        {
+            using (var conn = _database.OpenConnection())
+            {
+                return conn.Query<KeyValuePair<int, int>>("SELECT \"GameMetadata\".\"IgdbId\" AS \"Key\", \"Games\".\"PlatformId\" AS \"Value\" FROM \"GameMetadata\" JOIN \"Games\" ON (\"Games\".\"GameMetadataId\" = \"GameMetadata\".\"Id\")").ToList();
             }
         }
 

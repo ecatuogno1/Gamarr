@@ -1,0 +1,25 @@
+[
+  {
+    "id": 250000,
+    "name": "Future Game",
+    "slug": "future-game",
+    "first_release_date": 4102444800,
+    "platforms": [167],
+    "release_dates": [
+      { "id": 1, "date": 4102444800, "platform": 167 }
+    ],
+    "game_status": { "id": 2, "status": "Beta" }
+  },
+  {
+    "id": 250001,
+    "name": "Cancelled Game",
+    "slug": "cancelled-game",
+    "status": 6
+  },
+  {
+    "id": 250002,
+    "name": "Rumored Game",
+    "slug": "rumored-game",
+    "game_status": { "id": 7, "status": "Rumored" }
+  }
+]

@@ -6,16 +6,14 @@ using NzbDrone.Core.MediaCover;
 
 namespace Gamarr.Api.V3.Credits
 {
+    // A company credit (developer, publisher, porting or supporting studio)
     public class CreditResource : RestResource
     {
-        public string PersonName { get; set; }
+        public string CompanyName { get; set; }
         public string CreditIgdbId { get; set; }
-        public int PersonIgdbId { get; set; }
+        public int CompanyIgdbId { get; set; }
         public int GameMetadataId { get; set; }
         public List<MediaCover> Images { get; set; }
-        public string Department { get; set; }
-        public string Job { get; set; }
-        public string Character { get; set; }
         public int Order { get; set; }
         public CreditType Type { get; set; }
     }
@@ -34,13 +32,10 @@ namespace Gamarr.Api.V3.Credits
                 Id = model.Id,
                 GameMetadataId = model.GameMetadataId,
                 CreditIgdbId = model.CreditIgdbId,
-                PersonIgdbId = model.PersonIgdbId,
-                PersonName = model.Name,
+                CompanyIgdbId = model.CompanyIgdbId,
+                CompanyName = model.Name,
                 Order = model.Order,
-                Character = model.Character,
-                Department = model.Department,
                 Images = model.Images,
-                Job = model.Job,
                 Type = model.Type
             };
         }
@@ -61,15 +56,12 @@ namespace Gamarr.Api.V3.Credits
             {
                 Id = resource.Id,
                 GameMetadataId = resource.GameMetadataId,
-                Name = resource.PersonName,
+                Name = resource.CompanyName,
                 Order = resource.Order,
-                Character = resource.Character,
-                Department = resource.Department,
-                Job = resource.Job,
                 Type = resource.Type,
                 Images = resource.Images,
                 CreditIgdbId = resource.CreditIgdbId,
-                PersonIgdbId = resource.PersonIgdbId
+                CompanyIgdbId = resource.CompanyIgdbId
             };
         }
     }

@@ -74,27 +74,9 @@ namespace NzbDrone.Core.MediaFiles.GameImport
             return DetectSampleResult.NotSample;
         }
 
+        // Games have no runtime, stage 3 replaces video sample detection entirely
         private int GetMinimumAllowedRuntime(GameMetadata game)
         {
-            // Anime short - 15 seconds
-            if (game.Runtime <= 3)
-            {
-                return 15;
-            }
-
-            // Webisodes - 90 seconds
-            if (game.Runtime <= 10)
-            {
-                return 90;
-            }
-
-            // 30 minute episodes - 5 minutes
-            if (game.Runtime <= 30)
-            {
-                return 300;
-            }
-
-            // 60 minute episodes - 10 minutes
             return 600;
         }
     }

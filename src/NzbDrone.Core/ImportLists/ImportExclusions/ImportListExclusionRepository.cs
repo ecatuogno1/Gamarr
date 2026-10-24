@@ -8,8 +8,8 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
 {
     public interface IImportListExclusionRepository : IBasicRepository<ImportListExclusion>
     {
-        bool IsGameExcluded(int igdbid);
-        ImportListExclusion FindByIgdbid(int igdbid);
+        bool IsGameExcluded(int igdbId, int platformId);
+        ImportListExclusion FindByIgdbIdAndPlatform(int igdbId, int platformId);
         List<int> AllExcludedIgdbIds();
     }
 
@@ -20,14 +20,14 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
         {
         }
 
-        public bool IsGameExcluded(int igdbid)
+        public bool IsGameExcluded(int igdbId, int platformId)
         {
-            return Query(x => x.IgdbId == igdbid).Any();
+            return Query(x => x.IgdbId == igdbId).Any(x => x.Matches(igdbId, platformId));
         }
 
-        public ImportListExclusion FindByIgdbid(int igdbid)
+        public ImportListExclusion FindByIgdbIdAndPlatform(int igdbId, int platformId)
         {
-            return Query(x => x.IgdbId == igdbid).SingleOrDefault();
+            return Query(x => x.IgdbId == igdbId && x.PlatformId == platformId).SingleOrDefault();
         }
 
         public List<int> AllExcludedIgdbIds()

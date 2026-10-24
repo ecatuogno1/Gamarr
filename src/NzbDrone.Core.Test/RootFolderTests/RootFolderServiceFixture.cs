@@ -27,6 +27,9 @@ namespace NzbDrone.Core.Test.RootFolderTests
         {
             _namingConfig = NamingConfig.Default;
 
+            // These tests are about a flat root folder, the default Gamarr layout nests games in platform folders
+            _namingConfig.GameFolderFormat = "{Game Title} ({Release Year})";
+
             Mocker.GetMock<IDiskProvider>()
                   .Setup(m => m.FolderExists(It.IsAny<string>()))
                   .Returns(true);

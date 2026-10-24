@@ -6,7 +6,8 @@ namespace NzbDrone.Core.Notifications.Webhook
     public class WebhookRemoteGame
     {
         public int IgdbId { get; set; }
-        public string ImdbId { get; set; }
+        public string IgdbSlug { get; set; }
+        public int PlatformId { get; set; }
         public string Title { get; set; }
         public int Year { get; set; }
 
@@ -17,7 +18,8 @@ namespace NzbDrone.Core.Notifications.Webhook
         public WebhookRemoteGame(RemoteGame remoteGame)
         {
             IgdbId = remoteGame.Game.GameMetadata.Value.IgdbId;
-            ImdbId = remoteGame.Game.GameMetadata.Value.ImdbId;
+            IgdbSlug = remoteGame.Game.GameMetadata.Value.IgdbSlug;
+            PlatformId = remoteGame.Game.PlatformId;
             Title = remoteGame.Game.GameMetadata.Value.Title;
             Year = remoteGame.Game.GameMetadata.Value.Year;
         }
@@ -25,7 +27,8 @@ namespace NzbDrone.Core.Notifications.Webhook
         public WebhookRemoteGame(Game game)
         {
             IgdbId = game.GameMetadata.Value.IgdbId;
-            ImdbId = game.GameMetadata.Value.ImdbId;
+            IgdbSlug = game.GameMetadata.Value.IgdbSlug;
+            PlatformId = game.PlatformId;
             Title = game.GameMetadata.Value.Title;
             Year = game.GameMetadata.Value.Year;
         }

@@ -73,7 +73,7 @@ namespace NzbDrone.Core.Download.Clients.Flood
                             result.Add(remoteGame.Release.Indexer);
                             break;
                         case (int)AdditionalTags.Studio:
-                            result.Add(remoteGame.Game.GameMetadata.Value.Studio);
+                            result.UnionWith(remoteGame.Game.GameMetadata.Value.Developers);
                             break;
                         default:
                             throw new DownloadClientException("Unexpected additional tag ID");

@@ -23,7 +23,6 @@ namespace NzbDrone.Core.Test.GameStatsTests
         {
             var gameMetadata = Builder<GameMetadata>.CreateNew()
                 .With(h => h.IgdbId = 123456)
-                .With(m => m.Runtime = 90)
                 .BuildNew();
             Db.Insert(gameMetadata);
 

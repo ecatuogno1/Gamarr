@@ -115,41 +115,15 @@ namespace NzbDrone.Core.Indexers.Newznab
 
         private void AddGameIdPageableRequests(IndexerPageableRequestChain chain, int maxPages, IEnumerable<int> categories, SearchCriteriaBase searchCriteria)
         {
+            // Games have no IMDb id, stage 4 replaces id searches with title + platform category searches
             var includeIgdbSearch = SupportsIgdbSearch && searchCriteria.Game.GameMetadata.Value.IgdbId > 0;
-            var includeImdbSearch = SupportsImdbSearch && searchCriteria.Game.GameMetadata.Value.ImdbId.IsNotNullOrWhiteSpace();
 
-            if (SupportsAggregatedIdSearch && (includeIgdbSearch || includeImdbSearch))
+            if (includeIgdbSearch)
             {
-                var ids = "";
-
-                if (includeIgdbSearch)
-                {
-                    ids += $"&igdbid={searchCriteria.Game.GameMetadata.Value.IgdbId}";
-                }
-
-                if (includeImdbSearch)
-                {
-                    ids += $"&imdbid={searchCriteria.Game.GameMetadata.Value.ImdbId.Substring(2)}";
-                }
-
-                chain.Add(GetPagedRequests(maxPages, categories, "game", ids));
-            }
-            else
-            {
-                if (includeIgdbSearch)
-                {
-                    chain.Add(GetPagedRequests(maxPages,
-                        categories,
-                        "game",
-                        $"&igdbid={searchCriteria.Game.GameMetadata.Value.IgdbId}"));
-                }
-                else if (includeImdbSearch)
-                {
-                    chain.Add(GetPagedRequests(maxPages,
-                        categories,
-                        "game",
-                        $"&imdbid={searchCriteria.Game.GameMetadata.Value.ImdbId.Substring(2)}"));
-                }
+                chain.Add(GetPagedRequests(maxPages,
+                    categories,
+                    "game",
+                    $"&igdbid={searchCriteria.Game.GameMetadata.Value.IgdbId}"));
             }
 
             if (SupportsSearch && searchCriteria.Game.Year > 0)

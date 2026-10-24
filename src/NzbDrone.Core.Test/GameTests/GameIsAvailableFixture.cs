@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.GameTests
@@ -16,79 +18,43 @@ namespace NzbDrone.Core.Test.GameTests
         public void Setup()
         {
             _game = Builder<Game>.CreateNew()
-                                     .Build();
+                                 .With(g => g.Platform = null)
+                                 .Build();
         }
 
-        private void SetGameProperties(DateTime? cinema, DateTime? physical, DateTime? digital, GameStatusType minimumAvailability)
+        private void SetGameProperties(DateTime? releaseDate, GameStatusType minimumAvailability, GameStatusType status = GameStatusType.Announced)
         {
-            _game.GameMetadata.Value.InCinemas = cinema;
-            _game.GameMetadata.Value.PhysicalRelease = physical;
-            _game.GameMetadata.Value.DigitalRelease = digital;
+            _game.GameMetadata.Value.ReleaseDate = releaseDate;
+            _game.GameMetadata.Value.Status = status;
             _game.MinimumAvailability = minimumAvailability;
         }
 
-        // minAvail = TBA
-        [TestCase(null, null, null, GameStatusType.TBA, true)]
-        [TestCase("2000/01/01 21:10:42", null, null, GameStatusType.TBA, true)]
-        [TestCase("2100/01/01 21:10:42", null, null, GameStatusType.TBA, true)]
-        [TestCase(null, "2000/01/01 21:10:42", null, GameStatusType.TBA, true)]
-        [TestCase(null, "2100/01/01 21:10:42", null, GameStatusType.TBA, true)]
-        [TestCase(null, null, "2000/01/01 21:10:42", GameStatusType.TBA, true)]
-        [TestCase(null, null, "2100/01/01 21:10:42", GameStatusType.TBA, true)]
-
-        // minAvail = Announced
-        [TestCase(null, null, null, GameStatusType.Announced, true)]
-        [TestCase("2000/01/01 21:10:42", null, null, GameStatusType.Announced, true)]
-        [TestCase("2100/01/01 21:10:42", null, null, GameStatusType.Announced, true)]
-        [TestCase(null, "2000/01/01 21:10:42", null, GameStatusType.Announced, true)]
-        [TestCase(null, "2100/01/01 21:10:42", null, GameStatusType.Announced, true)]
-        [TestCase(null, null, "2000/01/01 21:10:42", GameStatusType.Announced, true)]
-        [TestCase(null, null, "2100/01/01 21:10:42", GameStatusType.Announced, true)]
-
-        // minAvail = InCinemas
-        // InCinemas is known and in the past others are not known or in future
-        [TestCase("2000/01/01 21:10:42", null, null, GameStatusType.InCinemas, true)]
-        [TestCase("2000/01/01 21:10:42", "2100/01/01 21:10:42", null, GameStatusType.InCinemas, true)]
-        [TestCase("2000/01/01 21:10:42", "2100/01/01 21:10:42", "2100/01/01 21:10:42", GameStatusType.InCinemas, true)]
-        [TestCase("2000/01/01 21:10:42", null, "2100/01/01 21:10:42", GameStatusType.InCinemas, true)]
-
-        // InCinemas is known and in the future others are not known or in future
-        [TestCase("2100/01/01 21:10:42", null, null, GameStatusType.InCinemas, false)]
-        [TestCase("2100/01/01 21:10:42", "2100/01/01 21:10:42", null, GameStatusType.InCinemas, false)]
-        [TestCase("2100/01/01 21:10:42", "2100/01/01 21:10:42", "2100/01/01 21:10:42", GameStatusType.InCinemas, false)]
-        [TestCase("2100/01/01 21:10:42", null, "2100/01/01 21:10:42", GameStatusType.InCinemas, false)]
-
-        // handle the cases where InCinemas date is not known but Digital/Physical are and passed -- this refers to the issue being fixed along with these tests
-        [TestCase(null, "2000/01/01 21:10:42", null, GameStatusType.InCinemas, true)]
-        [TestCase(null, "2000/01/01 21:10:42", "2000/01/01 21:10:42", GameStatusType.InCinemas, true)]
-        [TestCase(null, null, "2000/01/01 21:10:42", GameStatusType.InCinemas, true)]
-
-        // same as previous but digital/physical are in future
-        [TestCase(null, "2100/01/01 21:10:42", null, GameStatusType.InCinemas, false)]
-        [TestCase(null, "2100/01/01 21:10:42", "2100/01/01 21:10:42", GameStatusType.InCinemas, false)]
-        [TestCase(null, null, "2100/01/01 21:10:42", GameStatusType.InCinemas, false)]
-
-        // no date values
-        [TestCase(null, null, null, GameStatusType.InCinemas, false)]
-
-        // minAvail = Released
-        [TestCase(null, null, null, GameStatusType.Released, false)]
-        [TestCase("2000/01/01 21:10:42", null, null, GameStatusType.Released, true)]
-        [TestCase("2100/01/01 21:10:42", null, null, GameStatusType.Released, false)]
-        [TestCase(null, "2000/01/01 21:10:42", null, GameStatusType.Released, true)]
-        [TestCase(null, "2100/01/01 21:10:42", null, GameStatusType.Released, false)]
-        [TestCase(null, null, "2000/01/01 21:10:42", GameStatusType.Released, true)]
-        [TestCase(null, null, "2100/01/01 21:10:42", GameStatusType.Released, false)]
-        public void should_have_correct_availability(DateTime? cinema, DateTime? physical, DateTime? digital, GameStatusType minimumAvailability, bool result)
+        [TestCase(null, GameStatusType.TBA, true)]
+        [TestCase("2000/01/01 21:10:42", GameStatusType.TBA, true)]
+        [TestCase("2100/01/01 21:10:42", GameStatusType.TBA, true)]
+        [TestCase(null, GameStatusType.Announced, true)]
+        [TestCase("2000/01/01 21:10:42", GameStatusType.Announced, true)]
+        [TestCase("2100/01/01 21:10:42", GameStatusType.Announced, true)]
+        [TestCase(null, GameStatusType.Released, false)]
+        [TestCase("2000/01/01 21:10:42", GameStatusType.Released, true)]
+        [TestCase("2100/01/01 21:10:42", GameStatusType.Released, false)]
+        public void should_have_correct_availability(DateTime? releaseDate, GameStatusType minimumAvailability, bool result)
         {
-            SetGameProperties(cinema, physical, digital, minimumAvailability);
+            SetGameProperties(releaseDate, minimumAvailability);
             _game.IsAvailable().Should().Be(result);
+        }
+
+        [Test]
+        public void released_without_date_should_be_available_when_igdb_says_released()
+        {
+            SetGameProperties(null, GameStatusType.Released, GameStatusType.Released);
+            _game.IsAvailable().Should().BeTrue();
         }
 
         [Test]
         public void positive_delay_should_effect_availability()
         {
-            SetGameProperties(null, DateTime.Now.AddDays(-5), null, GameStatusType.Released);
+            SetGameProperties(DateTime.UtcNow.AddDays(-5), GameStatusType.Released);
             _game.IsAvailable().Should().BeTrue();
             _game.IsAvailable(6).Should().BeFalse();
         }
@@ -96,22 +62,39 @@ namespace NzbDrone.Core.Test.GameTests
         [Test]
         public void negative_delay_should_effect_availability()
         {
-            SetGameProperties(null, DateTime.Now.AddDays(5), null, GameStatusType.Released);
+            SetGameProperties(DateTime.UtcNow.AddDays(5), GameStatusType.Released);
             _game.IsAvailable().Should().BeFalse();
             _game.IsAvailable(-6).Should().BeTrue();
         }
 
         [Test]
-        public void minimum_availability_released_no_date_but_ninety_days_after_cinemas()
+        public void should_use_release_date_of_the_games_platform()
         {
-            SetGameProperties(DateTime.Now.AddDays(-91), null, null, GameStatusType.Released);
-            _game.IsAvailable().Should().BeTrue();
-            SetGameProperties(DateTime.Now.AddDays(-89), null, null, GameStatusType.Released);
+            _game.Platform = new Platform { Id = 2, IgdbPlatformId = 19 };
+            _game.GameMetadata.Value.PlatformReleaseDates = new List<PlatformReleaseDate>
+            {
+                new PlatformReleaseDate { IgdbPlatformId = 6, Date = DateTime.UtcNow.AddYears(-2) },
+                new PlatformReleaseDate { IgdbPlatformId = 19, Date = DateTime.UtcNow.AddDays(10) }
+            };
+
+            SetGameProperties(DateTime.UtcNow.AddYears(-2), GameStatusType.Released);
+
+            _game.GetReleaseDate().Should().BeAfter(DateTime.UtcNow);
             _game.IsAvailable().Should().BeFalse();
-            SetGameProperties(DateTime.Now.AddDays(-89), DateTime.Now.AddDays(-40), null, GameStatusType.Released);
+        }
+
+        [Test]
+        public void should_fall_back_to_first_release_date_when_platform_has_no_date()
+        {
+            _game.Platform = new Platform { Id = 2, IgdbPlatformId = 19 };
+            _game.GameMetadata.Value.PlatformReleaseDates = new List<PlatformReleaseDate>
+            {
+                new PlatformReleaseDate { IgdbPlatformId = 6, Date = DateTime.UtcNow.AddYears(-2) }
+            };
+
+            SetGameProperties(DateTime.UtcNow.AddYears(-2), GameStatusType.Released);
+
             _game.IsAvailable().Should().BeTrue();
-            SetGameProperties(DateTime.Now.AddDays(-91), DateTime.Now.AddDays(40), null, GameStatusType.Released);
-            _game.IsAvailable().Should().BeFalse();
         }
     }
 }

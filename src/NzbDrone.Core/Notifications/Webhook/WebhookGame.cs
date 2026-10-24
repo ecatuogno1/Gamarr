@@ -16,7 +16,9 @@ namespace NzbDrone.Core.Notifications.Webhook
         public string ReleaseDate { get; set; }
         public string FolderPath { get; set; }
         public int IgdbId { get; set; }
-        public string ImdbId { get; set; }
+        public string IgdbSlug { get; set; }
+        public int PlatformId { get; set; }
+        public string Platform { get; set; }
         public string Overview { get; set; }
         public List<string> Genres { get; set; }
         public List<WebhookImage> Images { get; set; }
@@ -32,10 +34,12 @@ namespace NzbDrone.Core.Notifications.Webhook
             Id = game.Id;
             Title = game.Title;
             Year = game.Year;
-            ReleaseDate = game.GameMetadata.Value.PhysicalReleaseDate().ToString("yyyy-MM-dd");
+            ReleaseDate = game.GetReleaseDate()?.ToString("yyyy-MM-dd");
             FolderPath = game.Path;
             IgdbId = game.IgdbId;
-            ImdbId = game.ImdbId;
+            IgdbSlug = game.GameMetadata.Value.IgdbSlug;
+            PlatformId = game.PlatformId;
+            Platform = game.Platform?.Name;
             Overview = game.GameMetadata.Value.Overview;
             Genres = game.GameMetadata.Value.Genres;
             Images = game.GameMetadata.Value.Images.Select(i => new WebhookImage(i)).ToList();

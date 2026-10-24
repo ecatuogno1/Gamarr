@@ -8,6 +8,9 @@ namespace Gamarr.Api.V3.ImportLists
     {
         // public int Id { get; set; }
         public int IgdbId { get; set; }
+
+        // 0 excludes the game on every platform
+        public int PlatformId { get; set; }
         public string GameTitle { get; set; }
         public int GameYear { get; set; }
     }
@@ -25,6 +28,7 @@ namespace Gamarr.Api.V3.ImportLists
             {
                 Id = model.Id,
                 IgdbId = model.IgdbId,
+                PlatformId = model.PlatformId,
                 GameTitle = model.GameTitle,
                 GameYear = model.GameYear
             };
@@ -41,6 +45,7 @@ namespace Gamarr.Api.V3.ImportLists
             {
                 Id = resource.Id,
                 IgdbId = resource.IgdbId,
+                PlatformId = resource.PlatformId,
                 GameTitle = resource.GameTitle,
                 GameYear = resource.GameYear
             };

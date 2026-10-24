@@ -13,7 +13,7 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
         List<ImportListExclusion> Add(List<ImportListExclusion> importListExclusions);
         List<ImportListExclusion> All();
         PagingSpec<ImportListExclusion> Paged(PagingSpec<ImportListExclusion> pagingSpec);
-        bool IsGameExcluded(int igdbId);
+        bool IsGameExcluded(int igdbId, int platformId);
         void Delete(int id);
         void Delete(List<int> ids);
         ImportListExclusion Get(int id);
@@ -35,9 +35,11 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
 
         public ImportListExclusion Add(ImportListExclusion importListExclusion)
         {
-            if (_repo.IsGameExcluded(importListExclusion.IgdbId))
+            var existing = _repo.FindByIgdbIdAndPlatform(importListExclusion.IgdbId, importListExclusion.PlatformId);
+
+            if (existing != null)
             {
-                return _repo.FindByIgdbid(importListExclusion.IgdbId);
+                return existing;
             }
 
             return _repo.Insert(importListExclusion);
@@ -50,9 +52,9 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
             return importListExclusions;
         }
 
-        public bool IsGameExcluded(int igdbId)
+        public bool IsGameExcluded(int igdbId, int platformId)
         {
-            return _repo.IsGameExcluded(igdbId);
+            return _repo.IsGameExcluded(igdbId, platformId);
         }
 
         public void Delete(int id)
@@ -102,6 +104,7 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
             var exclusionsToAdd = DeDupeExclusions(message.Games.Select(m => new ImportListExclusion
             {
                 IgdbId = m.IgdbId,
+                PlatformId = m.PlatformId,
                 GameTitle = m.Title,
                 GameYear = m.Year
             }).ToList());
@@ -111,11 +114,11 @@ namespace NzbDrone.Core.ImportLists.ImportExclusions
 
         private List<ImportListExclusion> DeDupeExclusions(List<ImportListExclusion> exclusions)
         {
-            var existingExclusions = _repo.AllExcludedIgdbIds();
+            var existingExclusions = _repo.All().Select(x => (x.IgdbId, x.PlatformId)).ToHashSet();
 
             return exclusions
-                .DistinctBy(x => x.IgdbId)
-                .Where(x => !existingExclusions.Contains(x.IgdbId))
+                .DistinctBy(x => (x.IgdbId, x.PlatformId))
+                .Where(x => !existingExclusions.Contains((x.IgdbId, x.PlatformId)))
                 .ToList();
         }
     }

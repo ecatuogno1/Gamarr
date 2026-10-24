@@ -43,7 +43,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     Name = Settings.Author.IsNullOrWhiteSpace() ? _configFileProvider.InstanceName : Settings.Author,
                     IconUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/256.png"
                 },
-                Url = $"https://www.thegamedb.org/game/{message.Game.GameMetadata.Value.IgdbId}",
+                Url = message.Game.GameMetadata.Value.IgdbUrl,
                 Description = "Game Grabbed",
                 Title = GetTitle(message.Game),
                 Color = (int)DiscordColors.Standard,
@@ -147,7 +147,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     Name = Settings.Author.IsNullOrWhiteSpace() ? _configFileProvider.InstanceName : Settings.Author,
                     IconUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/256.png"
                 },
-                Url = $"https://www.thegamedb.org/game/{message.Game.GameMetadata.Value.IgdbId}",
+                Url = message.Game.GameMetadata.Value.IgdbUrl,
                 Description = isUpgrade ? "Game Upgraded" : "Game Imported",
                 Title = GetTitle(message.Game),
                 Color = isUpgrade ? (int)DiscordColors.Upgrade : (int)DiscordColors.Success,
@@ -262,7 +262,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     Name = Settings.Author.IsNullOrWhiteSpace() ? _configFileProvider.InstanceName : Settings.Author,
                     IconUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/256.png"
                 },
-                Url = $"https://www.thegamedb.org/game/{game.GameMetadata.Value.IgdbId}",
+                Url = game.GameMetadata.Value.IgdbUrl,
                 Title = game.Title,
                 Description = "Game Added",
                 Color = (int)DiscordColors.Success,
@@ -319,7 +319,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     Name = Settings.Author.IsNullOrWhiteSpace() ? _configFileProvider.InstanceName : Settings.Author,
                     IconUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/256.png"
                 },
-                Url = $"https://www.thegamedb.org/game/{game.GameMetadata.Value.IgdbId}",
+                Url = game.GameMetadata.Value.IgdbUrl,
                 Title = game.Title,
                 Description = deleteMessage.DeletedFilesMessage,
                 Color = (int)DiscordColors.Danger,
@@ -360,7 +360,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     Name = Settings.Author.IsNullOrWhiteSpace() ? _configFileProvider.InstanceName : Settings.Author,
                     IconUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/256.png"
                 },
-                Url = $"https://www.thegamedb.org/game/{game.GameMetadata.Value.IgdbId}",
+                Url = game.GameMetadata.Value.IgdbUrl,
                 Title = GetTitle(game),
                 Description = "Game File Deleted",
                 Color = (int)DiscordColors.Danger,
@@ -460,7 +460,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     Name = Settings.Author.IsNullOrWhiteSpace() ? _configFileProvider.InstanceName : Settings.Author,
                     IconUrl = "https://raw.githubusercontent.com/Gamarr/Gamarr/develop/Logo/256.png"
                 },
-                Url = game?.GameMetadata.Value.IgdbId > 0 ? $"https://www.thegamedb.org/game/{game.GameMetadata.Value.IgdbId}" : null,
+                Url = game?.GameMetadata.Value.IgdbUrl,
                 Description = "Manual interaction needed",
                 Title = GetTitle(game),
                 Color = (int)DiscordColors.Standard,
@@ -613,15 +613,11 @@ namespace NzbDrone.Core.Notifications.Discord
                 return null;
             }
 
-            var links = new List<string>
-            {
-                $"[IGDB](https://thegamedb.org/game/{game.GameMetadata.Value.IgdbId})"
-            };
+            var links = new List<string>();
 
-            if (game.GameMetadata.Value.ImdbId.IsNotNullOrWhiteSpace())
+            if (game.GameMetadata.Value.IgdbUrl.IsNotNullOrWhiteSpace())
             {
-                links.Add($"[Trakt](https://trakt.tv/games/{game.GameMetadata.Value.ImdbId})");
-                links.Add($"[IMDb](https://imdb.com/title/{game.GameMetadata.Value.ImdbId}/)");
+                links.Add($"[IGDB]({game.GameMetadata.Value.IgdbUrl})");
             }
 
             if (game.GameMetadata.Value.YouTubeTrailerId.IsNotNullOrWhiteSpace())

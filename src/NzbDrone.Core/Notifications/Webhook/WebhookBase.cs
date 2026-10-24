@@ -222,7 +222,7 @@ namespace NzbDrone.Core.Notifications.Webhook
                 RemoteGame = new WebhookRemoteGame
                 {
                     IgdbId = 1234,
-                    ImdbId = "5678",
+                    IgdbSlug = "test-title",
                     Title = "Test title",
                     Year = 1970
                 },

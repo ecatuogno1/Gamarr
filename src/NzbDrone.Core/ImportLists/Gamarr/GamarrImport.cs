@@ -7,6 +7,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.Parser;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Validation;
 
 namespace NzbDrone.Core.ImportLists.Gamarr
@@ -14,6 +15,7 @@ namespace NzbDrone.Core.ImportLists.Gamarr
     public class GamarrImport : ImportListBase<GamarrSettings>
     {
         private readonly IGamarrV3Proxy _gamarrV3Proxy;
+        private readonly IPlatformService _platformService;
         public override string Name => "Gamarr";
         public override bool Enabled => true;
         public override bool EnableAuto => false;
@@ -22,6 +24,7 @@ namespace NzbDrone.Core.ImportLists.Gamarr
         public override TimeSpan MinRefreshInterval => TimeSpan.FromMinutes(15);
 
         public GamarrImport(IGamarrV3Proxy gamarrV3Proxy,
+                            IPlatformService platformService,
                             IImportListStatusService importListStatusService,
                             IConfigService configService,
                             IParsingService parsingService,
@@ -29,6 +32,7 @@ namespace NzbDrone.Core.ImportLists.Gamarr
             : base(importListStatusService, configService, parsingService, logger)
         {
             _gamarrV3Proxy = gamarrV3Proxy;
+            _platformService = platformService;
         }
 
         public override ImportListFetchResult Fetch()
@@ -57,11 +61,15 @@ namespace NzbDrone.Core.ImportLists.Gamarr
                         continue;
                     }
 
+                    // Platform ids are local to each instance, so match the remote platform by its IGDB platform id
+                    var platform = remoteGame.Platform != null ? _platformService.FindByIgdbPlatformId(remoteGame.Platform.IgdbPlatformId) : null;
+
                     games.Add(new ImportListGame
                     {
                         IgdbId = remoteGame.IgdbId,
                         Title = remoteGame.Title,
-                        Year = remoteGame.Year
+                        Year = remoteGame.Year,
+                        PlatformId = platform?.Id ?? 0
                     });
                 }
 

@@ -40,14 +40,13 @@ namespace NzbDrone.Core.Games
                     return false;
                 }
 
-                if (game.Status is GameStatusType.Announced or GameStatusType.InCinemas)
+                if (game.Status is GameStatusType.TBA or GameStatusType.Announced)
                 {
-                    _logger.Trace("Game {0} is announced or in cinemas, should refresh.", game.Title);
+                    _logger.Trace("Game {0} is not released yet, should refresh.", game.Title);
                     return true;
                 }
 
-                if (game.Status == GameStatusType.Released &&
-                    game.PhysicalReleaseDate() >= DateTime.UtcNow.AddDays(-30))
+                if (game.Status == GameStatusType.Released && game.IsRecentGame)
                 {
                     _logger.Trace("Game {0} is released since less than 30 days, should refresh", game.Title);
                     return true;

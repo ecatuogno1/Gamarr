@@ -9,7 +9,6 @@ using NzbDrone.Core.Configuration.Events;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.MetadataSource.SkyHook.Resource;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Security;
 
@@ -128,11 +127,16 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("ImportExclusions", value); }
         }
 
-        public IGDBCountryCode CertificationCountry
+        public string IgdbClientId
         {
-            get { return GetValueEnum("CertificationCountry", IGDBCountryCode.US); }
+            get { return GetValue("IgdbClientId", string.Empty); }
+            set { SetValue("IgdbClientId", value); }
+        }
 
-            set { SetValue("CertificationCountry", value); }
+        public string IgdbClientSecret
+        {
+            get { return GetValue("IgdbClientSecret", string.Empty); }
+            set { SetValue("IgdbClientSecret", value); }
         }
 
         public int MaximumSize

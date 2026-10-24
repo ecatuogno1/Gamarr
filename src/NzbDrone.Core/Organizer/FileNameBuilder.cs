@@ -15,6 +15,7 @@ using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Parser;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.Organizer
@@ -36,6 +37,7 @@ namespace NzbDrone.Core.Organizer
         private readonly IUpdateMediaInfo _mediaInfoUpdater;
         private readonly IGameTranslationService _gameTranslationService;
         private readonly ICustomFormatCalculationService _formatCalculator;
+        private readonly IPlatformService _platformService;
         private readonly Logger _logger;
 
         private static readonly Regex TitleRegex = new Regex(@"(?<tag>\{(?<prefix>[-{ ._\[(]*)(?:imdb(?:id)?-|edition-))?\{(?<prefix>[-{ ._\[(]*)(?<token>(?:[a-z0-9]+)(?:(?<separator>[- ._]+)(?:[a-z0-9]+))?)(?::(?<customFormat>[ ,a-z0-9|+-]+(?<![- ])))?(?<suffix>[-} ._)\]]*)\}",
@@ -92,6 +94,7 @@ namespace NzbDrone.Core.Organizer
                                IUpdateMediaInfo mediaInfoUpdater,
                                IGameTranslationService gameTranslationService,
                                ICustomFormatCalculationService formatCalculator,
+                               IPlatformService platformService,
                                Logger logger)
         {
             _namingConfigService = namingConfigService;
@@ -99,6 +102,7 @@ namespace NzbDrone.Core.Organizer
             _mediaInfoUpdater = mediaInfoUpdater;
             _gameTranslationService = gameTranslationService;
             _formatCalculator = formatCalculator;
+            _platformService = platformService;
             _logger = logger;
         }
 
@@ -127,6 +131,7 @@ namespace NzbDrone.Core.Organizer
             UpdateMediaInfoIfNeeded(pattern, gameFile, game);
 
             AddGameTokens(tokenHandlers, game);
+            AddPlatformTokens(tokenHandlers, game);
             AddReleaseDateTokens(tokenHandlers, game.Year);
             AddIdTokens(tokenHandlers, game);
             AddQualityTokens(tokenHandlers, game, gameFile);
@@ -177,6 +182,7 @@ namespace NzbDrone.Core.Organizer
             var tokenHandlers = new Dictionary<string, Func<TokenMatch, string>>(FileNameBuilderTokenEqualityComparer.Instance);
 
             AddGameTokens(tokenHandlers, game);
+            AddPlatformTokens(tokenHandlers, game);
             AddReleaseDateTokens(tokenHandlers, game.Year);
             AddIdTokens(tokenHandlers, game);
 
@@ -276,10 +282,18 @@ namespace NzbDrone.Core.Organizer
             tokenHandlers["{Game OriginalTitle}"] = m => Truncate(game.GameMetadata.Value.OriginalTitle, m.CustomFormat) ?? string.Empty;
             tokenHandlers["{Game CleanOriginalTitle}"] = m => Truncate(CleanTitle(game.GameMetadata.Value.OriginalTitle ?? string.Empty), m.CustomFormat);
 
-            tokenHandlers["{Game Certification}"] = m => game.GameMetadata.Value.Certification ?? string.Empty;
             tokenHandlers["{Game Collection}"] = m => Truncate(game.GameMetadata.Value.CollectionTitle, m.CustomFormat) ?? string.Empty;
             tokenHandlers["{Game CollectionThe}"] = m => Truncate(TitleThe(game.GameMetadata.Value.CollectionTitle), m.CustomFormat) ?? string.Empty;
             tokenHandlers["{Game CleanCollectionThe}"] = m => Truncate(CleanTitleThe(game.GameMetadata.Value.CollectionTitle), m.CustomFormat) ?? string.Empty;
+        }
+
+        private void AddPlatformTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Game game)
+        {
+            var platform = game.Platform ?? (game.PlatformId > 0 ? _platformService.Find(game.PlatformId) : null);
+
+            tokenHandlers["{Platform}"] = m => Truncate(platform?.Name ?? string.Empty, m.CustomFormat);
+            tokenHandlers["{Platform Folder}"] = m => platform?.FolderName ?? string.Empty;
+            tokenHandlers["{Platform Short}"] = m => Truncate(platform?.ShortName ?? string.Empty, m.CustomFormat);
         }
 
         private string GetLanguageTitle(Game game, string isoCodes)
@@ -330,7 +344,6 @@ namespace NzbDrone.Core.Organizer
 
         private void AddIdTokens(Dictionary<string, Func<TokenMatch, string>> tokenHandlers, Game game)
         {
-            tokenHandlers["{ImdbId}"] = m => game.GameMetadata.Value.ImdbId ?? string.Empty;
             tokenHandlers["{IgdbId}"] = m => game.GameMetadata.Value.IgdbId.ToString();
         }
 

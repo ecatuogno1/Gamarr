@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             _gameSearchCriteria = new GameSearchCriteria
             {
-                Game = new Games.Game { ImdbId = "tt0076759", Title = "Star Wars", Year = 1977, IgdbId = 11 },
+                Game = new Games.Game { Title = "Star Wars", Year = 1977, IgdbId = 11 },
                 SceneTitles = new List<string> { "Star Wars" }
             };
 
@@ -68,7 +68,8 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         {
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
-            results.GetAllTiers().Should().HaveCount(2);
+            // Default caps have no igdbid, and imdb searches are gone, so only the text search tier remains
+            results.GetAllTiers().Should().HaveCount(1);
 
             var pages = results.GetAllTiers().First().Take(3).ToList();
 
@@ -82,7 +83,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         {
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
-            results.GetAllTiers().Should().HaveCount(2);
+            results.GetAllTiers().Should().HaveCount(1);
 
             var pages = results.GetAllTiers().First().Take(500).ToList();
 
@@ -105,16 +106,16 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         }
 
         [Test]
-        public void should_search_by_imdbid_if_supported()
+        public void should_not_search_by_imdbid_even_if_supported()
         {
             _capabilities.SupportedGameSearchParameters = new[] { "q", "imdbid" };
 
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
-            results.GetTier(0).Should().HaveCount(1);
 
             var page = results.GetAllTiers().First().First();
 
-            page.Url.Query.Should().Contain("imdbid=0076759");
+            page.Url.Query.Should().NotContain("imdbid=");
+            page.Url.Query.Should().Contain("q=Star");
         }
 
         [Test]
@@ -156,7 +157,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
             var page = results.GetTier(0).First().First();
 
             page.Url.Query.Should().Contain("igdbid=11");
-            page.Url.Query.Should().Contain("imdbid=0076759");
+            page.Url.Query.Should().NotContain("imdbid=");
         }
 
         [Test]
@@ -180,7 +181,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
             _capabilities.SupportedGameSearchParameters = new[] { "q", "imdbid" };
             _capabilities.SupportsAggregateIdSearch = true; // Turns true if indexer supplies supportedParams.
 
-            _gameSearchCriteria.Game.ImdbId = null;
+            _gameSearchCriteria.Game.IgdbId = 0;
 
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
 

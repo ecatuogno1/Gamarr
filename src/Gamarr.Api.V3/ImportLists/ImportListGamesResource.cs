@@ -21,21 +21,22 @@ namespace Gamarr.Api.V3.ImportLists
         public Language OriginalLanguage { get; set; }
         public GameStatusType Status { get; set; }
         public string Overview { get; set; }
-        public DateTime? InCinemas { get; set; }
-        public DateTime? PhysicalRelease { get; set; }
-        public DateTime? DigitalRelease { get; set; }
+        public DateTime? ReleaseDate { get; set; }
+        public List<int> AvailablePlatformIgdbIds { get; set; }
         public List<MediaCover> Images { get; set; }
         public string Website { get; set; }
         public string RemotePoster { get; set; }
         public int Year { get; set; }
         public string YouTubeTrailerId { get; set; }
-        public string Studio { get; set; }
+        public List<string> Developers { get; set; }
+        public List<string> Publishers { get; set; }
 
-        public int Runtime { get; set; }
-        public string ImdbId { get; set; }
         public int IgdbId { get; set; }
+        public string IgdbSlug { get; set; }
+
+        // 0 when the list doesn't know the platform
+        public int PlatformId { get; set; }
         public string Folder { get; set; }
-        public string Certification { get; set; }
         public float Popularity { get; set; }
         public List<string> Genres { get; set; }
         public Ratings Ratings { get; set; }
@@ -64,9 +65,8 @@ namespace Gamarr.Api.V3.ImportLists
                 Title = model.Title,
                 SortTitle = model.GameMetadata.Value.SortTitle,
                 OriginalLanguage = model.GameMetadata.Value.OriginalLanguage,
-                InCinemas = model.GameMetadata.Value.InCinemas,
-                PhysicalRelease = model.GameMetadata.Value.PhysicalRelease,
-                DigitalRelease = model.GameMetadata.Value.DigitalRelease,
+                ReleaseDate = model.GameMetadata.Value.ReleaseDate,
+                AvailablePlatformIgdbIds = model.GameMetadata.Value.AvailablePlatformIgdbIds,
 
                 Status = model.GameMetadata.Value.Status,
                 Overview = model.GameMetadata.Value.Overview,
@@ -75,16 +75,16 @@ namespace Gamarr.Api.V3.ImportLists
 
                 Year = model.Year,
 
-                Runtime = model.GameMetadata.Value.Runtime,
-                ImdbId = model.ImdbId,
-                Certification = model.GameMetadata.Value.Certification,
+                IgdbSlug = model.GameMetadata.Value.IgdbSlug,
+                PlatformId = model.PlatformId,
                 Website = model.GameMetadata.Value.Website,
                 Genres = model.GameMetadata.Value.Genres,
                 Ratings = model.GameMetadata.Value.Ratings,
                 Popularity = model.GameMetadata.Value.Popularity,
                 YouTubeTrailerId = model.GameMetadata.Value.YouTubeTrailerId,
                 Collection = new GameCollection { Title = model.GameMetadata.Value.CollectionTitle, IgdbId = model.GameMetadata.Value.CollectionIgdbId },
-                Studio = model.GameMetadata.Value.Studio
+                Developers = model.GameMetadata.Value.Developers,
+                Publishers = model.GameMetadata.Value.Publishers
             };
         }
 
@@ -101,9 +101,8 @@ namespace Gamarr.Api.V3.ImportLists
                 Title = model.Title,
                 SortTitle = model.GameMetadata.Value.SortTitle,
                 OriginalLanguage = model.GameMetadata.Value.OriginalLanguage,
-                InCinemas = model.GameMetadata.Value.InCinemas,
-                PhysicalRelease = model.GameMetadata.Value.PhysicalRelease,
-                DigitalRelease = model.GameMetadata.Value.DigitalRelease,
+                ReleaseDate = model.GameMetadata.Value.ReleaseDate,
+                AvailablePlatformIgdbIds = model.GameMetadata.Value.AvailablePlatformIgdbIds,
 
                 Status = model.GameMetadata.Value.Status,
                 Overview = model.GameMetadata.Value.Overview,
@@ -112,15 +111,15 @@ namespace Gamarr.Api.V3.ImportLists
 
                 Year = model.Year,
 
-                Runtime = model.GameMetadata.Value.Runtime,
-                ImdbId = model.ImdbId,
-                Certification = model.GameMetadata.Value.Certification,
+                IgdbSlug = model.GameMetadata.Value.IgdbSlug,
+                PlatformId = model.PlatformId,
                 Website = model.GameMetadata.Value.Website,
                 Genres = model.GameMetadata.Value.Genres,
                 Ratings = model.GameMetadata.Value.Ratings,
                 YouTubeTrailerId = model.GameMetadata.Value.YouTubeTrailerId,
                 Popularity = model.GameMetadata.Value.Popularity,
-                Studio = model.GameMetadata.Value.Studio,
+                Developers = model.GameMetadata.Value.Developers,
+                Publishers = model.GameMetadata.Value.Publishers,
                 Collection = new GameCollection { Title = model.GameMetadata.Value.CollectionTitle, IgdbId = model.GameMetadata.Value.CollectionIgdbId },
                 Lists = new HashSet<int> { model.ListId }
             };

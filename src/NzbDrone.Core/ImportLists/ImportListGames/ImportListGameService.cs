@@ -46,11 +46,11 @@ namespace NzbDrone.Core.ImportLists.ImportListGames
         {
             var existingListGames = GetAllForLists(new List<int> { listId });
 
-            listGames.ForEach(l => l.Id = existingListGames.FirstOrDefault(e => e.IgdbId == l.IgdbId)?.Id ?? 0);
+            listGames.ForEach(l => l.Id = existingListGames.FirstOrDefault(e => e.IgdbId == l.IgdbId && e.PlatformId == l.PlatformId)?.Id ?? 0);
 
             _importListGameRepository.InsertMany(listGames.Where(l => l.Id == 0).ToList());
             _importListGameRepository.UpdateMany(listGames.Where(l => l.Id > 0).ToList());
-            _importListGameRepository.DeleteMany(existingListGames.Where(l => listGames.All(x => x.IgdbId != l.IgdbId)).ToList());
+            _importListGameRepository.DeleteMany(existingListGames.Where(l => listGames.All(x => x.IgdbId != l.IgdbId || x.PlatformId != l.PlatformId)).ToList());
 
             return listGames;
         }

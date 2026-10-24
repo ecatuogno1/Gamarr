@@ -19,6 +19,9 @@ namespace NzbDrone.Core.Games.Collections
         public string Overview { get; set; }
         public bool Monitored { get; set; }
         public int QualityProfileId { get; set; }
+
+        // Platform used when adding the collection's missing games
+        public int PlatformId { get; set; }
         public string RootFolderPath { get; set; }
         public bool SearchOnAdd { get; set; }
         public GameStatusType MinimumAvailability { get; set; }
@@ -35,6 +38,7 @@ namespace NzbDrone.Core.Games.Collections
             Monitored = otherCollection.Monitored;
             SearchOnAdd = otherCollection.SearchOnAdd;
             QualityProfileId = otherCollection.QualityProfileId;
+            PlatformId = otherCollection.PlatformId;
             MinimumAvailability = otherCollection.MinimumAvailability;
             RootFolderPath = otherCollection.RootFolderPath;
             Tags = otherCollection.Tags;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Equ;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Games.AlternativeTitles;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Languages;
@@ -15,35 +16,50 @@ namespace NzbDrone.Core.Games
             Translations = new List<GameTranslation>();
             Images = new List<MediaCover.MediaCover>();
             Genres = new List<string>();
+            Themes = new List<string>();
+            GameModes = new List<string>();
             Keywords = new List<string>();
+            Developers = new List<string>();
+            Publishers = new List<string>();
+            AgeRatings = new List<AgeRating>();
+            Websites = new List<GameWebsite>();
+            PlatformReleaseDates = new List<PlatformReleaseDate>();
+            AvailablePlatformIgdbIds = new List<int>();
             OriginalLanguage = Language.English;
             Recommendations = new List<int>();
             Ratings = new Ratings();
         }
 
         public int IgdbId { get; set; }
+        public string IgdbSlug { get; set; }
 
         public List<MediaCover.MediaCover> Images { get; set; }
         public List<string> Genres { get; set; }
+        public List<string> Themes { get; set; }
+        public List<string> GameModes { get; set; }
         public List<string> Keywords { get; set; }
-        public DateTime? InCinemas { get; set; }
-        public DateTime? PhysicalRelease { get; set; }
-        public DateTime? DigitalRelease { get; set; }
-        public string Certification { get; set; }
+        public List<string> Developers { get; set; }
+        public List<string> Publishers { get; set; }
+        public List<AgeRating> AgeRatings { get; set; }
+        public List<GameWebsite> Websites { get; set; }
+
+        // IGDB first_release_date
+        public DateTime? ReleaseDate { get; set; }
+        public List<PlatformReleaseDate> PlatformReleaseDates { get; set; }
+        public List<int> AvailablePlatformIgdbIds { get; set; }
         public int Year { get; set; }
         public Ratings Ratings { get; set; }
 
         public int CollectionIgdbId { get; set; }
         public string CollectionTitle { get; set; }
         public DateTime? LastInfoSync { get; set; }
-        public int Runtime { get; set; }
         public string Website { get; set; }
-        public string ImdbId { get; set; }
         public string Title { get; set; }
         public string CleanTitle { get; set; }
         public string SortTitle { get; set; }
         public GameStatusType Status { get; set; }
         public string Overview { get; set; }
+        public string Storyline { get; set; }
 
         // Get Loaded via a Join Query
         public List<AlternativeTitle> AlternativeTitles { get; set; }
@@ -51,7 +67,6 @@ namespace NzbDrone.Core.Games
 
         public int? SecondaryYear { get; set; }
         public string YouTubeTrailerId { get; set; }
-        public string Studio { get; set; }
         public string OriginalTitle { get; set; }
         public string CleanOriginalTitle { get; set; }
         public Language OriginalLanguage { get; set; }
@@ -59,24 +74,9 @@ namespace NzbDrone.Core.Games
         public float Popularity { get; set; }
 
         [MemberwiseEqualityIgnore]
-        public bool IsRecentGame
-        {
-            get
-            {
-                if ((PhysicalRelease.HasValue && PhysicalRelease.Value >= DateTime.UtcNow.AddDays(-21)) ||
-                    (DigitalRelease.HasValue && DigitalRelease.Value >= DateTime.UtcNow.AddDays(-21)) ||
-                    (InCinemas.HasValue && InCinemas.Value >= DateTime.UtcNow.AddDays(-120)))
-                {
-                    return true;
-                }
+        public bool IsRecentGame => ReleaseDate.HasValue && ReleaseDate.Value >= DateTime.UtcNow.AddDays(-21);
 
-                return false;
-            }
-        }
-
-        public DateTime PhysicalReleaseDate()
-        {
-            return PhysicalRelease ?? (InCinemas?.AddDays(90) ?? DateTime.MaxValue);
-        }
+        [MemberwiseEqualityIgnore]
+        public string IgdbUrl => IgdbSlug.IsNullOrWhiteSpace() ? null : $"https://www.igdb.com/games/{IgdbSlug}";
     }
 }

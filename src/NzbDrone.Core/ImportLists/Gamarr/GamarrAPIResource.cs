@@ -11,13 +11,21 @@ namespace NzbDrone.Core.ImportLists.Gamarr
         public string Overview { get; set; }
         public List<MediaCover.MediaCover> Images { get; set; }
         public bool Monitored { get; set; }
-        public DateTime InCinemas { get; set; }
-        public DateTime PhysicalRelease { get; set; }
+        public DateTime? ReleaseDate { get; set; }
+        public int PlatformId { get; set; }
+        public GamarrPlatform Platform { get; set; }
         public int Year { get; set; }
         public string TitleSlug { get; set; }
         public int QualityProfileId { get; set; }
         public string Path { get; set; }
         public HashSet<int> Tags { get; set; }
+    }
+
+    public class GamarrPlatform
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int IgdbPlatformId { get; set; }
     }
 
     public class GamarrProfile

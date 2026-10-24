@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NLog;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Exceptions;
 using NzbDrone.Core.Games.Collections;
@@ -11,6 +12,7 @@ using NzbDrone.Core.ImportLists.ImportExclusions;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.MetadataSource;
+using NzbDrone.Core.Platforms;
 
 namespace NzbDrone.Core.Games
 {
@@ -22,6 +24,7 @@ namespace NzbDrone.Core.Games
         private readonly IGameMetadataService _gameMetadataService;
         private readonly IAddGameService _addGameService;
         private readonly IImportListExclusionService _importListExclusionService;
+        private readonly IPlatformService _platformService;
         private readonly IEventAggregator _eventAggregator;
 
         private readonly Logger _logger;
@@ -32,6 +35,7 @@ namespace NzbDrone.Core.Games
                                         IGameMetadataService gameMetadataService,
                                         IAddGameService addGameService,
                                         IImportListExclusionService importListExclusionService,
+                                        IPlatformService platformService,
                                         IEventAggregator eventAggregator,
                                         Logger logger)
         {
@@ -41,6 +45,7 @@ namespace NzbDrone.Core.Games
             _gameMetadataService = gameMetadataService;
             _addGameService = addGameService;
             _importListExclusionService = importListExclusionService;
+            _platformService = platformService;
             _eventAggregator = eventAggregator;
             _logger = logger;
         }
@@ -127,12 +132,20 @@ namespace NzbDrone.Core.Games
             {
                 var collectionGames = _gameMetadataService
                     .GetGamesByCollectionIgdbId(collection.IgdbId)
-                    .Where(m => m.Status is GameStatusType.InCinemas or GameStatusType.Released)
+                    .Where(m => m.Status == GameStatusType.Released)
                     .ToList();
 
-                var existingGames = _gameService.AllGameIgdbIds();
-                var excludedGames = _importListExclusionService.All().Select(e => e.IgdbId);
-                var gamesToAdd = collectionGames.Where(m => !existingGames.Contains(m.IgdbId)).Where(m => !excludedGames.Contains(m.IgdbId)).ToList();
+                var platform = collection.PlatformId > 0 ? _platformService.Find(collection.PlatformId) : null;
+                var existingGames = _gameService.AllGameIgdbIdsWithPlatform();
+                var exclusions = _importListExclusionService.All();
+
+                var gamesToAdd = collectionGames
+                    .Where(m => platform == null
+                        ? existingGames.All(e => e.IgdbId != m.IgdbId)
+                        : !existingGames.Contains((m.IgdbId, platform.Id)))
+                    .Where(m => !exclusions.Any(e => e.Matches(m.IgdbId, collection.PlatformId)))
+                    .Where(m => platform == null || m.AvailablePlatformIgdbIds.Empty() || m.AvailablePlatformIgdbIds.Contains(platform.IgdbPlatformId))
+                    .ToList();
 
                 if (gamesToAdd.Any())
                 {
@@ -141,6 +154,7 @@ namespace NzbDrone.Core.Games
                         IgdbId = m.IgdbId,
                         Title = m.Title,
                         QualityProfileId = collection.QualityProfileId,
+                        PlatformId = collection.PlatformId,
                         RootFolderPath = collection.RootFolderPath,
                         MinimumAvailability = collection.MinimumAvailability,
                         AddOptions = new AddGameOptions

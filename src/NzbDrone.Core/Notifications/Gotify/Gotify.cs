@@ -161,22 +161,15 @@ namespace NzbDrone.Core.Notifications.Gotify
                         var linkText = "";
                         var linkUrl = "";
 
-                        if (linkType == MetadataLinkType.Igdb && game.IgdbId > 0)
+                        if (linkType == MetadataLinkType.Igdb && game.GameMetadata?.Value?.IgdbUrl != null)
                         {
                             linkText = "IGDB";
-                            linkUrl = $"https://www.thegamedb.org/game/{game.IgdbId}";
+                            linkUrl = game.GameMetadata.Value.IgdbUrl;
                         }
 
-                        if (linkType == MetadataLinkType.Imdb && game.ImdbId.IsNotNullOrWhiteSpace())
+                        if (linkUrl.IsNullOrWhiteSpace())
                         {
-                            linkText = "IMDb";
-                            linkUrl = $"https://www.imdb.com/title/{game.ImdbId}";
-                        }
-
-                        if (linkType == MetadataLinkType.Trakt && game.ImdbId.IsNotNullOrWhiteSpace())
-                        {
-                            linkText = "Trakt";
-                            linkUrl = $"https://trakt.tv/games/{game.ImdbId}";
+                            continue;
                         }
 
                         sb.AppendLine($"[{linkText}]({linkUrl})");

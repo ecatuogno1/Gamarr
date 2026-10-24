@@ -118,14 +118,12 @@ namespace NzbDrone.Core.Datastore
                   .Ignore(s => s.Title)
                   .Ignore(s => s.Year)
                   .Ignore(s => s.IgdbId)
-                  .Ignore(s => s.ImdbId)
                   .HasOne(a => a.GameMetadata, a => a.GameMetadataId);
 
             Mapper.Entity<ImportListGame>("ImportListGames").RegisterModel()
                   .Ignore(s => s.Title)
                   .Ignore(s => s.Year)
                   .Ignore(s => s.IgdbId)
-                  .Ignore(s => s.ImdbId)
                   .HasOne(a => a.GameMetadata, a => a.GameMetadataId);
 
             Mapper.Entity<AlternativeTitle>("AlternativeTitles").RegisterModel();

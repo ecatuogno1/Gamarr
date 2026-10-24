@@ -22,6 +22,7 @@ namespace Gamarr.Api.V3.Collections
         public bool Monitored { get; set; }
         public string RootFolderPath { get; set; }
         public int QualityProfileId { get; set; }
+        public int PlatformId { get; set; }
         public bool SearchOnAdd { get; set; }
         public GameStatusType MinimumAvailability { get; set; }
         public List<CollectionGameResource> Games { get; set; }
@@ -48,6 +49,7 @@ namespace Gamarr.Api.V3.Collections
                 Monitored = model.Monitored,
                 Images = model.Images,
                 QualityProfileId = model.QualityProfileId,
+                PlatformId = model.PlatformId,
                 RootFolderPath = model.RootFolderPath,
                 MinimumAvailability = model.MinimumAvailability,
                 SearchOnAdd = model.SearchOnAdd,
@@ -76,6 +78,7 @@ namespace Gamarr.Api.V3.Collections
                 Overview = resource.Overview,
                 Monitored = resource.Monitored,
                 QualityProfileId = resource.QualityProfileId,
+                PlatformId = resource.PlatformId,
                 RootFolderPath = resource.RootFolderPath,
                 SearchOnAdd = resource.SearchOnAdd,
                 MinimumAvailability = resource.MinimumAvailability,

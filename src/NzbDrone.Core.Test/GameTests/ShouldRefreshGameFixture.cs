@@ -16,8 +16,8 @@ namespace NzbDrone.Core.Test.GameTests
         public void Setup()
         {
             _game = Builder<GameMetadata>.CreateNew()
-                                     .With(v => v.Status = GameStatusType.InCinemas)
-                                     .With(m => m.PhysicalRelease = DateTime.Today.AddDays(-100))
+                                     .With(v => v.Status = GameStatusType.Announced)
+                                     .With(m => m.ReleaseDate = DateTime.Today.AddDays(-100))
                                      .Build();
         }
 
@@ -53,11 +53,11 @@ namespace NzbDrone.Core.Test.GameTests
 
         private void GivenRecentlyReleased()
         {
-            _game.PhysicalRelease = DateTime.Today.AddDays(-7);
+            _game.ReleaseDate = DateTime.Today.AddDays(-7);
         }
 
         [Test]
-        public void should_return_true_if_in_cinemas_game_last_refreshed_more_than_12_hours_ago()
+        public void should_return_true_if_announced_game_last_refreshed_more_than_12_hours_ago()
         {
             GivenGameLastRefreshedADayAgo();
 
@@ -65,7 +65,7 @@ namespace NzbDrone.Core.Test.GameTests
         }
 
         [Test]
-        public void should_return_false_if_in_cinemas_game_last_refreshed_less_than_12_hours_ago()
+        public void should_return_false_if_announced_game_last_refreshed_less_than_12_hours_ago()
         {
             GivenGameLastRefreshedRecently();
 

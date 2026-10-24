@@ -56,20 +56,8 @@ namespace Gamarr.Api.V3.Calendar
                     continue;
                 }
 
-                if (releaseTypes is not { Count: not 0 } || releaseTypes.Contains(CalendarReleaseType.CinemaRelease))
-                {
-                    CreateEvent(calendar, game.GameMetadata, "cinematic");
-                }
-
-                if (releaseTypes is not { Count: not 0 } || releaseTypes.Contains(CalendarReleaseType.DigitalRelease))
-                {
-                    CreateEvent(calendar, game.GameMetadata, "digital");
-                }
-
-                if (releaseTypes is not { Count: not 0 } || releaseTypes.Contains(CalendarReleaseType.PhysicalRelease))
-                {
-                    CreateEvent(calendar, game.GameMetadata, "physical");
-                }
+                // Games have a single release date (on the game's platform), releaseTypes is ignored
+                CreateEvent(calendar, game);
             }
 
             var serializer = new SerializerFactory().Build(calendar.GetType(), new SerializationContext()) as IStringSerializer;
@@ -78,41 +66,28 @@ namespace Gamarr.Api.V3.Calendar
             return icalendar is null ? TypedResults.NoContent() : TypedResults.Content(icalendar, "text/calendar");
         }
 
-        private static void CreateEvent(Ical.Net.Calendar calendar, GameMetadata game, string releaseType)
+        private static void CreateEvent(Ical.Net.Calendar calendar, Game game)
         {
-            var date = game.InCinemas;
-            var eventType = "_cinemas";
-            var summaryText = "(Theatrical Release)";
-
-            if (releaseType == "digital")
-            {
-                date = game.DigitalRelease;
-                eventType = "_digital";
-                summaryText = "(Digital Release)";
-            }
-            else if (releaseType == "physical")
-            {
-                date = game.PhysicalRelease;
-                eventType = "_physical";
-                summaryText = "(Physical Release)";
-            }
+            var date = game.GetReleaseDate();
 
             if (!date.HasValue)
             {
                 return;
             }
 
+            var metadata = game.GameMetadata.Value;
+
             var occurrence = calendar.Create<CalendarEvent>();
-            occurrence.Uid = "Gamarr_game_" + game.Id + eventType;
-            occurrence.Status = game.Status == GameStatusType.Announced ? EventStatus.Tentative : EventStatus.Confirmed;
+            occurrence.Uid = "Gamarr_game_" + game.Id + "_release";
+            occurrence.Status = metadata.Status == GameStatusType.Released ? EventStatus.Confirmed : EventStatus.Tentative;
 
             occurrence.Start = new CalDateTime(date.Value, false);
             occurrence.End = occurrence.Start;
 
-            occurrence.Description = game.Overview;
-            occurrence.Categories = new List<string> { game.Studio };
+            occurrence.Description = metadata.Overview;
+            occurrence.Categories = metadata.Developers.Concat(metadata.Publishers).Distinct().ToList();
 
-            occurrence.Summary = $"{game.Title} {summaryText}";
+            occurrence.Summary = game.Platform == null ? metadata.Title : $"{metadata.Title} ({game.Platform.ShortName})";
         }
     }
 }

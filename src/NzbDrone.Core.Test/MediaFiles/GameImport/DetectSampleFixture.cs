@@ -23,7 +23,6 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
         public void Setup()
         {
             _game = Builder<GameMetadata>.CreateNew()
-                                     .With(s => s.Runtime = 30)
                                      .Build();
 
             _localGame = new LocalGame
@@ -116,33 +115,6 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             GivenRuntime(600);
 
             ShouldBeNotSample();
-        }
-
-        [Test]
-        public void should_return_false_if_runtime_greater_than_webisode_minimum()
-        {
-            _game.Runtime = 6;
-            GivenRuntime(299);
-
-            ShouldBeNotSample();
-        }
-
-        [Test]
-        public void should_return_false_if_runtime_greater_than_anime_short_minimum()
-        {
-            _game.Runtime = 2;
-            GivenRuntime(60);
-
-            ShouldBeNotSample();
-        }
-
-        [Test]
-        public void should_return_true_if_runtime_less_than_anime_short_minimum()
-        {
-            _game.Runtime = 2;
-            GivenRuntime(10);
-
-            ShouldBeSample();
         }
 
         [Test]

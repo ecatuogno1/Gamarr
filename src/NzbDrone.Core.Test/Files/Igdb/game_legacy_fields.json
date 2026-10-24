@@ -1,0 +1,90 @@
+[
+  {
+    "id": 1103,
+    "age_ratings": [
+      { "id": 36017, "category": 1, "rating": 8 },
+      { "id": 36018, "category": 2, "rating": 1 }
+    ],
+    "aggregated_rating": 94.5,
+    "aggregated_rating_count": 6,
+    "alternative_names": [
+      { "id": 5050, "name": "Metroid 3", "comment": "Alternative title" },
+      { "id": 5051, "name": "Super Metroid", "comment": "Duplicate of the main name" }
+    ],
+    "artworks": [
+      { "id": 9001, "image_id": "ar1abc" }
+    ],
+    "category": 0,
+    "collection": { "id": 104, "name": "Metroid" },
+    "cover": { "id": 85712, "image_id": "co1x5c" },
+    "first_release_date": 765158400,
+    "game_modes": [
+      { "id": 1, "name": "Single player" }
+    ],
+    "genres": [
+      { "id": 8, "name": "Platform" },
+      { "id": 31, "name": "Adventure" }
+    ],
+    "involved_companies": [
+      {
+        "id": 3001,
+        "company": { "id": 70, "name": "Nintendo", "logo": { "id": 1, "image_id": "cl1abc" } },
+        "developer": false,
+        "publisher": true,
+        "porting": false,
+        "supporting": false
+      },
+      {
+        "id": 3002,
+        "company": { "id": 421, "name": "Nintendo R&D1" },
+        "developer": true,
+        "publisher": false,
+        "porting": false,
+        "supporting": false
+      },
+      {
+        "id": 3003,
+        "company": { "id": 832, "name": "Intelligent Systems" },
+        "developer": true,
+        "publisher": false,
+        "porting": false,
+        "supporting": true
+      }
+    ],
+    "keywords": [
+      { "id": 100, "name": "metroidvania" }
+    ],
+    "name": "Super Metroid",
+    "platforms": [19, 58, 5, 41],
+    "rating": 92.1234,
+    "rating_count": 812,
+    "release_dates": [
+      { "id": 1, "date": 765158400, "platform": 58 },
+      { "id": 2, "date": 766972800, "platform": 19 },
+      { "id": 3, "date": 1166659200, "platform": 5 },
+      { "id": 4, "date": null, "platform": 41 }
+    ],
+    "screenshots": [
+      { "id": 501, "image_id": "sc1aaa" },
+      { "id": 502, "image_id": "sc1bbb" }
+    ],
+    "similar_games": [1104, 1105],
+    "slug": "super-metroid",
+    "status": 0,
+    "storyline": "Samus Aran returns the last Metroid to the Ceres space colony.",
+    "summary": "The third game in the Metroid series.",
+    "themes": [
+      { "id": 18, "name": "Science fiction" }
+    ],
+    "total_rating_count": 818,
+    "updated_at": 1717000000,
+    "videos": [
+      { "id": 77, "name": "Gameplay", "video_id": "gameplay123" },
+      { "id": 78, "name": "Trailer", "video_id": "trailer456" }
+    ],
+    "websites": [
+      { "id": 10, "category": 1, "url": "https://www.nintendo.com/super-metroid" },
+      { "id": 11, "category": 3, "url": "https://en.wikipedia.org/wiki/Super_Metroid" }
+    ]
+  }
+]

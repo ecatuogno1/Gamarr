@@ -7,6 +7,11 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 {
     public class AcceptableSizeSpecification : IDownloadDecisionEngineSpecification
     {
+        // Quality sizes are still Radarr's MB-per-minute values, which used to be multiplied by the movie runtime.
+        // Games have no runtime, so a fixed 110 minutes (Radarr's fallback) keeps the old limits until stage 3
+        // replaces them with absolute sizes.
+        private const int SizeMultiplier = 110;
+
         private readonly IQualityDefinitionService _qualityDefinitionService;
         private readonly Logger _logger;
 
@@ -33,18 +38,11 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
             var qualityDefinition = _qualityDefinitionService.Get(quality);
 
-            if (subject.Game.GameMetadata.Value.Runtime == 0)
-            {
-                _logger.Warn("{0} has no runtime information using median game runtime of 110 minutes.", subject.Game);
-                subject.Game.GameMetadata.Value.Runtime = 110;
-            }
-
             if (qualityDefinition.MinSize.HasValue)
             {
                 var minSize = qualityDefinition.MinSize.Value.Megabytes();
 
-                // Multiply maxSize by Series.Runtime
-                minSize = minSize * subject.Game.GameMetadata.Value.Runtime;
+                minSize = minSize * SizeMultiplier;
 
                 // If the parsed size is smaller than minSize we don't want it
                 if (subject.Release.Size < minSize)
@@ -60,17 +58,11 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             {
                 _logger.Debug("Max size is unlimited, skipping check");
             }
-            else if (subject.Game.GameMetadata.Value.Runtime == 0)
-            {
-                _logger.Debug("Game runtime is 0, unable to validate size until it is available, rejecting");
-                return DownloadSpecDecision.Reject(DownloadRejectionReason.UnknownRuntime, "Game runtime is 0, unable to validate size until it is available");
-            }
             else
             {
                 var maxSize = qualityDefinition.MaxSize.Value.Megabytes();
 
-                // Multiply maxSize by Series.Runtime
-                maxSize = maxSize * subject.Game.GameMetadata.Value.Runtime;
+                maxSize = maxSize * SizeMultiplier;
 
                 // If the parsed size is greater than maxSize we don't want it
                 if (subject.Release.Size > maxSize)

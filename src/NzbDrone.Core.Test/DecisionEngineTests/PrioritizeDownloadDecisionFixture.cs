@@ -51,7 +51,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                   .Returns(new QualityDefinition { PreferredSize = size });
         }
 
-        private RemoteGame GivenRemoteGame(QualityModel quality, int age = 0, long size = 0, DownloadProtocol downloadProtocol = DownloadProtocol.Usenet, int runtime = 150, int indexerPriority = 25)
+        private RemoteGame GivenRemoteGame(QualityModel quality, int age = 0, long size = 0, DownloadProtocol downloadProtocol = DownloadProtocol.Usenet, int indexerPriority = 25)
         {
             var remoteGame = new RemoteGame();
             remoteGame.ParsedGameInfo = new ParsedGameInfo();
@@ -66,7 +66,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                 MinFormatScore = 0
             })
                 .With(m => m.Title = "A Game")
-                .With(m => m.GameMetadata.Value.Runtime = runtime).Build();
+                .Build();
 
             remoteGame.Release = new ReleaseInfo();
             remoteGame.Release.PublishDate = DateTime.Now.AddDays(-age);
@@ -154,7 +154,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_order_by_closest_to_preferred_size_if_both_over()
         {
-            // 2 MB/Min * 150 Min Runtime = 300 MB
+            // 2 MB/Min * 110 Min (fixed until stage 3) = 300 MB
             GivenPreferredSize(2);
 
             var remoteGameSmall = GivenRemoteGame(new QualityModel(Quality.HDTV720p), size: 400.Megabytes(), age: 1);
@@ -169,26 +169,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_order_by_largest_to_if_zero_runtime()
-        {
-            // 2 MB/Min * 150 Min Runtime = 300 MB
-            GivenPreferredSize(2);
-
-            var remoteGameSmall = GivenRemoteGame(new QualityModel(Quality.HDTV720p), size: 400.Megabytes(), age: 1, runtime: 0);
-            var remoteGameLarge = GivenRemoteGame(new QualityModel(Quality.HDTV720p), size: 15000.Megabytes(), age: 1, runtime: 0);
-
-            var decisions = new List<DownloadDecision>();
-            decisions.Add(new DownloadDecision(remoteGameSmall));
-            decisions.Add(new DownloadDecision(remoteGameLarge));
-
-            var qualifiedReports = Subject.PrioritizeDecisionsForGames(decisions);
-            qualifiedReports.First().RemoteGame.Should().Be(remoteGameLarge);
-        }
-
-        [Test]
         public void should_order_by_closest_to_preferred_size_if_both_under()
         {
-            // 390 MB/Min * 150 Min Runtime = 58,500 MB
+            // 390 MB/Min * 110 Min (fixed until stage 3) = 58,500 MB
             GivenPreferredSize(390);
 
             var remoteGameSmall = GivenRemoteGame(new QualityModel(Quality.HDTV720p), size: 100.Megabytes(), age: 1);
@@ -205,7 +188,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_order_by_closest_to_preferred_size_if_preferred_is_in_between()
         {
-            // 46 MB/Min * 150 Min Runtime = 6900 MB
+            // 46 MB/Min * 110 Min (fixed until stage 3) = 6900 MB
             GivenPreferredSize(46);
 
             var remoteGame1 = GivenRemoteGame(new QualityModel(Quality.HDTV720p), size: 100.Megabytes(), age: 1);

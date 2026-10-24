@@ -3,6 +3,7 @@ using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.MediaInfo;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.Organizer
@@ -57,12 +58,17 @@ namespace NzbDrone.Core.Organizer
                     OriginalTitle = "The Original Game Title",
                     CollectionTitle = "The Game Collection",
                     CollectionIgdbId = 123654,
-                    Certification = "R",
                     Year = 2010,
-                    ImdbId = "tt0066921",
                     IgdbId = 345691
                 },
-                GameMetadataId = 1
+                GameMetadataId = 1,
+                Platform = new Platform
+                {
+                    Name = "Super Nintendo Entertainment System",
+                    ShortName = "SNES",
+                    FolderName = "snes",
+                    IgdbPlatformId = 19
+                }
             };
 
             _customFormats = new List<CustomFormat>

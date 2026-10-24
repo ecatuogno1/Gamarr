@@ -169,10 +169,11 @@ namespace NzbDrone.Core.DecisionEngine
             {
                 var preferredSize = _qualityDefinitionService.Get(remoteGame.ParsedGameInfo.Quality.Quality).PreferredSize;
 
-                // If no value for preferred it means unlimited so fallback to sort largest is best
-                if (preferredSize.HasValue && remoteGame.Game.GameMetadata.Value.Runtime > 0)
+                // If no value for preferred it means unlimited so fallback to sort largest is best.
+                // Preferred sizes are per minute, games use a fixed 110 minutes until stage 3 replaces size limits.
+                if (preferredSize.HasValue)
                 {
-                    var preferredGameSize = remoteGame.Game.GameMetadata.Value.Runtime * preferredSize.Value.Megabytes();
+                    var preferredGameSize = 110 * preferredSize.Value.Megabytes();
 
                     // Calculate closest to the preferred size
                     return Math.Abs((remoteGame.Release.Size - preferredGameSize).Round(200.Megabytes())) * (-1);

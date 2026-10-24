@@ -63,7 +63,7 @@ namespace Gamarr.Api.V3.ImportLists
 
             var realResults = new List<ImportListGamesResource>();
             var listExclusions = _importListExclusionService.All();
-            var existingIgdbIds = _gameService.AllGameIgdbIds();
+            var existingGames = _gameService.AllGameIgdbIdsWithPlatform();
 
             if (includeRecommendations)
             {
@@ -98,7 +98,7 @@ namespace Gamarr.Api.V3.ImportLists
 
             realResults.AddRange(listGames);
 
-            var groupedListGames = realResults.GroupBy(x => x.IgdbId);
+            var groupedListGames = realResults.GroupBy(x => (x.IgdbId, x.PlatformId));
 
             // Distinct Games
             realResults = groupedListGames.Select(x =>
@@ -106,8 +106,10 @@ namespace Gamarr.Api.V3.ImportLists
                 var game = x.First();
 
                 game.Lists = x.SelectMany(m => m.Lists).ToHashSet();
-                game.IsExcluded = listExclusions.Any(e => e.IgdbId == game.IgdbId);
-                game.IsExisting = existingIgdbIds.Any(e => e == game.IgdbId);
+                game.IsExcluded = listExclusions.Any(e => e.Matches(game.IgdbId, game.PlatformId));
+                game.IsExisting = game.PlatformId > 0
+                    ? existingGames.Contains((game.IgdbId, game.PlatformId))
+                    : existingGames.Any(e => e.IgdbId == game.IgdbId);
                 game.IsRecommendation = x.Any(m => m.IsRecommendation);
                 game.IsPopular = x.Any(m => m.IsPopular);
                 game.IsTrending = x.Any(m => m.IsTrending);

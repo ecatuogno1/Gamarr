@@ -128,12 +128,8 @@ namespace NzbDrone.Core.Parser
         {
             FindGameResult result = null;
 
-            if (!string.IsNullOrWhiteSpace(imdbId) && imdbId != "0")
-            {
-                result = TryGetGameByImDbId(parsedGameInfo, imdbId);
-            }
-
-            if (result == null && igdbId > 0)
+            // Games have no IMDb ids, the parameter is kept until stage 3 reworks release mapping
+            if (igdbId > 0)
             {
                 result = TryGetGameByIgdbId(parsedGameInfo, igdbId);
             }
@@ -158,22 +154,11 @@ namespace NzbDrone.Core.Parser
             return result;
         }
 
-        private FindGameResult TryGetGameByImDbId(ParsedGameInfo parsedGameInfo, string imdbId)
-        {
-            var game = _gameService.FindByImdbId(imdbId);
-
-            // Should fix practically all problems, where indexer is shite at adding correct imdbids to games.
-            if (game != null && (parsedGameInfo.Year < 1800 || game.GameMetadata.Value.Year == parsedGameInfo.Year || game.GameMetadata.Value.SecondaryYear == parsedGameInfo.Year))
-            {
-                return new FindGameResult(game, GameMatchType.Id);
-            }
-
-            return null;
-        }
-
         private FindGameResult TryGetGameByIgdbId(ParsedGameInfo parsedGameInfo, int igdbId)
         {
-            var game = _gameService.FindByIgdbId(igdbId);
+            // A title can be in the library once per platform, only an unambiguous match counts
+            var games = _gameService.FindByIgdbId(igdbId);
+            var game = games.Count == 1 ? games[0] : null;
 
             // Should fix practically all problems, where indexer is shite at adding correct imdbids to games.
             if (game != null && (parsedGameInfo.Year < 1800 || game.GameMetadata.Value.Year == parsedGameInfo.Year || game.GameMetadata.Value.SecondaryYear == parsedGameInfo.Year))
@@ -241,11 +226,6 @@ namespace NzbDrone.Core.Parser
             }
 
             if (igdbId > 0 && igdbId == searchCriteria.Game.IgdbId)
-            {
-                return new FindGameResult(searchCriteria.Game, GameMatchType.Id);
-            }
-
-            if (imdbId.IsNotNullOrWhiteSpace() && imdbId == searchCriteria.Game.ImdbId)
             {
                 return new FindGameResult(searchCriteria.Game, GameMatchType.Id);
             }

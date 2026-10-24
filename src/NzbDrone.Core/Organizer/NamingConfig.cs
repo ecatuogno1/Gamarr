@@ -9,7 +9,7 @@ namespace NzbDrone.Core.Organizer
             RenameGames = false,
             ReplaceIllegalCharacters = true,
             ColonReplacementFormat = ColonReplacementFormat.Smart,
-            GameFolderFormat = "{Game Title} ({Release Year})",
+            GameFolderFormat = "{Platform Folder}/{Game Title} ({Release Year})",
             StandardGameFormat = "{Game Title} ({Release Year}) {Quality Full}",
         };
 

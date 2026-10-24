@@ -14,6 +14,9 @@ namespace NzbDrone.Core.ImportLists.ImportListGames
         public int GameMetadataId { get; set; }
         public LazyLoaded<GameMetadata> GameMetadata { get; set; }
 
+        // 0 when the list doesn't know the platform, the first enabled IGDB platform is used when adding
+        public int PlatformId { get; set; }
+
         public string Title
         {
             get { return GameMetadata.Value.Title; }
@@ -24,12 +27,6 @@ namespace NzbDrone.Core.ImportLists.ImportListGames
         {
             get { return GameMetadata.Value.IgdbId; }
             set { GameMetadata.Value.IgdbId = value; }
-        }
-
-        public string ImdbId
-        {
-            get { return GameMetadata.Value.ImdbId; }
-            set { GameMetadata.Value.ImdbId = value; }
         }
 
         public int Year

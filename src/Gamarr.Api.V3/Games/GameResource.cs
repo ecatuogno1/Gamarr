@@ -11,6 +11,7 @@ using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaCover;
+using NzbDrone.Core.Platforms;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Gamarr.Api.V3.Games
@@ -38,23 +39,36 @@ namespace Gamarr.Api.V3.Games
         public long? SizeOnDisk { get; set; }
         public GameStatusType Status { get; set; }
         public string Overview { get; set; }
-        public DateTime? InCinemas { get; set; }
-        public DateTime? PhysicalRelease { get; set; }
-        public DateTime? DigitalRelease { get; set; }
+        public string Storyline { get; set; }
+
+        // Release date on this game's platform (falls back to IGDB first_release_date)
         public DateTime? ReleaseDate { get; set; }
-        public string PhysicalReleaseNote { get; set; }
+
+        // IGDB first_release_date across all platforms
+        public DateTime? FirstReleaseDate { get; set; }
+        public List<PlatformReleaseDate> PlatformReleaseDates { get; set; }
+        public List<int> AvailablePlatformIgdbIds { get; set; }
         public List<MediaCover> Images { get; set; }
         public string Website { get; set; }
+        public List<GameWebsite> Websites { get; set; }
 
         // public bool Downloaded { get; set; }
         public string RemotePoster { get; set; }
         public int Year { get; set; }
         public string YouTubeTrailerId { get; set; }
-        public string Studio { get; set; }
+        public List<string> Developers { get; set; }
+        public List<string> Publishers { get; set; }
 
         // View & Edit
         public string Path { get; set; }
         public int QualityProfileId { get; set; }
+
+        // Required when adding a game, a title can be added once per platform
+        public int PlatformId { get; set; }
+        public GamePlatformResource Platform { get; set; }
+
+        // Lookup only: the enabled Gamarr platforms (ids) IGDB lists for the game
+        public List<int> AvailablePlatforms { get; set; }
 
         // Compatibility
         public bool? HasFile { get; set; }
@@ -66,16 +80,18 @@ namespace Gamarr.Api.V3.Games
         public bool IsAvailable { get; set; }
         public string FolderName { get; set; }
 
-        public int Runtime { get; set; }
         public string CleanTitle { get; set; }
-        public string ImdbId { get; set; }
         public int IgdbId { get; set; }
+        public string IgdbSlug { get; set; }
+        public string IgdbUrl { get; set; }
         public string TitleSlug { get; set; }
         public string RootFolderPath { get; set; }
         public string Folder { get; set; }
-        public string Certification { get; set; }
         public List<string> Genres { get; set; }
+        public List<string> Themes { get; set; }
+        public List<string> GameModes { get; set; }
         public List<string> Keywords { get; set; }
+        public List<AgeRating> AgeRatings { get; set; }
         public HashSet<int> Tags { get; set; }
         public DateTime Added { get; set; }
         public AddGameOptions AddOptions { get; set; }
@@ -121,13 +137,14 @@ namespace Gamarr.Api.V3.Games
                 OriginalTitle = model.GameMetadata.Value.OriginalTitle,
                 OriginalLanguage = model.GameMetadata.Value.OriginalLanguage,
                 SortTitle = GameTitleNormalizer.Normalize(translatedTitle, model.IgdbId),
-                InCinemas = model.GameMetadata.Value.InCinemas,
-                PhysicalRelease = model.GameMetadata.Value.PhysicalRelease,
-                DigitalRelease = model.GameMetadata.Value.DigitalRelease,
                 ReleaseDate = model.GetReleaseDate(),
+                FirstReleaseDate = model.GameMetadata.Value.ReleaseDate,
+                PlatformReleaseDates = model.GameMetadata.Value.PlatformReleaseDates,
+                AvailablePlatformIgdbIds = model.GameMetadata.Value.AvailablePlatformIgdbIds,
 
                 Status = model.GameMetadata.Value.Status,
                 Overview = translatedOverview,
+                Storyline = model.GameMetadata.Value.Storyline,
 
                 Images = model.GameMetadata.Value.Images.JsonClone(),
 
@@ -138,6 +155,8 @@ namespace Gamarr.Api.V3.Games
 
                 Path = model.Path,
                 QualityProfileId = model.QualityProfileId,
+                PlatformId = model.PlatformId,
+                Platform = model.Platform.ToGamePlatformResource(),
 
                 Monitored = model.Monitored,
                 MinimumAvailability = model.MinimumAvailability,
@@ -145,15 +164,22 @@ namespace Gamarr.Api.V3.Games
                 IsAvailable = model.IsAvailable(availDelay),
                 FolderName = model.FolderName(),
 
-                Runtime = model.GameMetadata.Value.Runtime,
                 CleanTitle = model.GameMetadata.Value.CleanTitle,
-                ImdbId = model.ImdbId,
-                TitleSlug = model.GameMetadata.Value.IgdbId.ToString(),
+                IgdbSlug = model.GameMetadata.Value.IgdbSlug,
+                IgdbUrl = model.GameMetadata.Value.IgdbUrl,
+
+                // IgdbId isn't unique in the library anymore (one game per platform), so the slug includes the platform
+                TitleSlug = model.PlatformId > 0 ? $"{model.GameMetadata.Value.IgdbId}-{model.PlatformId}" : model.GameMetadata.Value.IgdbId.ToString(),
                 RootFolderPath = model.RootFolderPath,
-                Certification = model.GameMetadata.Value.Certification,
                 Website = model.GameMetadata.Value.Website,
+                Websites = model.GameMetadata.Value.Websites,
                 Genres = model.GameMetadata.Value.Genres,
+                Themes = model.GameMetadata.Value.Themes,
+                GameModes = model.GameMetadata.Value.GameModes,
                 Keywords = model.GameMetadata.Value.Keywords,
+                AgeRatings = model.GameMetadata.Value.AgeRatings,
+                Developers = model.GameMetadata.Value.Developers,
+                Publishers = model.GameMetadata.Value.Publishers,
                 Tags = model.Tags,
                 Added = model.Added,
                 AddOptions = model.AddOptions,
@@ -161,7 +187,6 @@ namespace Gamarr.Api.V3.Games
                 Ratings = model.GameMetadata.Value.Ratings,
                 GameFile = gameFile,
                 YouTubeTrailerId = model.GameMetadata.Value.YouTubeTrailerId,
-                Studio = model.GameMetadata.Value.Studio,
                 Collection = collection,
                 Popularity = model.GameMetadata.Value.Popularity,
                 LastSearchTime = model.LastSearchTime,
@@ -187,23 +212,20 @@ namespace Gamarr.Api.V3.Games
                     Images = resource.Images,
                     OriginalTitle = resource.OriginalTitle,
                     SortTitle = resource.SortTitle,
-                    InCinemas = resource.InCinemas,
-                    PhysicalRelease = resource.PhysicalRelease,
+                    ReleaseDate = resource.FirstReleaseDate,
                     Year = resource.Year,
                     SecondaryYear = resource.SecondaryYear,
                     Overview = resource.Overview,
-                    Certification = resource.Certification,
                     Website = resource.Website,
                     Ratings = resource.Ratings,
                     YouTubeTrailerId = resource.YouTubeTrailerId,
-                    Studio = resource.Studio,
-                    Runtime = resource.Runtime,
                     CleanTitle = resource.CleanTitle,
-                    ImdbId = resource.ImdbId,
+                    IgdbSlug = resource.IgdbSlug,
                 },
 
                 Path = resource.Path,
                 QualityProfileId = resource.QualityProfileId,
+                PlatformId = resource.PlatformId,
 
                 Monitored = resource.Monitored,
                 MinimumAvailability = resource.MinimumAvailability,
@@ -228,6 +250,23 @@ namespace Gamarr.Api.V3.Games
         public static List<GameResource> ToResource(this IEnumerable<Game> games, int availDelay, IUpgradableSpecification upgradableSpecification = null, ICustomFormatCalculationService formatCalculationService = null)
         {
             return games.Select(x => ToResource(x, availDelay, null, upgradableSpecification, formatCalculationService)).ToList();
+        }
+
+        public static GamePlatformResource ToGamePlatformResource(this Platform platform)
+        {
+            if (platform == null)
+            {
+                return null;
+            }
+
+            return new GamePlatformResource
+            {
+                Id = platform.Id,
+                Name = platform.Name,
+                ShortName = platform.ShortName,
+                FolderName = platform.FolderName,
+                IgdbPlatformId = platform.IgdbPlatformId
+            };
         }
 
         public static List<Game> ToModel(this IEnumerable<GameResource> resources)

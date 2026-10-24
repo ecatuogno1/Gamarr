@@ -66,6 +66,7 @@ namespace Gamarr.Api.V3.Games
                            RecycleBinValidator recycleBinValidator,
                            SystemFolderValidator systemFolderValidator,
                            QualityProfileExistsValidator qualityProfileExistsValidator,
+                           PlatformExistsValidator platformExistsValidator,
                            RootFolderExistsValidator rootFolderExistsValidator,
                            GameFolderAsRootFolderValidator gameFolderAsRootFolderValidator)
             : base(signalRBroadcaster)
@@ -109,13 +110,35 @@ namespace Gamarr.Api.V3.Games
                 .ValidId()
                 .SetValidator(qualityProfileExistsValidator);
 
+            PostValidator.RuleFor(s => s.PlatformId).Cascade(CascadeMode.Stop)
+                .GreaterThan(0).WithMessage("A platform is required")
+                .SetValidator(platformExistsValidator);
+
+            PutValidator.RuleFor(s => s.PlatformId).Cascade(CascadeMode.Stop)
+                .SetValidator(platformExistsValidator)
+                .Must((resource, platformId) => !PlatformTakenByAnotherGame(resource, platformId))
+                .WithMessage("This game has already been added for this platform");
+
             PostValidator.RuleFor(s => s.Title).NotEmpty().When(s => s.IgdbId <= 0);
             PostValidator.RuleFor(s => s.IgdbId).NotNull().NotEmpty().SetValidator(gamesExistsValidator);
         }
 
+        private bool PlatformTakenByAnotherGame(GameResource resource, int platformId)
+        {
+            if (platformId <= 0)
+            {
+                return false;
+            }
+
+            var existing = _gamesService.GetGame(resource.Id);
+            var other = _gamesService.FindByIgdbIdAndPlatform(existing.IgdbId, platformId);
+
+            return other != null && other.Id != resource.Id;
+        }
+
         [HttpGet]
         [Produces("application/json")]
-        public Ok<List<GameResource>> AllGame(int? igdbId, bool excludeLocalCovers = false, int? languageId = null)
+        public Ok<List<GameResource>> AllGame(int? igdbId, int? platformId, bool excludeLocalCovers = false, int? languageId = null)
         {
             var gamesResources = new List<GameResource>();
 
@@ -125,9 +148,12 @@ namespace Gamarr.Api.V3.Games
 
             if (igdbId.HasValue)
             {
-                var game = _gamesService.FindByIgdbId(igdbId.Value);
+                // One game per platform can share an IgdbId
+                var games = platformId.HasValue
+                    ? new List<Game> { _gamesService.FindByIgdbIdAndPlatform(igdbId.Value, platformId.Value) }
+                    : _gamesService.FindByIgdbId(igdbId.Value);
 
-                if (game != null)
+                foreach (var game in games.Where(g => g != null))
                 {
                     gamesResources.AddIfNotNull(MapToResource(game, translationLanguage));
                 }

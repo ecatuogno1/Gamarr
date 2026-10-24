@@ -26,7 +26,9 @@ namespace Gamarr.Api.V3.ImportLists
                 return true;
             }
 
-            return !_importListExclusionService.All().Exists(v => v.IgdbId == (int)context.PropertyValue && v.Id != listExclusionResource.Id);
+            return !_importListExclusionService.All().Exists(v => v.IgdbId == (int)context.PropertyValue &&
+                                                                  v.PlatformId == listExclusionResource.PlatformId &&
+                                                                  v.Id != listExclusionResource.Id);
         }
     }
 }

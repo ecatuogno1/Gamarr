@@ -45,7 +45,7 @@ namespace NzbDrone.Core.Notifications
         private string GetMessage(Game game, QualityModel quality)
         {
             var qualityString = quality.Quality.ToString();
-            var imdbUrl = "https://www.imdb.com/title/" + game.GameMetadata.Value.ImdbId + "/";
+            var igdbUrl = game.GameMetadata.Value.IgdbUrl ?? string.Empty;
 
             if (quality.Revision.Version > 1)
             {
@@ -56,7 +56,7 @@ namespace NzbDrone.Core.Notifications
                                     game.Title,
                                     game.Year,
                                     qualityString,
-                                    imdbUrl);
+                                    igdbUrl);
         }
 
         private bool ShouldHandleGame(ProviderDefinition definition, Game game)

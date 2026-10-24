@@ -4,6 +4,7 @@ using System.Linq;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Profiles.Qualities;
 
 namespace NzbDrone.Core.Games
@@ -21,6 +22,7 @@ namespace NzbDrone.Core.Games
         public bool Monitored { get; set; }
         public GameStatusType MinimumAvailability { get; set; }
         public int QualityProfileId { get; set; }
+        public int PlatformId { get; set; }
 
         public string Path { get; set; }
 
@@ -29,6 +31,7 @@ namespace NzbDrone.Core.Games
         public string RootFolderPath { get; set; }
         public DateTime Added { get; set; }
         public QualityProfile QualityProfile { get; set; }
+        public Platform Platform { get; set; }
         public HashSet<int> Tags { get; set; }
         public AddGameOptions AddOptions { get; set; }
         public DateTime? LastSearchTime { get; set; }
@@ -48,12 +51,6 @@ namespace NzbDrone.Core.Games
         {
             get { return GameMetadata.Value.IgdbId; }
             set { GameMetadata.Value.IgdbId = value; }
-        }
-
-        public string ImdbId
-        {
-            get { return GameMetadata.Value.ImdbId; }
-            set { GameMetadata.Value.ImdbId = value; }
         }
 
         public int Year
@@ -76,81 +73,59 @@ namespace NzbDrone.Core.Games
 
         public bool IsAvailable(int delay = 0)
         {
-            // the below line is what was used before delay was implemented, could still be used for cases when delay==0
-            // return (Status >= MinimumAvailability || (MinimumAvailability == GameStatusType.PreDB && Status >= GameStatusType.Released));
-
-            // This more complex sequence handles the delay
-            DateTime minimumAvailabilityDate;
-
+            // Games are either announced or released, so "minimum availability" only looks at the release date
             if (MinimumAvailability is GameStatusType.TBA or GameStatusType.Announced)
             {
-                minimumAvailabilityDate = DateTime.MinValue;
-            }
-            else if (MinimumAvailability == GameStatusType.InCinemas && GameMetadata.Value.InCinemas.HasValue)
-            {
-                minimumAvailabilityDate = GameMetadata.Value.InCinemas.Value;
-            }
-            else
-            {
-                if (GameMetadata.Value.PhysicalRelease.HasValue && GameMetadata.Value.DigitalRelease.HasValue)
-                {
-                    minimumAvailabilityDate = new DateTime(Math.Min(GameMetadata.Value.PhysicalRelease.Value.Ticks, GameMetadata.Value.DigitalRelease.Value.Ticks));
-                }
-                else if (GameMetadata.Value.PhysicalRelease.HasValue)
-                {
-                    minimumAvailabilityDate = GameMetadata.Value.PhysicalRelease.Value;
-                }
-                else if (GameMetadata.Value.DigitalRelease.HasValue)
-                {
-                    minimumAvailabilityDate = GameMetadata.Value.DigitalRelease.Value;
-                }
-                else
-                {
-                    minimumAvailabilityDate = GameMetadata.Value.InCinemas?.AddDays(90) ?? DateTime.MaxValue;
-                }
+                return true;
             }
 
-            if (minimumAvailabilityDate == DateTime.MinValue || minimumAvailabilityDate == DateTime.MaxValue)
+            var releaseDate = GetReleaseDate();
+
+            if (releaseDate.HasValue)
             {
-                return DateTime.UtcNow >= minimumAvailabilityDate;
+                return DateTime.UtcNow >= releaseDate.Value.AddDays(delay);
             }
 
-            return DateTime.UtcNow >= minimumAvailabilityDate.AddDays(delay);
+            return GameMetadata.Value.Status == GameStatusType.Released;
         }
 
         public DateTime? GetReleaseDate()
         {
-            if (MinimumAvailability is GameStatusType.TBA or GameStatusType.Announced)
+            var metadata = GameMetadata.Value;
+            var igdbPlatformId = Platform?.IgdbPlatformId ?? 0;
+
+            if (igdbPlatformId > 0 && metadata.PlatformReleaseDates != null)
             {
-                return new[] { GameMetadata.Value.InCinemas, GameMetadata.Value.DigitalRelease, GameMetadata.Value.PhysicalRelease }
-                    .Where(x => x.HasValue)
+                var platformRelease = metadata.PlatformReleaseDates
+                    .Where(d => d.IgdbPlatformId == igdbPlatformId && d.Date.HasValue)
+                    .Select(d => d.Date)
                     .Min();
+
+                if (platformRelease.HasValue)
+                {
+                    return platformRelease;
+                }
             }
 
-            if (MinimumAvailability == GameStatusType.InCinemas && GameMetadata.Value.InCinemas.HasValue)
-            {
-                return GameMetadata.Value.InCinemas.Value;
-            }
-
-            if (GameMetadata.Value.DigitalRelease.HasValue || GameMetadata.Value.PhysicalRelease.HasValue)
-            {
-                return new[] { GameMetadata.Value.DigitalRelease, GameMetadata.Value.PhysicalRelease }
-                    .Where(x => x.HasValue)
-                    .Min();
-            }
-
-            return GameMetadata.Value.InCinemas?.AddDays(90);
+            return metadata.ReleaseDate;
         }
 
         public override string ToString()
         {
-            return string.Format("[{1} ({2})][{0}, {3}]", GameMetadata.Value.ImdbId, GameMetadata.Value.Title.NullSafe(), GameMetadata.Value.Year.NullSafe(), GameMetadata.Value.IgdbId);
+            return string.Format("[{0} ({1})][{2}, {3}]", GameMetadata.Value.Title.NullSafe(), GameMetadata.Value.Year.NullSafe(), GameMetadata.Value.IgdbId, Platform?.ShortName ?? PlatformId.ToString());
         }
 
         public void ApplyChanges(Game otherGame)
         {
             Path = otherGame.Path;
             QualityProfileId = otherGame.QualityProfileId;
+
+            // Updates that don't send a platform keep the current one
+            if (otherGame.PlatformId > 0)
+            {
+                PlatformId = otherGame.PlatformId;
+                Platform = otherGame.Platform;
+            }
 
             Monitored = otherGame.Monitored;
             MinimumAvailability = otherGame.MinimumAvailability;

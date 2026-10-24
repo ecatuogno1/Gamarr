@@ -29,31 +29,30 @@ namespace NzbDrone.Core.Test.ImportList
         {
             _importLists = new List<IImportList>();
 
+            // Most lists don't know the platform
             _list1Games = Builder<ImportListGame>.CreateListOfSize(5)
+                .All()
+                .With(s => s.PlatformId = 0)
                 .Build().ToList();
 
             _existingGames = Builder<Game>.CreateListOfSize(3)
                 .TheFirst(1)
                 .With(s => s.IgdbId = 6)
-                .With(s => s.ImdbId = "6")
                 .TheNext(1)
                 .With(s => s.IgdbId = 7)
-                .With(s => s.ImdbId = "7")
                 .TheNext(1)
                 .With(s => s.IgdbId = 8)
-                .With(s => s.ImdbId = "8")
                 .Build().ToList();
 
             _list2Games = Builder<ImportListGame>.CreateListOfSize(3)
+                .All()
+                .With(s => s.PlatformId = 0)
                 .TheFirst(1)
                 .With(s => s.IgdbId = 6)
-                .With(s => s.ImdbId = "6")
                 .TheNext(1)
                 .With(s => s.IgdbId = 7)
-                .With(s => s.ImdbId = "7")
                 .TheNext(1)
                 .With(s => s.IgdbId = 8)
-                .With(s => s.ImdbId = "8")
                 .Build().ToList();
 
             _importListFetch = new ImportListFetchResult
@@ -81,12 +80,12 @@ namespace NzbDrone.Core.Test.ImportList
                   .Returns(new List<ImportListExclusion>());
 
             Mocker.GetMock<IGameService>()
-                  .Setup(v => v.GameExists(It.IsAny<Game>()))
+                  .Setup(v => v.GameExists(It.IsAny<int>(), It.IsAny<int>()))
                   .Returns(false);
 
             Mocker.GetMock<IGameService>()
-                  .Setup(v => v.AllGameIgdbIds())
-                  .Returns(new List<int>());
+                  .Setup(v => v.AllGameIgdbIdsWithPlatform())
+                  .Returns(new HashSet<(int IgdbId, int PlatformId)>());
 
             Mocker.GetMock<IFetchAndParseImportList>()
                   .Setup(v => v.Fetch())
@@ -249,30 +248,6 @@ namespace NzbDrone.Core.Test.ImportList
         }
 
         [Test]
-        public void should_fallback_to_imdbid_on_clean_library_if_igdb_not_found()
-        {
-            _importListFetch.Games.ForEach(m => m.ListId = 1);
-            _importListFetch.Games[0].IgdbId = 0;
-            _importListFetch.Games[0].ImdbId = "6";
-
-            GivenList(1, true);
-            GivenCleanLevel("keepAndUnmonitor");
-
-            Mocker.GetMock<IGameService>()
-                  .Setup(v => v.GetAllGames())
-                  .Returns(_existingGames);
-
-            Mocker.GetMock<IImportListGameService>()
-                .Setup(v => v.GetAllListGames())
-                .Returns(_list1Games);
-
-            Subject.Execute(_commandAll);
-
-            Mocker.GetMock<IGameService>()
-                  .Verify(v => v.UpdateGame(It.Is<List<Game>>(s => s.Count == 2 && s.All(m => !m.Monitored)), true), Times.Once());
-        }
-
-        [Test]
         public void should_delete_games_not_files_on_clean_library_if_config_value_logonly()
         {
             _importListFetch.Games.ForEach(m => m.ListId = 1);
@@ -397,6 +372,43 @@ namespace NzbDrone.Core.Test.ImportList
         }
 
         [Test]
+        public void should_add_same_game_for_different_platforms()
+        {
+            _importListFetch.Games.ForEach(m => m.ListId = 1);
+            _importListFetch.Games[0].IgdbId = 4;
+            _importListFetch.Games[0].PlatformId = 1;
+            _importListFetch.Games[3].PlatformId = 2;
+
+            GivenList(1, true);
+            GivenCleanLevel("disabled");
+
+            Subject.Execute(_commandAll);
+
+            Mocker.GetMock<IAddGameService>()
+                  .Verify(v => v.AddGames(It.Is<List<Game>>(s => s.Count == 5 && s.Count(g => g.IgdbId == 4) == 2), true), Times.Once());
+        }
+
+        [Test]
+        public void should_not_add_game_that_exists_on_the_same_platform()
+        {
+            _importListFetch.Games.ForEach(m => m.ListId = 1);
+            _importListFetch.Games[0].PlatformId = 3;
+            _importListFetch.Games[1].PlatformId = 3;
+
+            GivenList(1, true);
+            GivenCleanLevel("disabled");
+
+            Mocker.GetMock<IGameService>()
+                 .Setup(v => v.AllGameIgdbIdsWithPlatform())
+                 .Returns(new HashSet<(int IgdbId, int PlatformId)> { (_importListFetch.Games[0].IgdbId, 3), (_importListFetch.Games[1].IgdbId, 4) });
+
+            Subject.Execute(_commandAll);
+
+            Mocker.GetMock<IAddGameService>()
+                  .Verify(v => v.AddGames(It.Is<List<Game>>(s => s.Count == 4 && s.All(g => g.IgdbId != _importListFetch.Games[0].IgdbId)), true), Times.Once());
+        }
+
+        [Test]
         public void should_not_add_duplicate_games_from_separate_lists()
         {
             _list2Games.ForEach(m => m.ListId = 2);
@@ -450,8 +462,8 @@ namespace NzbDrone.Core.Test.ImportList
             GivenCleanLevel("disabled");
 
             Mocker.GetMock<IGameService>()
-                 .Setup(v => v.AllGameIgdbIds())
-                 .Returns(new List<int> { _existingGames[0].IgdbId });
+                 .Setup(v => v.AllGameIgdbIdsWithPlatform())
+                 .Returns(new HashSet<(int IgdbId, int PlatformId)> { (_existingGames[0].IgdbId, _list2Games[0].PlatformId) });
 
             Subject.Execute(_commandAll);
 

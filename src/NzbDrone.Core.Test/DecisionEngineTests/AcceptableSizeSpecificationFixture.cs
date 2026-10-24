@@ -9,7 +9,6 @@ using NzbDrone.Core.Games;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
-using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.DecisionEngineTests
 {
@@ -46,15 +45,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             Mocker.GetMock<IQualityDefinitionService>().Setup(s => s.Get(Quality.SDTV)).Returns(_qualityType);
         }
 
-        [TestCase(30, 50, false)]
-        [TestCase(30, 250, true)]
-        [TestCase(30, 500, false)]
-        [TestCase(60, 100, false)]
-        [TestCase(60, 500, true)]
-        [TestCase(60, 1000, false)]
-        public void single_episode(int runtime, int sizeInMegaBytes, bool expectedResult)
+        // Sizes are still per minute, multiplied by a fixed 110 minutes until stage 3 (2 MB * 110 = 220 MB, 10 MB * 110 = 1100 MB)
+        [TestCase(100, false)]
+        [TestCase(500, true)]
+        [TestCase(1200, false)]
+        public void should_check_size_against_fixed_multiplier(int sizeInMegaBytes, bool expectedResult)
         {
-            _game.GameMetadata.Value.Runtime = runtime;
             _remoteGame.Game = _game;
             _remoteGame.Release.Size = sizeInMegaBytes.Megabytes();
 
@@ -64,7 +60,6 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_if_size_is_zero()
         {
-            _game.GameMetadata.Value.Runtime = 120;
             _remoteGame.Game = _game;
             _remoteGame.Release.Size = 0;
             _qualityType.MinSize = 10;
@@ -76,7 +71,6 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_if_unlimited_30_minute()
         {
-            _game.GameMetadata.Value.Runtime = 30;
             _remoteGame.Game = _game;
             _remoteGame.Release.Size = 18457280000;
             _qualityType.MaxSize = null;
@@ -87,7 +81,6 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         [Test]
         public void should_return_true_if_unlimited_60_minute()
         {
-            _game.GameMetadata.Value.Runtime = 60;
             _remoteGame.Game = _game;
             _remoteGame.Release.Size = 36857280000;
             _qualityType.MaxSize = null;
@@ -96,16 +89,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_use_110_minutes_if_runtime_is_0()
+        public void should_use_110_minutes()
         {
-            _game.GameMetadata.Value.Runtime = 0;
             _remoteGame.Game = _game;
             _remoteGame.Release.Size = 1095.Megabytes();
 
             Subject.IsSatisfiedBy(_remoteGame, new()).Accepted.Should().Be(true);
             _remoteGame.Release.Size = 1105.Megabytes();
             Subject.IsSatisfiedBy(_remoteGame, new()).Accepted.Should().Be(false);
-            ExceptionVerification.ExpectedWarns(1);
         }
     }
 }

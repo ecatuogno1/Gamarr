@@ -131,19 +131,11 @@ namespace NzbDrone.Core.Notifications.Telegram
             {
                 var linkType = (MetadataLinkType)link;
 
-                if (linkType == MetadataLinkType.Igdb && game.IgdbId > 0)
-                {
-                    links.Add(new TelegramLink("IGDB", $"https://www.thegamedb.org/game/{game.IgdbId}"));
-                }
+                var igdbUrl = game.GameMetadata?.Value?.IgdbUrl;
 
-                if (linkType == MetadataLinkType.Imdb && game.ImdbId.IsNotNullOrWhiteSpace())
+                if (linkType == MetadataLinkType.Igdb && igdbUrl.IsNotNullOrWhiteSpace())
                 {
-                    links.Add(new TelegramLink("IMDb", $"https://www.imdb.com/title/{game.ImdbId}"));
-                }
-
-                if (linkType == MetadataLinkType.Trakt && game.ImdbId.IsNotNullOrWhiteSpace())
-                {
-                    links.Add(new TelegramLink("Trakt", $"https://trakt.tv/games/{game.ImdbId}"));
+                    links.Add(new TelegramLink("IGDB", igdbUrl));
                 }
             }
 

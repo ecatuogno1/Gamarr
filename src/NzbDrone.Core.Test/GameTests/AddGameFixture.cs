@@ -12,6 +12,7 @@ using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Credits;
 using NzbDrone.Core.MetadataSource;
 using NzbDrone.Core.Organizer;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
 
@@ -56,6 +57,7 @@ namespace NzbDrone.Core.Test.GameTests
             var newGame = new Game
             {
                 IgdbId = 1,
+                PlatformId = 1,
                 RootFolderPath = @"C:\Test\Games"
             };
 
@@ -73,6 +75,7 @@ namespace NzbDrone.Core.Test.GameTests
             var newGame = new Game
             {
                 IgdbId = 1,
+                PlatformId = 1,
                 RootFolderPath = @"C:\Test\Games"
             };
 
@@ -85,11 +88,54 @@ namespace NzbDrone.Core.Test.GameTests
         }
 
         [Test]
+        public void should_use_first_enabled_igdb_platform_when_no_platform_given()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1,
+                RootFolderPath = @"C:\Test\Games"
+            };
+
+            _fakeGame.AvailablePlatformIgdbIds = new List<int> { 19, 6 };
+
+            Mocker.GetMock<IPlatformService>()
+                  .Setup(s => s.FindByIgdbPlatformIds(It.IsAny<IEnumerable<int>>()))
+                  .Returns(new List<Platform>
+                  {
+                      new Platform { Id = 5, IgdbPlatformId = 19, Enabled = false },
+                      new Platform { Id = 1, IgdbPlatformId = 6, Enabled = true }
+                  });
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+
+            var game = Subject.AddGame(newGame);
+
+            game.PlatformId.Should().Be(1);
+        }
+
+        [Test]
+        public void should_throw_if_no_platform_given_and_none_available()
+        {
+            var newGame = new Game
+            {
+                IgdbId = 1,
+                RootFolderPath = @"C:\Test\Games"
+            };
+
+            GivenValidGame(newGame.IgdbId);
+            GivenValidPath();
+
+            Assert.Throws<ValidationException>(() => Subject.AddGame(newGame));
+        }
+
+        [Test]
         public void should_throw_if_game_validation_fails()
         {
             var newGame = new Game
             {
                 IgdbId = 1,
+                PlatformId = 1,
                 Path = @"C:\Test\Game\Title1"
             };
 
@@ -111,12 +157,13 @@ namespace NzbDrone.Core.Test.GameTests
             var newGame = new Game
             {
                 IgdbId = 1,
+                PlatformId = 1,
                 Path = @"C:\Test\Game\Title1"
             };
 
             Mocker.GetMock<IProvideGameInfo>()
                   .Setup(s => s.GetGameInfo(newGame.IgdbId))
-                  .Throws(new GameNotFoundException("Game Not Found"));
+                  .Throws(new GameNotFoundException(1));
 
             Mocker.GetMock<IAddGameValidator>()
                   .Setup(s => s.Validate(It.IsAny<Game>()))

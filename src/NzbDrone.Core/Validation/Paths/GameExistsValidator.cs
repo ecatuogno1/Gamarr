@@ -3,6 +3,8 @@ using NzbDrone.Core.Games;
 
 namespace NzbDrone.Core.Validation.Paths
 {
+    // Validates an IgdbId property. The instance being validated must also have a PlatformId property,
+    // because a game is unique per (IgdbId, PlatformId), not per IgdbId.
     public class GameExistsValidator : PropertyValidator
     {
         private readonly IGameService _gameService;
@@ -12,7 +14,7 @@ namespace NzbDrone.Core.Validation.Paths
             _gameService = gameService;
         }
 
-        protected override string GetDefaultMessageTemplate() => "This game has already been added";
+        protected override string GetDefaultMessageTemplate() => "This game has already been added for this platform";
 
         protected override bool IsValid(PropertyValidatorContext context)
         {
@@ -22,8 +24,10 @@ namespace NzbDrone.Core.Validation.Paths
             }
 
             var igdbId = (int)context.PropertyValue;
+            dynamic instance = context.InstanceToValidate;
+            int platformId = instance.PlatformId;
 
-            return _gameService.FindByIgdbId(igdbId) == null;
+            return !_gameService.GameExists(igdbId, platformId);
         }
     }
 }

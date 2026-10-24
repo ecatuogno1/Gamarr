@@ -14,6 +14,7 @@ using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Organizer;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -212,13 +213,39 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         }
 
         [Test]
-        public void should_replace_game_certification()
+        public void should_replace_platform_tokens()
         {
-            _namingConfig.StandardGameFormat = "{Game Certification}";
-            _game.GameMetadata.Value.Certification = "R";
+            _namingConfig.StandardGameFormat = "{Platform} - {Platform Short} - {Platform Folder}";
+            _game.Platform = new Platform { Id = 2, Name = "Super Nintendo Entertainment System", ShortName = "SNES", FolderName = "snes" };
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("R");
+                   .Should().Be("Super Nintendo Entertainment System - SNES - snes");
+        }
+
+        [Test]
+        public void should_look_up_platform_when_not_loaded()
+        {
+            _namingConfig.GameFolderFormat = "{Platform Folder}/{Game Title}";
+            _game.Platform = null;
+            _game.PlatformId = 2;
+
+            Mocker.GetMock<IPlatformService>()
+                  .Setup(s => s.Find(2))
+                  .Returns(new Platform { Id = 2, Name = "Super Nintendo Entertainment System", ShortName = "SNES", FolderName = "snes" });
+
+            Subject.GetGameFolder(_game)
+                   .Should().Be(System.IO.Path.Combine("snes", _game.Title));
+        }
+
+        [Test]
+        public void should_use_platform_folder_in_default_game_folder_format()
+        {
+            _namingConfig.GameFolderFormat = NamingConfig.Default.GameFolderFormat;
+            _game.Platform = new Platform { Id = 2, Name = "Super Nintendo Entertainment System", ShortName = "SNES", FolderName = "snes" };
+            _game.GameMetadata.Value.Year = 1991;
+
+            Subject.GetGameFolder(_game)
+                   .Should().Be(System.IO.Path.Combine("snes", $"{_game.Title} (1991)"));
         }
 
         [Test]

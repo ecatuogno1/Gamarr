@@ -28,7 +28,12 @@ namespace NzbDrone.Core.AutoTagging.Specifications
 
         protected override bool IsSatisfiedByWithoutNegate(Game game)
         {
-            return Value.Any(studio => game.GameMetadata?.Value?.Studio?.EqualsIgnoreCase(studio) ?? false);
+            // Matches the game's developers and publishers
+            var companies = (game.GameMetadata?.Value?.Developers ?? new List<string>())
+                .Concat(game.GameMetadata?.Value?.Publishers ?? new List<string>())
+                .ToList();
+
+            return Value.Any(studio => companies.Any(c => c.EqualsIgnoreCase(studio)));
         }
 
         public override NzbDroneValidationResult Validate()

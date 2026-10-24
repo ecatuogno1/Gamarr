@@ -79,9 +79,7 @@ namespace Gamarr.Api.V3.Calendar
             var resources = MapToResource(results);
 
             return TypedResults.Ok(resources
-                .OrderBy(m => m.InCinemas)
-                .ThenBy(m => m.DigitalRelease)
-                .ThenBy(m => m.PhysicalRelease)
+                .OrderBy(m => m.ReleaseDate)
                 .ToList());
         }
     }

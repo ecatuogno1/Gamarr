@@ -121,6 +121,11 @@ namespace Gamarr.Api.V3.Collections
                     collection.QualityProfileId = resource.QualityProfileId.Value;
                 }
 
+                if (resource.PlatformId.HasValue)
+                {
+                    collection.PlatformId = resource.PlatformId.Value;
+                }
+
                 if (resource.MinimumAvailability.HasValue)
                 {
                     collection.MinimumAvailability = resource.MinimumAvailability.Value;
@@ -159,7 +164,7 @@ namespace Gamarr.Api.V3.Collections
             var namingConfig = _namingService.GetConfig();
             var configLanguage = (Language)_configService.GameInfoLanguage;
 
-            var existingGamesIgdbIds = _gameService.AllGameWithCollectionsIgdbIds();
+            var existingGames = _gameService.AllGameIgdbIdsWithPlatform();
             var listExclusions = _importListExclusionService.All();
 
             var allCollectionGames = _gameMetadataService.GetGamesWithCollections()
@@ -182,12 +187,12 @@ namespace Gamarr.Api.V3.Collections
                         var translation = GetTranslationFromDict(tdict, game, configLanguage);
 
                         var gameResource = game.ToResource(translation);
-                        gameResource.Folder = _fileNameBuilder.GetGameFolder(new Game { GameMetadata = game }, namingConfig);
+                        gameResource.Folder = _fileNameBuilder.GetGameFolder(new Game { GameMetadata = game, PlatformId = collection.PlatformId }, namingConfig);
 
-                        var isExisting = existingGamesIgdbIds.Contains(game.IgdbId);
+                        var isExisting = IsExisting(existingGames, game.IgdbId, collection.PlatformId);
                         gameResource.IsExisting = isExisting;
 
-                        var isExcluded = listExclusions.Any(e => e.IgdbId == game.IgdbId);
+                        var isExcluded = listExclusions.Any(e => e.Matches(game.IgdbId, collection.PlatformId));
                         gameResource.IsExcluded = isExcluded;
 
                         if (!isExisting && !isExcluded)
@@ -203,6 +208,14 @@ namespace Gamarr.Api.V3.Collections
             }
         }
 
+        // Without a collection platform, a game in the library on any platform counts as existing
+        private static bool IsExisting(HashSet<(int IgdbId, int PlatformId)> existingGames, int igdbId, int platformId)
+        {
+            return platformId > 0
+                ? existingGames.Contains((igdbId, platformId))
+                : existingGames.Any(g => g.IgdbId == igdbId);
+        }
+
         private CollectionResource MapToResource(GameCollection collection)
         {
             var resource = collection.ToResource();
@@ -210,7 +223,7 @@ namespace Gamarr.Api.V3.Collections
             var namingConfig = _namingService.GetConfig();
             var configLanguage = (Language)_configService.GameInfoLanguage;
 
-            var existingGamesIgdbIds = _gameService.AllGameWithCollectionsIgdbIds();
+            var existingGames = _gameService.AllGameIgdbIdsWithPlatform();
             var listExclusions = _importListExclusionService.All();
 
             foreach (var game in _gameMetadataService.GetGamesByCollectionIgdbId(collection.IgdbId))
@@ -219,12 +232,12 @@ namespace Gamarr.Api.V3.Collections
                 var translation = GetGameTranslation(translations, game, configLanguage);
 
                 var gameResource = game.ToResource(translation);
-                gameResource.Folder = _fileNameBuilder.GetGameFolder(new Game { GameMetadata = game }, namingConfig);
+                gameResource.Folder = _fileNameBuilder.GetGameFolder(new Game { GameMetadata = game, PlatformId = collection.PlatformId }, namingConfig);
 
-                var isExisting = existingGamesIgdbIds.Contains(game.IgdbId);
+                var isExisting = IsExisting(existingGames, game.IgdbId, collection.PlatformId);
                 gameResource.IsExisting = isExisting;
 
-                var isExcluded = listExclusions.Any(e => e.IgdbId == game.IgdbId);
+                var isExcluded = listExclusions.Any(e => e.Matches(game.IgdbId, collection.PlatformId));
                 gameResource.IsExcluded = isExcluded;
 
                 if (!isExisting && !isExcluded)

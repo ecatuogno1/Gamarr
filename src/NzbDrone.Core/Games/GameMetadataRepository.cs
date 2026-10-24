@@ -9,7 +9,6 @@ namespace NzbDrone.Core.Games
     public interface IGameMetadataRepository : IBasicRepository<GameMetadata>
     {
         GameMetadata FindByIgdbId(int igdbId);
-        GameMetadata FindByImdbId(string imdbId);
         List<GameMetadata> FindById(List<int> igdbIds);
         List<GameMetadata> GetGamesWithCollections();
         List<GameMetadata> GetGamesByCollectionIgdbId(int collectionId);
@@ -29,11 +28,6 @@ namespace NzbDrone.Core.Games
         public GameMetadata FindByIgdbId(int igdbId)
         {
             return Query(x => x.IgdbId == igdbId).FirstOrDefault();
-        }
-
-        public GameMetadata FindByImdbId(string imdbId)
-        {
-            return Query(x => x.ImdbId == imdbId).FirstOrDefault();
         }
 
         public List<GameMetadata> FindById(List<int> igdbIds)
