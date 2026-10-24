@@ -1456,6 +1456,7 @@
   "ProxyCheckBadRequestMessage": "Failed to test proxy. StatusCode: {statusCode}",
   "ProxyCheckFailedToTestMessage": "Failed to test proxy: {url}",
   "IgdbCredentialsCheckInvalidMessage": "IGDB credentials were rejected: {errorMessage}",
+  "IgdbOpenMetadataSettings": "Open Settings > Metadata to add your IGDB (Twitch) credentials",
   "IgdbCredentialsCheckMissingMessage": "IGDB credentials are missing, add a Twitch Client ID and Client Secret in Settings > Metadata to search for and refresh games",
   "IgdbClientId": "Twitch Client ID",
   "IgdbClientIdHelpText": "Client ID of a Twitch application, used to access the IGDB API. Create one at dev.twitch.tv/console/apps",
