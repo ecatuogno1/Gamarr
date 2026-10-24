@@ -6,6 +6,9 @@ on:
       - develop
   pull_request:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -47,7 +50,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          # The version the frontend lint and build are verified with (package.json has no engines field)
+          node-version: 22
           cache: yarn
 
       - name: Install
