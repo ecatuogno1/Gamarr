@@ -62,8 +62,7 @@ for indexers, download clients, import lists, notifications and metadata.
 - Images: cover -> Poster (`t_original`), first artwork (or first screenshot) -> Fanart (`t_1080p`), screenshots ->
   Screenshot (`t_1080p`), company logos (`t_logo_med`).
 - The Twitch Client ID/Secret are sent in the token request body, not the URL, so they don't end up in logs.
-- Quality size limits are still Radarr's MB-per-minute values multiplied by a fixed 110 minutes until stage 3
-  replaces them. Game translations are kept but IGDB doesn't fill them; OriginalLanguage defaults to English.
+- Game translations are kept but IGDB doesn't fill them; OriginalLanguage defaults to English.
 
 ## Releases: qualities
 
@@ -110,6 +109,109 @@ Repack/Proper and revisions map onto the existing Revision model.
 - Default folder layout: `{Root}/{Platform Folder}/{Game Title} ({Release Year})/`. The naming tokens
   `{Platform}`, `{Platform Folder}`, `{Region}`, `{Version}`, `{Release Type}` and `{Disc}` are added, and
   movie-only tokens are removed.
+
+## Stage 3 implementation notes
+
+### Qualities and profiles
+
+- Quality ids start at 100 so a persisted Radarr id can never be read as a game quality: Unknown 0,
+  ROM-Unverified 100, ROM-Verified 101, Disc-Compressed-Lossy 110, Disc-ISO 111, Disc-CHD-RVZ 112, Disc-Redump 113,
+  NSP-XCI 120, PKG 121, WUA-WUX 122, CIA-3DS 123, XEX-GOD 124, PC-Portable 130, PC-Steam-Rip 131, PC-Repack 132,
+  PC-Scene 133, PC-GOG 134 (weights follow that order). Names use dashes instead of slashes because they end up in
+  file names.
+- `QualitySource` is Unknown/Cartridge/Disc/Digital/PC. Resolution and the quality modifier are gone (the custom
+  format conditions too); the Source condition now matches those five values.
+- Size limits are absolute sizes of the whole release in GB (fractions allowed for ROMs), between 0 and 1000. A max
+  of null is unlimited, a null preferred size means "largest wins". The release comparer rounds sizes to 200 MB.
+- Fresh installs get "Any" (every quality incl. Unknown, cutoff ROM-Verified), "Verified ROMs / Redump",
+  "PC – GOG preferred" and "PC – Scene/Repack". The default profiles don't filter on language (`Any`), game
+  releases rarely have language tags.
+- Migration 245 deletes the quality definitions (they're re-seeded on startup), resets file/history/blocklist
+  qualities to Unknown, drops pending releases, makes existing profiles allow every game quality and adds the three
+  other default profiles, removes resolution/modifier/source conditions from custom formats, drops
+  `GameFiles.MediaInfo` and the media info/hardcoded subs settings, and replaces the movie default file format.
+
+### Parsing
+
+- `Parser` takes the title from everything before the first "marker": a bracket group, a version (`v1.2`,
+  `1.2.3`, `Build 123`), a platform token, an edition (`Deluxe Edition`, `GOTY`, `The Final Cut`), a release type
+  word (Update, DLC, Demo, Crackfix…), a language or region token, a scene tag (REPACK, PROPER, MULTi10…) or a
+  `+` (included content). Platform words that are also ordinary words (Switch, Arcade, Mac…) only count at the end or
+  before another marker, so "Nintendo.Switch.Sports.NSW" keeps its title. In No-Intro/TOSEC names (with region tags)
+  editions are part of the title. Years in brackets set `Year`; a trailing year in a scene title is kept and a second
+  title without it is added ("Hitman 2016" + "Hitman").
+- No-Intro ", The" titles are turned around. GOG installer names (`setup_x_1.2_(123).exe`, `gog_x_1.0.sh`) are
+  parsed as "X v1.2 [GOG]" with the platform from the extension.
+- Platforms are identified by IGDB platform id (`PlatformParser`): scene tokens (NSW, PS4, XBOX360, Wii.U…),
+  bracket aliases (any platform name/short name/folder name, "[PS Vita]"), unique extensions (.sfc, .nsp, .gdi…) and
+  PC scene/repack groups. SNES/Super Famicom, NES/Famicom, DS/DSi, 3DS/New 3DS, Neo Geo AES/MVS, PC Engine/SuperGrafx,
+  Switch/Switch 2 and PC/DOS are compatible. `ParsingService` resolves it to the Gamarr platform id
+  (`ParsedGameInfo.PlatformId`).
+- Regions: No-Intro names, GoodTools letters (`(U)`, `(JUE)`), TOSEC/Switch country codes (`(US-EU)`, `[US]`) and
+  scene tokens (USA, EUR, JPN, PAL, NTSC-J…). Languages: `(En,Fr,De)`, TOSEC `(en-de)`, `[T+Eng]`, words (GERMAN,
+  ENG…). `MULTi10` sets no languages (the indexer's multi-language setting still applies).
+- Release types: Hack (`[h]`, `(Hack)`), Translation (`[T+Eng]`), Homebrew (`(Homebrew)`, `(PD)`), Demo (`(Demo)`,
+  `(Kiosk)`, `(Sample)`), Prototype (`(Proto)`, `(Beta)`), Update (Update/Patch/Crackfix, Switch title id ending in
+  800), DLC (DLC/Unlocker, other Switch title ids), Bundle ("+ 5 DLCs", "incl. DLC", All DLCs). Included updates
+  ("+ Update 3") don't make a release an update.
+- Revisions: PROPER, scene REPACK/RERIP and No-Intro `(Rev 1)`/`(Rev A)` (version 2). "[FitGirl Repack]" style
+  repacks are a quality, not a revision.
+- Quality detection order: tags in the name (Redump, repack groups, GOG, Steam Rip, Portable, CHD/RVZ, CSO/WBFS,
+  NSP/XCI, WUA, CIA, XBLA/GOD, PKG/PSN, PC scene groups, ISO), then the extension (ROM extensions are
+  ROM-Verified when the name has `[!]`, No-Intro or a No-Intro region tag and no bad dump flags), then the
+  platform (cartridge → ROM, Switch → NSP-XCI, PS4/PS5/Vita → PKG, Wii U → WUA-WUX, 3DS → CIA-3DS, other consoles →
+  Disc-ISO). A platform guess counts like an extension (lower confidence than a tag). When a release doesn't name
+  its platform, its quality is parsed again with the matched game's platform.
+
+### Decision engine and custom formats
+
+- Removed: hardcoded subs, raw disk (BR/DVD) specs, IMDb ids in mapping. Added `PlatformMatchSpecification` (the
+  release's platform has to be compatible with the game's; a release without a platform is only accepted from
+  searches) and `ReleaseTypeAllowedSpecification` (Update, DLC, Demo, Hack, Translation and Prototype releases are
+  rejected unless a custom format with a matching Release Type condition has a positive score in the profile;
+  Prototype is rejected too, which goes a bit beyond the brief).
+- Mapping by title only considers games on the release's platform, and an ambiguous title (same game on several
+  platforms, release without platform) isn't matched. The title with the edition appended is tried as well. Years
+  match within ±1 (ports), an exact year wins.
+- New custom format conditions: Region (with "include World"), Release Type and Platform (value = IGDB platform
+  id, so formats can be shared). Release Title, Release Group, Edition, Language, Size, Indexer Flags, Year and
+  Source are kept. Game files store Regions, Version, ReleaseType, DiscNumber and DiscCount so custom formats and
+  naming work for existing files.
+
+### Import and multi-file releases
+
+- `MediaFileExtensions` is the union of all platforms' extensions plus generic disc/archive/installer formats. A
+  game file has to be in a format of the game's platform or a generic one (zip/7z/rar, iso/bin/cue/img/chd/m3u…).
+- MediaInfo/ffprobe is gone (no media info on files, no runtime sample detection). Samples are files named
+  sample/demo or in a Sample folder (unless the game's title has that word).
+- All game files of a download (or of a game folder without a game file) are one release
+  (`GameReleaseFileService`). The primary file (the GameFile) is picked as .m3u > .cue > .gdi > .ccd/.mds/.cdi >
+  single image/ROM/package/archive (base game before update/DLC, disc 1 first) > installer exe > largest. Loose files
+  of several releases (a folder of ROMs, manual import of an unknown folder) are grouped by cue/gdi/m3u references
+  and disc names. A release whose primary is an installer (.exe/.msi/.sh/.dmg) takes its whole folder tree.
+- The other files are companions: a new extra file type (`CompanionFiles` table) imported with the game file. They
+  keep their names and their path relative to the primary file's folder (or the release root), so cue sheets,
+  playlists and installers keep working. Only the primary file is renamed, and installers and CloneCD/Alcohol
+  images (.ccd/.mds) keep their original name. Companions are deleted (recycled) with their game file and moved with
+  the game folder; a file format with sub folders would leave them in place. A rescan registers other game files
+  next to the game file, everything in sub folders, and every other file for PC games, as companions.
+- ROMs in archives are game files. A RAR set (.r00/.partN.rar) or a RAR for a PC game is rejected with "needs to be
+  extracted"; executables aren't rejected anymore.
+- Manual import lists one item per release with its `companionFiles`; the import command can pass them back, if not
+  they're looked up again from the primary file.
+- Unmapped folders: root folder sub folders named like a platform's folder are platform folders, their sub folders
+  are games on that platform (`UnmappedFolder.PlatformId`); other folders are games without a platform. The library
+  import passes the platform to the lookup and to the added game.
+
+### Naming
+
+- Tokens: `{Region}` (USA, Europe), `{Languages}` (En,Fr,De), `{Version}` (v1.1 / Build 123), `{Release Type}`
+  (empty for base games), `{Disc}` (Disc 1), `{Edition}`, `{Platform}`, `{Platform Short}`, `{Platform Folder}`,
+  `{Quality Title}`/`{Quality Full}`, `{Release Group}`, `{Original Title}`, `{Custom Formats}`, `{IgdbId}`.
+  MediaInfo tokens are gone. The file-level tokens aren't allowed in the folder format.
+- Default file format: `{Game Title} ({Release Year}){ (Region)}{ [Version]}`, e.g.
+  "Super Mario World (1990) (USA, Europe) [v1.1].sfc".
+- The "in cinemas" file date option is gone, the release date option uses the game's release date on its platform.
 
 ## Indexers and download clients
 
