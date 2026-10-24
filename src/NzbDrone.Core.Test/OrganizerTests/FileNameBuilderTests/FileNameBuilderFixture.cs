@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using Moq;
@@ -12,7 +10,6 @@ using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Qualities;
@@ -59,7 +56,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
 
-            _gameFile = new GameFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "GamarrTest" };
+            _gameFile = new GameFile { Quality = new QualityModel(Quality.DiscRedump), ReleaseGroup = "GamarrTest" };
 
             Mocker.GetMock<IQualityDefinitionService>()
                 .Setup(v => v.Get(Moq.It.IsAny<Quality>()))
@@ -132,7 +129,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         [Test]
         public void should_replace_GAME_TITLE_with_random_casing_should_keep_original_casing()
         {
-            _namingConfig.StandardGameFormat = "{mOvIe-tItLE}";
+            _namingConfig.StandardGameFormat = "{gAmE-tItLE}";
 
             Subject.BuildFileName(_game, _gameFile)
                    .Should().Be(_game.Title.Replace(' ', '-'));
@@ -273,7 +270,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Quality Title}";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("HDTV-720p");
+                   .Should().Be("Disc-Redump");
         }
 
         [Test]
@@ -302,7 +299,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Game Title} [{Quality Title}]";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park [HDTV-720p]");
+                   .Should().Be("South Park [Disc-Redump]");
         }
 
         [Test]
@@ -399,94 +396,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Game.Title}.{_Quality.Title_}";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South.Park._HDTV-720p");
-        }
-
-        [Test]
-        public void should_format_mediainfo_properly()
-        {
-            _namingConfig.StandardGameFormat = "{Game.Title}.{MEDIAINFO.FULL}";
-
-            _gameFile.MediaInfo = new MediaInfoModel()
-            {
-                VideoFormat = "h264",
-                AudioFormat = "dts",
-                AudioLanguages = new List<string> { "eng", "spa" },
-                Subtitles = new List<string> { "eng", "spa", "ita" }
-            };
-
-            Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South.Park.H264.DTS[EN+ES].[EN+ES+IT]");
-        }
-
-        [TestCase("nob", "NB")]
-        [TestCase("swe", "SV")]
-        [TestCase("zho", "ZH")]
-        [TestCase("chi", "ZH")]
-        [TestCase("fre", "FR")]
-        [TestCase("rum", "RO")]
-        [TestCase("per", "FA")]
-        [TestCase("ger", "DE")]
-        [TestCase("gsw", "DE")]
-        [TestCase("cze", "CS")]
-        [TestCase("ice", "IS")]
-        [TestCase("dut", "NL")]
-        [TestCase("nor", "NO")]
-        [TestCase("khk", "MN")]
-        [TestCase("mvf", "MN")]
-        [TestCase("geo", "KA")]
-        [TestCase("kat", "KA")]
-        public void should_format_languagecodes_properly(string language, string code)
-        {
-            _namingConfig.StandardGameFormat = "{Game.Title}.{MEDIAINFO.FULL}";
-
-            _gameFile.MediaInfo = new MediaInfoModel()
-            {
-                VideoFormat = "h264",
-                AudioFormat = "dts",
-                AudioChannels = 6,
-                AudioLanguages = new List<string> { "eng" },
-                Subtitles = new List<string> { language },
-                SchemaRevision = 3
-            };
-
-            Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be($"South.Park.H264.DTS.[{code}]");
-        }
-
-        [Test]
-        public void should_exclude_english_in_mediainfo_audio_language()
-        {
-            _namingConfig.StandardGameFormat = "{Game.Title}.{MEDIAINFO.FULL}";
-
-            _gameFile.MediaInfo = new MediaInfoModel()
-            {
-                VideoFormat = "h264",
-                AudioFormat = "dts",
-                AudioLanguages = new List<string> { "eng" },
-                Subtitles = new List<string> { "eng", "spa", "ita" }
-            };
-
-            Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South.Park.H264.DTS.[EN+ES+IT]");
-        }
-
-        [Test]
-        public void should_format_mediainfo_3d_properly()
-        {
-            _namingConfig.StandardGameFormat = "{Game.Title}.{MEDIAINFO.3D}.{MediaInfo.Simple}";
-
-            _gameFile.MediaInfo = new MediaInfoModel()
-            {
-                VideoFormat = "h264",
-                VideoMultiViewCount = 2,
-                AudioFormat = "dts",
-                AudioLanguages = new List<string> { "eng" },
-                Subtitles = new List<string> { "eng", "spa", "ita" }
-            };
-
-            Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South.Park.3D.h264.DTS");
+                   .Should().Be("South.Park._Disc-Redump");
         }
 
         [Test]
@@ -531,7 +441,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Quality Title} {Quality Proper}";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("HDTV-720p");
+                   .Should().Be("Disc-Redump");
         }
 
         [Test]
@@ -542,7 +452,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             GivenProper();
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park [HDTV-720p] [Proper]");
+                   .Should().Be("South Park [Disc-Redump] [Proper]");
         }
 
         [Test]
@@ -551,7 +461,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Game Title} [{Quality Title}] {[Quality Proper]}";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park [HDTV-720p]");
+                   .Should().Be("South Park [Disc-Redump]");
         }
 
         [Test]
@@ -560,7 +470,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = "{Game Title} [{Quality Full}]";
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park [HDTV-720p]");
+                   .Should().Be("South Park [Disc-Redump]");
         }
 
         [Test]
@@ -571,7 +481,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             GivenProper();
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park [HDTV-720p Proper]");
+                   .Should().Be("South Park [Disc-Redump Proper]");
         }
 
         [Test]
@@ -581,7 +491,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             GivenReal();
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park [HDTV-720p REAL]");
+                   .Should().Be("South Park [Disc-Redump REAL]");
         }
 
         [TestCase(' ')]
@@ -593,7 +503,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}", separator);
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("HDTV-720p");
+                   .Should().Be("Disc-Redump");
         }
 
         [TestCase(' ')]
@@ -605,25 +515,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             _namingConfig.StandardGameFormat = string.Format("{{Quality{0}Title}}{0}{{Quality{0}Proper}}{0}{{Game{0}Title}}", separator);
 
             Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be(string.Format("HDTV-720p{0}South{0}Park", separator));
-        }
-
-        [TestCase("en-US")]
-        [TestCase("fr-FR")]
-        [TestCase("az")]
-        [TestCase("tr-TR")]
-        public void should_replace_all_tokens_for_different_cultures(string culture)
-        {
-            Thread.CurrentThread.CurrentCulture = new CultureInfo(culture);
-
-            _game.IgdbId = 124578;
-            _game.Year = 2020;
-            GivenMediaInfoModel();
-
-            _namingConfig.StandardGameFormat = "{Game CleanTitle} ({Release Year}) [{Quality Title}] [igdb-{IgdbId}] [{MediaInfo AudioCodec}]";
-
-            Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be("South Park (2020) [HDTV-720p] [igdb-124578] [DTS]");
+                   .Should().Be(string.Format("Disc-Redump{0}South{0}Park", separator));
         }
 
         [Test]
@@ -671,157 +563,6 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
 
             Subject.BuildFileName(_game, _gameFile)
                    .Should().Be(releaseGroup);
-        }
-
-        [TestCase("eng", "")]
-        [TestCase("eng/deu", "[EN+DE]")]
-        public void should_format_audio_languages(string audioLanguages, string expected)
-        {
-            _gameFile.ReleaseGroup = null;
-
-            GivenMediaInfoModel(audioLanguages: audioLanguages);
-
-            _namingConfig.StandardGameFormat = "{MediaInfo AudioLanguages}";
-
-            Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be(expected);
-        }
-
-        [TestCase("eng", "[EN]")]
-        [TestCase("eng/deu", "[EN+DE]")]
-        public void should_format_audio_languages_all(string audioLanguages, string expected)
-        {
-            _gameFile.ReleaseGroup = null;
-
-            GivenMediaInfoModel(audioLanguages: audioLanguages);
-
-            _namingConfig.StandardGameFormat = "{MediaInfo AudioLanguagesAll}";
-
-            Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be(expected);
-        }
-
-        [TestCase("eng/deu", "", "[EN+DE]")]
-        [TestCase("eng/nld/deu", "", "[EN+NL+DE]")]
-        [TestCase("eng/deu", ":DE", "[DE]")]
-        [TestCase("eng/nld/deu", ":EN+NL", "[EN+NL]")]
-        [TestCase("eng/nld/deu", ":NL+EN", "[NL+EN]")]
-        [TestCase("eng/nld/deu", ":-NL", "[EN+DE]")]
-        [TestCase("eng/nld/deu", ":DE+", "[DE+-]")]
-        [TestCase("eng/nld/deu", ":DE+NO.", "[DE].")]
-        [TestCase("eng/nld/deu", ":-EN-", "[NL+DE]-")]
-        public void should_format_subtitle_languages_all(string subtitleLanguages, string format, string expected)
-        {
-            _gameFile.ReleaseGroup = null;
-
-            GivenMediaInfoModel(subtitles: subtitleLanguages);
-
-            _namingConfig.StandardGameFormat = "{MediaInfo SubtitleLanguages" + format + "}End";
-
-            Subject.BuildFileName(_game, _gameFile)
-                   .Should().Be(expected + "End");
-        }
-
-        [TestCase(HdrFormat.None, "South.Park")]
-        [TestCase(HdrFormat.Hlg10, "South.Park.HDR")]
-        [TestCase(HdrFormat.Hdr10, "South.Park.HDR")]
-        public void should_include_hdr_for_mediainfo_videodynamicrange_with_valid_properties(HdrFormat hdrFormat, string expectedName)
-        {
-            _namingConfig.StandardGameFormat =
-                "{Game.Title}.{MediaInfo VideoDynamicRange}";
-
-            GivenMediaInfoModel(hdrFormat: hdrFormat);
-
-            Subject.BuildFileName(_game, _gameFile)
-                .Should().Be(expectedName);
-        }
-
-        [Test]
-        public void should_update_media_info_if_token_configured_and_revision_is_old()
-        {
-            _namingConfig.StandardGameFormat =
-                "{Game.Title}.{MediaInfo VideoDynamicRange}";
-
-            GivenMediaInfoModel(schemaRevision: 3);
-
-            Subject.BuildFileName(_game, _gameFile);
-
-            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_gameFile, _game), Times.Once());
-        }
-
-        [Test]
-        public void should_not_update_media_info_if_no_game_path_available()
-        {
-            _namingConfig.StandardGameFormat =
-                "{Game.Title}.{MediaInfo VideoDynamicRange}";
-
-            GivenMediaInfoModel(schemaRevision: 3);
-            _game.Path = null;
-
-            Subject.BuildFileName(_game, _gameFile);
-
-            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_gameFile, _game), Times.Never());
-        }
-
-        [Test]
-        public void should_not_update_media_info_if_token_not_configured_and_revision_is_old()
-        {
-            _namingConfig.StandardGameFormat =
-                "{Game.Title}";
-
-            GivenMediaInfoModel(schemaRevision: 3);
-
-            Subject.BuildFileName(_game, _gameFile);
-
-            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_gameFile, _game), Times.Never());
-        }
-
-        [Test]
-        public void should_not_update_media_info_if_token_configured_and_revision_is_current()
-        {
-            _namingConfig.StandardGameFormat =
-                "{Game.Title}.{MediaInfo VideoDynamicRange}";
-
-            GivenMediaInfoModel(schemaRevision: 5);
-
-            Subject.BuildFileName(_game, _gameFile);
-
-            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_gameFile, _game), Times.Never());
-        }
-
-        [Test]
-        public void should_not_update_media_info_if_token_configured_and_revision_is_newer()
-        {
-            _namingConfig.StandardGameFormat =
-                "{Game.Title}.{MediaInfo VideoDynamicRange}";
-
-            GivenMediaInfoModel(schemaRevision: 8);
-
-            Subject.BuildFileName(_game, _gameFile);
-
-            Mocker.GetMock<IUpdateMediaInfo>().Verify(v => v.Update(_gameFile, _game), Times.Never());
-        }
-
-        private void GivenMediaInfoModel(string videoCodec = "h264",
-            string audioCodec = "dts",
-            int audioChannels = 6,
-            int videoBitDepth = 8,
-            HdrFormat hdrFormat = HdrFormat.None,
-            string audioLanguages = "eng",
-            string subtitles = "eng/spa/ita",
-            int schemaRevision = 5)
-        {
-            _gameFile.MediaInfo = new MediaInfoModel
-            {
-                VideoFormat = videoCodec,
-                AudioFormat = audioCodec,
-                AudioChannels = audioChannels,
-                AudioLanguages = audioLanguages.Split("/").ToList(),
-                Subtitles = subtitles.Split("/").ToList(),
-                VideoBitDepth = videoBitDepth,
-                VideoHdrFormat = hdrFormat,
-                SchemaRevision = schemaRevision
-            };
         }
     }
 }

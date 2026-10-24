@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
             Mocker.GetMock<INamingConfigService>()
                   .Setup(c => c.GetConfig()).Returns(_namingConfig);
 
-            _gameFile = new GameFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "GamarrTest" };
+            _gameFile = new GameFile { Quality = new QualityModel(Quality.DiscRedump), ReleaseGroup = "GamarrTest" };
 
             Mocker.GetMock<IQualityDefinitionService>()
                 .Setup(v => v.Get(Moq.It.IsAny<Quality>()))
@@ -56,13 +56,13 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _game.Title = "The Fantastic Life of Mr. Sisko";
 
-            _gameFile.Quality.Quality = Quality.Bluray1080p;
+            _gameFile.Quality.Quality = Quality.XexGod;
             _gameFile.ReleaseGroup = "IWishIWasALittleBitTallerIWishIWasABallerIWishIHadAGirlWhoLookedGoodIWouldCallHerIWishIHadARabbitInAHatWithABatAndASixFourImpala";
             _namingConfig.StandardGameFormat = "{Game Title} ({Release Year}) {Quality Full}-{ReleaseGroup:12}";
 
             var result = Subject.BuildFileName(_game, _gameFile);
             result.Length.Should().BeLessOrEqualTo(255);
-            result.Should().Be("The Fantastic Life of Mr. Sisko (2024) Bluray-1080p-IWishIWas...");
+            result.Should().Be("The Fantastic Life of Mr. Sisko (2024) XEX-GOD-IWishIWas...");
         }
 
         [Test]
@@ -70,13 +70,13 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
         {
             _game.Title = "The Fantastic Life of Mr. Sisko";
 
-            _gameFile.Quality.Quality = Quality.Bluray1080p;
+            _gameFile.Quality.Quality = Quality.XexGod;
             _gameFile.ReleaseGroup = "IWishIWasALittleBitTallerIWishIWasABallerIWishIHadAGirlWhoLookedGoodIWouldCallHerIWishIHadARabbitInAHatWithABatAndASixFourImpala";
             _namingConfig.StandardGameFormat = "{Game Title} ({Release Year}) {Quality Full}-{ReleaseGroup:-17}";
 
             var result = Subject.BuildFileName(_game, _gameFile);
             result.Length.Should().BeLessOrEqualTo(255);
-            result.Should().Be("The Fantastic Life of Mr. Sisko (2024) Bluray-1080p-...ASixFourImpala");
+            result.Should().Be("The Fantastic Life of Mr. Sisko (2024) XEX-GOD-...ASixFourImpala");
         }
     }
 }

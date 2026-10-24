@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.MediaInfo;
+using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Qualities;
 
@@ -26,28 +27,19 @@ namespace NzbDrone.Core.Organizer
         {
             _buildFileNames = buildFileNames;
 
-            var mediaInfo = new MediaInfoModel
-            {
-                VideoFormat = "AVC",
-                VideoBitDepth = 10,
-                VideoMultiViewCount = 2,
-                VideoColourPrimaries = "bt2020",
-                VideoTransferCharacteristics = "HLG",
-                AudioFormat = "DTS",
-                AudioChannels = 6,
-                AudioChannelPositions = "5.1",
-                AudioLanguages = new List<string> { "ger" },
-                Subtitles = new List<string> { "eng", "ger" }
-            };
-
             _gameFile = new GameFile
             {
-                Quality = new QualityModel(Quality.Bluray1080p, new Revision(2)),
-                RelativePath = "The.Game.Title.2010.1080p.BluRay.DTS.x264-EVOLVE.mkv",
-                SceneName = "The.Game.Title.2010.1080p.BluRay.DTS.x264-EVOLVE",
-                ReleaseGroup = "EVOLVE",
-                MediaInfo = mediaInfo,
-                Edition = "Ultimate extended edition",
+                Quality = new QualityModel(Quality.RomVerified, new Revision(2)),
+                RelativePath = "Game Title, The (USA, Europe) (En,Fr,De) (Rev 1).sfc",
+                SceneName = "Game.Title.USA.SNES-GAMARR",
+                ReleaseGroup = "GAMARR",
+                Edition = "Deluxe edition",
+                Regions = new List<Region> { Region.USA, Region.Europe },
+                Languages = new List<Language> { Language.English, Language.French, Language.German },
+                Version = "1.1",
+                ReleaseType = ReleaseType.Base,
+                DiscNumber = 1,
+                DiscCount = 2
             };
 
             _game = new Game
@@ -75,12 +67,12 @@ namespace NzbDrone.Core.Organizer
             {
                 new CustomFormat
                 {
-                    Name = "Surround Sound",
+                    Name = "Verified",
                     IncludeCustomFormatWhenRenaming = true
                 },
                 new CustomFormat
                 {
-                    Name = "x264",
+                    Name = "No-Intro",
                     IncludeCustomFormatWhenRenaming = true
                 }
             };

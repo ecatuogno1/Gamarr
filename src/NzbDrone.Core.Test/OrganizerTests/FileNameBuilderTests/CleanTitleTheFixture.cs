@@ -26,7 +26,7 @@ namespace NzbDrone.Core.Test.OrganizerTests.FileNameBuilderTests
                     .CreateNew()
                     .Build();
 
-            _gameFile = new GameFile { Quality = new QualityModel(Quality.HDTV720p), ReleaseGroup = "GamarrTest" };
+            _gameFile = new GameFile { Quality = new QualityModel(Quality.DiscRedump), ReleaseGroup = "GamarrTest" };
 
             _namingConfig = NamingConfig.Default;
             _namingConfig.RenameGames = true;

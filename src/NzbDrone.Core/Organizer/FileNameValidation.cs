@@ -9,7 +9,7 @@ namespace NzbDrone.Core.Organizer
 {
     public static class FileNameValidation
     {
-        public static readonly Regex DeprecatedGameFolderTokensRegex = new(@"(\{[- ._\[\(]?(?:Original[- ._](?:Title|Filename)|Release[- ._]Group|Edition[- ._]Tags|Quality[- ._](?:Full|Title|Proper|Real)|MediaInfo[- ._](?:Video|VideoCodec|VideoBitDepth|Audio|AudioCodec|AudioChannels|AudioLanguages|AudioLanguagesAll|SubtitleLanguages|SubtitleLanguagesAll|3D|Simple|Full|VideoDynamicRange|VideoDynamicRangeType))[- ._\]\)]?\})",
+        public static readonly Regex DeprecatedGameFolderTokensRegex = new(@"(\{[- ._\[\(]?(?:Original[- ._](?:Title|Filename)|Release[- ._]Group|Edition[- ._]Tags|Edition|Quality[- ._](?:Full|Title|Proper|Real)|Region|Version|Release[- ._]Type|Disc|Languages)[- ._\]\)]?\})",
                                                                             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         internal static readonly Regex OriginalTokenRegex = new(@"(\{Original[- ._](?:Title|Filename)\})",
