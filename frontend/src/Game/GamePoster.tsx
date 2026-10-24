@@ -1,8 +1,27 @@
 import React from 'react';
 import GameImage, { GameImageProps } from './GameImage';
 
-const posterPlaceholder =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKgAAAD3CAMAAAC+Te+kAAAAZlBMVEUvLi8vLy8vLzAvMDAwLy8wLzAwMDAwMDEwMTExMDAxMDExMTExMTIxMjIyMjIyMjMyMzMzMjMzMzMzMzQzNDQ0NDQ0NDU0NTU1NTU1NTY1NjY2NTY2NjY2Njc2Nzc3Njc3Nzc3NziHChLWAAAAAWJLR0QAiAUdSAAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+MKCgEdHeShUbsAAALZSURBVHja7dxNcuwgDEZR1qAVmP1vMrNUJe91GfTzCSpXo575lAymjYWGXRIDKFCgQIECBQoUKFCgQIECBQoUKFCgQIECBQoUKFCgQIECBQoUKNA/AZ3fcTR0/owjofNDnAadnwPoPnS+xTXQeQZ0rkQ/dC4H0Gzo7ITO3bgGOnug/2PcAF3Mczt0fUj0QncG7znQBupw3PkWqh8qpkagpnyqjuArkkxaC02kRqGypCZANVYFdJZCdy9WTRVB5znQ6qTmjFFBWnOhdg20Lqnp0CpqAbRmAJRAK5JaA32zngTNvv910OSkVkJTs1oLtWugeTkNQZ/nkT2rotBHldUwNE6VQTVWGTQ6AHKggqGaBS23JkKf0hUgE1qa01Ro5fzPhoapR0HtCGg4q0poSCqFRgaAFhqxqqEr1EOgmdJaqHdaHQq1I6CunPZAHdY2aIJUBN2V9kE3H1Wd0BXrNVA7BLpgdUCtALo8pZqhdgd0Z6OyE7q1pdoH3dv7tS7o7iZ1E3R/N70Huuz795cQao65vvkqooT+vEgDdPcbj2s3zxTv9Qt/7cuhdgfUo2yAOplyqNuphfqZSqhFmEJo0HkcdPZCo0rRymRxpwSawHR+YtyBZihfvi+nQO0OqCmcYahGqYPGS4qCUJkzBpUpJdCkordyaFZxXi1UUpaZAJ2XQFOLh8ug2XXjVdD0+vYiqLIO3w1VH8EogtoxUPnpGxe04zyTA1p57i4T2nTmbnnnUuLMg1afYE2C1h+1zYEKjlknQLtPg9tb3YzU+dL054qOBb8cvcz3DlqBZhUmhdrnKo9j+pR0rkN5UHkznZHPtJIYN2TTCe1poTUyk9nWPO0bt8Ys7Ug34mlUMONtPUXMaEdXnXN1MnUzN2Z9q3Lr8XQN1DaLQJpXpiamZwltYdIUHShQoECBAgUKFChQoECBAgUKFChQoECBAgUKFChQoECBAgUKFCjQ+vgCff/mEp/vtiIAAAAASUVORK5CYII=';
+// A faint game controller on the dark poster background (168x247, like a 3:4 cover)
+const posterPlaceholderSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 247">
+<rect width="168" height="247" fill="#2f2f2f"/>
+<g fill="#3a3a3a" transform="translate(14 54) scale(0.274)">
+<rect x="72" y="146" width="368" height="178" rx="89"/>
+<ellipse cx="138" cy="302" rx="72" ry="100" transform="rotate(24 138 302)"/>
+<ellipse cx="374" cy="302" rx="72" ry="100" transform="rotate(-24 374 302)"/>
+</g>
+<g fill="#2f2f2f" transform="translate(14 54) scale(0.274)">
+<rect x="148" y="190" width="34" height="96" rx="7"/>
+<rect x="117" y="221" width="96" height="34" rx="7"/>
+<circle cx="352" cy="200" r="19"/>
+<circle cx="392" cy="238" r="19"/>
+<circle cx="312" cy="238" r="19"/>
+<circle cx="352" cy="276" r="19"/>
+</g>
+</svg>`;
+
+const posterPlaceholder = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+  posterPlaceholderSvg
+)}`;
 
 interface GamePosterProps
   extends Omit<GameImageProps, 'coverType' | 'placeholder'> {
