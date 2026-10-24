@@ -34,6 +34,7 @@ using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Notifications;
 using NzbDrone.Core.Organizer;
 using NzbDrone.Core.Parser.Model;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Profiles;
 using NzbDrone.Core.Profiles.Delay;
 using NzbDrone.Core.Profiles.Qualities;
@@ -177,6 +178,8 @@ namespace NzbDrone.Core.Datastore
             Mapper.Entity<GameCollection>("Collections").RegisterModel();
 
             Mapper.Entity<AutoTagging.AutoTag>("AutoTagging").RegisterModel();
+
+            Mapper.Entity<Platform>("Platforms").RegisterModel();
         }
 
         private static void RegisterMappers()
