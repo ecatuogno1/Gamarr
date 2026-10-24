@@ -235,7 +235,7 @@ function GeneralSettings() {
       <ConfirmModal
         isOpen={isRestartRequiredModalOpen}
         kind={kinds.DANGER}
-        title={translate('RestartRadarr')}
+        title={translate('RestartGamarr')}
         message={`${translate('RestartRequiredToApplyChanges')} ${
           isWindowsService ? translate('RestartRequiredWindowsService') : ''
         }`}

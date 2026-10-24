@@ -35,7 +35,7 @@ interface QueryOptions<T> {
     | undefined;
 }
 
-const apiRoot = window.Radarr.apiRoot;
+const apiRoot = window.Gamarr.apiRoot;
 
 function useApiQuery<T>(options: QueryOptions<T>) {
   const { path, headers } = useMemo(() => {
@@ -43,7 +43,7 @@ function useApiQuery<T>(options: QueryOptions<T>) {
       path: apiRoot + options.path,
       headers: {
         ...options.headers,
-        'X-Api-Key': window.Radarr.apiKey,
+        'X-Api-Key': window.Gamarr.apiKey,
       },
     };
   }, [options]);

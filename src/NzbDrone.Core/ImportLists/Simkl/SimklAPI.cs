@@ -5,24 +5,24 @@ using Newtonsoft.Json;
 
 namespace NzbDrone.Core.ImportLists.Simkl
 {
-    public class SimklMovieIdsResource
+    public class SimklGameIdsResource
     {
         public int Simkl { get; set; }
         public string Imdb { get; set; }
-        public string Tmdb { get; set; }
+        public string Igdb { get; set; }
         public string Mal { get; set; }
     }
 
-    public class SimklMoviePropsResource
+    public class SimklGamePropsResource
     {
         public string Title { get; set; }
         public int? Year { get; set; }
-        public SimklMovieIdsResource Ids { get; set; }
+        public SimklGameIdsResource Ids { get; set; }
     }
 
-    public class SimklMovieResource
+    public class SimklGameResource
     {
-        public SimklMoviePropsResource Movie { get; set; }
+        public SimklGamePropsResource Game { get; set; }
 
         [JsonProperty("anime_type")]
         public SimklAnimeType AnimeType { get; set; }
@@ -30,7 +30,7 @@ namespace NzbDrone.Core.ImportLists.Simkl
 
     public class SimklShowResource
     {
-        public SimklMoviePropsResource Show { get; set; }
+        public SimklGamePropsResource Show { get; set; }
 
         [JsonProperty("anime_type")]
         public SimklAnimeType AnimeType { get; set; }
@@ -38,7 +38,7 @@ namespace NzbDrone.Core.ImportLists.Simkl
 
     public class SimklResponse
     {
-        public List<SimklMovieResource> Movies { get; set; }
+        public List<SimklGameResource> Games { get; set; }
         public List<SimklShowResource> Anime { get; set; }
     }
 
@@ -70,14 +70,14 @@ namespace NzbDrone.Core.ImportLists.Simkl
 
     public class SimklSyncActivityResource
     {
-        [JsonProperty("movies")]
-        public SimklMoviesSyncActivityResource Movies { get; set; }
+        [JsonProperty("games")]
+        public SimklGamesSyncActivityResource Games { get; set; }
 
         [JsonProperty("anime")]
-        public SimklMoviesSyncActivityResource Anime { get; set; }
+        public SimklGamesSyncActivityResource Anime { get; set; }
     }
 
-    public class SimklMoviesSyncActivityResource
+    public class SimklGamesSyncActivityResource
     {
         public DateTime All { get; set; }
     }
@@ -86,7 +86,7 @@ namespace NzbDrone.Core.ImportLists.Simkl
     {
         Unknown,
         Tv,
-        Movie,
+        Game,
         Ova,
         Ona,
         Special,

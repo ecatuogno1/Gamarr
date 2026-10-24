@@ -15,20 +15,20 @@ public class TraktSmartListRequestGenerator : IImportListRequestGenerator
         _traktProxy = traktProxy;
     }
 
-    public virtual ImportListPageableRequestChain GetMovies()
+    public virtual ImportListPageableRequestChain GetGames()
     {
         var pageableRequests = new ImportListPageableRequestChain();
 
-        pageableRequests.Add(GetMoviesRequest());
+        pageableRequests.Add(GetGamesRequest());
 
         return pageableRequests;
     }
 
-    private IEnumerable<ImportListRequest> GetMoviesRequest()
+    private IEnumerable<ImportListRequest> GetGamesRequest()
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(Settings.SmartListId);
 
-        var link = $"smart-lists/{Settings.SmartListId}/items/movies?limit={Settings.Limit}";
+        var link = $"smart-lists/{Settings.SmartListId}/items/games?limit={Settings.Limit}";
 
         yield return new ImportListRequest(_traktProxy.BuildRequest(link, HttpMethod.Get, Settings.AccessToken));
     }

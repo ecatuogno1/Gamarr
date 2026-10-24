@@ -9,10 +9,10 @@ import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import TableRow from 'Components/Table/TableRow';
 import Popover from 'Components/Tooltip/Popover';
 import Tooltip from 'Components/Tooltip/Tooltip';
+import GameFormats from 'Game/GameFormats';
+import GameLanguages from 'Game/GameLanguages';
+import GameQuality from 'Game/GameQuality';
 import { icons, kinds, tooltipPositions } from 'Helpers/Props';
-import MovieFormats from 'Movie/MovieFormats';
-import MovieLanguages from 'Movie/MovieLanguages';
-import MovieQuality from 'Movie/MovieQuality';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import Release from 'typings/Release';
 import formatDateTime from 'Utilities/Date/formatDateTime';
@@ -94,7 +94,7 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
     languages,
     customFormatScore,
     customFormats,
-    mappedMovieId,
+    mappedGameId,
     indexerFlags = [],
     rejections = [],
     downloadAllowed,
@@ -245,11 +245,11 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
       </TableRowCell>
 
       <TableRowCell className={styles.languages}>
-        <MovieLanguages languages={languages} />
+        <GameLanguages languages={languages} />
       </TableRowCell>
 
       <TableRowCell className={styles.quality}>
-        <MovieQuality quality={quality} showRevision={true} />
+        <GameQuality quality={quality} showRevision={true} />
       </TableRowCell>
 
       <TableRowCell className={styles.customFormatScore}>
@@ -258,7 +258,7 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
             customFormatScore,
             customFormats.length
           )}
-          tooltip={<MovieFormats formats={customFormats} />}
+          tooltip={<GameFormats formats={customFormats} />}
           position={tooltipPositions.LEFT}
         />
       </TableRowCell>
@@ -342,7 +342,7 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
         title={title}
         indexerId={indexerId}
         guid={guid}
-        movieId={mappedMovieId}
+        gameId={mappedGameId}
         languages={languages}
         quality={quality}
         protocol={protocol}

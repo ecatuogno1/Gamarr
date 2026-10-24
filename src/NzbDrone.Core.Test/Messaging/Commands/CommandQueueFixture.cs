@@ -2,9 +2,9 @@ using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.Games.Commands;
 using NzbDrone.Core.ImportLists;
 using NzbDrone.Core.Messaging.Commands;
-using NzbDrone.Core.Movies.Commands;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Core.Update.Commands;
 
@@ -130,8 +130,8 @@ namespace NzbDrone.Core.Test.Messaging.Commands
 
             var newCommandModel = Builder<CommandModel>
                 .CreateNew()
-                .With(c => c.Name = "RefreshMovie")
-                .With(c => c.Body = new RefreshMovieCommand())
+                .With(c => c.Name = "RefreshGame")
+                .With(c => c.Body = new RefreshGameCommand())
                 .Build();
 
             Subject.Add(newCommandModel);
@@ -167,8 +167,8 @@ namespace NzbDrone.Core.Test.Messaging.Commands
 
             var newCommandModel = Builder<CommandModel>
                 .CreateNew()
-                .With(c => c.Name = "RefreshMovie")
-                .With(c => c.Body = new RefreshMovieCommand())
+                .With(c => c.Name = "RefreshGame")
+                .With(c => c.Body = new RefreshGameCommand())
                 .Build();
 
             Subject.Add(newCommandModel);

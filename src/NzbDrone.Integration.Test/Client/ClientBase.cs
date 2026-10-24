@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using FluentAssertions;
+using Gamarr.Http;
+using Gamarr.Http.REST;
 using NLog;
 using NzbDrone.Common.Serializer;
-using Radarr.Http;
-using Radarr.Http.REST;
 using RestSharp;
 
 namespace NzbDrone.Integration.Test.Client

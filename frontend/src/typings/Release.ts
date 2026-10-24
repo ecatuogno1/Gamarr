@@ -21,11 +21,11 @@ interface Release {
   languages: Language[];
   customFormats: CustomFormat[];
   customFormatScore: number;
-  mappedMovieId?: number;
+  mappedGameId?: number;
   indexerFlags: string[];
   rejections: string[];
   history?: ReleaseHistory;
-  movieRequested: boolean;
+  gameRequested: boolean;
   downloadAllowed: boolean;
 
   isGrabbing?: boolean;

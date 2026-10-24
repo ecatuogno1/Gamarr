@@ -1,7 +1,7 @@
 ﻿using FluentValidation.TestHelper;
+using Gamarr.Api.V3.Qualities;
 using NUnit.Framework;
 using NzbDrone.Core.Qualities;
-using Radarr.Api.V3.Qualities;
 
 namespace NzbDrone.Api.Test.v3.Qualities;
 

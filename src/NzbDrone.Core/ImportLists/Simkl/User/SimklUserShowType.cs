@@ -1,8 +1,8 @@
 namespace NzbDrone.Core.ImportLists.Simkl.User
 {
-    public enum SimklUserMovieType
+    public enum SimklUserGameType
     {
-        Movies = 0,
+        Games = 0,
         Anime = 1
     }
 }

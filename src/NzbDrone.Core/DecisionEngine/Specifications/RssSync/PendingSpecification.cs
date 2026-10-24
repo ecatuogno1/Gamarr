@@ -20,7 +20,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
         public SpecificationPriority Priority => SpecificationPriority.Database;
         public RejectionType Type => RejectionType.Temporary;
 
-        public DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, ReleaseDecisionInformation information)
+        public DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, ReleaseDecisionInformation information)
         {
             // Skip this check for RSS sync and interactive searches,
 
@@ -37,14 +37,14 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
 
             var pending = _pendingReleaseService.GetPendingQueue();
 
-            var matchingMovie = pending.Where(q => q.RemoteMovie?.Movie != null &&
-                                                   q.RemoteMovie.Movie.Id == subject.Movie.Id)
+            var matchingGame = pending.Where(q => q.RemoteGame?.Game != null &&
+                                                   q.RemoteGame.Game.Id == subject.Game.Id)
                 .ToList();
 
-            if (matchingMovie.Any())
+            if (matchingGame.Any())
             {
-                _logger.Debug("Release containing at least one matching movie is already pending. Delaying pushed release");
-                return DownloadSpecDecision.Reject(DownloadRejectionReason.MinimumAgeDelayPushed, "Release containing at least one matching movie is already pending, delaying pushed release");
+                _logger.Debug("Release containing at least one matching game is already pending. Delaying pushed release");
+                return DownloadSpecDecision.Reject(DownloadRejectionReason.MinimumAgeDelayPushed, "Release containing at least one matching game is already pending, delaying pushed release");
             }
 
             return DownloadSpecDecision.Accept();

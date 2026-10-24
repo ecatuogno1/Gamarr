@@ -10,7 +10,7 @@ namespace NzbDrone.Core.ImportLists.Simkl.User
 
         public string ClientId { get; set; }
 
-        public virtual ImportListPageableRequestChain GetMovies()
+        public virtual ImportListPageableRequestChain GetGames()
         {
             var pageableRequests = new ImportListPageableRequestChain();
 
@@ -21,7 +21,7 @@ namespace NzbDrone.Core.ImportLists.Simkl.User
 
         private IEnumerable<ImportListRequest> GetSeriesRequest()
         {
-            var link = $"{Settings.BaseUrl.Trim()}/sync/all-items/{((SimklUserMovieType)Settings.MovieType).ToString().ToLowerInvariant()}/{((SimklUserListType)Settings.ListType).ToString().ToLowerInvariant()}";
+            var link = $"{Settings.BaseUrl.Trim()}/sync/all-items/{((SimklUserGameType)Settings.GameType).ToString().ToLowerInvariant()}/{((SimklUserListType)Settings.ListType).ToString().ToLowerInvariant()}";
 
             var request = new ImportListRequest(link, HttpAccept.Json);
 

@@ -170,7 +170,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.RQBitTests
         {
             GivenSuccessfulDownload();
 
-            var remoteEpisode = CreateRemoteMovie();
+            var remoteEpisode = CreateRemoteGame();
 
             var id = await Subject.Download(remoteEpisode, CreateIndexer());
 
@@ -182,7 +182,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.RQBitTests
         {
             GivenSuccessfulDownload();
 
-            var remoteEpisode = CreateRemoteMovie();
+            var remoteEpisode = CreateRemoteGame();
             remoteEpisode.Release.DownloadUrl = magnetUrl;
 
             var id = await Subject.Download(remoteEpisode, CreateIndexer());

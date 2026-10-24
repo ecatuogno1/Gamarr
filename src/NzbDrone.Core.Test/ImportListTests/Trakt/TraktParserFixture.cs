@@ -20,46 +20,46 @@ namespace NzbDrone.Core.Test.ImportListTests.Trakt
         }
 
         [Test]
-        public void should_parse_movie_with_valid_tmdb_id()
+        public void should_parse_game_with_valid_igdb_id()
         {
             var json = @"[
               {
-                ""type"": ""movie"",
-                ""movie"": {
+                ""type"": ""game"",
+                ""game"": {
                   ""title"": ""Rogue One: A Star Wars Story"",
                   ""year"": 2016,
-                  ""ids"": { ""trakt"": 190420, ""slug"": ""rogue-one"", ""imdb"": ""tt3748528"", ""tmdb"": 330459 }
+                  ""ids"": { ""trakt"": 190420, ""slug"": ""rogue-one"", ""imdb"": ""tt3748528"", ""igdb"": 330459 }
                 }
               }
             ]";
 
-            var result = Subject.ParseResponse(CreateResponse("http://api.trakt.tv/users/me/watchlist/movies", json));
+            var result = Subject.ParseResponse(CreateResponse("http://api.trakt.tv/users/me/watchlist/games", json));
 
             result.Should().HaveCount(1);
             result.First().Title.Should().Be("Rogue One: A Star Wars Story");
-            result.First().TmdbId.Should().Be(330459);
+            result.First().IgdbId.Should().Be(330459);
             result.First().ImdbId.Should().Be("tt3748528");
             result.First().Year.Should().Be(2016);
         }
 
         [Test]
-        public void should_not_throw_when_entry_has_null_tmdb_id()
+        public void should_not_throw_when_entry_has_null_igdb_id()
         {
             var json = @"[
               {
-                ""type"": ""movie"",
-                ""movie"": {
+                ""type"": ""game"",
+                ""game"": {
                   ""title"": ""Nosferatu"",
                   ""year"": null,
-                  ""ids"": { ""trakt"": 287264, ""slug"": ""nosferatu"", ""imdb"": null, ""tmdb"": null }
+                  ""ids"": { ""trakt"": 287264, ""slug"": ""nosferatu"", ""imdb"": null, ""igdb"": null }
                 }
               }
             ]";
 
-            var result = Subject.ParseResponse(CreateResponse("http://api.trakt.tv/users/me/watchlist/movies", json));
+            var result = Subject.ParseResponse(CreateResponse("http://api.trakt.tv/users/me/watchlist/games", json));
 
             result.Should().HaveCount(1);
-            result.First().TmdbId.Should().Be(0);
+            result.First().IgdbId.Should().Be(0);
         }
     }
 }

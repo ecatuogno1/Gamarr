@@ -6,15 +6,15 @@ using NLog;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Localization;
-using NzbDrone.Core.Movies;
 
 namespace NzbDrone.Core.Notifications.Emby
 {
     public interface IMediaBrowserService
     {
         void Notify(MediaBrowserSettings settings, string title, string message);
-        void Update(MediaBrowserSettings settings, Movie movie, string updateType);
+        void Update(MediaBrowserSettings settings, Game game, string updateType);
         ValidationFailure Test(MediaBrowserSettings settings);
     }
 
@@ -36,11 +36,11 @@ namespace NzbDrone.Core.Notifications.Emby
             _proxy.Notify(settings, title, message);
         }
 
-        public void Update(MediaBrowserSettings settings, Movie movie, string updateType)
+        public void Update(MediaBrowserSettings settings, Game game, string updateType)
         {
-            var paths = _proxy.GetPaths(settings, movie);
+            var paths = _proxy.GetPaths(settings, game);
 
-            var mappedPath = new OsPath(movie.Path);
+            var mappedPath = new OsPath(game.Path);
 
             if (settings.MapTo.IsNotNullOrWhiteSpace())
             {
@@ -84,7 +84,7 @@ namespace NzbDrone.Core.Notifications.Emby
             {
                 try
                 {
-                    Notify(settings, "Test from Radarr", "Success! MediaBrowser has been successfully configured!");
+                    Notify(settings, "Test from Gamarr", "Success! MediaBrowser has been successfully configured!");
                 }
                 catch (HttpException ex)
                 {

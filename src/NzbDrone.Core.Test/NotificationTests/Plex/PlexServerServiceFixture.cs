@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Cache;
-using NzbDrone.Core.Movies;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Notifications.Plex.Server;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Test.Framework;
@@ -12,9 +12,9 @@ namespace NzbDrone.Core.Test.NotificationTests.Plex
 {
     public class PlexServerServiceFixture : CoreTest<PlexServerService>
     {
-        private const string RootFolderPath = @"C:\Test\Movies";
+        private const string RootFolderPath = @"C:\Test\Games";
 
-        private Movie _movie;
+        private Game _game;
         private PlexServerSettings _settings;
 
         [SetUp]
@@ -22,9 +22,9 @@ namespace NzbDrone.Core.Test.NotificationTests.Plex
         {
             Mocker.SetConstant<ICacheManager>(Mocker.Resolve<CacheManager>());
 
-            _movie = new Movie
+            _game = new Game
             {
-                Path = @"C:\Test\Movies\Movie Title (2020)".AsOsAgnostic()
+                Path = @"C:\Test\Games\Game Title (2020)".AsOsAgnostic()
             };
 
             _settings = new PlexServerSettings
@@ -59,7 +59,7 @@ namespace NzbDrone.Core.Test.NotificationTests.Plex
         }
 
         [Test]
-        public void should_update_all_sections_matching_the_movie_path()
+        public void should_update_all_sections_matching_the_game_path()
         {
             var sections = new List<PlexSection>
             {
@@ -68,10 +68,10 @@ namespace NzbDrone.Core.Test.NotificationTests.Plex
             };
 
             Mocker.GetMock<IPlexServerProxy>()
-                .Setup(s => s.GetMovieSections(_settings))
+                .Setup(s => s.GetGameSections(_settings))
                 .Returns(sections);
 
-            Subject.UpdateLibrary(_movie, _settings);
+            Subject.UpdateLibrary(_game, _settings);
 
             Mocker.GetMock<IPlexServerProxy>()
                 .Verify(v => v.Update(1, It.IsAny<string>(), _settings), Times.Once());
@@ -92,16 +92,16 @@ namespace NzbDrone.Core.Test.NotificationTests.Plex
             nonMatchingSection.Locations.Add(new PlexSectionLocation
             {
                 Id = 2,
-                Path = @"C:\Test\OtherMovies".AsOsAgnostic()
+                Path = @"C:\Test\OtherGames".AsOsAgnostic()
             });
 
             var sections = new List<PlexSection> { matchingSection, nonMatchingSection };
 
             Mocker.GetMock<IPlexServerProxy>()
-                .Setup(s => s.GetMovieSections(_settings))
+                .Setup(s => s.GetGameSections(_settings))
                 .Returns(sections);
 
-            Subject.UpdateLibrary(_movie, _settings);
+            Subject.UpdateLibrary(_game, _settings);
 
             Mocker.GetMock<IPlexServerProxy>()
                 .Verify(v => v.Update(1, It.IsAny<string>(), _settings), Times.Once());
@@ -121,10 +121,10 @@ namespace NzbDrone.Core.Test.NotificationTests.Plex
             var sections = new List<PlexSection> { section };
 
             Mocker.GetMock<IPlexServerProxy>()
-                .Setup(s => s.GetMovieSections(_settings))
+                .Setup(s => s.GetGameSections(_settings))
                 .Returns(sections);
 
-            Subject.UpdateLibrary(_movie, _settings);
+            Subject.UpdateLibrary(_game, _settings);
 
             Mocker.GetMock<IPlexServerProxy>()
                 .Verify(v => v.Update(1, It.IsAny<string>(), _settings), Times.Once());
@@ -139,14 +139,14 @@ namespace NzbDrone.Core.Test.NotificationTests.Plex
                 new PlexSection { Id = 2 }
             };
 
-            sections[0].Locations.Add(new PlexSectionLocation { Id = 1, Path = @"C:\Test\OtherMovies".AsOsAgnostic() });
-            sections[1].Locations.Add(new PlexSectionLocation { Id = 2, Path = @"C:\Test\OtherMovies2".AsOsAgnostic() });
+            sections[0].Locations.Add(new PlexSectionLocation { Id = 1, Path = @"C:\Test\OtherGames".AsOsAgnostic() });
+            sections[1].Locations.Add(new PlexSectionLocation { Id = 2, Path = @"C:\Test\OtherGames2".AsOsAgnostic() });
 
             Mocker.GetMock<IPlexServerProxy>()
-                .Setup(s => s.GetMovieSections(_settings))
+                .Setup(s => s.GetGameSections(_settings))
                 .Returns(sections);
 
-            Subject.UpdateLibrary(_movie, _settings);
+            Subject.UpdateLibrary(_game, _settings);
 
             Mocker.GetMock<IPlexServerProxy>()
                 .Verify(v => v.Update(1, It.IsAny<string>(), _settings), Times.Once());

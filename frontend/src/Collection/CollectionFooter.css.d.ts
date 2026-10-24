@@ -7,7 +7,7 @@ interface CssExports {
   'buttons': string;
   'excludeSelectedButton': string;
   'inputContainer': string;
-  'selectedMovieLabel': string;
+  'selectedGameLabel': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

@@ -53,21 +53,21 @@ namespace NzbDrone.Core.Test.ImportListTests.Trakt
         }
 
         [Test]
-        public void should_request_movie_items_of_the_smart_list()
+        public void should_request_game_items_of_the_smart_list()
         {
-            var tiers = Subject.GetMovies().GetAllTiers().ToList();
+            var tiers = Subject.GetGames().GetAllTiers().ToList();
 
             tiers.Should().HaveCount(1);
 
             var request = tiers.First().First().HttpRequest;
 
-            request.Url.FullUri.Should().Be("https://api.trakt.tv/smart-lists/sci-fi-picks-1a2b3c4d5e6f7a8b/items/movies?limit=250");
+            request.Url.FullUri.Should().Be("https://api.trakt.tv/smart-lists/sci-fi-picks-1a2b3c4d5e6f7a8b/items/games?limit=250");
         }
 
         [Test]
         public void should_send_the_access_token()
         {
-            Subject.GetMovies().GetAllTiers().First().ToList();
+            Subject.GetGames().GetAllTiers().First().ToList();
 
             Mocker.GetMock<ITraktProxy>()
                 .Verify(v => v.BuildRequest(It.IsAny<string>(), HttpMethod.Get, "token"), Times.Once());

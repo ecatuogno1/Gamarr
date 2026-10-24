@@ -7,10 +7,10 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Download.Aggregation;
 using NzbDrone.Core.Download.History;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.History;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Events;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 
@@ -27,16 +27,16 @@ namespace NzbDrone.Core.Download.TrackedDownloads
     }
 
     public class TrackedDownloadService : ITrackedDownloadService,
-                                          IHandle<MovieGrabbedEvent>,
-                                          IHandle<MovieAddedEvent>,
-                                          IHandle<MovieEditedEvent>,
-                                          IHandle<MoviesBulkEditedEvent>,
-                                          IHandle<MoviesDeletedEvent>
+                                          IHandle<GameGrabbedEvent>,
+                                          IHandle<GameAddedEvent>,
+                                          IHandle<GameEditedEvent>,
+                                          IHandle<GamesBulkEditedEvent>,
+                                          IHandle<GamesDeletedEvent>
     {
         private readonly IParsingService _parsingService;
         private readonly IHistoryService _historyService;
         private readonly IDownloadHistoryService _downloadHistoryService;
-        private readonly IRemoteMovieAggregationService _aggregationService;
+        private readonly IRemoteGameAggregationService _aggregationService;
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
@@ -46,7 +46,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
         public TrackedDownloadService(IParsingService parsingService,
                                       IHistoryService historyService,
                                       IDownloadHistoryService downloadHistoryService,
-                                      IRemoteMovieAggregationService aggregationService,
+                                      IRemoteGameAggregationService aggregationService,
                                       ICustomFormatCalculationService formatCalculator,
                                       IEventAggregator eventAggregator,
                                       ICacheManager cacheManager,
@@ -124,13 +124,13 @@ namespace NzbDrone.Core.Download.TrackedDownloads
                     trackedDownload.State = state;
                 }
 
-                var parsedMovieInfo = Parser.Parser.ParseMovieTitle(trackedDownload.DownloadItem.Title);
+                var parsedGameInfo = Parser.Parser.ParseGameTitle(trackedDownload.DownloadItem.Title);
 
-                if (parsedMovieInfo != null)
+                if (parsedGameInfo != null)
                 {
-                    trackedDownload.RemoteMovie = downloadHistory is { EventType: DownloadHistoryEventType.DownloadImported }
-                        ? _parsingService.Map(parsedMovieInfo, downloadHistory.MovieId)
-                        : _parsingService.Map(parsedMovieInfo, "", 0, null);
+                    trackedDownload.RemoteGame = downloadHistory is { EventType: DownloadHistoryEventType.DownloadImported }
+                        ? _parsingService.Map(parsedGameInfo, downloadHistory.GameId)
+                        : _parsingService.Map(parsedGameInfo, "", 0, null);
                 }
 
                 var historyItems = _historyService.FindByDownloadId(downloadItem.DownloadId)
@@ -140,66 +140,66 @@ namespace NzbDrone.Core.Download.TrackedDownloads
                 if (historyItems.Any())
                 {
                     var firstHistoryItem = historyItems.First();
-                    var grabbedEvent = historyItems.FirstOrDefault(v => v.EventType == MovieHistoryEventType.Grabbed);
+                    var grabbedEvent = historyItems.FirstOrDefault(v => v.EventType == GameHistoryEventType.Grabbed);
 
                     trackedDownload.Indexer = grabbedEvent?.Data?.GetValueOrDefault("indexer");
                     trackedDownload.Added = grabbedEvent?.Date;
 
-                    if (parsedMovieInfo == null ||
-                        trackedDownload.RemoteMovie?.Movie == null)
+                    if (parsedGameInfo == null ||
+                        trackedDownload.RemoteGame?.Game == null)
                     {
-                        parsedMovieInfo = Parser.Parser.ParseMovieTitle(firstHistoryItem.SourceTitle);
+                        parsedGameInfo = Parser.Parser.ParseGameTitle(firstHistoryItem.SourceTitle);
 
-                        if (parsedMovieInfo != null)
+                        if (parsedGameInfo != null)
                         {
-                            trackedDownload.RemoteMovie = _parsingService.Map(parsedMovieInfo,
-                                firstHistoryItem.MovieId);
+                            trackedDownload.RemoteGame = _parsingService.Map(parsedGameInfo,
+                                firstHistoryItem.GameId);
                         }
                     }
 
-                    if (trackedDownload.RemoteMovie != null)
+                    if (trackedDownload.RemoteGame != null)
                     {
-                        trackedDownload.RemoteMovie.Release ??= new ReleaseInfo();
-                        trackedDownload.RemoteMovie.Release.Indexer = trackedDownload.Indexer;
-                        trackedDownload.RemoteMovie.Release.Title = trackedDownload.RemoteMovie.ParsedMovieInfo?.ReleaseTitle;
+                        trackedDownload.RemoteGame.Release ??= new ReleaseInfo();
+                        trackedDownload.RemoteGame.Release.Indexer = trackedDownload.Indexer;
+                        trackedDownload.RemoteGame.Release.Title = trackedDownload.RemoteGame.ParsedGameInfo?.ReleaseTitle;
 
                         if (Enum.TryParse(grabbedEvent?.Data?.GetValueOrDefault("indexerFlags"), true, out IndexerFlags flags))
                         {
-                            trackedDownload.RemoteMovie.Release.IndexerFlags = flags;
+                            trackedDownload.RemoteGame.Release.IndexerFlags = flags;
                         }
 
                         if (downloadHistory != null)
                         {
-                            trackedDownload.RemoteMovie.Release.IndexerId = downloadHistory.IndexerId;
+                            trackedDownload.RemoteGame.Release.IndexerId = downloadHistory.IndexerId;
                         }
                     }
                 }
 
-                if (trackedDownload.RemoteMovie != null)
+                if (trackedDownload.RemoteGame != null)
                 {
-                    _aggregationService.Augment(trackedDownload.RemoteMovie);
+                    _aggregationService.Augment(trackedDownload.RemoteGame);
 
                     // Calculate custom formats
-                    trackedDownload.RemoteMovie.CustomFormats = _formatCalculator.ParseCustomFormat(trackedDownload.RemoteMovie, downloadItem.TotalSize);
+                    trackedDownload.RemoteGame.CustomFormats = _formatCalculator.ParseCustomFormat(trackedDownload.RemoteGame, downloadItem.TotalSize);
                 }
 
-                // Track it so it can be displayed in the queue even though we can't determine which movie it is for
-                if (trackedDownload.RemoteMovie == null)
+                // Track it so it can be displayed in the queue even though we can't determine which game it is for
+                if (trackedDownload.RemoteGame == null)
                 {
-                    _logger.Trace("No Movie found for download '{0}'", trackedDownload.DownloadItem.Title);
+                    _logger.Trace("No Game found for download '{0}'", trackedDownload.DownloadItem.Title);
                 }
             }
-            catch (MultipleMoviesFoundException e)
+            catch (MultipleGamesFoundException e)
             {
-                _logger.Debug(e, "Found multiple movies for " + downloadItem.Title);
+                _logger.Debug(e, "Found multiple games for " + downloadItem.Title);
 
-                trackedDownload.Warn("Unable to import automatically, found multiple movies: {0}", string.Join(", ", e.Movies));
+                trackedDownload.Warn("Unable to import automatically, found multiple games: {0}", string.Join(", ", e.Games));
             }
             catch (Exception e)
             {
-                _logger.Debug(e, "Failed to find movie for " + downloadItem.Title);
+                _logger.Debug(e, "Failed to find game for " + downloadItem.Title);
 
-                trackedDownload.Warn("Unable to parse movie from title");
+                trackedDownload.Warn("Unable to parse game from title");
             }
 
             LogItemChange(trackedDownload, existingItem?.DownloadItem, trackedDownload.DownloadItem);
@@ -230,24 +230,24 @@ namespace NzbDrone.Core.Download.TrackedDownloads
                 existingItem.CanBeRemoved != downloadItem.CanBeRemoved ||
                 existingItem.CanMoveFiles != downloadItem.CanMoveFiles)
             {
-                _logger.Debug("Tracking '{0}:{1}': ClientState={2}{3} RadarrStage={4} Movie='{5}' OutputPath={6}.",
+                _logger.Debug("Tracking '{0}:{1}': ClientState={2}{3} GamarrStage={4} Game='{5}' OutputPath={6}.",
                     downloadItem.DownloadClientInfo.Name,
                     downloadItem.Title,
                     downloadItem.Status,
                     downloadItem.CanBeRemoved ? "" : downloadItem.CanMoveFiles ? " (busy)" : " (readonly)",
                     trackedDownload.State,
-                    trackedDownload.RemoteMovie?.ParsedMovieInfo,
+                    trackedDownload.RemoteGame?.ParsedGameInfo,
                     downloadItem.OutputPath);
             }
         }
 
         private void UpdateCachedItem(TrackedDownload trackedDownload)
         {
-            var parsedMovieInfo = Parser.Parser.ParseMovieTitle(trackedDownload.DownloadItem.Title);
+            var parsedGameInfo = Parser.Parser.ParseGameTitle(trackedDownload.DownloadItem.Title);
 
-            trackedDownload.RemoteMovie = parsedMovieInfo == null ? null : _parsingService.Map(parsedMovieInfo, "", 0, null);
+            trackedDownload.RemoteGame = parsedGameInfo == null ? null : _parsingService.Map(parsedGameInfo, "", 0, null);
 
-            _aggregationService.Augment(trackedDownload.RemoteMovie);
+            _aggregationService.Augment(trackedDownload.RemoteGame);
         }
 
         private static TrackedDownloadState GetStateFromHistory(DownloadHistoryEventType eventType)
@@ -265,7 +265,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             }
         }
 
-        public void Handle(MovieGrabbedEvent message)
+        public void Handle(GameGrabbedEvent message)
         {
             if (message.DownloadId.IsNullOrWhiteSpace())
             {
@@ -282,12 +282,12 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             }
         }
 
-        public void Handle(MovieAddedEvent message)
+        public void Handle(GameAddedEvent message)
         {
             var cachedItems = _cache.Values
                 .Where(t =>
-                    t.RemoteMovie?.Movie == null ||
-                    message.Movie?.TmdbId == t.RemoteMovie.Movie.TmdbId)
+                    t.RemoteGame?.Game == null ||
+                    message.Game?.IgdbId == t.RemoteGame.Game.IgdbId)
                 .ToList();
 
             if (cachedItems.Any())
@@ -298,12 +298,12 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             }
         }
 
-        public void Handle(MovieEditedEvent message)
+        public void Handle(GameEditedEvent message)
         {
             var cachedItems = _cache.Values
                 .Where(t =>
-                    t.RemoteMovie?.Movie != null &&
-                    (t.RemoteMovie.Movie.Id == message.Movie?.Id || t.RemoteMovie.Movie.TmdbId == message.Movie?.TmdbId))
+                    t.RemoteGame?.Game != null &&
+                    (t.RemoteGame.Game.Id == message.Game?.Id || t.RemoteGame.Game.IgdbId == message.Game?.IgdbId))
                 .ToList();
 
             if (cachedItems.Any())
@@ -314,12 +314,12 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             }
         }
 
-        public void Handle(MoviesBulkEditedEvent message)
+        public void Handle(GamesBulkEditedEvent message)
         {
             var cachedItems = _cache.Values
                 .Where(t =>
-                    t.RemoteMovie?.Movie != null &&
-                    message.Movies.Any(m => m.Id == t.RemoteMovie.Movie.Id || m.TmdbId == t.RemoteMovie.Movie.TmdbId))
+                    t.RemoteGame?.Game != null &&
+                    message.Games.Any(m => m.Id == t.RemoteGame.Game.Id || m.IgdbId == t.RemoteGame.Game.IgdbId))
                 .ToList();
 
             if (cachedItems.Any())
@@ -330,12 +330,12 @@ namespace NzbDrone.Core.Download.TrackedDownloads
             }
         }
 
-        public void Handle(MoviesDeletedEvent message)
+        public void Handle(GamesDeletedEvent message)
         {
             var cachedItems = _cache.Values
                 .Where(t =>
-                    t.RemoteMovie?.Movie != null &&
-                    message.Movies.Any(m => m.Id == t.RemoteMovie.Movie.Id || m.TmdbId == t.RemoteMovie.Movie.TmdbId))
+                    t.RemoteGame?.Game != null &&
+                    message.Games.Any(m => m.Id == t.RemoteGame.Game.Id || m.IgdbId == t.RemoteGame.Game.IgdbId))
                 .ToList();
 
             if (cachedItems.Any())

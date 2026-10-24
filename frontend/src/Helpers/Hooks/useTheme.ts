@@ -5,7 +5,7 @@ import themes from 'Styles/Themes';
 
 const useTheme = (): 'dark' | 'light' => {
   const { theme } = useSelector((state: AppState) => state.settings.ui.item);
-  const selectedTheme = theme ?? window.Radarr.theme;
+  const selectedTheme = theme ?? window.Gamarr.theme;
   const [resolvedTheme, setResolvedTheme] = useState(() => {
     if (selectedTheme === 'auto') {
       return window.matchMedia('(prefers-color-scheme: dark)').matches

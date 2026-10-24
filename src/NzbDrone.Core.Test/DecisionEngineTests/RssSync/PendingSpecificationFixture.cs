@@ -8,8 +8,8 @@ using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications.RssSync;
 using NzbDrone.Core.Download.Pending;
+using NzbDrone.Core.Games;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.Movies;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -21,10 +21,10 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
     [TestFixture]
     public class PendingSpecificationFixture : CoreTest<PendingSpecification>
     {
-        private Movie _movie;
-        private RemoteMovie _remoteMovie;
+        private Game _game;
+        private RemoteGame _remoteGame;
 
-        private Movie _otherMovie;
+        private Game _otherGame;
 
         private ReleaseDecisionInformation _information = new(false, null);
 
@@ -33,7 +33,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         {
             CustomFormatsTestHelpers.GivenCustomFormats();
 
-            _movie = Builder<Movie>.CreateNew()
+            _game = Builder<Game>.CreateNew()
                 .With(e => e.QualityProfile = new QualityProfile
                 {
                     UpgradeAllowed = true,
@@ -43,18 +43,18 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                 })
                 .Build();
 
-            _otherMovie = Builder<Movie>.CreateNew()
+            _otherGame = Builder<Game>.CreateNew()
                 .With(s => s.Id = 2)
                 .Build();
 
-            _remoteMovie = Builder<RemoteMovie>.CreateNew()
-                .With(r => r.Movie = _movie)
-                .With(r => r.ParsedMovieInfo = new ParsedMovieInfo { Quality = new QualityModel(Quality.DVD), Languages = new List<Language> { Language.Spanish } })
+            _remoteGame = Builder<RemoteGame>.CreateNew()
+                .With(r => r.Game = _game)
+                .With(r => r.ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.DVD), Languages = new List<Language> { Language.Spanish } })
                 .With(r => r.CustomFormats = new List<CustomFormat>())
                 .Build();
 
             Mocker.GetMock<ICustomFormatCalculationService>()
-                  .Setup(x => x.ParseCustomFormat(It.IsAny<RemoteMovie>(), It.IsAny<long>()))
+                  .Setup(x => x.ParseCustomFormat(It.IsAny<RemoteGame>(), It.IsAny<long>()))
                   .Returns(new List<CustomFormat>());
         }
 
@@ -65,11 +65,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                 .Returns(new List<Queue.Queue>());
         }
 
-        private void GivenPendingQueue(IEnumerable<RemoteMovie> remoteMovies)
+        private void GivenPendingQueue(IEnumerable<RemoteGame> remoteGames)
         {
-            var queue = remoteMovies.Select(remoteMovie => new Queue.Queue
+            var queue = remoteGames.Select(remoteGame => new Queue.Queue
             {
-                RemoteMovie = remoteMovie
+                RemoteGame = remoteGame
             });
 
             Mocker.GetMock<IPendingReleaseService>()
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         {
             GivenEmptyPendingQueue();
 
-            Subject.IsSatisfiedBy(_remoteMovie, _information).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, _information).Accepted.Should().BeTrue();
 
             Mocker.GetMock<IPendingReleaseService>()
                 .Verify(s => s.GetPendingQueue(), Times.Once);
@@ -91,18 +91,18 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
         [Test]
         public void should_return_true_when_not_pushed_release()
         {
-            _remoteMovie.ReleaseSource = ReleaseSourceType.Rss;
+            _remoteGame.ReleaseSource = ReleaseSourceType.Rss;
 
             GivenEmptyPendingQueue();
 
-            Subject.IsSatisfiedBy(_remoteMovie, _information).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, _information).Accepted.Should().BeTrue();
 
             Mocker.GetMock<IPendingReleaseService>()
                 .Verify(s => s.GetPendingQueue(), Times.Never);
         }
 
         [Test]
-        public void should_return_true_when_movie_is_not_pending()
+        public void should_return_true_when_game_is_not_pending()
         {
             GivenEmptyPendingQueue();
 
@@ -112,21 +112,21 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                 {
                     new()
                     {
-                        RemoteMovie = new RemoteMovie
+                        RemoteGame = new RemoteGame
                         {
-                            Movie = _otherMovie,
+                            Game = _otherGame,
                         }
                     }
                 });
 
-            Subject.IsSatisfiedBy(_remoteMovie, _information).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, _information).Accepted.Should().BeTrue();
 
             Mocker.GetMock<IPendingReleaseService>()
                 .Verify(s => s.GetPendingQueue(), Times.Once);
         }
 
         [Test]
-        public void should_return_false_when_movie_is_pending()
+        public void should_return_false_when_game_is_pending()
         {
             GivenEmptyPendingQueue();
 
@@ -136,14 +136,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
                 {
                     new()
                     {
-                        RemoteMovie = new RemoteMovie
+                        RemoteGame = new RemoteGame
                         {
-                            Movie = _movie,
+                            Game = _game,
                         }
                     }
                 });
 
-            Subject.IsSatisfiedBy(_remoteMovie, _information).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, _information).Accepted.Should().BeFalse();
 
             Mocker.GetMock<IPendingReleaseService>()
                 .Verify(s => s.GetPendingQueue(), Times.Once);

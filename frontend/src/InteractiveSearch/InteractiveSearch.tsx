@@ -186,7 +186,7 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
           customFilters={customFilters}
           buttonComponent={PageMenuButton}
           filterModalConnectorComponent={InteractiveSearchFilterModal}
-          filterModalConnectorComponentProps={{ type: 'movies' }}
+          filterModalConnectorComponentProps={{ type: 'games' }}
           onFilterSelect={handleFilterSelect}
         />
       </div>
@@ -203,7 +203,7 @@ function InteractiveSearch({ searchPayload }: InteractiveSearchProps) {
               })}
             </>
           ) : (
-            translate('MovieSearchResultsLoadError')
+            translate('GameSearchResultsLoadError')
           )}
         </Alert>
       ) : null}

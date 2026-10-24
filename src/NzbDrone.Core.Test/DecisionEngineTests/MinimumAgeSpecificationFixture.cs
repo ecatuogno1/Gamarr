@@ -13,12 +13,12 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
     public class MinimumAgeSpecificationFixture : CoreTest<MinimumAgeSpecification>
     {
-        private RemoteMovie _remoteMovie;
+        private RemoteGame _remoteGame;
 
         [SetUp]
         public void Setup()
         {
-            _remoteMovie = new RemoteMovie
+            _remoteGame = new RemoteGame
             {
                 Release = new ReleaseInfo() { DownloadProtocol = DownloadProtocol.Usenet }
             };
@@ -31,7 +31,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
         private void WithAge(int minutes)
         {
-            _remoteMovie.Release.PublishDate = DateTime.UtcNow.AddMinutes(-minutes);
+            _remoteGame.Release.PublishDate = DateTime.UtcNow.AddMinutes(-minutes);
         }
 
         [Test]
@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMinimumAge(0);
             WithAge(100);
 
-            Subject.IsSatisfiedBy(_remoteMovie, new()).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMinimumAge(30);
             WithAge(100);
 
-            Subject.IsSatisfiedBy(_remoteMovie, new()).Accepted.Should().BeTrue();
+            Subject.IsSatisfiedBy(_remoteGame, new()).Accepted.Should().BeTrue();
         }
 
         [Test]
@@ -58,7 +58,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             WithMinimumAge(30);
             WithAge(10);
 
-            Subject.IsSatisfiedBy(_remoteMovie, new()).Accepted.Should().BeFalse();
+            Subject.IsSatisfiedBy(_remoteGame, new()).Accepted.Should().BeFalse();
         }
     }
 }

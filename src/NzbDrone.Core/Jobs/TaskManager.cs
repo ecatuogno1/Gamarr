@@ -8,6 +8,7 @@ using NzbDrone.Core.Caching;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Configuration.Events;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.Games.Commands;
 using NzbDrone.Core.HealthCheck;
 using NzbDrone.Core.Housekeeping;
 using NzbDrone.Core.ImportLists;
@@ -16,7 +17,6 @@ using NzbDrone.Core.Lifecycle;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
-using NzbDrone.Core.Movies.Commands;
 using NzbDrone.Core.Update.Commands;
 
 namespace NzbDrone.Core.Jobs
@@ -93,7 +93,7 @@ namespace NzbDrone.Core.Jobs
                     new ScheduledTask
                     {
                         Interval = 24 * 60,
-                        TypeName = typeof(RefreshMovieCommand).FullName
+                        TypeName = typeof(RefreshGameCommand).FullName
                     },
 
                     new ScheduledTask

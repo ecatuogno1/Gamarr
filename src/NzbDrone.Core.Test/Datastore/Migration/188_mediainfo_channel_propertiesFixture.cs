@@ -11,11 +11,11 @@ namespace NzbDrone.Core.Test.Datastore.Migration
     [TestFixture]
     public class mediainfo_channel_propertiesFixture : MigrationTest<mediainfo_channels>
     {
-        private void AddMovieFile(mediainfo_channels m, int movieId)
+        private void AddGameFile(mediainfo_channels m, int gameId)
         {
-            var movie = new
+            var game = new
             {
-                MovieId = movieId,
+                GameId = gameId,
                 Quality = new { }.ToJson(),
                 Size = 0,
                 DateAdded = DateTime.UtcNow,
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
                 }.ToJson()
             };
 
-            m.Insert.IntoTable("MovieFiles").Row(movie);
+            m.Insert.IntoTable("GameFiles").Row(game);
         }
 
         [Test]
@@ -63,10 +63,10 @@ namespace NzbDrone.Core.Test.Datastore.Migration
         {
             var db = WithMigrationTestDb(c =>
             {
-                AddMovieFile(c, 1);
+                AddGameFile(c, 1);
             });
 
-            var items = db.Query<MovieFile188>("SELECT \"MediaInfo\" FROM \"MovieFiles\"");
+            var items = db.Query<GameFile188>("SELECT \"MediaInfo\" FROM \"GameFiles\"");
 
             items.Should().HaveCount(1);
 
@@ -86,7 +86,7 @@ namespace NzbDrone.Core.Test.Datastore.Migration
             mediainfo.AudioChannelPositions.Should().Be("3/2/0.1");
         }
 
-        public class MovieFile188
+        public class GameFile188
         {
             public int Id { get; set; }
             public MediaInfo188 MediaInfo { get; set; }

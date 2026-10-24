@@ -7,9 +7,9 @@ using Moq;
 using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.EnvironmentInfo;
+using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.Events;
 using NzbDrone.Core.MediaCover;
-using NzbDrone.Core.Movies;
-using NzbDrone.Core.Movies.Events;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.MediaCoverTests
@@ -17,17 +17,17 @@ namespace NzbDrone.Core.Test.MediaCoverTests
     [TestFixture]
     public class MediaCoverServiceFixture : CoreTest<MediaCoverService>
     {
-        private Movie _movie;
+        private Game _game;
 
         [SetUp]
         public void Setup()
         {
             Mocker.SetConstant<IAppFolderInfo>(new AppFolderInfo(Mocker.Resolve<IStartupContext>()));
 
-            _movie = Builder<Movie>.CreateNew()
+            _game = Builder<Game>.CreateNew()
                 .With(v => v.Id = 2)
                 .With(v => v.Added = DateTime.UtcNow)
-                .With(v => v.MovieMetadata.Value.Images = new List<MediaCover.MediaCover> { new(MediaCoverTypes.Poster, "") })
+                .With(v => v.GameMetadata.Value.Images = new List<MediaCover.MediaCover> { new(MediaCoverTypes.Poster, "") })
                 .Build();
         }
 
@@ -96,18 +96,18 @@ namespace NzbDrone.Core.Test.MediaCoverTests
                   .Setup(v => v.FileExists(It.IsAny<string>()))
                   .Returns(false);
 
-            Subject.ConvertToLocalUrls(_movie.Id, covers, _movie.Added);
+            Subject.ConvertToLocalUrls(_game.Id, covers, _game.Added);
 
-            covers.Single().Url.Should().Be($"/MediaCover/{_movie.Id}/poster.jpg");
+            covers.Single().Url.Should().Be($"/MediaCover/{_game.Id}/poster.jpg");
 
             Mocker.GetMock<ICoverExistsSpecification>()
                   .Setup(v => v.AlreadyExists(It.IsAny<string>(), It.IsAny<string>()))
                   .Returns(true);
 
-            Subject.HandleAsync(new MovieUpdatedEvent(_movie));
-            Subject.ConvertToLocalUrls(_movie.Id, covers, _movie.Added);
+            Subject.HandleAsync(new GameUpdatedEvent(_game));
+            Subject.ConvertToLocalUrls(_game.Id, covers, _game.Added);
 
-            covers.Single().Url.Should().Be($"/MediaCover/{_movie.Id}/poster.jpg?h=2a57c239a7baaae159e7");
+            covers.Single().Url.Should().Be($"/MediaCover/{_game.Id}/poster.jpg?h=2a57c239a7baaae159e7");
         }
 
         [Test]
@@ -124,7 +124,7 @@ namespace NzbDrone.Core.Test.MediaCoverTests
         }
 
         [Test]
-        public void should_not_check_if_cover_exists_for_movie_added_more_than_a_day_ago()
+        public void should_not_check_if_cover_exists_for_game_added_more_than_a_day_ago()
         {
             var covers = new List<MediaCover.MediaCover>
             {
@@ -154,7 +154,7 @@ namespace NzbDrone.Core.Test.MediaCoverTests
                   .Setup(v => v.FileExists(It.IsAny<string>()))
                   .Returns(true);
 
-            Subject.HandleAsync(new MovieUpdatedEvent(_movie));
+            Subject.HandleAsync(new GameUpdatedEvent(_game));
 
             Mocker.GetMock<IImageResizer>()
                   .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.Exactly(2));
@@ -171,7 +171,7 @@ namespace NzbDrone.Core.Test.MediaCoverTests
                   .Setup(v => v.FileExists(It.IsAny<string>()))
                   .Returns(false);
 
-            Subject.HandleAsync(new MovieUpdatedEvent(_movie));
+            Subject.HandleAsync(new GameUpdatedEvent(_game));
 
             Mocker.GetMock<IImageResizer>()
                   .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.Exactly(2));
@@ -192,7 +192,7 @@ namespace NzbDrone.Core.Test.MediaCoverTests
                   .Setup(v => v.GetFileSize(It.IsAny<string>()))
                   .Returns(1000);
 
-            Subject.HandleAsync(new MovieUpdatedEvent(_movie));
+            Subject.HandleAsync(new GameUpdatedEvent(_game));
 
             Mocker.GetMock<IImageResizer>()
                   .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.Never());
@@ -213,7 +213,7 @@ namespace NzbDrone.Core.Test.MediaCoverTests
                   .Setup(v => v.GetFileSize(It.IsAny<string>()))
                   .Returns(0);
 
-            Subject.HandleAsync(new MovieUpdatedEvent(_movie));
+            Subject.HandleAsync(new GameUpdatedEvent(_game));
 
             Mocker.GetMock<IImageResizer>()
                   .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.Exactly(2));
@@ -234,7 +234,7 @@ namespace NzbDrone.Core.Test.MediaCoverTests
                   .Setup(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
                   .Throws<ApplicationException>();
 
-            Subject.HandleAsync(new MovieUpdatedEvent(_movie));
+            Subject.HandleAsync(new GameUpdatedEvent(_game));
 
             Mocker.GetMock<IImageResizer>()
                   .Verify(v => v.Resize(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.Exactly(2));

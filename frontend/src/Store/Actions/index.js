@@ -1,21 +1,21 @@
-import * as addMovie from './addMovieActions';
+import * as addGame from './addGameActions';
 import * as app from './appActions';
 import * as blocklist from './blocklistActions';
 import * as calendar from './calendarActions';
 import * as captcha from './captchaActions';
 import * as commands from './commandActions';
 import * as customFilters from './customFilterActions';
-import * as discoverMovie from './discoverMovieActions';
+import * as discoverGame from './discoverGameActions';
 import * as extraFiles from './extraFileActions';
+import * as games from './gameActions';
+import * as gameCollections from './gameCollectionActions';
+import * as gameCredits from './gameCreditsActions';
+import * as gameFiles from './gameFileActions';
+import * as gameHistory from './gameHistoryActions';
+import * as gameIndex from './gameIndexActions';
 import * as history from './historyActions';
-import * as importMovie from './importMovieActions';
+import * as importGame from './importGameActions';
 import * as interactiveImportActions from './interactiveImportActions';
-import * as movies from './movieActions';
-import * as movieCollections from './movieCollectionActions';
-import * as movieCredits from './movieCreditsActions';
-import * as movieFiles from './movieFileActions';
-import * as movieHistory from './movieHistoryActions';
-import * as movieIndex from './movieIndexActions';
 import * as oAuth from './oAuthActions';
 import * as organizePreview from './organizePreviewActions';
 import * as parse from './parseActions';
@@ -30,18 +30,18 @@ import * as tags from './tagActions';
 import * as wanted from './wantedActions';
 
 export default [
-  addMovie,
+  addGame,
   app,
   blocklist,
   calendar,
   captcha,
   commands,
   customFilters,
-  discoverMovie,
-  movieFiles,
+  discoverGame,
+  gameFiles,
   extraFiles,
   history,
-  importMovie,
+  importGame,
   interactiveImportActions,
   oAuth,
   organizePreview,
@@ -51,11 +51,11 @@ export default [
   queue,
   releases,
   rootFolders,
-  movies,
-  movieCollections,
-  movieHistory,
-  movieIndex,
-  movieCredits,
+  games,
+  gameCollections,
+  gameHistory,
+  gameIndex,
+  gameCredits,
   settings,
   system,
   tags,

@@ -9,36 +9,31 @@ import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import DownloadProtocol from 'DownloadClient/DownloadProtocol';
+import Game from 'Game/Game';
+import GameLanguages from 'Game/GameLanguages';
+import GameQuality from 'Game/GameQuality';
 import usePrevious from 'Helpers/Hooks/usePrevious';
+import SelectGameModal from 'InteractiveImport/Game/SelectGameModal';
 import SelectLanguageModal from 'InteractiveImport/Language/SelectLanguageModal';
-import SelectMovieModal from 'InteractiveImport/Movie/SelectMovieModal';
 import SelectQualityModal from 'InteractiveImport/Quality/SelectQualityModal';
 import Language from 'Language/Language';
-import Movie from 'Movie/Movie';
-import MovieLanguages from 'Movie/MovieLanguages';
-import MovieQuality from 'Movie/MovieQuality';
 import { QualityModel } from 'Quality/Quality';
 import { grabRelease } from 'Store/Actions/releaseActions';
 import { fetchDownloadClients } from 'Store/Actions/settingsActions';
 import createEnabledDownloadClientsSelector from 'Store/Selectors/createEnabledDownloadClientsSelector';
-import { createMovieSelectorForHook } from 'Store/Selectors/createMovieSelector';
+import { createGameSelectorForHook } from 'Store/Selectors/createGameSelector';
 import translate from 'Utilities/String/translate';
 import SelectDownloadClientModal from './DownloadClient/SelectDownloadClientModal';
 import OverrideMatchData from './OverrideMatchData';
 import styles from './OverrideMatchModalContent.css';
 
-type SelectType =
-  | 'select'
-  | 'movie'
-  | 'quality'
-  | 'language'
-  | 'downloadClient';
+type SelectType = 'select' | 'game' | 'quality' | 'language' | 'downloadClient';
 
 interface OverrideMatchModalContentProps {
   indexerId: number;
   title: string;
   guid: string;
-  movieId?: number;
+  gameId?: number;
   languages: Language[];
   quality: QualityModel;
   protocol: DownloadProtocol;
@@ -59,7 +54,7 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
     onModalClose,
   } = props;
 
-  const [movieId, setMovieId] = useState(props.movieId);
+  const [gameId, setGameId] = useState(props.gameId);
   const [languages, setLanguages] = useState(props.languages);
   const [quality, setQuality] = useState(props.quality);
   const [downloadClientId, setDownloadClientId] = useState<number | null>(null);
@@ -70,9 +65,7 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
   const previousIsGrabbing = usePrevious(isGrabbing);
 
   const dispatch = useDispatch();
-  const movie: Movie | undefined = useSelector(
-    createMovieSelectorForHook(movieId)
-  );
+  const game: Game | undefined = useSelector(createGameSelectorForHook(gameId));
   const { items: downloadClients } = useSelector(
     createEnabledDownloadClientsSelector(protocol)
   );
@@ -81,16 +74,16 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
     setSelectModalOpen(null);
   }, [setSelectModalOpen]);
 
-  const onSelectMoviePress = useCallback(() => {
-    setSelectModalOpen('movie');
+  const onSelectGamePress = useCallback(() => {
+    setSelectModalOpen('game');
   }, [setSelectModalOpen]);
 
-  const onMovieSelect = useCallback(
-    (m: Movie) => {
-      setMovieId(m.id);
+  const onGameSelect = useCallback(
+    (m: Game) => {
+      setGameId(m.id);
       setSelectModalOpen(null);
     },
-    [setMovieId, setSelectModalOpen]
+    [setGameId, setSelectModalOpen]
   );
 
   const onSelectQualityPress = useCallback(() => {
@@ -130,8 +123,8 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
   );
 
   const onGrabPress = useCallback(() => {
-    if (!movieId) {
-      setError(translate('OverrideGrabNoMovie'));
+    if (!gameId) {
+      setError(translate('OverrideGrabNoGame'));
       return;
     } else if (!quality) {
       setError(translate('OverrideGrabNoQuality'));
@@ -145,7 +138,7 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
       grabRelease({
         indexerId,
         guid,
-        movieId,
+        gameId,
         quality,
         languages,
         downloadClientId,
@@ -155,7 +148,7 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
   }, [
     indexerId,
     guid,
-    movieId,
+    gameId,
     quality,
     languages,
     downloadClientId,
@@ -187,11 +180,11 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
         <DescriptionList>
           <DescriptionListItem
             className={styles.item}
-            title={translate('Movie')}
+            title={translate('Game')}
             data={
               <OverrideMatchData
-                value={movie?.title}
-                onPress={onSelectMoviePress}
+                value={game?.title}
+                onPress={onSelectGamePress}
               />
             }
           />
@@ -202,7 +195,7 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
             data={
               <OverrideMatchData
                 value={
-                  <MovieQuality className={styles.label} quality={quality} />
+                  <GameQuality className={styles.label} quality={quality} />
                 }
                 onPress={onSelectQualityPress}
               />
@@ -215,7 +208,7 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
             data={
               <OverrideMatchData
                 value={
-                  <MovieLanguages
+                  <GameLanguages
                     className={styles.label}
                     languages={languages}
                   />
@@ -260,10 +253,10 @@ function OverrideMatchModalContent(props: OverrideMatchModalContentProps) {
         </div>
       </ModalFooter>
 
-      <SelectMovieModal
-        isOpen={selectModalOpen === 'movie'}
+      <SelectGameModal
+        isOpen={selectModalOpen === 'game'}
         modalTitle={modalTitle}
-        onMovieSelect={onMovieSelect}
+        onGameSelect={onGameSelect}
         onModalClose={onSelectModalClose}
       />
 

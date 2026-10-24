@@ -1,0 +1,32 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Gamarr.Http;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using NzbDrone.Common.Extensions;
+using NzbDrone.Core.Parser.Model;
+
+namespace Gamarr.Api.V3.Indexers
+{
+    [V3ApiController]
+    public class IndexerFlagController : Controller
+    {
+        [HttpGet]
+        [Produces("application/json")]
+        public Ok<List<IndexerFlagResource>> GetAll()
+        {
+            var type = typeof(IndexerFlags);
+
+            return TypedResults.Ok(Enum.GetValues(type)
+                .Cast<IndexerFlags>()
+                .Where(f => type.GetField(f.ToString())?.GetCustomAttributes(false).OfType<ObsoleteAttribute>().Empty() ?? true)
+                .Select(f => new IndexerFlagResource
+                {
+                    Id = (int)f,
+                    Name = f.ToString()
+                }).ToList());
+        }
+    }
+}

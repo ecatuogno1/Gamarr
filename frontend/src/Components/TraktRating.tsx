@@ -1,7 +1,7 @@
 import React from 'react';
 import Tooltip from 'Components/Tooltip/Tooltip';
+import { Ratings } from 'Game/Game';
 import { kinds, tooltipPositions } from 'Helpers/Props';
-import { Ratings } from 'Movie/Movie';
 import translate from 'Utilities/String/translate';
 import styles from './TraktRating.css';
 

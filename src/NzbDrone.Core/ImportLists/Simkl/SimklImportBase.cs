@@ -4,7 +4,7 @@ using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Http;
 using NzbDrone.Core.Configuration;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.ImportLists.Simkl.User;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Validation;
@@ -52,11 +52,11 @@ namespace NzbDrone.Core.ImportLists.Simkl
             // Check to see if user has any activity since last sync, if not return empty to avoid work
             if (lastFetch.HasValue && lastActivity < lastFetch.Value.AddHours(-2))
             {
-                // mark failure to avoid deleting movies due to emptiness
-                return new ImportListFetchResult(new List<ImportListMovie>(), true);
+                // mark failure to avoid deleting games due to emptiness
+                return new ImportListFetchResult(new List<ImportListGame>(), true);
             }
 
-            return FetchMovies(g => g.GetMovies());
+            return FetchGames(g => g.GetGames());
         }
 
         public override IParseImportListResponse GetParser()
@@ -107,16 +107,16 @@ namespace NzbDrone.Core.ImportLists.Simkl
 
                 if (response?.Resource != null)
                 {
-                    var movieType = Settings switch
+                    var gameType = Settings switch
                     {
-                        SimklUserSettings userSettings => (SimklUserMovieType)userSettings.MovieType,
-                        _ => SimklUserMovieType.Movies
+                        SimklUserSettings userSettings => (SimklUserGameType)userSettings.GameType,
+                        _ => SimklUserGameType.Games
                     };
 
-                    return movieType switch
+                    return gameType switch
                     {
-                        SimklUserMovieType.Anime => response.Resource.Anime.All,
-                        _ => response.Resource.Movies.All
+                        SimklUserGameType.Anime => response.Resource.Anime.All,
+                        _ => response.Resource.Games.All
                     };
                 }
             }

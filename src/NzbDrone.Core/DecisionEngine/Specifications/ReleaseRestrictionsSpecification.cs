@@ -23,12 +23,12 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, ReleaseDecisionInformation information)
+        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, ReleaseDecisionInformation information)
         {
             _logger.Debug("Checking if release meets restrictions: {0}", subject);
 
             var title = subject.Release.Title;
-            var releaseProfiles = _releaseProfileService.EnabledForTags(subject.Movie.Tags, subject.Release.IndexerId);
+            var releaseProfiles = _releaseProfileService.EnabledForTags(subject.Game.Tags, subject.Release.IndexerId);
 
             var required = releaseProfiles.Where(r => r.Required.Any());
             var ignored = releaseProfiles.Where(r => r.Ignored.Any());

@@ -4,19 +4,16 @@ import AppState from 'App/State/AppState';
 import * as commandNames from 'Commands/commandNames';
 import Alert from 'Components/Alert';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
+import Game from 'Game/Game';
 import useCurrentPage from 'Helpers/Hooks/useCurrentPage';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import { kinds } from 'Helpers/Props';
-import Movie from 'Movie/Movie';
 import {
   clearCalendar,
   fetchCalendar,
   gotoCalendarToday,
 } from 'Store/Actions/calendarActions';
-import {
-  clearMovieFiles,
-  fetchMovieFiles,
-} from 'Store/Actions/movieFileActions';
+import { clearGameFiles, fetchGameFiles } from 'Store/Actions/gameFileActions';
 import {
   clearQueueDetails,
   fetchQueueDetails,
@@ -46,15 +43,15 @@ function Calendar() {
     (state: AppState) => state.calendar
   );
 
-  const isRefreshingMovie = useSelector(
-    createCommandExecutingSelector(commandNames.REFRESH_MOVIE)
+  const isRefreshingGame = useSelector(
+    createCommandExecutingSelector(commandNames.REFRESH_GAME)
   );
 
   const firstDayOfWeek = useSelector(
     (state: AppState) => state.settings.ui.item.firstDayOfWeek
   );
 
-  const wasRefreshingMovie = usePrevious(isRefreshingMovie);
+  const wasRefreshingGame = usePrevious(isRefreshingGame);
   const previousFirstDayOfWeek = usePrevious(firstDayOfWeek);
   const previousItems = usePrevious(items);
 
@@ -75,7 +72,7 @@ function Calendar() {
     return () => {
       dispatch(clearCalendar());
       dispatch(clearQueueDetails());
-      dispatch(clearMovieFiles());
+      dispatch(clearGameFiles());
       clearTimeout(updateTimeout.current);
     };
   }, [dispatch, handleScheduleUpdate]);
@@ -94,7 +91,7 @@ function Calendar() {
       dispatch(fetchCalendar({ time, view }));
     };
 
-    registerPagePopulator(repopulate, ['movieFileUpdated', 'movieFileDeleted']);
+    registerPagePopulator(repopulate, ['gameFileUpdated', 'gameFileDeleted']);
 
     return () => {
       unregisterPagePopulator(repopulate);
@@ -115,22 +112,22 @@ function Calendar() {
   }, [time, view, firstDayOfWeek, previousFirstDayOfWeek, dispatch]);
 
   useEffect(() => {
-    if (wasRefreshingMovie && !isRefreshingMovie) {
+    if (wasRefreshingGame && !isRefreshingGame) {
       dispatch(fetchCalendar({ time, view }));
     }
-  }, [time, view, isRefreshingMovie, wasRefreshingMovie, dispatch]);
+  }, [time, view, isRefreshingGame, wasRefreshingGame, dispatch]);
 
   useEffect(() => {
     if (!previousItems || hasDifferentItems(items, previousItems)) {
-      const movieIds = selectUniqueIds<Movie, number>(items, 'id');
-      const movieFileIds = selectUniqueIds<Movie, number>(items, 'movieFileId');
+      const gameIds = selectUniqueIds<Game, number>(items, 'id');
+      const gameFileIds = selectUniqueIds<Game, number>(items, 'gameFileId');
 
       if (items.length) {
-        dispatch(fetchQueueDetails({ movieIds }));
+        dispatch(fetchQueueDetails({ gameIds }));
       }
 
-      if (movieFileIds.length) {
-        dispatch(fetchMovieFiles({ movieFileIds }));
+      if (gameFileIds.length) {
+        dispatch(fetchGameFiles({ gameFileIds }));
       }
     }
   }, [items, previousItems, dispatch]);

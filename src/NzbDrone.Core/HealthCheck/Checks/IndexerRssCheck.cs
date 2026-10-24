@@ -29,7 +29,7 @@ namespace NzbDrone.Core.HealthCheck.Checks
                     HealthCheckResult.Error,
                     HealthCheckReason.IndexerRssNoIndexersEnabled,
                     _localizationService.GetLocalizedString("IndexerRssHealthCheckNoIndexers"),
-                    "#no-indexers-available-with-rss-sync-enabled-radarr-will-not-grab-new-releases-automatically");
+                    "#no-indexers-available-with-rss-sync-enabled-gamarr-will-not-grab-new-releases-automatically");
             }
 
             var active = _indexerFactory.RssEnabled(true);

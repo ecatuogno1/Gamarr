@@ -22,14 +22,14 @@
       <xs:enumeration value="rageid" />
       <xs:enumeration value="tvtitle" />
       <xs:enumeration value="tvairdate" />
-      <!-- TV, Movies, Audio -->
+      <!-- TV, Games, Audio -->
       <xs:enumeration value="video" />
       <xs:enumeration value="audio" />
       <xs:enumeration value="resolution" />
       <xs:enumeration value="framerate" />
       <xs:enumeration value="language" />
       <xs:enumeration value="subs" />
-      <!-- Movies -->
+      <!-- Games -->
       <xs:enumeration value="imdb" />
       <xs:enumeration value="imdbscore" />
       <xs:enumeration value="imdbtitle" />
@@ -41,7 +41,7 @@
       <xs:enumeration value="imdbyear" />
       <xs:enumeration value="imdbdirector" />
       <xs:enumeration value="imdbactors" />
-      <!-- TV, Movies -->
+      <!-- TV, Games -->
       <xs:enumeration value="genre" />
       <!-- Music -->
       <xs:enumeration value="artist" />
@@ -59,7 +59,7 @@
       <xs:enumeration value="pages" />
 
       <!-- Generic extensions -->
-      <xs:enumeration value="type" /> <!-- series|movie|music|book if unknown just omit -->
+      <xs:enumeration value="type" /> <!-- series|game|music|book if unknown just omit -->
       <xs:enumeration value="tvdbid" />
       <xs:enumeration value="bannerurl" />
 

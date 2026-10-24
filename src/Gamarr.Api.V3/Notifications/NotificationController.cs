@@ -1,0 +1,34 @@
+using System;
+using System.Collections.Generic;
+using Gamarr.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using NzbDrone.Core.Notifications;
+using NzbDrone.SignalR;
+
+namespace Gamarr.Api.V3.Notifications
+{
+    [V3ApiController]
+    public class NotificationController : ProviderControllerBase<NotificationResource, NotificationBulkResource, INotification, NotificationDefinition>
+    {
+        public static readonly NotificationResourceMapper ResourceMapper = new();
+        public static readonly NotificationBulkResourceMapper BulkResourceMapper = new();
+
+        public NotificationController(IBroadcastSignalRMessage signalRBroadcaster, NotificationFactory notificationFactory)
+            : base(signalRBroadcaster, notificationFactory, "notification", ResourceMapper, BulkResourceMapper)
+        {
+        }
+
+        [NonAction]
+        public override Results<Ok<IEnumerable<NotificationResource>>, BadRequest> UpdateProvider([FromBody] NotificationBulkResource providerResource)
+        {
+            throw new NotImplementedException();
+        }
+
+        [NonAction]
+        public override Ok<object> DeleteProviders([FromBody] NotificationBulkResource resource)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}

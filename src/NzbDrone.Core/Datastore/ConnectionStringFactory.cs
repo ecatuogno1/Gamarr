@@ -40,7 +40,7 @@ namespace NzbDrone.Core.Datastore
                     LogDbConnection = GetConnectionString(appFolderInfo.GetLogDatabase());
                     break;
                 default:
-                    throw new RadarrStartupException("Unable to determine database connection string for type {0}.", connectionStringType.ToString());
+                    throw new GamarrStartupException("Unable to determine database connection string for type {0}.", connectionStringType.ToString());
             }
         }
 
@@ -116,18 +116,18 @@ namespace NzbDrone.Core.Datastore
             {
                 if (!isMainDBConnectionStringSet && isLogDBConnectionStringSet)
                 {
-                    throw new RadarrStartupException("Postgres MainDbConnectionString is set but LogDbConnectionString is not. Both must be set or neither.");
+                    throw new GamarrStartupException("Postgres MainDbConnectionString is set but LogDbConnectionString is not. Both must be set or neither.");
                 }
 
                 if (isLogDBConnectionStringSet && !isMainDBConnectionStringSet)
                 {
-                    throw new RadarrStartupException("Postgres LogDbConnectionString is set but MainDbConnectionString is not. Both must be set or neither.");
+                    throw new GamarrStartupException("Postgres LogDbConnectionString is set but MainDbConnectionString is not. Both must be set or neither.");
                 }
             }
 
             if (isMainDBConnectionStringSet && _configFileProvider.PostgresHost.IsNotNullOrWhiteSpace())
             {
-                throw new RadarrStartupException($"Either both Postgres connection strings must be set, or the other Postgres settings must be set, but not both.");
+                throw new GamarrStartupException($"Either both Postgres connection strings must be set, or the other Postgres settings must be set, but not both.");
             }
 
             return isMainDBConnectionStringSet ? ConnectionStringType.PostgreSqlConnectionString : ConnectionStringType.PostgreSqlVars;

@@ -2,6 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DryIoc;
+using Gamarr.Api.V3.System;
+using Gamarr.Http;
+using Gamarr.Http.Authentication;
+using Gamarr.Http.ClientSchema;
+using Gamarr.Http.ErrorManagement;
+using Gamarr.Http.Frontend;
+using Gamarr.Http.Middleware;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -24,13 +31,6 @@ using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Host.AccessControl;
 using NzbDrone.Http.Authentication;
 using NzbDrone.SignalR;
-using Radarr.Api.V3.System;
-using Radarr.Http;
-using Radarr.Http.Authentication;
-using Radarr.Http.ClientSchema;
-using Radarr.Http.ErrorManagement;
-using Radarr.Http.Frontend;
-using Radarr.Http.Middleware;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace NzbDrone.Host
@@ -53,7 +53,7 @@ namespace NzbDrone.Host
                 b.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
                 b.AddFilter("Microsoft.AspNetCore.HostFiltering", LogLevel.Information);
                 b.AddFilter("Microsoft.AspNetCore.HttpOverrides", LogLevel.Debug);
-                b.AddFilter("Radarr.Http.Authentication.ApiKeyAuthenticationHandler", LogLevel.Information);
+                b.AddFilter("Gamarr.Http.Authentication.ApiKeyAuthenticationHandler", LogLevel.Information);
                 b.AddFilter("Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager", LogLevel.Error);
                 b.AddNLog();
             });
@@ -103,12 +103,12 @@ namespace NzbDrone.Host
                 c.SwaggerDoc("v3", new OpenApiInfo
                 {
                     Version = "3.0.0",
-                    Title = "Radarr",
-                    Description = "Radarr API docs",
+                    Title = "Gamarr",
+                    Description = "Gamarr API docs",
                     License = new OpenApiLicense
                     {
                         Name = "GPL-3.0",
-                        Url = new Uri("https://github.com/Radarr/Radarr/blob/develop/LICENSE")
+                        Url = new Uri("https://github.com/Gamarr/Gamarr/blob/develop/LICENSE")
                     }
                 });
 
@@ -217,7 +217,7 @@ namespace NzbDrone.Host
                               IRuntimeInfo runtimeInfo,
                               IFirewallAdapter firewallAdapter,
                               IEventAggregator eventAggregator,
-                              RadarrErrorPipeline errorHandler)
+                              GamarrErrorPipeline errorHandler)
         {
             initializeLogger.Initialize();
             appFolderFactory.Register();

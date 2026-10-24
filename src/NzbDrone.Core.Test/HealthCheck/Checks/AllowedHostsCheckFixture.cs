@@ -56,15 +56,15 @@ namespace NzbDrone.Core.Test.HealthCheck.Checks
         [Test]
         public void should_return_ok_when_allowed_hosts_is_configured()
         {
-            GivenAllowedHosts("radarr.local");
+            GivenAllowedHosts("gamarr.local");
             GivenAuthenticationRequired(AuthenticationRequiredType.DisabledForLocalAddresses);
 
             Subject.Check().ShouldBeOk();
         }
 
         [TestCase("*")]
-        [TestCase("*, radarr.local")]
-        [TestCase("radarr.local; *")]
+        [TestCase("*, gamarr.local")]
+        [TestCase("gamarr.local; *")]
         public void should_return_warning_when_allowed_hosts_contains_wildcard(string allowedHosts)
         {
             GivenAllowedHosts(allowedHosts);

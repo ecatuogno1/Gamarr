@@ -95,7 +95,7 @@ function HostSettings({
           name="allowedHosts"
           helpText={translate('AllowedHostsHelpText')}
           helpTextWarning={translate('RestartRequiredHelpTextWarning')}
-          helpLink="https://wiki.servarr.com/radarr/settings#host"
+          helpLink="https://wiki.servarr.com/gamarr/settings#host"
           onChange={onInputChange}
           {...allowedHosts}
         />

@@ -41,7 +41,7 @@ namespace NzbDrone.Core.HealthCheck
 
         private static HttpUri MakeWikiUrl(string fragment)
         {
-            return new HttpUri("https://wiki.servarr.com/radarr/system#") + new HttpUri(fragment);
+            return new HttpUri("https://wiki.servarr.com/gamarr/system#") + new HttpUri(fragment);
         }
     }
 
@@ -82,7 +82,7 @@ namespace NzbDrone.Core.HealthCheck
         IndexerStatusUnavailable,
         MetadataKometaDeprecated,
         MinimumApiKeyLength,
-        MountMovies,
+        MountGames,
         NamingConfigDeprecatedToken,
         NotificationStatusAll,
         NotificationStatusSingle,
@@ -98,7 +98,7 @@ namespace NzbDrone.Core.HealthCheck
         ReleaseBranch,
         RemotePathMappingBadDockerPath,
         RemotePathMappingDockerFolderMissing,
-        RemotePathMappingDownloadPermissionsMovie,
+        RemotePathMappingDownloadPermissionsGame,
         RemotePathMappingFileRemoved,
         RemotePathMappingFilesBadDockerPath,
         RemotePathMappingFilesGenericPermissions,
@@ -106,13 +106,13 @@ namespace NzbDrone.Core.HealthCheck
         RemotePathMappingFilesWrongOSPath,
         RemotePathMappingFolderPermissions,
         RemotePathMappingGenericPermissions,
-        RemotePathMappingImportMovieFailed,
+        RemotePathMappingImportGameFailed,
         RemotePathMappingLocalFolderMissing,
         RemotePathMappingLocalWrongOSPath,
         RemotePathMappingRemoteDownloadClient,
         RemotePathMappingWrongOSPath,
-        RemovedMovieMultiple,
-        RemovedMovieSingle,
+        RemovedGameMultiple,
+        RemovedGameSingle,
         RootFolderMissing,
         RootFolderMultipleMissing,
         ServerNotification,

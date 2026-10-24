@@ -18,9 +18,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Database;
         public RejectionType Type => RejectionType.Permanent;
 
-        public DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, ReleaseDecisionInformation information)
+        public DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, ReleaseDecisionInformation information)
         {
-            if (_blocklistService.Blocklisted(subject.Movie.Id, subject.Release))
+            if (_blocklistService.Blocklisted(subject.Game.Id, subject.Release))
             {
                 _logger.Debug("{0} is blocklisted, rejecting.", subject.Release.Title);
                 return DownloadSpecDecision.Reject(DownloadRejectionReason.Blocklisted, "Release is blocklisted");

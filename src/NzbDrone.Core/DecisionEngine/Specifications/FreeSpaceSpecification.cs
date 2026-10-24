@@ -23,7 +23,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Disk;
         public RejectionType Type => RejectionType.Permanent;
 
-        public DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, ReleaseDecisionInformation information)
+        public DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, ReleaseDecisionInformation information)
         {
             if (_configService.SkipFreeSpaceCheckWhenImporting)
             {
@@ -32,7 +32,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             }
 
             var size = subject.Release.Size;
-            var path = subject.Movie.Path;
+            var path = subject.Game.Path;
             long? freeSpace = null;
 
             try

@@ -36,18 +36,18 @@ namespace NzbDrone.Host
 
         public static readonly List<string> ASSEMBLIES = new()
         {
-            "Radarr.Host",
-            "Radarr.Core",
-            "Radarr.SignalR",
-            "Radarr.Api.V3",
-            "Radarr.Http"
+            "Gamarr.Host",
+            "Gamarr.Core",
+            "Gamarr.SignalR",
+            "Gamarr.Api.V3",
+            "Gamarr.Http"
         };
 
         public static void Start(string[] args, Action<IHostBuilder> trayCallback = null)
         {
             try
             {
-                Logger.Info("Starting Radarr - {0} - Version {1}",
+                Logger.Info("Starting Gamarr - {0} - Version {1}",
                             Environment.ProcessPath,
                             Assembly.GetExecutingAssembly().GetName().Version);
 
@@ -65,11 +65,11 @@ namespace NzbDrone.Host
 
                 RunHostUntilShutdown(args, startupContext, appMode, trayCallback);
 
-                Logger.Info("Radarr has shut down completely");
+                Logger.Info("Gamarr has shut down completely");
             }
             catch (InvalidConfigFileException ex)
             {
-                throw new RadarrStartupException(ex);
+                throw new GamarrStartupException(ex);
             }
             catch (TerminateApplicationException e)
             {
@@ -110,12 +110,12 @@ namespace NzbDrone.Host
                 })
                 .ConfigureServices(services =>
                 {
-                    services.Configure<PostgresOptions>(config.GetSection("Radarr:Postgres"));
-                    services.Configure<AppOptions>(config.GetSection("Radarr:App"));
-                    services.Configure<AuthOptions>(config.GetSection("Radarr:Auth"));
-                    services.Configure<ServerOptions>(config.GetSection("Radarr:Server"));
-                    services.Configure<LogOptions>(config.GetSection("Radarr:Log"));
-                    services.Configure<UpdateOptions>(config.GetSection("Radarr:Update"));
+                    services.Configure<PostgresOptions>(config.GetSection("Gamarr:Postgres"));
+                    services.Configure<AppOptions>(config.GetSection("Gamarr:App"));
+                    services.Configure<AuthOptions>(config.GetSection("Gamarr:Auth"));
+                    services.Configure<ServerOptions>(config.GetSection("Gamarr:Server"));
+                    services.Configure<LogOptions>(config.GetSection("Gamarr:Log"));
+                    services.Configure<UpdateOptions>(config.GetSection("Gamarr:Update"));
                 })
                 .Build();
         }
@@ -146,14 +146,14 @@ namespace NzbDrone.Host
         {
             var config = GetConfiguration(context);
 
-            var bindAddress = config.GetValue<string>($"Radarr:Server:{nameof(ServerOptions.BindAddress)}") ?? config.GetValue(nameof(ConfigFileProvider.BindAddress), "*");
-            var port = config.GetValue<int?>($"Radarr:Server:{nameof(ServerOptions.Port)}") ?? config.GetValue(nameof(ConfigFileProvider.Port), 7878);
-            var sslPort = config.GetValue<int?>($"Radarr:Server:{nameof(ServerOptions.SslPort)}") ?? config.GetValue(nameof(ConfigFileProvider.SslPort), 8787);
-            var enableSsl = config.GetValue<bool?>($"Radarr:Server:{nameof(ServerOptions.EnableSsl)}") ?? config.GetValue(nameof(ConfigFileProvider.EnableSsl), false);
-            var sslCertPath = config.GetValue<string>($"Radarr:Server:{nameof(ServerOptions.SslCertPath)}") ?? config.GetValue<string>(nameof(ConfigFileProvider.SslCertPath));
-            var sslKeyPath = config.GetValue<string>($"Radarr:Server:{nameof(ServerOptions.SslKeyPath)}") ?? config.GetValue<string>(nameof(ConfigFileProvider.SslKeyPath));
-            var sslCertPassword = config.GetValue<string>($"Radarr:Server:{nameof(ServerOptions.SslCertPassword)}") ?? config.GetValue<string>(nameof(ConfigFileProvider.SslCertPassword));
-            var logDbEnabled = config.GetValue<bool?>($"Radarr:Log:{nameof(LogOptions.DbEnabled)}") ?? config.GetValue(nameof(ConfigFileProvider.LogDbEnabled), true);
+            var bindAddress = config.GetValue<string>($"Gamarr:Server:{nameof(ServerOptions.BindAddress)}") ?? config.GetValue(nameof(ConfigFileProvider.BindAddress), "*");
+            var port = config.GetValue<int?>($"Gamarr:Server:{nameof(ServerOptions.Port)}") ?? config.GetValue(nameof(ConfigFileProvider.Port), 7878);
+            var sslPort = config.GetValue<int?>($"Gamarr:Server:{nameof(ServerOptions.SslPort)}") ?? config.GetValue(nameof(ConfigFileProvider.SslPort), 8787);
+            var enableSsl = config.GetValue<bool?>($"Gamarr:Server:{nameof(ServerOptions.EnableSsl)}") ?? config.GetValue(nameof(ConfigFileProvider.EnableSsl), false);
+            var sslCertPath = config.GetValue<string>($"Gamarr:Server:{nameof(ServerOptions.SslCertPath)}") ?? config.GetValue<string>(nameof(ConfigFileProvider.SslCertPath));
+            var sslKeyPath = config.GetValue<string>($"Gamarr:Server:{nameof(ServerOptions.SslKeyPath)}") ?? config.GetValue<string>(nameof(ConfigFileProvider.SslKeyPath));
+            var sslCertPassword = config.GetValue<string>($"Gamarr:Server:{nameof(ServerOptions.SslCertPassword)}") ?? config.GetValue<string>(nameof(ConfigFileProvider.SslCertPassword));
+            var logDbEnabled = config.GetValue<bool?>($"Gamarr:Log:{nameof(LogOptions.DbEnabled)}") ?? config.GetValue(nameof(ConfigFileProvider.LogDbEnabled), true);
 
             var urls = new List<string> { BuildUrl("http", bindAddress, port) };
 
@@ -183,12 +183,12 @@ namespace NzbDrone.Host
                 })
                 .ConfigureServices(services =>
                 {
-                    services.Configure<PostgresOptions>(config.GetSection("Radarr:Postgres"));
-                    services.Configure<AppOptions>(config.GetSection("Radarr:App"));
-                    services.Configure<AuthOptions>(config.GetSection("Radarr:Auth"));
-                    services.Configure<ServerOptions>(config.GetSection("Radarr:Server"));
-                    services.Configure<LogOptions>(config.GetSection("Radarr:Log"));
-                    services.Configure<UpdateOptions>(config.GetSection("Radarr:Update"));
+                    services.Configure<PostgresOptions>(config.GetSection("Gamarr:Postgres"));
+                    services.Configure<AppOptions>(config.GetSection("Gamarr:App"));
+                    services.Configure<AuthOptions>(config.GetSection("Gamarr:Auth"));
+                    services.Configure<ServerOptions>(config.GetSection("Gamarr:Server"));
+                    services.Configure<LogOptions>(config.GetSection("Gamarr:Log"));
+                    services.Configure<UpdateOptions>(config.GetSection("Gamarr:Update"));
                 })
                 .ConfigureWebHost(builder =>
                 {
@@ -277,7 +277,7 @@ namespace NzbDrone.Host
             {
                 Logger.Error(ex, ex.Message);
 
-                throw new InvalidConfigFileException($"{configPath} is corrupt or invalid. Please delete the config file and Radarr will recreate it.", ex);
+                throw new InvalidConfigFileException($"{configPath} is corrupt or invalid. Please delete the config file and Gamarr will recreate it.", ex);
             }
         }
 
@@ -296,15 +296,15 @@ namespace NzbDrone.Host
             {
                 if (ex.HResult == 0x2 || ex.HResult == 0x2006D080)
                 {
-                    throw new RadarrStartupException(ex,
+                    throw new GamarrStartupException(ex,
                         $"The SSL certificate file {cert} does not exist");
                 }
 
-                throw new RadarrStartupException(ex);
+                throw new GamarrStartupException(ex);
             }
             catch (Exception ex)
             {
-                throw new RadarrStartupException(ex);
+                throw new GamarrStartupException(ex);
             }
         }
 

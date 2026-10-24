@@ -2,8 +2,8 @@
 // Please do not change this file!
 interface CssExports {
   'freeSpace': string;
+  'gameFolder': string;
   'isMissing': string;
-  'movieFolder': string;
   'path': string;
   'pathContainer': string;
   'selectedValue': string;

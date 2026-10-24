@@ -15,13 +15,13 @@ export interface AvailabilitySelectInputProps
   includeMixed?: boolean;
 }
 
-interface IMovieAvailabilityOption {
+interface IGameAvailabilityOption {
   key: string;
   value: string;
   isDisabled?: boolean;
 }
 
-const movieAvailabilityOptions: IMovieAvailabilityOption[] = [
+const gameAvailabilityOptions: IGameAvailabilityOption[] = [
   {
     key: 'announced',
     get value() {
@@ -50,7 +50,7 @@ function AvailabilitySelectInput(props: AvailabilitySelectInputProps) {
   } = props;
 
   const values: EnhancedSelectInputValue<string>[] = [
-    ...movieAvailabilityOptions,
+    ...gameAvailabilityOptions,
   ];
 
   if (includeNoChange) {

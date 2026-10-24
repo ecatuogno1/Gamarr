@@ -20,20 +20,20 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, ReleaseDecisionInformation information)
+        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, ReleaseDecisionInformation information)
         {
-            var delayProfile = _delayProfileService.BestForTags(subject.Movie.Tags);
+            var delayProfile = _delayProfileService.BestForTags(subject.Game.Tags);
 
             if (subject.Release.DownloadProtocol == DownloadProtocol.Usenet && !delayProfile.EnableUsenet)
             {
-                _logger.Debug("[{0}] Usenet is not enabled for this movie", subject.Release.Title);
-                return DownloadSpecDecision.Reject(DownloadRejectionReason.ProtocolDisabled, "Usenet is not enabled for this movie");
+                _logger.Debug("[{0}] Usenet is not enabled for this game", subject.Release.Title);
+                return DownloadSpecDecision.Reject(DownloadRejectionReason.ProtocolDisabled, "Usenet is not enabled for this game");
             }
 
             if (subject.Release.DownloadProtocol == DownloadProtocol.Torrent && !delayProfile.EnableTorrent)
             {
-                _logger.Debug("[{0}] Torrent is not enabled for this movie", subject.Release.Title);
-                return DownloadSpecDecision.Reject(DownloadRejectionReason.ProtocolDisabled, "Torrent is not enabled for this movie");
+                _logger.Debug("[{0}] Torrent is not enabled for this game", subject.Release.Title);
+                return DownloadSpecDecision.Reject(DownloadRejectionReason.ProtocolDisabled, "Torrent is not enabled for this game");
             }
 
             return DownloadSpecDecision.Accept();

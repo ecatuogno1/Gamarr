@@ -22,7 +22,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, ReleaseDecisionInformation information)
+        public virtual DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, ReleaseDecisionInformation information)
         {
             if (information.SearchCriteria != null)
             {
@@ -37,14 +37,14 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
                 return DownloadSpecDecision.Accept();
             }
 
-            if (subject.Movie.MovieFile == null)
+            if (subject.Game.GameFile == null)
             {
                 return DownloadSpecDecision.Accept();
             }
 
-            var file = subject.Movie.MovieFile;
+            var file = subject.Game.GameFile;
 
-            if (_qualityUpgradableSpecification.IsRevisionUpgrade(file.Quality, subject.ParsedMovieInfo.Quality))
+            if (_qualityUpgradableSpecification.IsRevisionUpgrade(file.Quality, subject.ParsedGameInfo.Quality))
             {
                 if (downloadPropersAndRepacks == ProperDownloadTypes.DoNotUpgrade)
                 {

@@ -4,7 +4,7 @@ using System.Linq;
 using FluentValidation.Results;
 using NLog;
 using NzbDrone.Core.Configuration;
-using NzbDrone.Core.ImportLists.ImportListMovies;
+using NzbDrone.Core.ImportLists.ImportListGames;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.ThingiProvider;
 
@@ -14,16 +14,16 @@ namespace NzbDrone.Core.ImportLists
     {
         public ImportListFetchResult()
         {
-            Movies = new List<ImportListMovie>();
+            Games = new List<ImportListGame>();
         }
 
-        public ImportListFetchResult(List<ImportListMovie> movies, bool anyFailure)
+        public ImportListFetchResult(List<ImportListGame> games, bool anyFailure)
         {
-            Movies = movies;
+            Games = games;
             AnyFailure = anyFailure;
         }
 
-        public List<ImportListMovie> Movies { get; set; }
+        public List<ImportListGame> Games { get; set; }
         public bool AnyFailure { get; set; }
         public int SyncedLists { get; set; }
     }
@@ -80,9 +80,9 @@ namespace NzbDrone.Core.ImportLists
             return null;
         }
 
-        protected virtual List<ImportListMovie> CleanupListItems(IEnumerable<ImportListMovie> listMovies)
+        protected virtual List<ImportListGame> CleanupListItems(IEnumerable<ImportListGame> listGames)
         {
-            var result = listMovies.ToList();
+            var result = listGames.ToList();
 
             result.ForEach(c =>
             {

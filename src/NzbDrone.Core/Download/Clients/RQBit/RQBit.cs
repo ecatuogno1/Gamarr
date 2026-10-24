@@ -198,12 +198,12 @@ namespace NzbDrone.Core.Download.Clients.RQBit
             }
         }
 
-        protected override string AddFromMagnetLink(RemoteMovie remoteMovie, string hash, string magnetLink)
+        protected override string AddFromMagnetLink(RemoteGame remoteGame, string hash, string magnetLink)
         {
             return _proxy.AddTorrentFromUrl(magnetLink, Settings);
         }
 
-        protected override string AddFromTorrentFile(RemoteMovie remoteMovie, string hash, string filename, byte[] fileContent)
+        protected override string AddFromTorrentFile(RemoteGame remoteGame, string hash, string filename, byte[] fileContent)
         {
             return _proxy.AddTorrentFromFile(filename, fileContent, Settings);
         }

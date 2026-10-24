@@ -26,7 +26,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
         public SpecificationPriority Priority => SpecificationPriority.Database;
         public RejectionType Type => RejectionType.Permanent;
 
-        public DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, ReleaseDecisionInformation information)
+        public DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, ReleaseDecisionInformation information)
         {
             var cdhEnabled = _configService.EnableCompletedDownloadHandling;
 
@@ -36,27 +36,27 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
                 return DownloadSpecDecision.Accept();
             }
 
-            var movie = subject.Movie;
+            var game = subject.Game;
 
             _logger.Debug("Performing already imported check on report");
-            if (movie != null)
+            if (game != null)
             {
-                if (!movie.HasFile)
+                if (!game.HasFile)
                 {
-                    _logger.Debug("Skipping already imported check for movie without file");
+                    _logger.Debug("Skipping already imported check for game without file");
                     return DownloadSpecDecision.Accept();
                 }
 
-                var historyForMovie = _historyService.GetByMovieId(movie.Id, null);
-                var lastGrabbed = historyForMovie.FirstOrDefault(h => h.EventType == MovieHistoryEventType.Grabbed);
+                var historyForGame = _historyService.GetByGameId(game.Id, null);
+                var lastGrabbed = historyForGame.FirstOrDefault(h => h.EventType == GameHistoryEventType.Grabbed);
 
                 if (lastGrabbed == null)
                 {
                     return DownloadSpecDecision.Accept();
                 }
 
-                var imported = historyForMovie.FirstOrDefault(h =>
-                    h.EventType == MovieHistoryEventType.DownloadFolderImported &&
+                var imported = historyForGame.FirstOrDefault(h =>
+                    h.EventType == GameHistoryEventType.DownloadFolderImported &&
                     h.DownloadId == lastGrabbed.DownloadId);
 
                 if (imported == null)

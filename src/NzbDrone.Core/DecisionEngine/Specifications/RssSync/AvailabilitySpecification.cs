@@ -18,7 +18,7 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
         public SpecificationPriority Priority => SpecificationPriority.Default;
         public RejectionType Type => RejectionType.Permanent;
 
-        public DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, ReleaseDecisionInformation information)
+        public DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, ReleaseDecisionInformation information)
         {
             if (information.SearchCriteria is { UserInvokedSearch: true })
             {
@@ -28,9 +28,9 @@ namespace NzbDrone.Core.DecisionEngine.Specifications.RssSync
 
             var availabilityDelay = _configService.AvailabilityDelay;
 
-            if (!subject.Movie.IsAvailable(availabilityDelay))
+            if (!subject.Game.IsAvailable(availabilityDelay))
             {
-                return DownloadSpecDecision.Reject(DownloadRejectionReason.Availability, "Movie {0} will only be considered available {1} days after {2}", subject.Movie, availabilityDelay, subject.Movie.MinimumAvailability.ToString());
+                return DownloadSpecDecision.Reject(DownloadRejectionReason.Availability, "Game {0} will only be considered available {1} days after {2}", subject.Game, availabilityDelay, subject.Game.MinimumAvailability.ToString());
             }
 
             return DownloadSpecDecision.Accept();

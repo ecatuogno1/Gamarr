@@ -1,9 +1,9 @@
 using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
+using Gamarr.Http.Validation;
 using NUnit.Framework;
 using NzbDrone.Test.Common;
-using Radarr.Http.Validation;
 
 namespace NzbDrone.Api.Test.Http.Validation;
 

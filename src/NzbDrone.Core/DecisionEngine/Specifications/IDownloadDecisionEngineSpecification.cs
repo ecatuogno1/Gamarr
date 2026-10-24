@@ -8,6 +8,6 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
         SpecificationPriority Priority { get; }
 
-        DownloadSpecDecision IsSatisfiedBy(RemoteMovie subject, ReleaseDecisionInformation information);
+        DownloadSpecDecision IsSatisfiedBy(RemoteGame subject, ReleaseDecisionInformation information);
     }
 }
