@@ -266,9 +266,9 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
                 {
                     status.SortingMode = "TV";
                 }
-                else if (config.Misc.enable_game_sorting && ContainsCategory(config.Misc.game_categories, Settings.GameCategory))
+                else if (config.Misc.enable_movie_sorting && ContainsCategory(config.Misc.movie_categories, Settings.GameCategory))
                 {
-                    status.SortingMode = "Game";
+                    status.SortingMode = "Movie";
                 }
                 else if (config.Misc.enable_date_sorting && ContainsCategory(config.Misc.date_categories, Settings.GameCategory))
                 {
@@ -499,7 +499,7 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
                 };
             }
 
-            if (config.Misc.enable_game_sorting && ContainsCategory(config.Misc.game_categories, Settings.GameCategory))
+            if (config.Misc.enable_movie_sorting && ContainsCategory(config.Misc.movie_categories, Settings.GameCategory))
             {
                 return new NzbDroneValidationFailure("GameCategory", _localizationService.GetLocalizedString("DownloadClientSabnzbdValidationEnableDisableGameSorting"))
                 {

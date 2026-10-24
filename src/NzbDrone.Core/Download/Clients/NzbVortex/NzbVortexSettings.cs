@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
         {
             Host = "localhost";
             Port = 4321;
-            TvCategory = "Games";
+            TvCategory = "gamarr";
             RecentGamePriority = (int)NzbVortexPriority.Normal;
             OlderGamePriority = (int)NzbVortexPriority.Normal;
         }
