@@ -66,10 +66,11 @@ namespace Gamarr.Api.V3.Games
 
             // Everything is validated before anything is saved, the response lists every game that can't be changed
             var failures = new List<ValidationFailure>();
+            var conflictingIgdbIds = new HashSet<int>();
 
             if (resource.PlatformId is > 0)
             {
-                failures.AddRange(ValidatePlatformChange(gamesToUpdate, platform, resource.PlatformId.Value));
+                failures.AddRange(ValidatePlatformChange(gamesToUpdate, platform, resource.PlatformId.Value, conflictingIgdbIds));
             }
 
             foreach (var game in gamesToUpdate)
@@ -98,7 +99,7 @@ namespace Gamarr.Api.V3.Games
 
                         if (newPath != null && newPath.PathNotEquals(game.Path))
                         {
-                            if (_gameService.GamePathExists(newPath))
+                            if (!conflictingIgdbIds.Contains(game.IgdbId) && _gameService.GamePathExists(newPath))
                             {
                                 failures.Add(new ValidationFailure("Path", $"{game.Title}: another game already uses '{newPath}'"));
                             }
@@ -240,7 +241,7 @@ namespace Gamarr.Api.V3.Games
         }
 
         // A game (IGDB id) can only be in the library once per platform
-        private List<ValidationFailure> ValidatePlatformChange(List<Game> games, Platform platform, int platformId)
+        private List<ValidationFailure> ValidatePlatformChange(List<Game> games, Platform platform, int platformId, HashSet<int> conflictingIgdbIds)
         {
             if (platform == null)
             {
@@ -257,6 +258,7 @@ namespace Gamarr.Api.V3.Games
                     var platforms = string.Join(", ", group.Select(g => (g.Platform ?? _platformService.Find(g.PlatformId))?.Name ?? g.PlatformId.ToString()));
 
                     failures.Add(new ValidationFailure("PlatformId", $"{group.First().Title} is selected on several platforms ({platforms}), only one of them can be changed to {platform.Name}"));
+                    conflictingIgdbIds.Add(group.Key);
                     continue;
                 }
 
@@ -265,6 +267,7 @@ namespace Gamarr.Api.V3.Games
                 if (existing != null && !selectedIds.Contains(existing.Id))
                 {
                     failures.Add(new ValidationFailure("PlatformId", $"{existing.Title} is already in the library on {platform.Name}"));
+                    conflictingIgdbIds.Add(group.Key);
                 }
             }
 

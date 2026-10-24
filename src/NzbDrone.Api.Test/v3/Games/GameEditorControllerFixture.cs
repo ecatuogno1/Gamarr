@@ -190,5 +190,31 @@ namespace NzbDrone.Api.Test.v3.Games
             Mocker.GetMock<IManageCommandQueue>()
                   .Verify(v => v.Push(It.IsAny<BulkMoveGameCommand>(), It.IsAny<CommandPriority>(), It.IsAny<CommandTrigger>()), Times.Never());
         }
+
+        [Test]
+        public void should_reject_move_into_folder_another_game_uses()
+        {
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.GamePathExists(Path.Combine(Root, "sfc", "Super Mario World (1990)")))
+                  .Returns(true);
+
+            var errors = SaveExpectingErrors(new GameEditorResource { GameIds = new List<int> { 1 }, PlatformId = _sfc.Id, MoveFiles = true });
+
+            errors.Should().ContainSingle().Which.Should().Contain("another game already uses");
+        }
+
+        [Test]
+        public void should_only_report_the_platform_conflict_of_a_game()
+        {
+            GivenInLibrary(GivenGame(10, 100, "Super Mario World", _sfc));
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.GamePathExists(It.IsAny<string>()))
+                  .Returns(true);
+
+            var errors = SaveExpectingErrors(new GameEditorResource { GameIds = new List<int> { 1 }, PlatformId = _sfc.Id });
+
+            errors.Should().ContainSingle().Which.Should().Contain("already in the library on Super Famicom");
+        }
     }
 }
