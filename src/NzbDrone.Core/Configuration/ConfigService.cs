@@ -407,8 +407,6 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("CleanupMetadataImages", value); }
         }
 
-        public string PlexClientIdentifier => GetValue("PlexClientIdentifier", Guid.NewGuid().ToString(), true);
-
         public string RijndaelPassphrase => GetValue("RijndaelPassphrase", Guid.NewGuid().ToString(), true);
 
         public string HmacPassphrase => GetValue("HmacPassphrase", Guid.NewGuid().ToString(), true);
