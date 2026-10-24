@@ -4,7 +4,6 @@ using Gamarr.Http.REST;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.Extras.Others;
-using NzbDrone.Core.Extras.Subtitles;
 
 namespace Gamarr.Api.V3.ExtraFiles
 {
@@ -39,26 +38,6 @@ namespace Gamarr.Api.V3.ExtraFiles
             };
         }
 
-        public static ExtraFileResource ToResource(this SubtitleFile model)
-        {
-            if (model == null)
-            {
-                return null;
-            }
-
-            return new ExtraFileResource
-            {
-                Id = model.Id,
-                GameId = model.GameId,
-                GameFileId = model.GameFileId,
-                RelativePath = model.RelativePath,
-                Extension = model.Extension,
-                LanguageTags = model.LanguageTags,
-                Title = model.Title,
-                Type = ExtraFileType.Subtitle
-            };
-        }
-
         public static ExtraFileResource ToResource(this OtherExtraFile model)
         {
             if (model == null)
@@ -75,11 +54,6 @@ namespace Gamarr.Api.V3.ExtraFiles
                 Extension = model.Extension,
                 Type = ExtraFileType.Other
             };
-        }
-
-        public static List<ExtraFileResource> ToResource(this IEnumerable<SubtitleFile> games)
-        {
-            return games.Select(ToResource).ToList();
         }
 
         public static List<ExtraFileResource> ToResource(this IEnumerable<MetadataFile> games)

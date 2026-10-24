@@ -32,22 +32,6 @@ namespace NzbDrone.Core.Test.ParserTests
             result.Languages.Should().Contain(Language.Unknown);
         }
 
-        [TestCase("Game Title - 2022.en.sub")]
-        [TestCase("Game Title - 2022.EN.sub")]
-        [TestCase("Game Title - 2022.eng.sub")]
-        [TestCase("Game Title - 2022.ENG.sub")]
-        [TestCase("Game Title - 2022.English.sub")]
-        [TestCase("Game Title - 2022.english.sub")]
-        [TestCase("Game Title - 2022.en.cc.sub")]
-        [TestCase("Game Title - 2022.en.sdh.sub")]
-        [TestCase("Game Title - 2022.en.forced.sub")]
-        [TestCase("Game Title - 2022.en.sdh.forced.sub")]
-        public void should_parse_subtitle_language_english(string fileName)
-        {
-            var result = LanguageParser.ParseSubtitleLanguage(fileName);
-            result.Should().Be(Language.English);
-        }
-
         [TestCase("Game.Title.1994.French.1080p.XviD-LOL")]
         [TestCase("Game Title : Other Title 2011 AVC.1080p.Blu-ray HD.VOSTFR.VFF")]
         [TestCase("Game Title - Other Title 2011 Bluray 4k HDR HEVC AC3 VFF")]
@@ -531,23 +515,6 @@ namespace NzbDrone.Core.Test.ParserTests
             result.Should().Contain(Language.Georgian);
         }
 
-        [TestCase("Game.Title.en.sub")]
-        [TestCase("Game Title.eng.sub")]
-        [TestCase("Game.Title.eng.forced.sub")]
-        [TestCase("Game-Title-eng-forced.sub")]
-        public void should_parse_subtitle_language(string fileName)
-        {
-            var result = LanguageParser.ParseSubtitleLanguage(fileName);
-            result.Should().Be(Language.English);
-        }
-
-        [TestCase("Game Title.sub")]
-        public void should_parse_subtitle_language_unknown(string fileName)
-        {
-            var result = LanguageParser.ParseSubtitleLanguage(fileName);
-            result.Should().Be(Language.Unknown);
-        }
-
         [TestCase("The.Game.Name.2016.German.DTS.DL.720p.BluRay.x264-RlsGrp")]
         public void should_add_original_language_to_german_release_with_dl_tag(string postTitle)
         {
@@ -586,44 +553,6 @@ namespace NzbDrone.Core.Test.ParserTests
             result.Languages.Should().Contain(Language.German);
             result.Languages.Should().Contain(Language.Original);
             result.Languages.Should().Contain(Language.English);
-        }
-
-        [TestCase("Name (2020) - [AAC 2.0].testtitle.default.eng.forced.ass", new[] { "default", "forced" }, "testtitle", "English")]
-        [TestCase("Name (2020) - [AAC 2.0].eng.default.testtitle.forced.ass", new[] { "default", "forced" }, "testtitle", "English")]
-        [TestCase("Name (2020) - [AAC 2.0].default.eng.testtitle.forced.ass", new[] { "default", "forced" }, "testtitle", "English")]
-        [TestCase("Name (2020) - [AAC 2.0].testtitle.forced.eng.ass", new[] { "forced" }, "testtitle", "English")]
-        [TestCase("Name (2020) - [AAC 2.0].eng.forced.testtitle.ass", new[] { "forced" }, "testtitle", "English")]
-        [TestCase("Name (2020) - [AAC 2.0].forced.eng.testtitle.ass", new[] { "forced" }, "testtitle", "English")]
-        [TestCase("Name (2020) - [AAC 2.0].testtitle.default.fra.forced.ass", new[] { "default", "forced" }, "testtitle", "French")]
-        [TestCase("Name (2020) - [AAC 2.0].fra.default.testtitle.forced.ass", new[] { "default", "forced" }, "testtitle", "French")]
-        [TestCase("Name (2020) - [AAC 2.0].default.fra.testtitle.forced.ass", new[] { "default", "forced" }, "testtitle", "French")]
-        [TestCase("Name (2020) - [AAC 2.0].testtitle.forced.fra.ass", new[] { "forced" }, "testtitle", "French")]
-        [TestCase("Name (2020) - [AAC 2.0].fra.forced.testtitle.ass", new[] { "forced" }, "testtitle", "French")]
-        [TestCase("Name (2020) - [AAC 2.0].forced.fra.testtitle.ass", new[] { "forced" }, "testtitle", "French")]
-        [TestCase("Name (2020) - [AAC 2.0].ru-something-else.srt", new string[0], "something-else", "Russian")]
-        [TestCase("Name (2020) - [AAC 2.0].Full Subtitles.eng.ass", new string[0], "Full Subtitles", "English")]
-        [TestCase("Name (2020) - [AAC 2.0].mytitle - 1.en.ass", new string[0], "mytitle", "English")]
-        [TestCase("Name (2020) - [AAC 2.0].mytitle 1.en.ass", new string[0], "mytitle 1", "English")]
-        [TestCase("Name (2020) - [AAC 2.0].mytitle.en.ass", new string[0], "mytitle", "English")]
-        public void should_parse_title_and_tags(string postTitle, string[] expectedTags, string expectedTitle, string expectedLanguage)
-        {
-            var subtitleTitleInfo = LanguageParser.ParseSubtitleLanguageInformation(postTitle);
-
-            subtitleTitleInfo.LanguageTags.Should().BeEquivalentTo(expectedTags);
-            subtitleTitleInfo.Title.Should().BeEquivalentTo(expectedTitle);
-            subtitleTitleInfo.Language.Should().BeEquivalentTo((Language)expectedLanguage);
-        }
-
-        [TestCase("Name (2020) - [AAC 2.0].default.forced.ass")]
-        [TestCase("Name (2020) - [AAC 2.0].default.ass")]
-        [TestCase("Name (2020) - [AAC 2.0].ass")]
-        [TestCase("Name (2020) - [AAC 2.0].testtitle.ass")]
-        public void should_not_parse_false_title(string postTitle)
-        {
-            var subtitleTitleInfo = LanguageParser.ParseSubtitleLanguageInformation(postTitle);
-            subtitleTitleInfo.Language.Should().Be(Language.Unknown);
-            subtitleTitleInfo.LanguageTags.Should().BeEmpty();
-            subtitleTitleInfo.RawTitle.Should().BeNull();
         }
     }
 }
