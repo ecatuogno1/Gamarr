@@ -26,6 +26,7 @@ function GameSearchResult(props: GameSearchResultProps) {
     igdbId,
     igdbSlug,
     tags,
+    platforms,
   } = props;
 
   let alternateTitle = null;
@@ -51,6 +52,10 @@ function GameSearchResult(props: GameSearchResultProps) {
         <div className={styles.title}>
           {title} {year > 0 ? `(${year})` : ''}
         </div>
+
+        {platforms.length ? (
+          <div className={styles.platforms}>{platforms.join(', ')}</div>
+        ) : null}
 
         {match.key === 'originalTitle' && originalTitle ? (
           <div className={styles.originalTitle}>{originalTitle}</div>

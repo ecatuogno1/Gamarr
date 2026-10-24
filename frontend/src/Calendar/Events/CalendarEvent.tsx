@@ -7,6 +7,7 @@ import getStatusStyle from 'Calendar/getStatusStyle';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
 import { GamePlatform } from 'Game/Game';
+import { getTitleWithPlatform } from 'Game/Title/gameTitle';
 import useGameFile from 'GameFile/useGameFile';
 import { icons, kinds } from 'Helpers/Props';
 import { createQueueItemSelectorForHook } from 'Store/Selectors/createQueueItemSelector';
@@ -95,7 +96,9 @@ function CalendarEvent({
 
       <div className={styles.overlay}>
         <div className={styles.info}>
-          <div className={styles.gameTitle}>{title}</div>
+          <div className={styles.gameTitle}>
+            {getTitleWithPlatform(title, platform)}
+          </div>
 
           <div
             className={classNames(
@@ -138,8 +141,6 @@ function CalendarEvent({
 
             <div className={styles.gameInfo}>
               <div className={styles.eventType}>{eventTypes.join(', ')}</div>
-
-              <div>{platform?.shortName}</div>
             </div>
           </>
         ) : null}

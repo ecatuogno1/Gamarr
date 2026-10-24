@@ -19,7 +19,8 @@
 }
 
 .originalTitle,
-.alternateTitle {
+.alternateTitle,
+.platforms {
   composes: title;
 
   color: var(--disabledColor);

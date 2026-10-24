@@ -3,6 +3,7 @@
 interface CssExports {
   'alternateTitle': string;
   'originalTitle': string;
+  'platforms': string;
   'poster': string;
   'result': string;
   'tagContainer': string;
