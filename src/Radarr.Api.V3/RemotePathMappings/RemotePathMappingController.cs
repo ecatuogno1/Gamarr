@@ -1,0 +1,90 @@
+using System.Collections.Generic;
+using FluentValidation;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using NzbDrone.Common.Extensions;
+using NzbDrone.Core.RemotePathMappings;
+using NzbDrone.Core.Validation.Paths;
+using Radarr.Http;
+using Radarr.Http.REST;
+using Radarr.Http.REST.Attributes;
+
+namespace Radarr.Api.V3.RemotePathMappings
+{
+    [V3ApiController]
+    public class RemotePathMappingController : RestController<RemotePathMappingResource>
+    {
+        private readonly IRemotePathMappingService _remotePathMappingService;
+
+        public RemotePathMappingController(IRemotePathMappingService remotePathMappingService,
+                                       PathExistsValidator pathExistsValidator,
+                                       MappedNetworkDriveValidator mappedNetworkDriveValidator)
+        {
+            _remotePathMappingService = remotePathMappingService;
+
+            SharedValidator.RuleFor(c => c.Host)
+                .NotEmpty();
+
+            // We cannot use IsValidPath here, because it's a remote path, possibly other OS.
+            SharedValidator.RuleFor(c => c.RemotePath)
+                .NotEmpty();
+
+            SharedValidator.RuleFor(c => c.RemotePath)
+                .Must(remotePath => remotePath.IsNotNullOrWhiteSpace() && !remotePath.StartsWith(" "))
+                .WithMessage("Remote Path '{PropertyValue}' must not start with a space");
+
+            SharedValidator.RuleFor(c => c.RemotePath)
+                .Must(remotePath => remotePath.IsNotNullOrWhiteSpace() && !remotePath.EndsWith(" "))
+                .WithMessage("Remote Path '{PropertyValue}' must not end with a space");
+
+            SharedValidator.RuleFor(c => c.LocalPath)
+                .Cascade(CascadeMode.Stop)
+                .IsValidPath()
+                .SetValidator(mappedNetworkDriveValidator)
+                .SetValidator(pathExistsValidator)
+                .SetValidator(new SystemFolderValidator())
+                .NotEqual("/")
+                .WithMessage("Cannot be set to '/'");
+        }
+
+        protected override RemotePathMappingResource GetResourceById(int id)
+        {
+            return _remotePathMappingService.Get(id).ToResource();
+        }
+
+        [RestPostById]
+        [Consumes("application/json")]
+        public Results<Created<RemotePathMappingResource>, NotFound> CreateMapping([FromBody] RemotePathMappingResource resource)
+        {
+            var model = resource.ToModel();
+
+            return Created(_remotePathMappingService.Add(model).Id);
+        }
+
+        [HttpGet]
+        [Produces("application/json")]
+        public Ok<List<RemotePathMappingResource>> GetMappings()
+        {
+            return TypedResults.Ok(_remotePathMappingService.All().ToResource());
+        }
+
+        [RestDeleteById]
+        public Ok DeleteMapping(int id)
+        {
+            _remotePathMappingService.Remove(id);
+
+            return TypedResults.Ok();
+        }
+
+        [RestPutById]
+        [Consumes("application/json")]
+        [Produces("application/json")]
+        public Results<Ok<RemotePathMappingResource>, NotFound> UpdateMapping([FromBody] RemotePathMappingResource resource)
+        {
+            var mapping = resource.ToModel();
+
+            return TypedResults.Ok(_remotePathMappingService.Update(mapping).ToResource());
+        }
+    }
+}

@@ -1,0 +1,33 @@
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using NzbDrone.Core.MediaFiles;
+using Radarr.Http;
+using Radarr.Http.REST;
+
+namespace Radarr.Api.V3.Movies
+{
+    [V3ApiController("rename")]
+    public class RenameMovieController : Controller
+    {
+        private readonly IRenameMovieFileService _renameMovieFileService;
+
+        public RenameMovieController(IRenameMovieFileService renameMovieFileService)
+        {
+            _renameMovieFileService = renameMovieFileService;
+        }
+
+        [HttpGet]
+        [Produces("application/json")]
+        public Results<Ok<List<RenameMovieResource>>, BadRequest> GetMovies([FromQuery(Name = "movieId")] List<int> movieIds)
+        {
+            if (movieIds is not { Count: not 0 })
+            {
+                throw new BadRequestException("movieId must be provided");
+            }
+
+            return TypedResults.Ok(_renameMovieFileService.GetRenamePreviews(movieIds).ToResource());
+        }
+    }
+}
