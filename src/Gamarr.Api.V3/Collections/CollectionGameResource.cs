@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Gamarr.Api.V3.Games;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.MediaCover;
@@ -48,7 +49,7 @@ namespace Gamarr.Api.V3.Collections
                 Images = model.Images,
                 IgdbSlug = model.IgdbSlug,
                 Ratings = model.Ratings,
-                ReleaseDate = model.ReleaseDate,
+                ReleaseDate = model.ReleaseDate.ToReleaseDay(),
                 AvailablePlatformIgdbIds = model.AvailablePlatformIgdbIds,
                 CleanTitle = model.CleanTitle,
                 Genres = model.Genres,

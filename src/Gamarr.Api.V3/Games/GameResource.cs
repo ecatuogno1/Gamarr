@@ -137,9 +137,9 @@ namespace Gamarr.Api.V3.Games
                 OriginalTitle = model.GameMetadata.Value.OriginalTitle,
                 OriginalLanguage = model.GameMetadata.Value.OriginalLanguage,
                 SortTitle = GameTitleNormalizer.Normalize(translatedTitle, model.IgdbId),
-                ReleaseDate = model.GetReleaseDate(),
-                FirstReleaseDate = model.GameMetadata.Value.ReleaseDate,
-                PlatformReleaseDates = model.GameMetadata.Value.PlatformReleaseDates,
+                ReleaseDate = model.GetReleaseDate().ToReleaseDay(),
+                FirstReleaseDate = model.GameMetadata.Value.ReleaseDate.ToReleaseDay(),
+                PlatformReleaseDates = model.GameMetadata.Value.PlatformReleaseDates.ToReleaseDays(),
                 AvailablePlatformIgdbIds = model.GameMetadata.Value.AvailablePlatformIgdbIds,
 
                 Status = model.GameMetadata.Value.Status,

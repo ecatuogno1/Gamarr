@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Gamarr.Api.V3.Games;
 using Gamarr.Http.REST;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Games.Collections;
@@ -65,7 +66,7 @@ namespace Gamarr.Api.V3.ImportLists
                 Title = model.Title,
                 SortTitle = model.GameMetadata.Value.SortTitle,
                 OriginalLanguage = model.GameMetadata.Value.OriginalLanguage,
-                ReleaseDate = model.GameMetadata.Value.ReleaseDate,
+                ReleaseDate = model.GameMetadata.Value.ReleaseDate.ToReleaseDay(),
                 AvailablePlatformIgdbIds = model.GameMetadata.Value.AvailablePlatformIgdbIds,
 
                 Status = model.GameMetadata.Value.Status,
@@ -101,7 +102,7 @@ namespace Gamarr.Api.V3.ImportLists
                 Title = model.Title,
                 SortTitle = model.GameMetadata.Value.SortTitle,
                 OriginalLanguage = model.GameMetadata.Value.OriginalLanguage,
-                ReleaseDate = model.GameMetadata.Value.ReleaseDate,
+                ReleaseDate = model.GameMetadata.Value.ReleaseDate.ToReleaseDay(),
                 AvailablePlatformIgdbIds = model.GameMetadata.Value.AvailablePlatformIgdbIds,
 
                 Status = model.GameMetadata.Value.Status,
