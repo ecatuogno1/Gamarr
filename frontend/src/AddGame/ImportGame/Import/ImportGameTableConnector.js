@@ -25,12 +25,13 @@ function createMapStateToProps() {
 
 function createMapDispatchToProps(dispatch, props) {
   return {
-    onGameLookup(name, path, relativePath) {
+    onGameLookup(name, path, relativePath, folderName, platformId) {
       dispatch(queueLookupGame({
         name,
         path,
         relativePath,
-        term: name
+        platformId,
+        term: folderName || name
       }));
     },
 

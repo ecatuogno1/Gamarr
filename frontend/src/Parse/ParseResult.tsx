@@ -1,8 +1,15 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
+import AppState from 'App/State/AppState';
 import { ParseModel } from 'App/State/ParseAppState';
 import FieldSet from 'Components/FieldSet';
 import GameFormats from 'Game/GameFormats';
 import GameTitleLink from 'Game/GameTitleLink';
+import {
+  formatVersion,
+  getRegionNames,
+  getReleaseTypeName,
+} from 'GameFile/releaseDetails';
 import translate from 'Utilities/String/translate';
 import ParseResultItem from './ParseResultItem';
 import styles from './ParseResult.css';
@@ -26,8 +33,18 @@ function ParseResult(props: ParseResultProps) {
     releaseHash,
     quality,
     igdbId,
-    imdbId,
+    platformId,
+    regions,
+    version,
+    releaseType,
+    discNumber,
+    discCount,
+    titleId,
   } = parsedGameInfo;
+
+  const platform = useSelector((state: AppState) =>
+    state.settings.platforms.items.find((p) => p.id === platformId)
+  );
 
   const finalLanguages = languages ?? parsedGameInfo.languages;
 
@@ -70,9 +87,38 @@ function ParseResult(props: ParseResultProps) {
           <ParseResultItem title={translate('IGDBId')} data={igdbId} />
         ) : null}
 
-        {imdbId ? (
-          <ParseResultItem title={translate('IMDbId')} data={imdbId} />
-        ) : null}
+        {titleId ? <ParseResultItem title="Title ID" data={titleId} /> : null}
+      </FieldSet>
+
+      <FieldSet legend={translate('Details')}>
+        <ParseResultItem
+          title={translate('Platform')}
+          data={platform ? platform.name : '-'}
+        />
+
+        <ParseResultItem
+          title={translate('CustomFormatsSpecificationRegion')}
+          data={regions?.length ? getRegionNames(regions) : '-'}
+        />
+
+        <ParseResultItem
+          title={translate('CustomFormatsSpecificationReleaseType')}
+          data={getReleaseTypeName(releaseType) || '-'}
+        />
+
+        <ParseResultItem
+          title={translate('Version')}
+          data={version ? formatVersion(version) : '-'}
+        />
+
+        <ParseResultItem
+          title="Disc"
+          data={
+            discNumber
+              ? `${discNumber}${discCount ? ` / ${discCount}` : ''}`
+              : '-'
+          }
+        />
       </FieldSet>
 
       <FieldSet legend={translate('Quality')}>

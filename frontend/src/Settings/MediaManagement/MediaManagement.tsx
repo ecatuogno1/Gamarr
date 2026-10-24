@@ -369,22 +369,6 @@ function MediaManagement() {
               <FormGroup
                 advancedSettings={showAdvancedSettings}
                 isAdvanced={true}
-                size={sizes.MEDIUM}
-              >
-                <FormLabel>{translate('AnalyseVideoFiles')}</FormLabel>
-
-                <FormInputGroup
-                  type={inputTypes.CHECK}
-                  name="enableMediaInfo"
-                  helpText={translate('AnalyseVideoFilesHelpText')}
-                  onChange={handleInputChange}
-                  {...settings.enableMediaInfo}
-                />
-              </FormGroup>
-
-              <FormGroup
-                advancedSettings={showAdvancedSettings}
-                isAdvanced={true}
               >
                 <FormLabel>
                   {translate('RescanGameFolderAfterRefresh')}

@@ -29,17 +29,15 @@
 }
 
 .languages,
-.audio,
-.video,
+.version,
+.releaseType,
 .actions {
   composes: cell from '~Components/Table/Cells/TableRowCell.css';
 
   width: 100px;
 }
 
-.audioLanguages,
-.videoDynamicRangeType,
-.subtitles {
+.regions {
   composes: cell from '~Components/Table/Cells/TableRowCell.css';
 
   width: 165px;

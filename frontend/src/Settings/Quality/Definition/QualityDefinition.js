@@ -12,14 +12,16 @@ import translate from 'Utilities/String/translate';
 import QualityDefinitionLimits from './QualityDefinitionLimits';
 import styles from './QualityDefinition.css';
 
+// Sizes are absolute, in GB. The slider uses a square root scale so ROM sized (MB) limits can be set as well.
 const MIN = 0;
-const MAX = 2000;
-const MIN_DISTANCE = 1;
+const MAX = 1000;
+const MIN_DISTANCE = 0.01;
+const EXPONENT = 2;
 
 const slider = {
   min: MIN,
-  max: roundNumber(Math.pow(MAX, 1 / 1.1)),
-  step: 0.1
+  max: roundNumber(Math.pow(MAX, 1 / EXPONENT)),
+  step: 0.01
 };
 
 function getValue(inputValue) {
@@ -35,7 +37,7 @@ function getValue(inputValue) {
 }
 
 function getSliderValue(value, defaultValue) {
-  const sliderValue = value ? Math.pow(value, 1 / 1.1) : defaultValue;
+  const sliderValue = value ? Math.pow(value, 1 / EXPONENT) : defaultValue;
 
   return roundNumber(sliderValue);
 }
@@ -87,9 +89,9 @@ class QualityDefinition extends Component {
     });
 
     this.props.onSizeChange({
-      minSize: roundNumber(Math.pow(sliderMinSize, 1.1)),
-      preferredSize: sliderPreferredSize === (slider.max - 3) ? null : roundNumber(Math.pow(sliderPreferredSize, 1.1)),
-      maxSize: sliderMaxSize === slider.max ? null : roundNumber(Math.pow(sliderMaxSize, 1.1))
+      minSize: roundNumber(Math.pow(sliderMinSize, EXPONENT)),
+      preferredSize: sliderPreferredSize === (slider.max - 3) ? null : roundNumber(Math.pow(sliderPreferredSize, EXPONENT)),
+      maxSize: sliderMaxSize === slider.max ? null : roundNumber(Math.pow(sliderMaxSize, EXPONENT))
     });
   };
 
@@ -170,14 +172,16 @@ class QualityDefinition extends Component {
       sliderPreferredSize
     } = this.state;
 
-    const minBytes = minSize * 1024 * 1024;
-    const minSixty = `${formatBytes(minBytes * 60)}/${translate('HourShorthand')}`;
+    const gigabyte = 1024 * 1024 * 1024;
 
-    const preferredBytes = preferredSize * 1024 * 1024;
-    const preferredSixty = preferredBytes ? `${formatBytes(preferredBytes * 60)}/${translate('HourShorthand')}` : translate('Unlimited');
+    const minBytes = minSize * gigabyte;
+    const minLabel = minBytes ? formatBytes(minBytes) : '0';
 
-    const maxBytes = maxSize && maxSize * 1024 * 1024;
-    const maxSixty = maxBytes ? `${formatBytes(maxBytes * 60)}/${translate('HourShorthand')}` : translate('Unlimited');
+    const preferredBytes = preferredSize * gigabyte;
+    const preferredLabel = preferredBytes ? formatBytes(preferredBytes) : translate('Unlimited');
+
+    const maxBytes = maxSize && maxSize * gigabyte;
+    const maxLabel = maxBytes ? formatBytes(maxBytes) : translate('Unlimited');
 
     return (
       <div className={styles.qualityDefinition}>
@@ -215,7 +219,7 @@ class QualityDefinition extends Component {
             <div>
               <Popover
                 anchor={
-                  <Label kind={kinds.INFO}>{minSixty}</Label>
+                  <Label kind={kinds.INFO}>{minLabel}</Label>
                 }
                 title={translate('MinimumLimits')}
                 body={
@@ -231,7 +235,7 @@ class QualityDefinition extends Component {
             <div>
               <Popover
                 anchor={
-                  <Label kind={kinds.SUCCESS}>{preferredSixty}</Label>
+                  <Label kind={kinds.SUCCESS}>{preferredLabel}</Label>
                 }
                 title={translate('PreferredSize')}
                 body={
@@ -247,7 +251,7 @@ class QualityDefinition extends Component {
             <div>
               <Popover
                 anchor={
-                  <Label kind={kinds.WARNING}>{maxSixty}</Label>
+                  <Label kind={kinds.WARNING}>{maxLabel}</Label>
                 }
                 title={translate('MaximumLimits')}
                 body={
@@ -274,7 +278,7 @@ class QualityDefinition extends Component {
                   value={minSize || MIN}
                   min={MIN}
                   max={preferredSize ? preferredSize - MIN_DISTANCE : MAX - MIN_DISTANCE}
-                  step={0.1}
+                  step={0.01}
                   isFloat={true}
                   onChange={this.onMinSizeChange}
                 />
@@ -289,7 +293,7 @@ class QualityDefinition extends Component {
                   value={preferredSize || MAX - MIN_DISTANCE}
                   min={MIN}
                   max={maxSize ? maxSize - MIN_DISTANCE : MAX - MIN_DISTANCE}
-                  step={0.1}
+                  step={0.01}
                   isFloat={true}
                   onChange={this.onPreferredSizeChange}
                 />
@@ -304,7 +308,7 @@ class QualityDefinition extends Component {
                   value={maxSize || MAX}
                   min={minSize + MIN_DISTANCE}
                   max={MAX}
-                  step={0.1}
+                  step={0.01}
                   isFloat={true}
                   onChange={this.onMaxSizeChange}
                 />

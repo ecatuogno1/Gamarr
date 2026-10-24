@@ -17,5 +17,4 @@ export default interface MediaManagement {
   scriptImportPath: string;
   importExtraFiles: boolean;
   extraFileExtensions: string;
-  enableMediaInfo: boolean;
 }

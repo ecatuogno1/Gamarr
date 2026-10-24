@@ -67,6 +67,7 @@ export const actionHandlers = handleThunks({
       name,
       path,
       relativePath,
+      platformId,
       term,
       topOfQueue = false
     } = payload;
@@ -77,6 +78,7 @@ export const actionHandlers = handleThunks({
       term,
       path,
       relativePath,
+      platformId,
       isFetching: false,
       isPopulated: false,
       error: null
@@ -143,9 +145,9 @@ export const actionHandlers = handleThunks({
 
     const { request, abortRequest } = createAjaxRequest({
       url: '/game/lookup',
-      data: {
-        term: queued.term
-      }
+      data: queued.platformId ?
+        { term: queued.term, platformId: queued.platformId } :
+        { term: queued.term }
     });
 
     abortCurrentLookup = abortRequest;
@@ -221,9 +223,13 @@ export const actionHandlers = handleThunks({
 
       // Make sure we have a selected game and
       // the same game hasn't been added yet.
-      if (selectedGame && !acc.some((a) => a.igdbId === selectedGame.igdbId)) {
+      // The platform folder the game was found in decides its platform
+      const platformId = selectedGame ? item.platformId || selectedGame.platformId : 0;
+
+      if (selectedGame && !acc.some((a) => a.igdbId === selectedGame.igdbId && a.platformId === platformId)) {
         const newGame = getNewGame(_.cloneDeep(selectedGame), item);
         newGame.path = item.path;
+        newGame.platformId = platformId;
 
         addedIds.push(id);
         acc.push(newGame);

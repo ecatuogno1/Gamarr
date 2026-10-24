@@ -55,14 +55,6 @@ function IndexerOptions({
     [dispatch]
   );
 
-  const handleWhitelistedSubtitleChange = useCallback(
-    ({ name, value }: InputChanged<string[] | null>) => {
-      // @ts-expect-error - actions aren't typed
-      dispatch(setIndexerOptionsValue({ name, value: value?.join(',') }));
-    },
-    [dispatch]
-  );
-
   useEffect(() => {
     dispatch(fetchIndexerOptions());
     setChildSave(() => dispatch(saveIndexerOptions()));
@@ -175,30 +167,6 @@ function IndexerOptions({
               helpLink="https://github.com/ecatuogno1/Gamarr/wiki/faq#how-does-gamarr-work"
               onChange={handleInputChange}
               {...settings.rssSyncInterval}
-            />
-          </FormGroup>
-
-          <FormGroup advancedSettings={showAdvancedSettings} isAdvanced={true}>
-            <FormLabel>{translate('WhitelistedSubtitleTags')}</FormLabel>
-
-            <FormInputGroup
-              type={inputTypes.TEXT_TAG}
-              name="whitelistedHardcodedSubs"
-              helpText={translate('WhitelistedHardcodedSubsHelpText')}
-              onChange={handleWhitelistedSubtitleChange}
-              {...settings.whitelistedHardcodedSubs}
-            />
-          </FormGroup>
-
-          <FormGroup advancedSettings={showAdvancedSettings} isAdvanced={true}>
-            <FormLabel>{translate('AllowHardcodedSubs')}</FormLabel>
-
-            <FormInputGroup
-              type={inputTypes.CHECK}
-              name="allowHardcodedSubs"
-              helpText={translate('AllowHardcodedSubsHelpText')}
-              onChange={handleInputChange}
-              {...settings.allowHardcodedSubs}
             />
           </FormGroup>
         </Form>

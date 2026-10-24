@@ -17,7 +17,14 @@ export interface ParsedGameInfo {
   releaseGroup?: string;
   edition?: string;
   igdbId?: number;
-  imdbId?: string;
+  platformId: number;
+  platformIgdbId: number;
+  regions: string[];
+  version?: string;
+  releaseType: string;
+  discNumber: number;
+  discCount: number;
+  titleId?: string;
 }
 
 export interface ParseModel extends ModelBase {

@@ -13,8 +13,7 @@ import GameLanguages from 'Game/GameLanguages';
 import GameQuality from 'Game/GameQuality';
 import IndexerFlags from 'Game/IndexerFlags';
 import FileEditModal from 'GameFile/Edit/FileEditModal';
-import MediaInfo from 'GameFile/MediaInfo';
-import * as mediaInfoTypes from 'GameFile/mediaInfoTypes';
+import { formatVersion, getRegionNames, getReleaseTypeName } from 'GameFile/releaseDetails';
 import { icons, kinds, tooltipPositions } from 'Helpers/Props';
 import formatBytes from 'Utilities/Number/formatBytes';
 import formatCustomFormatScore from 'Utilities/Number/formatCustomFormatScore';
@@ -77,8 +76,13 @@ class GameFileEditorRow extends Component {
   render() {
     const {
       id,
-      mediaInfo,
       relativePath,
+      edition,
+      regions,
+      version,
+      releaseType,
+      discNumber,
+      discCount,
       size,
       releaseGroup,
       quality,
@@ -218,72 +222,35 @@ class GameFileEditorRow extends Component {
               );
             }
 
-            if (name === 'audioInfo') {
+            if (name === 'regions') {
               return (
                 <TableRowCell
                   key={name}
-                  className={styles.audio}
+                  className={styles.regions}
                 >
-                  <MediaInfo
-                    type={mediaInfoTypes.AUDIO}
-                    gameFileId={id}
-                  />
+                  {getRegionNames(regions)}
                 </TableRowCell>
               );
             }
 
-            if (name === 'audioLanguages') {
+            if (name === 'version') {
               return (
                 <TableRowCell
                   key={name}
-                  className={styles.audioLanguages}
+                  className={styles.version}
                 >
-                  <MediaInfo
-                    type={mediaInfoTypes.AUDIO_LANGUAGES}
-                    gameFileId={id}
-                  />
+                  {formatVersion(version)}
                 </TableRowCell>
               );
             }
 
-            if (name === 'subtitleLanguages') {
+            if (name === 'releaseType') {
               return (
                 <TableRowCell
                   key={name}
-                  className={styles.subtitles}
+                  className={styles.releaseType}
                 >
-                  <MediaInfo
-                    type={mediaInfoTypes.SUBTITLES}
-                    gameFileId={id}
-                  />
-                </TableRowCell>
-              );
-            }
-
-            if (name === 'videoCodec') {
-              return (
-                <TableRowCell
-                  key={name}
-                  className={styles.video}
-                >
-                  <MediaInfo
-                    type={mediaInfoTypes.VIDEO}
-                    gameFileId={id}
-                  />
-                </TableRowCell>
-              );
-            }
-
-            if (name === 'videoDynamicRangeType') {
-              return (
-                <TableRowCell
-                  key={name}
-                  className={styles.videoDynamicRangeType}
-                >
-                  <MediaInfo
-                    type={mediaInfoTypes.VIDEO_DYNAMIC_RANGE_TYPE}
-                    gameFileId={id}
-                  />
+                  {releaseType === 'base' ? '' : getReleaseTypeName(releaseType)}
                 </TableRowCell>
               );
             }
@@ -352,7 +319,13 @@ class GameFileEditorRow extends Component {
         <FileDetailsModal
           isOpen={isFileDetailsModalOpen}
           onModalClose={this.onFileDetailsModalClose}
-          mediaInfo={mediaInfo}
+          relativePath={relativePath}
+          edition={edition}
+          regions={regions}
+          version={version}
+          releaseType={releaseType}
+          discNumber={discNumber}
+          discCount={discCount}
         />
 
         <FileEditModal
@@ -388,7 +361,12 @@ GameFileEditorRow.propTypes = {
   indexerFlags: PropTypes.number.isRequired,
   qualityCutoffNotMet: PropTypes.bool.isRequired,
   languages: PropTypes.arrayOf(PropTypes.object).isRequired,
-  mediaInfo: PropTypes.object,
+  edition: PropTypes.string,
+  regions: PropTypes.arrayOf(PropTypes.string),
+  version: PropTypes.string,
+  releaseType: PropTypes.string,
+  discNumber: PropTypes.number,
+  discCount: PropTypes.number,
   dateAdded: PropTypes.string,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   onDeletePress: PropTypes.func.isRequired

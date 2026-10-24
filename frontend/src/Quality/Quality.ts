@@ -1,12 +1,9 @@
 export enum QualitySource {
   Unknown = 'unknown',
-  Television = 'television',
-  TelevisionRaw = 'televisionRaw',
-  Web = 'web',
-  WebRip = 'webRip',
-  DVD = 'dvd',
-  Bluray = 'bluray',
-  BlurayRaw = 'blurayRaw',
+  Cartridge = 'cartridge',
+  Disc = 'disc',
+  Digital = 'digital',
+  PC = 'pc',
 }
 
 export interface Revision {
@@ -18,7 +15,6 @@ export interface Revision {
 interface Quality {
   id: number;
   name: string;
-  resolution: number;
   source: QualitySource;
 }
 

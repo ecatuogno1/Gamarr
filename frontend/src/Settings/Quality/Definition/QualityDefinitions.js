@@ -38,7 +38,7 @@ class QualityDefinitions extends Component {
             {
               advancedSettings ?
                 <div className={styles.megabytesPerMinute}>
-                  {translate('MegabytesPerMinute')}
+                  {translate('SizeLimitsGigabytes')}
                 </div> :
                 null
             }

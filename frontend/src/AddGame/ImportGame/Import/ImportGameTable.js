@@ -28,9 +28,10 @@ class ImportGameTable extends Component {
     };
 
     unmappedFolders.forEach((unmappedFolder) => {
-      const id = unmappedFolder.name;
+      // The same game can be in several platform folders, the relative path tells them apart
+      const id = unmappedFolder.platformId ? unmappedFolder.relativePath : unmappedFolder.name;
 
-      onGameLookup(id, unmappedFolder.path, unmappedFolder.relativePath);
+      onGameLookup(id, unmappedFolder.path, unmappedFolder.relativePath, unmappedFolder.name, unmappedFolder.platformId);
 
       onSetImportGameValue({
         id,

@@ -67,32 +67,28 @@ const caseOptions: { key: TokenCase; value: string }[] = [
 
 const fileNameTokens = [
   {
-    token:
-      '{Game Title} ({Release Year}) - {Edition Tags }{[Custom Formats]}{[Quality Full]}{-Release Group}',
-    example:
-      'The Game - Title (2010) - Ultimate Extended Edition [Surround Sound x264][Bluray-1080p Proper]-EVOLVE',
+    token: '{Game Title} ({Release Year}){ (Region)}{ [Version]}',
+    example: "Game's Title (1990) (USA, Europe) [v1.1]",
   },
   {
     token:
-      '{Game CleanTitle} {Release Year} - {Edition Tags }{[Custom Formats]}{[Quality Full]}{-Release Group}',
-    example:
-      'The Game Title 2010 - Ultimate Extended Edition [Surround Sound x264][Bluray-1080p Proper]-EVOLVE',
+      '{Game Title} ({Release Year}){ (Region)}{ (Languages)}{ [Release Type]}{ [Quality Title]}',
+    example: "Game's Title (1990) (USA, Europe) (En,Fr,De) [ROM-Verified]",
   },
   {
     token:
-      '{Game.CleanTitle}{.Release.Year}{.Edition.Tags}{.Custom.Formats}{.Quality.Full}{-Release Group}',
-    example:
-      'The.Game.Title.2010.Ultimate.Extended.Edition.Surround.Sound.x264.Bluray-1080p.Proper-EVOLVE',
+      '{Game.CleanTitle}{.Release.Year}{.Edition}{.Version}{-Release Group}',
+    example: 'Games.Title.1990.Deluxe.Edition.v1.1-GAMARR',
   },
 ];
 
 const gameTokens = [
   { token: '{Game Title}', example: "Game's Title", footNotes: '1' },
-  { token: '{Game Title:DE}', example: 'Titel des Films', footNotes: '1' },
+  { token: '{Game Title:DE}', example: 'Titel des Spiels', footNotes: '1' },
   { token: '{Game CleanTitle}', example: 'Games Title', footNotes: '1' },
   {
     token: '{Game CleanTitle:DE}',
-    example: 'Titel des Films',
+    example: 'Titel des Spiels',
     footNotes: '1',
   },
   { token: '{Game TitleThe}', example: "Game's Title, The", footNotes: '1' },
@@ -133,33 +129,16 @@ const gameTokens = [
 const gameIdTokens = [{ token: '{IgdbId}', example: '123456' }];
 
 const qualityTokens = [
-  { token: '{Quality Full}', example: 'HDTV-720p Proper' },
-  { token: '{Quality Title}', example: 'HDTV-720p' },
+  { token: '{Quality Full}', example: 'ROM-Verified Proper' },
+  { token: '{Quality Title}', example: 'ROM-Verified' },
 ];
 
-const mediaInfoTokens = [
-  { token: '{MediaInfo Simple}', example: 'x264 DTS' },
-  { token: '{MediaInfo Full}', example: 'x264 DTS [EN+DE]', footNotes: '1' },
-
-  { token: '{MediaInfo AudioCodec}', example: 'DTS' },
-  { token: '{MediaInfo AudioChannels}', example: '5.1' },
-  {
-    token: '{MediaInfo AudioLanguages}',
-    example: '[EN+DE]',
-    footNotes: '1,2',
-  },
-  {
-    token: '{MediaInfo AudioLanguagesAll}',
-    example: '[EN]',
-    footNotes: '1',
-  },
-  { token: '{MediaInfo SubtitleLanguages}', example: '[DE]', footNotes: '1' },
-
-  { token: '{MediaInfo VideoCodec}', example: 'x264' },
-  { token: '{MediaInfo VideoBitDepth}', example: '10' },
-  { token: '{MediaInfo VideoDynamicRange}', example: 'HDR' },
-  { token: '{MediaInfo VideoDynamicRangeType}', example: 'DV HDR10' },
-  { token: '{MediaInfo 3D}', example: '3D' },
+const releaseTokens = [
+  { token: '{Region}', example: 'USA, Europe' },
+  { token: '{Languages}', example: 'En,Fr,De' },
+  { token: '{Version}', example: 'v1.1' },
+  { token: '{Release Type}', example: 'Update', footNotes: '1' },
+  { token: '{Disc}', example: 'Disc 1' },
 ];
 
 const releaseGroupTokens = [
@@ -167,17 +146,18 @@ const releaseGroupTokens = [
 ];
 
 const editionTokens = [
-  { token: '{Edition Tags}', example: 'IMAX', footNotes: '1' },
+  { token: '{Edition}', example: 'Deluxe Edition', footNotes: '1' },
+  { token: '{Edition Tags}', example: 'Deluxe Edition', footNotes: '1' },
 ];
 
 const customFormatTokens = [
-  { token: '{Custom Formats}', example: 'Surround Sound x264' },
-  { token: '{Custom Format:FormatName}', example: 'AMZN' },
+  { token: '{Custom Formats}', example: 'Verified No-Intro' },
+  { token: '{Custom Format:FormatName}', example: 'No-Intro' },
 ];
 
 const originalTokens = [
-  { token: '{Original Title}', example: 'Game.Title.HDTV.x264-EVOLVE' },
-  { token: '{Original Filename}', example: 'game title hdtv.x264-Evolve' },
+  { token: '{Original Title}', example: 'Game.Title.USA.NSW-GAMARR' },
+  { token: '{Original Filename}', example: "Game's Title (USA) (Rev 1)" },
 ];
 
 interface NamingModalProps {
@@ -361,9 +341,9 @@ function NamingModal(props: NamingModalProps) {
                 </div>
               </FieldSet>
 
-              <FieldSet legend={translate('MediaInfo')}>
+              <FieldSet legend={translate('Release')}>
                 <div className={styles.groups}>
-                  {mediaInfoTokens.map(({ token, example, footNotes }) => {
+                  {releaseTokens.map(({ token, example, footNotes }) => {
                     return (
                       <NamingOption
                         key={token}
@@ -380,12 +360,7 @@ function NamingModal(props: NamingModalProps) {
 
                 <div className={styles.footNote}>
                   <sup className={styles.identifier}>1</sup>
-                  <InlineMarkdown data={translate('MediaInfoFootNote')} />
-                </div>
-
-                <div className={styles.footNote}>
-                  <sup className={styles.identifier}>2</sup>
-                  <InlineMarkdown data={translate('MediaInfoFootNote2')} />
+                  <InlineMarkdown data={translate('ReleaseTypeFootNote')} />
                 </div>
               </FieldSet>
 
