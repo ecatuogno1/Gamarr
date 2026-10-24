@@ -101,11 +101,18 @@ namespace NzbDrone.Core.ImportLists
 
                             if (!importListReports.AnyFailure)
                             {
-                                var alreadyMapped = result.Games.Where(x => importListReports.Games.Any(r => r.IgdbId == x.IgdbId));
-                                var listGames = MapGameReports(importListReports.Games.Where(x => result.Games.All(r => r.IgdbId != x.IgdbId))).Where(x => x.IgdbId > 0).ToList();
+                                // Games another list already mapped are reused, with this list's platform
+                                var mapped = result.Games.GroupBy(x => x.IgdbId).ToDictionary(g => g.Key, g => g.First());
+                                var listGames = MapGameReports(importListReports.Games.Where(x => !mapped.ContainsKey(x.IgdbId))).Where(x => x.IgdbId > 0).ToList();
 
-                                listGames.AddRange(alreadyMapped);
-                                listGames = listGames.DistinctBy(x => (x.IgdbId, x.PlatformId)).ToList();
+                                listGames.AddRange(importListReports.Games.Where(x => mapped.ContainsKey(x.IgdbId)).Select(x => new ImportListGame
+                                {
+                                    GameMetadata = mapped[x.IgdbId].GameMetadata,
+                                    GameMetadataId = mapped[x.IgdbId].GameMetadataId,
+                                    PlatformId = x.PlatformId
+                                }));
+
+                                listGames = ApplyDefaultPlatform(listGames, (ImportListDefinition)importList.Definition);
                                 listGames.ForEach(m => m.ListId = importList.Definition.Id);
 
                                 result.Games.AddRange(listGames);
@@ -160,10 +167,7 @@ namespace NzbDrone.Core.ImportLists
 
                     if (!importListReports.AnyFailure)
                     {
-                        var listGames = MapGameReports(importListReports.Games)
-                            .Where(x => x.IgdbId > 0)
-                            .DistinctBy(x => (x.IgdbId, x.PlatformId))
-                            .ToList();
+                        var listGames = ApplyDefaultPlatform(MapGameReports(importListReports.Games).Where(x => x.IgdbId > 0).ToList(), definition);
 
                         listGames.ForEach(m => m.ListId = importList.Definition.Id);
 
@@ -186,6 +190,17 @@ namespace NzbDrone.Core.ImportLists
             _logger.Debug("Found {0} games from {1} ({2})", result.Games.Count, importList.Name, importListLocal.Definition.Name);
 
             return result;
+        }
+
+        // Items without a platform get the list's platform (if it has one)
+        public static List<ImportListGame> ApplyDefaultPlatform(List<ImportListGame> listGames, ImportListDefinition definition)
+        {
+            if (definition?.PlatformId > 0)
+            {
+                listGames.Where(x => x.PlatformId == 0).ToList().ForEach(x => x.PlatformId = definition.PlatformId);
+            }
+
+            return listGames.DistinctBy(x => (x.IgdbId, x.PlatformId)).ToList();
         }
 
         private List<ImportListGame> MapGameReports(IEnumerable<ImportListGame> reports)

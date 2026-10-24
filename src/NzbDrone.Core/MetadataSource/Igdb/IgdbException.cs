@@ -32,7 +32,7 @@ namespace NzbDrone.Core.MetadataSource.Igdb
     public class IgdbCredentialsMissingException : IgdbException
     {
         public IgdbCredentialsMissingException()
-            : base("IGDB credentials are missing. Add a Twitch Client ID and Client Secret in Settings > Metadata.")
+            : base("IGDB credentials are not configured. Add a Twitch Client ID and Client Secret in Settings > Metadata.")
         {
         }
     }

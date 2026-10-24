@@ -134,9 +134,15 @@ class AddNewGame extends Component {
                 <Alert kind={kinds.DANGER}>{getErrorMessage(error)}</Alert>
 
                 <div>
-                  <Link to="https://github.com/ecatuogno1/Gamarr/wiki/troubleshooting#invalid-response-received-from-igdb">
-                    {translate('WhySearchesCouldBeFailing')}
-                  </Link>
+                  {
+                    error.status === 503 ?
+                      <Link to="/settings/metadata">
+                        {translate('IgdbOpenMetadataSettings')}
+                      </Link> :
+                      <Link to="https://github.com/ecatuogno1/Gamarr/wiki/troubleshooting#invalid-response-received-from-igdb">
+                        {translate('WhySearchesCouldBeFailing')}
+                      </Link>
+                  }
                 </div>
               </div> : null
           }

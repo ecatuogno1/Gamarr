@@ -16,7 +16,8 @@ namespace Gamarr.Api.V3.ImportLists
         public ImportListController(IBroadcastSignalRMessage signalRBroadcaster,
             IImportListFactory importListFactory,
             RootFolderExistsValidator rootFolderExistsValidator,
-            QualityProfileExistsValidator qualityProfileExistsValidator)
+            QualityProfileExistsValidator qualityProfileExistsValidator,
+            PlatformExistsValidator platformExistsValidator)
             : base(signalRBroadcaster, importListFactory, "importlist", ResourceMapper, BulkResourceMapper)
         {
             SharedValidator.RuleFor(c => c.MinimumAvailability).NotNull();
@@ -28,6 +29,8 @@ namespace Gamarr.Api.V3.ImportLists
             SharedValidator.RuleFor(c => c.QualityProfileId).Cascade(CascadeMode.Stop)
                 .ValidId()
                 .SetValidator(qualityProfileExistsValidator);
+
+            SharedValidator.RuleFor(c => c.PlatformId).SetValidator(platformExistsValidator);
         }
     }
 }

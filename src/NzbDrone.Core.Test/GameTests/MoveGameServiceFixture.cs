@@ -129,5 +129,22 @@ namespace NzbDrone.Core.Test.GameTests
             Mocker.GetMock<IBuildFileNames>()
                   .Verify(v => v.GetGameFolder(It.IsAny<Game>(), null), Times.Never());
         }
+
+        [Test]
+        public void should_use_destination_path_of_bulk_move_when_set()
+        {
+            var destination = @"C:\Test\Games\switch\Game".AsOsAgnostic();
+
+            _bulkCommand.DestinationRootFolder = null;
+            _bulkCommand.Games.First().DestinationPath = destination;
+
+            Subject.Execute(_bulkCommand);
+
+            Mocker.GetMock<IDiskTransferService>()
+                  .Verify(v => v.TransferFolder(_bulkCommand.Games.First().SourcePath, destination, TransferMode.Move), Times.Once());
+
+            Mocker.GetMock<IBuildFileNames>()
+                  .Verify(v => v.GetGameFolder(It.IsAny<Game>(), null), Times.Never());
+        }
     }
 }

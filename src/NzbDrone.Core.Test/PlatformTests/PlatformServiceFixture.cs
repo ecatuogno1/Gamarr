@@ -67,5 +67,51 @@ namespace NzbDrone.Core.Test.PlatformTests
         {
             Subject.FindByFolderName("SNES").Should().ContainSingle(p => p.IgdbPlatformId == 19);
         }
+
+        [Test]
+        public void migration_should_set_igdb_slugs()
+        {
+            var platforms = Subject.All();
+
+            platforms.Should().OnlyContain(p => p.Slug == PlatformDefinitions.Get(p.IgdbPlatformId).Slug);
+            platforms.Single(p => p.IgdbPlatformId == 19).Slug.Should().Be("snes");
+        }
+
+        [Test]
+        public void should_not_insert_platform_again_after_its_igdb_id_was_corrected()
+        {
+            var snes = Db.All<Platform>().Single(p => p.IgdbPlatformId == 19);
+            snes.IgdbPlatformId = 99919;
+            Db.Update(snes);
+
+            Subject.Handle(new ApplicationStartedEvent());
+
+            Subject.All().Should().HaveCount(PlatformDefinitions.All.Count);
+            Subject.All().Should().NotContain(p => p.IgdbPlatformId == 19);
+        }
+
+        [Test]
+        public void should_find_platform_with_corrected_igdb_id_by_definition_id()
+        {
+            var snes = Db.All<Platform>().Single(p => p.IgdbPlatformId == 19);
+            snes.IgdbPlatformId = 99919;
+            Db.Update(snes);
+
+            Subject.FindByIgdbPlatformId(19).Id.Should().Be(snes.Id);
+            Subject.FindByIgdbPlatformId(99919).Id.Should().Be(snes.Id);
+        }
+
+        [Test]
+        public void should_fill_in_missing_slugs_on_startup()
+        {
+            var snes = Db.All<Platform>().Single(p => p.IgdbPlatformId == 19);
+            snes.Slug = null;
+            Db.Update(snes);
+
+            Subject.Handle(new ApplicationStartedEvent());
+
+            Subject.Get(snes.Id).Slug.Should().Be("snes");
+            Subject.All().Should().HaveCount(PlatformDefinitions.All.Count);
+        }
     }
 }

@@ -17,6 +17,7 @@ using NzbDrone.Core.Lifecycle;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Update.Commands;
 
 namespace NzbDrone.Core.Jobs
@@ -106,6 +107,12 @@ namespace NzbDrone.Core.Jobs
                     {
                         Interval = 24 * 60,
                         TypeName = typeof(CleanUpRecycleBinCommand).FullName
+                    },
+
+                    new ScheduledTask
+                    {
+                        Interval = 7 * 24 * 60,
+                        TypeName = typeof(SyncPlatformsWithIgdbCommand).FullName
                     },
 
                     new ScheduledTask

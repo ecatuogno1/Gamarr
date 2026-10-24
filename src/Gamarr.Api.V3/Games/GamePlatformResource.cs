@@ -8,5 +8,6 @@ namespace Gamarr.Api.V3.Games
         public string ShortName { get; set; }
         public string FolderName { get; set; }
         public int IgdbPlatformId { get; set; }
+        public string Slug { get; set; }
     }
 }

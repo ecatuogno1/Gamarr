@@ -22,6 +22,7 @@ import styles from './GameIndexSelectFooter.css';
 interface SavePayload {
   monitored?: boolean;
   qualityProfileId?: number;
+  platformId?: number;
   rootFolderPath?: string;
   moveFiles?: boolean;
 }
@@ -73,8 +74,8 @@ function GameIndexSelectFooter() {
 
   const onSavePress = useCallback(
     (payload: SavePayload) => {
+      // The modal closes itself once the save succeeded and shows the error otherwise
       setIsSavingGames(true);
-      setIsEditModalOpen(false);
 
       dispatch(
         saveGameEditor({

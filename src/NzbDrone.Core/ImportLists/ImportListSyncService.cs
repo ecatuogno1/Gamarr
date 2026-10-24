@@ -81,15 +81,17 @@ namespace NzbDrone.Core.ImportLists
                 return;
             }
 
+            var platformId = report.PlatformId > 0 ? report.PlatformId : importList.PlatformId;
+
             // Check to see if game in DB. Without a platform from the list, any platform version counts.
-            if (report.PlatformId > 0 ? dbGames.Contains((report.IgdbId, report.PlatformId)) : dbGames.Any(g => g.IgdbId == report.IgdbId))
+            if (platformId > 0 ? dbGames.Contains((report.IgdbId, platformId)) : dbGames.Any(g => g.IgdbId == report.IgdbId))
             {
                 _logger.Debug("{0} [{1}] Rejected, Game Exists in DB", report.IgdbId, report.Title);
                 return;
             }
 
             // Check to see if game excluded
-            var excludedGame = listExclusions.FirstOrDefault(s => s.Matches(report.IgdbId, report.PlatformId));
+            var excludedGame = listExclusions.FirstOrDefault(s => s.Matches(report.IgdbId, platformId));
 
             if (excludedGame != null)
             {
@@ -98,7 +100,7 @@ namespace NzbDrone.Core.ImportLists
             }
 
             // Append Artist if not already in DB or already on add list
-            if (gamesToAdd.All(s => s.IgdbId != report.IgdbId || s.PlatformId != report.PlatformId))
+            if (gamesToAdd.All(s => s.IgdbId != report.IgdbId || s.PlatformId != platformId))
             {
                 var monitorType = importList.Monitor;
 
@@ -107,7 +109,7 @@ namespace NzbDrone.Core.ImportLists
                     Monitored = monitorType != MonitorTypes.None,
                     RootFolderPath = importList.RootFolderPath,
                     QualityProfileId = importList.QualityProfileId,
-                    PlatformId = report.PlatformId,
+                    PlatformId = platformId,
                     MinimumAvailability = importList.MinimumAvailability,
                     Tags = importList.Tags,
                     IgdbId = report.IgdbId,

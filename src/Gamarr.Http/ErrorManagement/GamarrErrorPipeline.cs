@@ -9,6 +9,7 @@ using NLog;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Exceptions;
+using NzbDrone.Core.MetadataSource.Igdb;
 
 namespace Gamarr.Http.ErrorManagement
 {
@@ -56,7 +57,22 @@ namespace Gamarr.Http.ErrorManagement
             {
                 statusCode = clientException.StatusCode;
             }
-            else if (exception is ModelNotFoundException)
+            else if (exception is IgdbCredentialsMissingException or IgdbAuthenticationException)
+            {
+                // A configuration problem, not a bug: tell the UI what to fix without a stack trace
+                _logger.Warn("{0} {1}: {2}", context.Request.Method, context.Request.Path, exception.Message);
+
+                errorModel = new ErrorModel { Message = exception.Message };
+                statusCode = HttpStatusCode.ServiceUnavailable;
+            }
+            else if (exception is IgdbException)
+            {
+                _logger.Warn(exception, "{0} {1}: {2}", context.Request.Method, context.Request.Path, exception.Message);
+
+                errorModel = new ErrorModel { Message = exception.Message };
+                statusCode = HttpStatusCode.ServiceUnavailable;
+            }
+            else if (exception is ModelNotFoundException or GameNotFoundException)
             {
                 statusCode = HttpStatusCode.NotFound;
             }

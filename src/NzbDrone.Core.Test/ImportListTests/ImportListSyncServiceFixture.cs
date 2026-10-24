@@ -109,9 +109,9 @@ namespace NzbDrone.Core.Test.ImportList
                   .Returns(cleanLevel);
         }
 
-        private void GivenList(int id, bool enabledAuto)
+        private void GivenList(int id, bool enabledAuto, int platformId = 0)
         {
-            var importListDefinition = new ImportListDefinition { Id = id, EnableAuto = enabledAuto };
+            var importListDefinition = new ImportListDefinition { Id = id, EnableAuto = enabledAuto, PlatformId = platformId };
 
             Mocker.GetMock<IImportListFactory>()
                   .Setup(v => v.Get(id))
@@ -469,6 +469,39 @@ namespace NzbDrone.Core.Test.ImportList
 
             Mocker.GetMock<IAddGameService>()
                   .Verify(v => v.AddGames(It.Is<List<Game>>(s => s.Count == 7 && s.All(m => m.IgdbId != _existingGames[0].IgdbId)), true), Times.Once());
+        }
+
+        [Test]
+        public void should_add_games_without_platform_on_the_lists_platform()
+        {
+            _importListFetch.Games.ForEach(m => m.ListId = 1);
+            _importListFetch.Games[0].PlatformId = 3;
+
+            GivenList(1, true, 9);
+            GivenCleanLevel("disabled");
+
+            Subject.Execute(_commandAll);
+
+            Mocker.GetMock<IAddGameService>()
+                  .Verify(v => v.AddGames(It.Is<List<Game>>(s => s.Count == 5 && s.Count(g => g.PlatformId == 9) == 4 && s.Count(g => g.PlatformId == 3) == 1), true), Times.Once());
+        }
+
+        [Test]
+        public void should_not_add_game_that_exists_on_the_lists_platform()
+        {
+            _importListFetch.Games.ForEach(m => m.ListId = 1);
+
+            GivenList(1, true, 9);
+            GivenCleanLevel("disabled");
+
+            Mocker.GetMock<IGameService>()
+                 .Setup(v => v.AllGameIgdbIdsWithPlatform())
+                 .Returns(new HashSet<(int IgdbId, int PlatformId)> { (_importListFetch.Games[0].IgdbId, 9), (_importListFetch.Games[1].IgdbId, 4) });
+
+            Subject.Execute(_commandAll);
+
+            Mocker.GetMock<IAddGameService>()
+                  .Verify(v => v.AddGames(It.Is<List<Game>>(s => s.Count == 4 && s.All(g => g.IgdbId != _importListFetch.Games[0].IgdbId)), true), Times.Once());
         }
     }
 }

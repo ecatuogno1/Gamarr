@@ -100,18 +100,34 @@ namespace NzbDrone.Core.Games
             var gamesToMove = message.Games;
             var destinationRootFolder = message.DestinationRootFolder;
 
-            _logger.ProgressInfo("Moving {0} games to '{1}'", gamesToMove.Count, destinationRootFolder);
+            if (destinationRootFolder.IsNotNullOrWhiteSpace())
+            {
+                _logger.ProgressInfo("Moving {0} games to '{1}'", gamesToMove.Count, destinationRootFolder);
+            }
+            else
+            {
+                _logger.ProgressInfo("Moving {0} games", gamesToMove.Count);
+            }
 
             for (var index = 0; index < gamesToMove.Count; index++)
             {
                 var s = gamesToMove[index];
                 var game = _gameService.GetGame(s.GameId);
-                var destinationPath = Path.Combine(destinationRootFolder, _filenameBuilder.GetGameFolder(game));
+                var destinationPath = s.DestinationPath.IsNotNullOrWhiteSpace()
+                    ? s.DestinationPath
+                    : Path.Combine(destinationRootFolder, _filenameBuilder.GetGameFolder(game));
 
                 MoveSingleGame(game, s.SourcePath, destinationPath, index, gamesToMove.Count);
             }
 
-            _logger.ProgressInfo("Finished moving {0} games to '{1}'", gamesToMove.Count, destinationRootFolder);
+            if (destinationRootFolder.IsNotNullOrWhiteSpace())
+            {
+                _logger.ProgressInfo("Finished moving {0} games to '{1}'", gamesToMove.Count, destinationRootFolder);
+            }
+            else
+            {
+                _logger.ProgressInfo("Finished moving {0} games", gamesToMove.Count);
+            }
         }
     }
 }

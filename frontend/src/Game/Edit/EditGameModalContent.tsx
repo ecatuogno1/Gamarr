@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import GameMinimumAvailabilityPopoverContent from 'AddGame/GameMinimumAvailabilityPopoverContent';
 import AppState from 'App/State/AppState';
@@ -30,6 +36,7 @@ import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import selectSettings from 'Store/Selectors/selectSettings';
 import { InputChanged } from 'typings/inputs';
 import translate from 'Utilities/String/translate';
+import getPlatformChangePath from './getPlatformChangePath';
 import RootFolderModal from './RootFolder/RootFolderModal';
 import { RootFolderUpdated } from './RootFolder/RootFolderModalContent';
 import styles from './EditGameModalContent.css';
@@ -105,12 +112,47 @@ function EditGameModalContent({
     saveError,
   ]);
 
+  const platforms = useSelector(
+    (state: AppState) => state.settings.platforms.items
+  );
+
+  // The path set for the selected platform, replaced again when the platform changes unless edited by hand
+  const platformPath = useRef<string | undefined>(undefined);
+
   const handleInputChange = useCallback(
     ({ name, value }: InputChanged) => {
       // @ts-expect-error actions aren't typed
       dispatch(setGameValue({ name, value }));
+
+      const isPathUnchanged =
+        !pendingChanges.path || pendingChanges.path === platformPath.current;
+
+      if (name !== 'platformId' || !isPathUnchanged) {
+        return;
+      }
+
+      // Follow a platform change with the path, the move is confirmed on save
+      const newPath =
+        getPlatformChangePath(
+          path,
+          initialRootFolderPath,
+          platforms.find((p) => p.id === platformId)?.folderName,
+          platforms.find((p) => p.id === value)?.folderName
+        ) ?? path;
+
+      platformPath.current = newPath === path ? undefined : newPath;
+
+      // @ts-expect-error actions aren't typed
+      dispatch(setGameValue({ name: 'path', value: newPath }));
     },
-    [dispatch]
+    [
+      dispatch,
+      pendingChanges.path,
+      path,
+      initialRootFolderPath,
+      platforms,
+      platformId,
+    ]
   );
 
   const handleRootFolderPress = useCallback(() => {

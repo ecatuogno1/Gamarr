@@ -49,6 +49,11 @@ categories of each. Disable the ones you don't collect for, so they aren't offer
 A game is always on one platform. The same title on two platforms is two games in Gamarr (e.g. Hollow Knight on PC
 and on Switch), each with its own folder, file and quality profile.
 
+Changing the platform of a game (Edit, or several games at once in the game editor) moves its folder to the new
+platform's folder when it's in the recommended layout below (`/games/snes/Super Mario World (1990)` becomes
+`/games/sfc/Super Mario World (1990)`); you're asked whether Gamarr should move the files. A game can only be in the
+library once per platform, the editor lists every game that can't be changed and saves nothing in that case.
+
 Recommended layout, one root folder with a folder per platform (the default game folder format is
 `{Platform Folder}/{Game Title} ({Release Year})`):
 
@@ -77,6 +82,9 @@ A release can consist of several files (bin/cue tracks, multi-disc sets with an 
 the primary file (the .cue, .m3u, setup.exe…) as the game file and keeps the other files as companion files next to
 it; they're moved, renamed and deleted together. Turn on **Rename Games** in Media Management to rename the primary
 file with the naming tokens (`{Region}`, `{Version}`, `{Disc}`…).
+
+Import lists have a **Platform** setting for list items that don't come with a platform (a Gamarr list passes on the
+platform of each game). With **Any Platform** such games are added on the first enabled platform IGDB lists for them.
 
 ## 3. Quality profiles and custom formats
 
@@ -109,26 +117,45 @@ container or on another machine, set up remote path mappings like in the other \
 
 ## 6. EmulationStation (ES-DE) metadata
 
-**Settings > Metadata > EmulationStation (ES-DE)** keeps a `gamelist.xml` in each platform folder (the parent of the
-game folders) when games are imported or rescanned:
+**Settings > Metadata > EmulationStation (ES-DE)** keeps a `gamelist.xml` per platform (ES-DE "system") when games are
+imported or rescanned:
 
 - one `<game>` entry per Gamarr game with path, name, description, release date, developer, publisher, genre,
-  players (only when IGDB says single player), rating (0–1) and image paths;
-- with **Game Images** on, `media/cover.jpg`, `media/screenshot.jpg` and `media/fanart.jpg` are saved inside the game
-  folder and referenced from the entry (`<image>`, `<thumbnail>`, `<fanart>`);
-- existing entries of other games are kept. Gamarr finds its own entries by `id`/`source="IGDB"` or by a path inside
-  the game folder, updates the fields it manages and keeps the rest (favorite, playcount, lastplayed, hidden…). An
-  invalid gamelist.xml isn't touched. Deleting a game with its files removes its entry.
+  players (only when IGDB says single player) and rating (0–1). `<path>` is relative to the platform folder, e.g.
+  `./Super Mario World (1990)/Super Mario World (1990) (USA).sfc`;
+- existing entries of other games are kept. Gamarr finds its own entries by `id`/`source="IGDB"` or by a path inside the
+  game folder, updates the fields it manages and keeps the rest (favorite, playcount, lastplayed, hidden…). An
+  invalid gamelist.xml isn't touched. Deleting a game with its files removes its entry, moving a game (new root folder or
+  platform) moves its entry to the gamelist of the new location.
 
-Frontend notes: EmulationStation, RetroPie and Batocera read `gamelist.xml` and the image tags from the ROM folders.
-ES-DE keeps its gamelists in its own `ES-DE/gamelists/<system>/` folder by default and uses its own
-`downloaded_media` folder for images; to use Gamarr's files there, either enable ES-DE's legacy gamelist location
-option (reads gamelist.xml from the ROM directories) or copy/link the files into `ES-DE/gamelists/<system>/`. Check
-the ES-DE documentation for your version.
+Pick the **gamelist.xml Location** that matches your frontend:
+
+| Location | gamelist.xml | Images (with **Game Images** on) | Frontends |
+|---|---|---|---|
+| ROM folder (default) | `<root>/<platform folder>/gamelist.xml` | `<game folder>/media/cover.jpg`, `screenshot.jpg`, `fanart.jpg`, referenced from `<image>`, `<thumbnail>`, `<fanart>` | RetroPie, Batocera, EmulationStation, ES-DE with `LegacyGamelistFileLocation` |
+| ES-DE gamelists directory | `<ES-DE Gamelists Directory>/<platform folder>/gamelist.xml` (default `~/ES-DE/gamelists`) | `<ES-DE Media Directory>/<platform folder>/covers\|screenshots\|fanart/<game folder>/<game file name>.jpg` (default `~/ES-DE/downloaded_media`) | ES-DE 2.0 and later |
+
+How the frontends read them:
+
+- **ES-DE 2.0+** only reads `~/ES-DE/gamelists/<system>/gamelist.xml` and ignores `gamelist.xml` files in the ROM
+  folders unless `LegacyGamelistFileLocation` is set to `true` in `es_settings.xml`. It ignores image tags and finds media
+  by the ROM's path and file name below `downloaded_media/<system>/<covers|screenshots|fanart…>/`, mirroring sub folders,
+  which is the layout the ES-DE location writes. Use the ES-DE location, with the directories pointing at the ES-DE folder
+  of the machine running ES-DE (`~` is the home folder of the user Gamarr runs as; in Docker map the ES-DE folder into the
+  container and use the mapped path). ES-DE system names are the platform folder names (`snes`, `psx`, `gc`…), so the
+  root folder works as ES-DE's ROM directory.
+- **RetroPie** reads `<ROM folder>/gamelist.xml` first, then `~/.emulationstation/gamelists/<system>/`, and **Batocera**
+  reads `/userdata/roms/<system>/gamelist.xml`; both use the `./media/...` image tags. Use the ROM folder location.
+
+When ES-DE itself saves an entry (e.g. after you mark a favorite) it rewrites the whole entry; Gamarr's fields are written
+again on the next rescan.
 
 ## Troubleshooting
 
-- Searching for a game says IGDB credentials are missing: see step 1.
+- Searching for a game says "IGDB credentials are not configured" (or that Twitch rejected them): see step 1, the
+  message links to Settings > Metadata.
+- Platform ids: Gamarr checks its platforms' IGDB ids against IGDB (by slug) on startup and weekly once credentials are
+  set, corrections are logged at Info level.
 - A release is rejected as "wrong platform": the release names another platform, or its indexer categories do.
   Check the platform of the game and the categories of the indexer.
 - Logs are under the data folder in `logs/`, or in **System > Log Files**.

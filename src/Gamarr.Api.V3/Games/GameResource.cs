@@ -265,7 +265,8 @@ namespace Gamarr.Api.V3.Games
                 Name = platform.Name,
                 ShortName = platform.ShortName,
                 FolderName = platform.FolderName,
-                IgdbPlatformId = platform.IgdbPlatformId
+                IgdbPlatformId = platform.IgdbPlatformId,
+                Slug = platform.Slug
             };
         }
 

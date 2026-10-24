@@ -9824,6 +9824,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "platformId": {
+            "type": "integer",
+            "format": "int32"
+          },
           "searchOnAdd": {
             "type": "boolean"
           },
@@ -13194,6 +13198,10 @@
           "igdbPlatformId": {
             "type": "integer",
             "format": "int32"
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

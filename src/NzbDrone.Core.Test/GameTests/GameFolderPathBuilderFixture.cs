@@ -5,6 +5,7 @@ using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -89,6 +90,72 @@ namespace NzbDrone.Core.Test.GameTests
             _game.Path = null;
 
             Subject.BuildPath(_game, true).Should().Be(Path.Combine(rootFolder, _game.Title));
+        }
+
+        private static Platform GivenPlatform(string folderName)
+        {
+            return new Platform { Name = folderName, FolderName = folderName };
+        }
+
+        [Test]
+        public void should_swap_platform_folder_when_game_is_in_its_platform_folder()
+        {
+            var rootFolder = @"C:\Test\Games".AsOsAgnostic();
+            GivenExistingRootFolder(rootFolder);
+            _game.Path = Path.Combine(rootFolder, "snes", "Super Mario World (1990)");
+
+            Subject.BuildPathForPlatform(_game, GivenPlatform("snes"), GivenPlatform("sfc"))
+                   .Should().Be(Path.Combine(rootFolder, "sfc", "Super Mario World (1990)"));
+        }
+
+        [Test]
+        public void should_match_platform_folder_case_insensitively_and_keep_deeper_folders()
+        {
+            var rootFolder = @"C:\Test\Games".AsOsAgnostic();
+            GivenExistingRootFolder(rootFolder);
+            _game.Path = Path.Combine(rootFolder, "PC", "Indie", "Hollow Knight (2017)");
+
+            Subject.BuildPathForPlatform(_game, GivenPlatform("pc"), GivenPlatform("switch"))
+                   .Should().Be(Path.Combine(rootFolder, "switch", "Indie", "Hollow Knight (2017)"));
+        }
+
+        [Test]
+        public void should_return_null_when_game_is_not_in_its_platform_folder()
+        {
+            var rootFolder = @"C:\Test\Games".AsOsAgnostic();
+            GivenExistingRootFolder(rootFolder);
+            _game.Path = Path.Combine(rootFolder, "Super Mario World (1990)");
+
+            Subject.BuildPathForPlatform(_game, GivenPlatform("snes"), GivenPlatform("sfc")).Should().BeNull();
+        }
+
+        [Test]
+        public void should_return_null_when_platform_folder_is_another_platforms()
+        {
+            var rootFolder = @"C:\Test\Games".AsOsAgnostic();
+            GivenExistingRootFolder(rootFolder);
+            _game.Path = Path.Combine(rootFolder, "roms", "Super Mario World (1990)");
+
+            Subject.BuildPathForPlatform(_game, GivenPlatform("snes"), GivenPlatform("sfc")).Should().BeNull();
+        }
+
+        [Test]
+        public void should_return_null_when_game_is_outside_root_folders()
+        {
+            GivenExistingRootFolder(@"C:\Other".AsOsAgnostic());
+            _game.Path = @"C:\Test\Games\snes\Super Mario World (1990)".AsOsAgnostic();
+
+            Subject.BuildPathForPlatform(_game, GivenPlatform("snes"), GivenPlatform("sfc")).Should().BeNull();
+        }
+
+        [Test]
+        public void should_keep_path_when_platforms_share_a_folder()
+        {
+            var rootFolder = @"C:\Test\Games".AsOsAgnostic();
+            GivenExistingRootFolder(rootFolder);
+            _game.Path = Path.Combine(rootFolder, "nds", "Game (2008)");
+
+            Subject.BuildPathForPlatform(_game, GivenPlatform("nds"), GivenPlatform("nds")).Should().Be(_game.Path);
         }
     }
 }

@@ -42,14 +42,14 @@ namespace NzbDrone.Core.Test.ImportListTests
                 .Returns<GameMetadata>(m => new GameMetadata { IgdbId = m.IgdbId });
         }
 
-        private void GivenList(int id, bool enabled, bool enabledAuto, ImportListFetchResult fetchResult)
+        private void GivenList(int id, bool enabled, bool enabledAuto, ImportListFetchResult fetchResult, int platformId = 0)
         {
-            CreateListResult(id, enabled, enabledAuto, fetchResult);
+            CreateListResult(id, enabled, enabledAuto, fetchResult, platformId);
         }
 
-        private Mock<IImportList> CreateListResult(int id, bool enabled, bool enabledAuto, ImportListFetchResult fetchResult)
+        private Mock<IImportList> CreateListResult(int id, bool enabled, bool enabledAuto, ImportListFetchResult fetchResult, int platformId = 0)
         {
-            var importListDefinition = new ImportListDefinition { Id = id, EnableAuto = enabledAuto };
+            var importListDefinition = new ImportListDefinition { Id = id, EnableAuto = enabledAuto, PlatformId = platformId };
 
             var mockImportList = new Mock<IImportList>();
             mockImportList.SetupGet(s => s.Definition).Returns(importListDefinition);
@@ -184,6 +184,53 @@ namespace NzbDrone.Core.Test.ImportListTests
             var listResult = Subject.Fetch();
             listResult.AnyFailure.Should().BeFalse();
             listResult.Games.Count.Should().Be(5);
+        }
+
+        [Test]
+        public void should_use_list_platform_for_items_without_platform()
+        {
+            _listGames.ForEach(g => g.PlatformId = 0);
+            _listGames[0].PlatformId = 3;
+
+            GivenList(1, true, true, new ImportListFetchResult { Games = _listGames }, 7);
+
+            var listResult = Subject.Fetch();
+
+            listResult.Games.Should().HaveCount(5);
+            listResult.Games.Single(g => g.IgdbId == _listGames[0].IgdbId).PlatformId.Should().Be(3);
+            listResult.Games.Where(g => g.IgdbId != _listGames[0].IgdbId).Should().OnlyContain(g => g.PlatformId == 7);
+        }
+
+        [Test]
+        public void should_keep_each_lists_platform_for_games_on_several_lists()
+        {
+            _listGames.ForEach(g => g.PlatformId = 0);
+
+            GivenList(1, true, true, new ImportListFetchResult { Games = _listGames }, 7);
+            GivenList(2, true, true, new ImportListFetchResult { Games = _listGames.Select(g => new ImportListGame { IgdbId = g.IgdbId, Title = g.Title }).ToList() }, 8);
+
+            var listResult = Subject.Fetch();
+
+            listResult.Games.Should().HaveCount(10);
+            listResult.Games.Where(g => g.ListId == 1).Should().OnlyContain(g => g.PlatformId == 7);
+            listResult.Games.Where(g => g.ListId == 2).Should().OnlyContain(g => g.PlatformId == 8);
+        }
+
+        [Test]
+        public void should_use_list_platform_when_fetching_single_list()
+        {
+            _listGames.ForEach(g => g.PlatformId = 0);
+
+            var importList = CreateListResult(1, true, true, new ImportListFetchResult { Games = _listGames }, 7);
+
+            Mocker.GetMock<IImportListFactory>()
+                  .Setup(v => v.GetInstance(It.IsAny<ImportListDefinition>()))
+                  .Returns(importList.Object);
+
+            var definition = (ImportListDefinition)importList.Object.Definition;
+            definition.Enabled = true;
+
+            Subject.FetchSingleList(definition).Games.Should().OnlyContain(g => g.PlatformId == 7);
         }
     }
 }
