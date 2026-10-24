@@ -36,7 +36,6 @@ export interface GameTitleSummary {
   monitored: boolean;
   sizeOnDisk: number;
   kind: Kind;
-  progress: number;
 }
 
 export function getPlatformName(game: Pick<Game, 'platform'>) {
@@ -191,7 +190,6 @@ export function getGameTitleSummary(
     monitored: monitoredVersions.length > 0,
     sizeOnDisk,
     kind,
-    progress: totalCount ? (downloadedCount / totalCount) * 100 : 0,
   };
 }
 

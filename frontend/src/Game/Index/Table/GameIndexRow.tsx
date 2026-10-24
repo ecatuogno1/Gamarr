@@ -177,7 +177,10 @@ function GameIndexRow(props: GameIndexRowProps) {
         if (name === 'platform') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              <GamePlatformBadges versions={summary.versions} />
+              <GamePlatformBadges
+                className={styles.platformBadges}
+                versions={summary.versions}
+              />
             </VirtualTableRowCell>
           );
         }

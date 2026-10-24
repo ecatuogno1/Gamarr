@@ -21,6 +21,7 @@ interface CssExports {
   'originalTitle': string;
   'path': string;
   'platform': string;
+  'platformBadges': string;
   'popularity': string;
   'publishers': string;
   'qualityProfileId': string;

@@ -27,13 +27,20 @@
 
 .large {
   padding: 3px 10px;
+  border-width: 2px;
   font-size: $defaultFontSize;
   line-height: 20px;
+  opacity: 0.6;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+  }
 }
 
 .selected {
   border-color: var(--white);
-  box-shadow: 0 0 0 2px var(--themeDarkColor, #333);
+  opacity: 1;
 }
 
 .default {

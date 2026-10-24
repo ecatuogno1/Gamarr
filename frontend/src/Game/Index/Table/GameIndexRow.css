@@ -25,7 +25,12 @@
   flex: 0 0 140px;
 }
 
-.platform,
+.platform {
+  composes: cell;
+
+  flex: 2 0 150px;
+}
+
 .developers,
 .publishers {
   composes: cell;
@@ -131,4 +136,9 @@
   composes: cell;
 
   flex: 0 0 100px;
+}
+
+.platformBadges {
+  flex-wrap: nowrap;
+  overflow: hidden;
 }

@@ -58,7 +58,7 @@ function GameTitleProgressBar({
     <ProgressBar
       className={styles.progressBar}
       containerClassName={isStandAlone ? undefined : attachedClassName}
-      progress={summary.progress}
+      progress={100}
       kind={summary.kind as 'primary'}
       size={detailedProgressBar ? sizes.MEDIUM : sizes.SMALL}
       showText={detailedProgressBar}
