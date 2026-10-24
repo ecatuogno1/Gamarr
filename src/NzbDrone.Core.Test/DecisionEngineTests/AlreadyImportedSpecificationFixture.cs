@@ -35,8 +35,8 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
                                     .With(m => m.GameFileId = 1)
                                     .Build();
 
-            _hdtv720p = new QualityModel(Quality.HDTV720p, new Revision(version: 1));
-            _hdtv1080p = new QualityModel(Quality.HDTV1080p, new Revision(version: 1));
+            _hdtv720p = new QualityModel(Quality.DiscRedump, new Revision(version: 1));
+            _hdtv1080p = new QualityModel(Quality.WuaWux, new Revision(version: 1));
 
             _remoteGame = new RemoteGame
             {

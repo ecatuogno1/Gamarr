@@ -11,7 +11,7 @@ namespace NzbDrone.Core.Parser
                 return null;
             }
 
-            if (!title.Contains('.'))
+            if (!title.Contains('.') && !title.Contains('_'))
             {
                 return null;
             }

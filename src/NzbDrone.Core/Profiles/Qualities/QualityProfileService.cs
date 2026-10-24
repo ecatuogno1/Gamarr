@@ -129,85 +129,26 @@ namespace NzbDrone.Core.Profiles.Qualities
             _logger.Info("Setting up default quality profiles");
 
             AddDefaultProfile("Any",
-                Quality.Bluray480p,
-                Quality.WORKPRINT,
-                Quality.CAM,
-                Quality.TELESYNC,
-                Quality.TELECINE,
-                Quality.DVDSCR,
-                Quality.REGIONAL,
-                Quality.SDTV,
-                Quality.DVD,
-                Quality.DVDR,
-                Quality.HDTV720p,
-                Quality.HDTV1080p,
-                Quality.HDTV2160p,
-                Quality.WEBDL480p,
-                Quality.WEBRip480p,
-                Quality.WEBDL720p,
-                Quality.WEBRip720p,
-                Quality.WEBDL1080p,
-                Quality.WEBRip1080p,
-                Quality.WEBDL2160p,
-                Quality.WEBRip2160p,
-                Quality.Bluray480p,
-                Quality.Bluray576p,
-                Quality.Bluray720p,
-                Quality.Bluray1080p,
-                Quality.Bluray2160p,
-                Quality.Remux1080p,
-                Quality.Remux2160p,
-                Quality.BRDISK);
+                Quality.RomVerified,
+                Quality.All.ToArray());
 
-            AddDefaultProfile("SD",
-                Quality.Bluray480p,
-                Quality.WORKPRINT,
-                Quality.CAM,
-                Quality.TELESYNC,
-                Quality.TELECINE,
-                Quality.DVDSCR,
-                Quality.REGIONAL,
-                Quality.SDTV,
-                Quality.DVD,
-                Quality.WEBDL480p,
-                Quality.WEBRip480p,
-                Quality.Bluray480p,
-                Quality.Bluray576p);
+            AddDefaultProfile("Verified ROMs / Redump",
+                Quality.RomVerified,
+                Quality.RomVerified,
+                Quality.DiscRedump);
 
-            AddDefaultProfile("HD-720p",
-                Quality.Bluray720p,
-                Quality.HDTV720p,
-                Quality.WEBDL720p,
-                Quality.WEBRip720p,
-                Quality.Bluray720p);
+            AddDefaultProfile("PC – GOG preferred",
+                Quality.PcGog,
+                Quality.PcPortable,
+                Quality.PcSteamRip,
+                Quality.PcRepack,
+                Quality.PcScene,
+                Quality.PcGog);
 
-            AddDefaultProfile("HD-1080p",
-                Quality.Bluray1080p,
-                Quality.HDTV1080p,
-                Quality.WEBDL1080p,
-                Quality.WEBRip1080p,
-                Quality.Bluray1080p,
-                Quality.Remux1080p);
-
-            AddDefaultProfile("Ultra-HD",
-                Quality.Remux2160p,
-                Quality.HDTV2160p,
-                Quality.WEBDL2160p,
-                Quality.WEBRip2160p,
-                Quality.Bluray2160p,
-                Quality.Remux2160p);
-
-            AddDefaultProfile("HD - 720p/1080p",
-                Quality.Bluray720p,
-                Quality.HDTV720p,
-                Quality.HDTV1080p,
-                Quality.WEBDL720p,
-                Quality.WEBRip720p,
-                Quality.WEBDL1080p,
-                Quality.WEBRip1080p,
-                Quality.Bluray720p,
-                Quality.Bluray1080p,
-                Quality.Remux1080p);
+            AddDefaultProfile("PC – Scene/Repack",
+                Quality.PcScene,
+                Quality.PcRepack,
+                Quality.PcScene);
         }
 
         public QualityProfile GetDefaultProfile(string name, Quality cutoff = null, params Quality[] allowed)
@@ -255,12 +196,13 @@ namespace NzbDrone.Core.Profiles.Qualities
                 Format = format
             }).ToList();
 
+            // Game releases rarely carry language tags, so the defaults don't filter on language
             var qualityProfile = new QualityProfile
             {
                 Name = name,
                 Cutoff = profileCutoff,
                 Items = items,
-                Language = Language.Original,
+                Language = Language.Any,
                 MinFormatScore = 0,
                 CutoffFormatScore = 0,
                 MinUpgradeFormatScore = 1,

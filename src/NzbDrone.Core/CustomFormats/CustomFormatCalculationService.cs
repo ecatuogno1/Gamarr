@@ -71,7 +71,11 @@ namespace NzbDrone.Core.CustomFormats
                 Edition = parsed?.Edition,
                 Quality = blocklist.Quality,
                 Languages = blocklist.Languages,
-                ReleaseGroup = parsed?.ReleaseGroup
+                ReleaseGroup = parsed?.ReleaseGroup,
+                Regions = parsed?.Regions ?? new List<Region>(),
+                ReleaseType = parsed?.ReleaseType ?? ReleaseType.Base,
+                PlatformIgdbId = parsed?.PlatformIgdbId ?? 0,
+                Version = parsed?.Version
             };
 
             var input = new CustomFormatInput
@@ -103,6 +107,10 @@ namespace NzbDrone.Core.CustomFormats
                 Quality = history.Quality,
                 Languages = history.Languages,
                 ReleaseGroup = parsed?.ReleaseGroup,
+                Regions = parsed?.Regions ?? new List<Region>(),
+                ReleaseType = parsed?.ReleaseType ?? ReleaseType.Base,
+                PlatformIgdbId = parsed?.PlatformIgdbId ?? 0,
+                Version = parsed?.Version
             };
 
             var input = new CustomFormatInput
@@ -128,7 +136,11 @@ namespace NzbDrone.Core.CustomFormats
                 Quality = localGame.Quality,
                 Edition = localGame.Edition,
                 Languages = localGame.Languages,
-                ReleaseGroup = localGame.ReleaseGroup
+                ReleaseGroup = localGame.ReleaseGroup,
+                Regions = localGame.Regions ?? new List<Region>(),
+                ReleaseType = localGame.ReleaseType,
+                PlatformIgdbId = localGame.FileGameInfo?.PlatformIgdbId ?? localGame.FolderGameInfo?.PlatformIgdbId ?? 0,
+                Version = localGame.Version
             };
 
             var input = new CustomFormatInput
@@ -200,7 +212,11 @@ namespace NzbDrone.Core.CustomFormats
                 Quality = gameFile.Quality,
                 Languages = gameFile.Languages,
                 ReleaseGroup = gameFile.ReleaseGroup,
-                Edition = gameFile.Edition
+                Edition = gameFile.Edition,
+                Regions = gameFile.Regions ?? new List<Region>(),
+                ReleaseType = gameFile.ReleaseType,
+                Version = gameFile.Version,
+                PlatformIgdbId = game.Platform?.IgdbPlatformId ?? 0
             };
 
             var input = new CustomFormatInput

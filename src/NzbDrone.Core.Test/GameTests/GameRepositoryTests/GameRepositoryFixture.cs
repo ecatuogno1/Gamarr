@@ -34,10 +34,10 @@ namespace NzbDrone.Core.Test.GameTests.GameRepositoryTests
         {
             var profile = new QualityProfile
             {
-                Items = Qualities.QualityFixture.GetDefaultQualities(Quality.Bluray1080p, Quality.DVD, Quality.HDTV720p),
+                Items = Qualities.QualityFixture.GetDefaultQualities(Quality.XexGod, Quality.RomVerified, Quality.DiscRedump),
                 FormatItems = CustomFormatsTestHelpers.GetDefaultFormatItems(),
                 MinFormatScore = 0,
-                Cutoff = Quality.Bluray1080p.Id,
+                Cutoff = Quality.XexGod.Id,
                 Name = "TestProfile"
             };
 

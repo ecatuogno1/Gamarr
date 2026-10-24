@@ -4,7 +4,6 @@ namespace NzbDrone.Core.Qualities
     {
         Unknown,
         Name,
-        Extension,
-        MediaInfo
+        Extension
     }
 }

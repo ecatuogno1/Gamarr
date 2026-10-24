@@ -122,92 +122,9 @@ namespace NzbDrone.Core.Datastore.Migration
             // Grab custom formats if any exist and add them to the new profiles
             var formats = conn.Query<CustomFormat180>($"SELECT \"Id\" FROM \"CustomFormats\"").ToList();
 
-            profiles.Add(GetDefaultProfile("Any",
-                formats,
-                Quality.Bluray480p,
-                Quality.WORKPRINT,
-                Quality.CAM,
-                Quality.TELESYNC,
-                Quality.TELECINE,
-                Quality.DVDSCR,
-                Quality.REGIONAL,
-                Quality.SDTV,
-                Quality.DVD,
-                Quality.DVDR,
-                Quality.HDTV720p,
-                Quality.HDTV1080p,
-                Quality.HDTV2160p,
-                Quality.WEBDL480p,
-                Quality.WEBRip480p,
-                Quality.WEBDL720p,
-                Quality.WEBRip720p,
-                Quality.WEBDL1080p,
-                Quality.WEBRip1080p,
-                Quality.WEBDL2160p,
-                Quality.WEBRip2160p,
-                Quality.Bluray480p,
-                Quality.Bluray576p,
-                Quality.Bluray720p,
-                Quality.Bluray1080p,
-                Quality.Bluray2160p,
-                Quality.Remux1080p,
-                Quality.Remux2160p,
-                Quality.BRDISK));
-
-            profiles.Add(GetDefaultProfile("SD",
-                formats,
-                Quality.Bluray480p,
-                Quality.WORKPRINT,
-                Quality.CAM,
-                Quality.TELESYNC,
-                Quality.TELECINE,
-                Quality.DVDSCR,
-                Quality.REGIONAL,
-                Quality.SDTV,
-                Quality.DVD,
-                Quality.WEBDL480p,
-                Quality.WEBRip480p,
-                Quality.Bluray480p,
-                Quality.Bluray576p));
-
-            profiles.Add(GetDefaultProfile("HD-720p",
-                formats,
-                Quality.Bluray720p,
-                Quality.HDTV720p,
-                Quality.WEBDL720p,
-                Quality.WEBRip720p,
-                Quality.Bluray720p));
-
-            profiles.Add(GetDefaultProfile("HD-1080p",
-                formats,
-                Quality.Bluray1080p,
-                Quality.HDTV1080p,
-                Quality.WEBDL1080p,
-                Quality.WEBRip1080p,
-                Quality.Bluray1080p,
-                Quality.Remux1080p));
-
-            profiles.Add(GetDefaultProfile("Ultra-HD",
-                formats,
-                Quality.Remux2160p,
-                Quality.HDTV2160p,
-                Quality.WEBDL2160p,
-                Quality.WEBRip2160p,
-                Quality.Bluray2160p,
-                Quality.Remux2160p));
-
-            profiles.Add(GetDefaultProfile("HD - 720p/1080p",
-                formats,
-                Quality.Bluray720p,
-                Quality.HDTV720p,
-                Quality.HDTV1080p,
-                Quality.WEBDL720p,
-                Quality.WEBRip720p,
-                Quality.WEBDL1080p,
-                Quality.WEBRip1080p,
-                Quality.Bluray720p,
-                Quality.Bluray1080p,
-                Quality.Remux1080p));
+            // Gamarr: the movie default profiles were replaced by a single "Any" profile with the game qualities,
+            // migration 245 rewrites all profiles anyway.
+            profiles.Add(GetDefaultProfile("Any", formats, Quality.Unknown, Quality.All.ToArray()));
 
             return profiles;
         }

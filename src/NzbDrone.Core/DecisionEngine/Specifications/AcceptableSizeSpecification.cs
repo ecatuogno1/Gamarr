@@ -5,13 +5,9 @@ using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.DecisionEngine.Specifications
 {
+    // Quality size limits are absolute sizes in GB (games have no runtime to scale them by)
     public class AcceptableSizeSpecification : IDownloadDecisionEngineSpecification
     {
-        // Quality sizes are still Radarr's MB-per-minute values, which used to be multiplied by the movie runtime.
-        // Games have no runtime, so a fixed 110 minutes (Radarr's fallback) keeps the old limits until stage 3
-        // replaces them with absolute sizes.
-        private const int SizeMultiplier = 110;
-
         private readonly IQualityDefinitionService _qualityDefinitionService;
         private readonly Logger _logger;
 
@@ -38,19 +34,14 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
 
             var qualityDefinition = _qualityDefinitionService.Get(quality);
 
-            if (qualityDefinition.MinSize.HasValue)
+            if (qualityDefinition.MinSize.HasValue && qualityDefinition.MinSize.Value > 0)
             {
-                var minSize = qualityDefinition.MinSize.Value.Megabytes();
+                var minSize = qualityDefinition.MinSize.Value.Gigabytes();
 
-                minSize = minSize * SizeMultiplier;
-
-                // If the parsed size is smaller than minSize we don't want it
                 if (subject.Release.Size < minSize)
                 {
-                    var runtimeMessage = subject.Game.Title;
-
-                    _logger.Debug("Item: {0}, Size: {1} is smaller than minimum allowed size ({2} bytes for {3}), rejecting.", subject, subject.Release.Size, minSize, runtimeMessage);
-                    return DownloadSpecDecision.Reject(DownloadRejectionReason.BelowMinimumSize, "{0} is smaller than minimum allowed {1} (for {2})", subject.Release.Size.SizeSuffix(), minSize.SizeSuffix(), runtimeMessage);
+                    _logger.Debug("Item: {0}, Size: {1} is smaller than minimum allowed size ({2} bytes for {3}), rejecting.", subject, subject.Release.Size, minSize, quality);
+                    return DownloadSpecDecision.Reject(DownloadRejectionReason.BelowMinimumSize, "{0} is smaller than minimum allowed {1} for {2}", subject.Release.Size.SizeSuffix(), minSize.SizeSuffix(), quality);
                 }
             }
 
@@ -60,15 +51,12 @@ namespace NzbDrone.Core.DecisionEngine.Specifications
             }
             else
             {
-                var maxSize = qualityDefinition.MaxSize.Value.Megabytes();
+                var maxSize = qualityDefinition.MaxSize.Value.Gigabytes();
 
-                maxSize = maxSize * SizeMultiplier;
-
-                // If the parsed size is greater than maxSize we don't want it
                 if (subject.Release.Size > maxSize)
                 {
-                    _logger.Debug("Item: {0}, Size: {1} is greater than maximum allowed size ({2} for {3}), rejecting", subject, subject.Release.Size, maxSize, subject.Game.Title);
-                    return DownloadSpecDecision.Reject(DownloadRejectionReason.AboveMaximumSize, "{0} is larger than maximum allowed {1} (for {2})", subject.Release.Size.SizeSuffix(), maxSize.SizeSuffix(), subject.Game.Title);
+                    _logger.Debug("Item: {0}, Size: {1} is greater than maximum allowed size ({2} for {3}), rejecting", subject, subject.Release.Size, maxSize, quality);
+                    return DownloadSpecDecision.Reject(DownloadRejectionReason.AboveMaximumSize, "{0} is larger than maximum allowed {1} for {2}", subject.Release.Size.SizeSuffix(), maxSize.SizeSuffix(), quality);
                 }
             }
 

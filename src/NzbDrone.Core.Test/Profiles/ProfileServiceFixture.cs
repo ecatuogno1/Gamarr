@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Test.Profiles
             Subject.Handle(new ApplicationStartedEvent());
 
             Mocker.GetMock<IQualityProfileRepository>()
-                .Verify(v => v.Insert(It.IsAny<QualityProfile>()), Times.Exactly(6));
+                .Verify(v => v.Insert(It.IsAny<QualityProfile>()), Times.Exactly(4));
         }
 
         [Test]

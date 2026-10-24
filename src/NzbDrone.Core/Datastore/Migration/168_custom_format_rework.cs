@@ -10,7 +10,6 @@ using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Datastore.Migration.Framework;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
-using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.Datastore.Migration
 {
@@ -93,12 +92,11 @@ namespace NzbDrone.Core.Datastore.Migration
 
             switch (type)
             {
+                // Gamarr has no resolution, video source or quality modifier conditions anymore
                 case "r":
-                    return new ResolutionSpecification { Value = (int)ParseResolution(value) };
                 case "s":
-                    return new SourceSpecification { Value = (int)ParseSource(value) };
                 case "m":
-                    return new QualityModifierSpecification { Value = (int)ParseModifier(value) };
+                    return new ReleaseTitleSpecification { Value = Regex.Escape(value) };
                 case "e":
                     return new EditionSpecification { Value = ParseString(value, isRegex) };
                 case "l":
@@ -111,69 +109,6 @@ namespace NzbDrone.Core.Datastore.Migration
                 case "c":
                 default:
                     return new ReleaseTitleSpecification { Value = ParseString(value, isRegex) };
-            }
-        }
-
-        private Resolution ParseResolution(string value)
-        {
-            switch (value)
-            {
-                case "2160":
-                    return Resolution.R2160p;
-                case "1080":
-                    return Resolution.R1080p;
-                case "720":
-                    return Resolution.R720p;
-                case "576":
-                    return Resolution.R576p;
-                case "480":
-                    return Resolution.R480p;
-                default:
-                    return Resolution.Unknown;
-            }
-        }
-
-        private QualitySource ParseSource(string value)
-        {
-            switch (value)
-            {
-                case "cam":
-                    return QualitySource.CAM;
-                case "telesync":
-                    return QualitySource.TELESYNC;
-                case "telecine":
-                    return QualitySource.TELECINE;
-                case "workprint":
-                    return QualitySource.WORKPRINT;
-                case "dvd":
-                    return QualitySource.DVD;
-                case "tv":
-                    return QualitySource.TV;
-                case "webdl":
-                    return QualitySource.WEBDL;
-                case "bluray":
-                    return QualitySource.BLURAY;
-                default:
-                    return QualitySource.UNKNOWN;
-            }
-        }
-
-        private Modifier ParseModifier(string value)
-        {
-            switch (value)
-            {
-                case "regional":
-                    return Modifier.REGIONAL;
-                case "screener":
-                    return Modifier.SCREENER;
-                case "rawhd":
-                    return Modifier.RAWHD;
-                case "brdisk":
-                    return Modifier.BRDISK;
-                case "remux":
-                    return Modifier.REMUX;
-                default:
-                    return Modifier.NONE;
             }
         }
 

@@ -55,7 +55,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             };
 
             Mocker.GetMock<IParsingService>()
-                  .Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>())).Returns(_remoteGame);
+                  .Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>())).Returns(_remoteGame);
         }
 
         private void GivenSpecifications(params Mock<IDownloadDecisionEngineSpecification>[] mocks)
@@ -121,11 +121,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_not_attempt_to_map_episode_if_not_parsable()
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
-            _reports[0].Title = "Not parsable";
+            _reports[0].Title = "0e895c37245186812cb08aab1529cf8ee389dd05";
 
             Subject.GetRssDecision(_reports).ToList();
 
-            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
+            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
 
             _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>()), Times.Never());
             _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>()), Times.Never());
@@ -136,11 +136,11 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         public void should_return_rejected_result_for_unparsable_search()
         {
             GivenSpecifications(_pass1, _pass2, _pass3);
-            _reports[0].Title = "1937 - Snow White and the Seven Dwarves";
+            _reports[0].Title = "#$%";
 
             Subject.GetSearchDecision(_reports, new GameSearchCriteria()).ToList();
 
-            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
+            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Never());
 
             _pass1.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>()), Times.Never());
             _pass2.Verify(c => c.IsSatisfiedBy(It.IsAny<RemoteGame>(), It.IsAny<ReleaseDecisionInformation>()), Times.Never());
@@ -166,7 +166,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1);
 
-            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()))
+            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()))
                      .Throws<TestException>();
 
             _reports = new List<ReleaseInfo>
@@ -178,7 +178,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.GetRssDecision(_reports);
 
-            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Exactly(_reports.Count));
+            Mocker.GetMock<IParsingService>().Verify(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()), Times.Exactly(_reports.Count));
 
             ExceptionVerification.ExpectedErrors(3);
         }
@@ -229,7 +229,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         {
             GivenSpecifications(_pass1);
 
-            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()))
+            Mocker.GetMock<IParsingService>().Setup(c => c.Map(It.IsAny<ParsedGameInfo>(), It.IsAny<int>(), It.IsAny<SearchCriteriaBase>()))
                      .Throws<TestException>();
 
             _reports = new List<ReleaseInfo>

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Games;
@@ -13,7 +14,7 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         [Test]
         public void should_use_passed_in_title_when_it_cannot_be_parsed()
         {
-            const string title = "30 Game";
+            const string title = "#$%";
 
             Subject.GetGame(title);
 
@@ -22,27 +23,25 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         }
 
         [Test]
-        public void should_use_parsed_series_title()
+        public void should_use_parsed_game_title()
         {
-            const string title = "30.Game.2015.720p.hdtv";
+            const string title = "Elden.Ring-CODEX";
 
             Subject.GetGame(title);
 
             Mocker.GetMock<IGameService>()
-                .Verify(s => s.FindByTitle(Parser.Parser.ParseGameTitle(title, false).GameTitles, It.IsAny<int>(), It.IsAny<List<string>>(), null), Times.Once());
+                .Verify(s => s.FindByTitle(It.Is<List<string>>(t => t.SequenceEqual(new[] { "Elden Ring" })), null, It.IsAny<List<string>>(), It.IsAny<List<Game>>()), Times.Once());
         }
 
-        /*[Test]
-        public void should_fallback_to_title_without_year_and_year_when_title_lookup_fails()
+        [Test]
+        public void should_use_parsed_year()
         {
-            const string title = "Game.2004.S01E01.720p.hdtv";
-            var parsedEpisodeInfo = Parser.Parser.ParseGameTitle(title,false,false);
+            const string title = "Doom (2016) [FitGirl Repack]";
 
             Subject.GetGame(title);
 
             Mocker.GetMock<IGameService>()
-                  .Verify(s => s.FindByTitle(parsedEpisodeInfo.GameTitleInfo.TitleWithoutYear,
-                                             parsedEpisodeInfo.GameTitleInfo.Year), Times.Once());
-        }*/
+                .Verify(s => s.FindByTitle(It.IsAny<List<string>>(), 2016, It.IsAny<List<string>>(), It.IsAny<List<Game>>()), Times.Once());
+        }
     }
 }

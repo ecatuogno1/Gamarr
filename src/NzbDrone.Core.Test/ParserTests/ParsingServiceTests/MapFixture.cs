@@ -11,6 +11,7 @@ using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Test.Common;
 
 namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
@@ -129,10 +130,50 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         {
             GivenMatchByGameTitle();
 
-            Subject.Map(_parsedGameInfo, "", 0, null);
+            Subject.Map(_parsedGameInfo, 0, null);
 
             Mocker.GetMock<IGameService>()
-                .Verify(v => v.FindByTitle(It.IsAny<List<string>>(), It.IsAny<int>(), It.IsAny<List<string>>(), null), Times.Once());
+                .Verify(v => v.FindByTitle(It.IsAny<List<string>>(), It.IsAny<int>(), It.IsAny<List<string>>(), It.IsAny<List<Game>>()), Times.Once());
+        }
+
+        [Test]
+        public void should_only_consider_games_on_the_release_platform()
+        {
+            var snesGame = Builder<Game>.CreateNew()
+                                        .With(g => g.Id = 10)
+                                        .With(g => g.Platform = new Platform { Id = 2, IgdbPlatformId = PlatformParser.Snes })
+                                        .Build();
+
+            var gbaGame = Builder<Game>.CreateNew()
+                                       .With(g => g.Id = 11)
+                                       .With(g => g.Platform = new Platform { Id = 3, IgdbPlatformId = PlatformParser.GameBoyAdvance })
+                                       .Build();
+
+            var otherTitles = new List<string>();
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindByTitleCandidates(It.IsAny<List<string>>(), out otherTitles))
+                  .Returns(new List<Game> { snesGame, gbaGame });
+
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindByTitle(It.IsAny<List<string>>(), It.IsAny<int?>(), It.IsAny<List<string>>(), It.IsAny<List<Game>>()))
+                  .Returns<List<string>, int?, List<string>, List<Game>>((t, y, o, c) => c.Single());
+
+            var parsed = Parser.Parser.ParseGameTitle("Super Mario Advance (USA).gba");
+
+            Subject.Map(parsed, 0, null).Game.Should().Be(gbaGame);
+        }
+
+        [Test]
+        public void should_not_match_when_title_is_on_several_platforms_and_release_has_no_platform()
+        {
+            Mocker.GetMock<IGameService>()
+                  .Setup(s => s.FindByTitle(It.IsAny<List<string>>(), It.IsAny<int?>(), It.IsAny<List<string>>(), It.IsAny<List<Game>>()))
+                  .Throws(new MultipleGamesFoundException(new List<Game>(), "Expected one game, but found 2"));
+
+            var parsed = Parser.Parser.ParseGameTitle("Some Game (USA).zip");
+
+            Subject.Map(parsed, 0, null).Game.Should().BeNull();
         }
 
         [Test]
@@ -140,7 +181,7 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         {
             GivenMatchByGameTitle();
 
-            Subject.Map(_parsedGameInfo, "", 0, _gameSearchCriteria);
+            Subject.Map(_parsedGameInfo, 0, _gameSearchCriteria);
 
             Mocker.GetMock<IGameService>()
                   .Verify(v => v.FindByTitle(It.IsAny<string>()), Times.Never());
@@ -149,26 +190,26 @@ namespace NzbDrone.Core.Test.ParserTests.ParsingServiceTests
         [Test]
         public void should_match_alternative_title()
         {
-            Subject.Map(_alternativeTitleInfo, "", 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
+            Subject.Map(_alternativeTitleInfo, 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
         }
 
         [Test]
         public void should_match_translation_title()
         {
-            Subject.Map(_translationTitleInfo, "", 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
+            Subject.Map(_translationTitleInfo, 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
         }
 
         [Test]
         public void should_match_roman_title()
         {
-            Subject.Map(_romanTitleInfo, "", 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
+            Subject.Map(_romanTitleInfo, 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
         }
 
         [Test]
         public void should_match_umlauts()
         {
-            Subject.Map(_umlautInfo, "", 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
-            Subject.Map(_umlautAltInfo, "", 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
+            Subject.Map(_umlautInfo, 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
+            Subject.Map(_umlautAltInfo, 0, _gameSearchCriteria).Game.Should().Be(_gameSearchCriteria.Game);
         }
     }
 }

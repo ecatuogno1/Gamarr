@@ -5,7 +5,6 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.DecisionEngine.Specifications;
-using NzbDrone.Core.Parser;
 using NzbDrone.Core.Profiles;
 using NzbDrone.Core.Profiles.Qualities;
 using NzbDrone.Core.Qualities;
@@ -18,33 +17,33 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
     public class UpgradeSpecificationFixture : CoreTest<UpgradableSpecification>
     {
-        private static readonly CustomFormat CustomFormat1 = new("My Format 1", new ResolutionSpecification { Value = (int)Resolution.R1080p }) { Id = 1 };
-        private static readonly CustomFormat CustomFormat2 = new("My Format 2", new ResolutionSpecification { Value = (int)Resolution.R480p }) { Id = 2 };
+        private static readonly CustomFormat CustomFormat1 = new("My Format 1", new ReleaseTitleSpecification { Value = "R1080" }) { Id = 1 };
+        private static readonly CustomFormat CustomFormat2 = new("My Format 2", new ReleaseTitleSpecification { Value = "R480" }) { Id = 2 };
 
         public static object[] IsUpgradeTestCases =
         {
             // Quality upgrade trumps custom format
-            new object[] { Quality.SDTV, 1, new List<CustomFormat>(), Quality.SDTV, 2, new List<CustomFormat>(), UpgradeableRejectReason.None },
-            new object[] { Quality.SDTV, 1, new List<CustomFormat> { CustomFormat1 }, Quality.SDTV, 2, new List<CustomFormat> { CustomFormat1 }, UpgradeableRejectReason.None },
-            new object[] { Quality.SDTV, 1, new List<CustomFormat> { CustomFormat1 }, Quality.SDTV, 2, new List<CustomFormat> { CustomFormat2 }, UpgradeableRejectReason.None },
-            new object[] { Quality.SDTV, 1, new List<CustomFormat> { CustomFormat2 }, Quality.SDTV, 2, new List<CustomFormat> { CustomFormat1 }, UpgradeableRejectReason.None },
+            new object[] { Quality.RomUnverified, 1, new List<CustomFormat>(), Quality.RomUnverified, 2, new List<CustomFormat>(), UpgradeableRejectReason.None },
+            new object[] { Quality.RomUnverified, 1, new List<CustomFormat> { CustomFormat1 }, Quality.RomUnverified, 2, new List<CustomFormat> { CustomFormat1 }, UpgradeableRejectReason.None },
+            new object[] { Quality.RomUnverified, 1, new List<CustomFormat> { CustomFormat1 }, Quality.RomUnverified, 2, new List<CustomFormat> { CustomFormat2 }, UpgradeableRejectReason.None },
+            new object[] { Quality.RomUnverified, 1, new List<CustomFormat> { CustomFormat2 }, Quality.RomUnverified, 2, new List<CustomFormat> { CustomFormat1 }, UpgradeableRejectReason.None },
 
             // Revision upgrade trumps custom format
-            new object[] { Quality.WEBDL720p, 1, new List<CustomFormat>(), Quality.WEBDL720p, 2, new List<CustomFormat>(), UpgradeableRejectReason.None },
-            new object[] { Quality.WEBDL720p, 1, new List<CustomFormat> { CustomFormat1 }, Quality.WEBDL720p, 2, new List<CustomFormat> { CustomFormat1 }, UpgradeableRejectReason.None },
-            new object[] { Quality.WEBDL720p, 1, new List<CustomFormat> { CustomFormat1 }, Quality.WEBDL720p, 2, new List<CustomFormat> { CustomFormat2 }, UpgradeableRejectReason.None },
-            new object[] { Quality.WEBDL720p, 1, new List<CustomFormat> { CustomFormat2 }, Quality.WEBDL720p, 2, new List<CustomFormat> { CustomFormat1 }, UpgradeableRejectReason.None },
+            new object[] { Quality.NspXci, 1, new List<CustomFormat>(), Quality.NspXci, 2, new List<CustomFormat>(), UpgradeableRejectReason.None },
+            new object[] { Quality.NspXci, 1, new List<CustomFormat> { CustomFormat1 }, Quality.NspXci, 2, new List<CustomFormat> { CustomFormat1 }, UpgradeableRejectReason.None },
+            new object[] { Quality.NspXci, 1, new List<CustomFormat> { CustomFormat1 }, Quality.NspXci, 2, new List<CustomFormat> { CustomFormat2 }, UpgradeableRejectReason.None },
+            new object[] { Quality.NspXci, 1, new List<CustomFormat> { CustomFormat2 }, Quality.NspXci, 2, new List<CustomFormat> { CustomFormat1 }, UpgradeableRejectReason.None },
 
             // Custom formats apply if quality same
-            new object[] { Quality.SDTV, 1, new List<CustomFormat>(), Quality.SDTV, 1, new List<CustomFormat>(), UpgradeableRejectReason.CustomFormatScore },
-            new object[] { Quality.SDTV, 1, new List<CustomFormat> { CustomFormat1 }, Quality.SDTV, 1, new List<CustomFormat> { CustomFormat1 }, UpgradeableRejectReason.CustomFormatScore },
-            new object[] { Quality.SDTV, 1, new List<CustomFormat> { CustomFormat1 }, Quality.SDTV, 1, new List<CustomFormat> { CustomFormat2 }, UpgradeableRejectReason.CustomFormatCutoff },
-            new object[] { Quality.SDTV, 1, new List<CustomFormat> { CustomFormat2 }, Quality.SDTV, 1, new List<CustomFormat> { CustomFormat1 }, UpgradeableRejectReason.CustomFormatScore },
+            new object[] { Quality.RomUnverified, 1, new List<CustomFormat>(), Quality.RomUnverified, 1, new List<CustomFormat>(), UpgradeableRejectReason.CustomFormatScore },
+            new object[] { Quality.RomUnverified, 1, new List<CustomFormat> { CustomFormat1 }, Quality.RomUnverified, 1, new List<CustomFormat> { CustomFormat1 }, UpgradeableRejectReason.CustomFormatScore },
+            new object[] { Quality.RomUnverified, 1, new List<CustomFormat> { CustomFormat1 }, Quality.RomUnverified, 1, new List<CustomFormat> { CustomFormat2 }, UpgradeableRejectReason.CustomFormatCutoff },
+            new object[] { Quality.RomUnverified, 1, new List<CustomFormat> { CustomFormat2 }, Quality.RomUnverified, 1, new List<CustomFormat> { CustomFormat1 }, UpgradeableRejectReason.CustomFormatScore },
 
-            new object[] { Quality.WEBDL720p, 1, new List<CustomFormat>(), Quality.HDTV720p, 2, new List<CustomFormat>(), UpgradeableRejectReason.BetterQuality },
-            new object[] { Quality.WEBDL720p, 1, new List<CustomFormat>(), Quality.HDTV720p, 2, new List<CustomFormat>(), UpgradeableRejectReason.BetterQuality },
-            new object[] { Quality.WEBDL720p, 1, new List<CustomFormat>(), Quality.WEBDL720p, 1, new List<CustomFormat>(), UpgradeableRejectReason.CustomFormatScore },
-            new object[] { Quality.WEBDL1080p, 1, new List<CustomFormat>(), Quality.WEBDL1080p, 1, new List<CustomFormat>(), UpgradeableRejectReason.CustomFormatScore }
+            new object[] { Quality.NspXci, 1, new List<CustomFormat>(), Quality.DiscRedump, 2, new List<CustomFormat>(), UpgradeableRejectReason.BetterQuality },
+            new object[] { Quality.NspXci, 1, new List<CustomFormat>(), Quality.DiscRedump, 2, new List<CustomFormat>(), UpgradeableRejectReason.BetterQuality },
+            new object[] { Quality.NspXci, 1, new List<CustomFormat>(), Quality.NspXci, 1, new List<CustomFormat>(), UpgradeableRejectReason.CustomFormatScore },
+            new object[] { Quality.Cia3ds, 1, new List<CustomFormat>(), Quality.Cia3ds, 1, new List<CustomFormat>(), UpgradeableRejectReason.CustomFormatScore }
         };
 
         [SetUp]
@@ -100,9 +99,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradable(
                        profile,
-                       new QualityModel(Quality.DVD, new Revision(version: 1)),
+                       new QualityModel(Quality.RomVerified, new Revision(version: 1)),
                        new List<CustomFormat>(),
-                       new QualityModel(Quality.DVD, new Revision(version: 2)),
+                       new QualityModel(Quality.RomVerified, new Revision(version: 2)),
                        new List<CustomFormat>())
                     .Should().Be(UpgradeableRejectReason.None);
         }
@@ -119,9 +118,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradable(
                        profile,
-                       new QualityModel(Quality.DVD, new Revision(version: 1)),
+                       new QualityModel(Quality.RomVerified, new Revision(version: 1)),
                        new List<CustomFormat>(),
-                       new QualityModel(Quality.DVD, new Revision(version: 2)),
+                       new QualityModel(Quality.RomVerified, new Revision(version: 2)),
                        new List<CustomFormat>())
                    .Should().Be(UpgradeableRejectReason.UpgradesNotAllowed);
         }
@@ -136,9 +135,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradable(
                        profile,
-                       new QualityModel(Quality.HDTV720p, new Revision(version: 1)),
+                       new QualityModel(Quality.DiscRedump, new Revision(version: 1)),
                        new List<CustomFormat>(),
-                       new QualityModel(Quality.HDTV720p, new Revision(version: 1)),
+                       new QualityModel(Quality.DiscRedump, new Revision(version: 1)),
                        new List<CustomFormat>())
                    .Should().Be(UpgradeableRejectReason.UpgradesNotAllowed);
         }
@@ -150,14 +149,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             {
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true,
-                Cutoff = Quality.HDTV1080p.Id
+                Cutoff = Quality.WuaWux.Id
             };
 
             Subject.IsUpgradable(
                     profile,
-                    new QualityModel(Quality.HDTV720p, new Revision(version: 1)),
+                    new QualityModel(Quality.DiscRedump, new Revision(version: 1)),
                     new List<CustomFormat>(),
-                    new QualityModel(Quality.HDTV1080p, new Revision(version: 1)),
+                    new QualityModel(Quality.WuaWux, new Revision(version: 1)),
                     new List<CustomFormat>())
                 .Should().Be(UpgradeableRejectReason.None);
         }
@@ -169,14 +168,14 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             {
                 Items = Qualities.QualityFixture.GetDefaultQualities(),
                 UpgradeAllowed = true,
-                Cutoff = Quality.HDTV720p.Id
+                Cutoff = Quality.DiscRedump.Id
             };
 
             Subject.IsUpgradable(
                     profile,
-                    new QualityModel(Quality.HDTV720p, new Revision(version: 1)),
+                    new QualityModel(Quality.DiscRedump, new Revision(version: 1)),
                     new List<CustomFormat>(),
-                    new QualityModel(Quality.HDTV1080p, new Revision(version: 1)),
+                    new QualityModel(Quality.WuaWux, new Revision(version: 1)),
                     new List<CustomFormat>())
                 .Should().Be(UpgradeableRejectReason.QualityCutoff);
         }
@@ -219,9 +218,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradable(
                     profile,
-                    new QualityModel(Quality.DVD),
+                    new QualityModel(Quality.RomVerified),
                     new List<CustomFormat> { customFormatOne },
-                    new QualityModel(Quality.DVD),
+                    new QualityModel(Quality.RomVerified),
                     new List<CustomFormat> { customFormatTwo })
                 .Should().Be(UpgradeableRejectReason.MinCustomFormatScore);
         }
@@ -264,9 +263,9 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
 
             Subject.IsUpgradable(
                     profile,
-                    new QualityModel(Quality.DVD),
+                    new QualityModel(Quality.RomVerified),
                     new List<CustomFormat> { customFormatOne },
-                    new QualityModel(Quality.DVD),
+                    new QualityModel(Quality.RomVerified),
                     new List<CustomFormat> { customFormatTwo })
                 .Should().Be(UpgradeableRejectReason.None);
         }

@@ -10,6 +10,7 @@ namespace NzbDrone.Core.Parser.Model
         {
             GameTitles = new List<string>();
             Languages = new List<Language>();
+            Regions = new List<Region>();
         }
 
         public List<string> GameTitles { get; set; }
@@ -22,9 +23,20 @@ namespace NzbDrone.Core.Parser.Model
         public string ReleaseHash { get; set; }
         public string Edition { get; set; }
         public int Year { get; set; }
-        public string ImdbId { get; set; }
         public int IgdbId { get; set; }
-        public string HardcodedSubs { get; set; }
+
+        // The platform as detected from the release (IGDB platform id, stable across databases) and the
+        // matching Gamarr platform id once it's been resolved against the platform table (0 = unknown).
+        public int PlatformIgdbId { get; set; }
+        public int PlatformId { get; set; }
+        public List<Region> Regions { get; set; }
+        public string Version { get; set; }
+        public ReleaseType ReleaseType { get; set; }
+        public int DiscNumber { get; set; }
+        public int DiscCount { get; set; }
+
+        // Switch title id (16 hex digits) when present
+        public string TitleId { get; set; }
 
         public string GameTitle => PrimaryGameTitle;
 

@@ -13,7 +13,6 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Serializer;
 using NzbDrone.Core.Datastore.Migration.Framework;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 
 namespace NzbDrone.Core.Datastore.Migration
 {
@@ -365,7 +364,8 @@ namespace NzbDrone.Core.Datastore.Migration
                 }
             }
 
-            return VideoFileInfoReader.GetHdrFormat(mediaInfo.VideoBitDepth, mediaInfo.VideoColourPrimaries, mediaInfo.VideoTransferCharacteristics, new());
+            // Media info was removed in Gamarr, there are no movie files to migrate
+            return HdrFormat.None;
         }
 
         private void MigrateAudioCodec(MediaInfo198 mediaInfo, MediaInfo199 m)
@@ -900,5 +900,20 @@ namespace NzbDrone.Core.Datastore.Migration
             public List<string> Subtitles { get; set; }
             public string ScanType { get; set; }
         }
+    }
+
+    // Gamarr removed media info, the enum is kept here for this migration
+    public enum HdrFormat
+    {
+        None,
+        Pq10,
+        Hdr10,
+        Hdr10Plus,
+        Hlg10,
+        DolbyVision,
+        DolbyVisionHdr10,
+        DolbyVisionSdr,
+        DolbyVisionHlg,
+        DolbyVisionHdr10Plus
     }
 }

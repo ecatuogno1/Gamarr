@@ -76,7 +76,7 @@ namespace NzbDrone.Core.DecisionEngine
 
                     if (parsedGameInfo != null && !parsedGameInfo.PrimaryGameTitle.IsNullOrWhiteSpace())
                     {
-                        var remoteGame = _parsingService.Map(parsedGameInfo, report.ImdbId.ToString(), report.IgdbId, searchCriteria);
+                        var remoteGame = _parsingService.Map(parsedGameInfo, report.IgdbId, searchCriteria);
                         remoteGame.Release = report;
                         remoteGame.ReleaseSource = GetReleaseSource(pushedRelease, searchCriteria);
 
@@ -86,6 +86,14 @@ namespace NzbDrone.Core.DecisionEngine
                         }
                         else
                         {
+                            // A release without a platform tag (a ROM set name, a PC repack) gets its quality
+                            // from the game's platform
+                            if (parsedGameInfo.PlatformIgdbId == 0 && remoteGame.Game.Platform != null &&
+                                (parsedGameInfo.Quality == null || parsedGameInfo.Quality.Quality == Qualities.Quality.Unknown))
+                            {
+                                parsedGameInfo.Quality = QualityParser.ParseQuality(report.Title, remoteGame.Game.Platform.IgdbPlatformId);
+                            }
+
                             _aggregationService.Augment(remoteGame);
 
                             remoteGame.CustomFormats = _formatCalculator.ParseCustomFormat(remoteGame, remoteGame.Release.Size);

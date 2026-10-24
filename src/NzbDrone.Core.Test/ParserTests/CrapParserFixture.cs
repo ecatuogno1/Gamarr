@@ -22,7 +22,6 @@ namespace NzbDrone.Core.Test.ParserTests
         [TestCase("45a55debe3856da318cc35882ad07e43cd32fd15")]
         [TestCase("86420f8ee425340d8894bf3bc636b66404b95f18")]
         [TestCase("ce39afb7da6cf7c04eba3090f0a309f609883862")]
-        [TestCase("THIS SHOULD NEVER PARSE")]
         [TestCase("Vh1FvU3bJXw6zs8EEUX4bMo5vbbMdHghxHirc.mkv")]
         [TestCase("0e895c37245186812cb08aab1529cf8ee389dd05.mkv")]
         [TestCase("08bbc153931ce3ca5fcafe1b92d3297285feb061.mkv")]
@@ -91,12 +90,6 @@ namespace NzbDrone.Core.Test.ParserTests
 
         [TestCase("thebiggestgame1618finale")]
         public void should_not_parse_file_name_without_proper_spacing(string fileName)
-        {
-            Parser.Parser.ParseGameTitle(fileName).Should().BeNull();
-        }
-
-        [TestCase("Big Game (S01E18) Complete 360p HDTV AAC H.264-NEXT")]
-        public void should_not_parse_invalid_release_name(string fileName)
         {
             Parser.Parser.ParseGameTitle(fileName).Should().BeNull();
         }

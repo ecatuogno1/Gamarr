@@ -28,33 +28,46 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
             _qualityType = Builder<QualityDefinition>.CreateNew()
                 .With(q => q.MinSize = 2)
                 .With(q => q.MaxSize = 10)
-                .With(q => q.Quality = Quality.SDTV)
+                .With(q => q.Quality = Quality.RomUnverified)
                 .Build();
 
             _remoteGame = new RemoteGame
             {
                 Game = _game,
                 Release = new ReleaseInfo(),
-                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.SDTV, new Revision(version: 2)) },
+                ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.RomUnverified, new Revision(version: 2)) },
             };
 
             Mocker.GetMock<IQualityDefinitionService>()
                 .Setup(v => v.Get(It.IsAny<Quality>()))
                 .Returns<Quality>(v => Quality.DefaultQualityDefinitions.First(c => c.Quality == v));
 
-            Mocker.GetMock<IQualityDefinitionService>().Setup(s => s.Get(Quality.SDTV)).Returns(_qualityType);
+            Mocker.GetMock<IQualityDefinitionService>().Setup(s => s.Get(Quality.RomUnverified)).Returns(_qualityType);
         }
 
-        // Sizes are still per minute, multiplied by a fixed 110 minutes until stage 3 (2 MB * 110 = 220 MB, 10 MB * 110 = 1100 MB)
-        [TestCase(100, false)]
-        [TestCase(500, true)]
-        [TestCase(1200, false)]
-        public void should_check_size_against_fixed_multiplier(int sizeInMegaBytes, bool expectedResult)
+        // Sizes are absolute, in GB: between 2 GB and 10 GB
+        [TestCase(1024, false)]
+        [TestCase(5120, true)]
+        [TestCase(11264, false)]
+        public void should_check_size_in_gigabytes(int sizeInMegaBytes, bool expectedResult)
         {
             _remoteGame.Game = _game;
             _remoteGame.Release.Size = sizeInMegaBytes.Megabytes();
 
             Subject.IsSatisfiedBy(_remoteGame, new()).Accepted.Should().Be(expectedResult);
+        }
+
+        [Test]
+        public void should_allow_fractional_gigabytes_for_roms()
+        {
+            _qualityType.MinSize = 0;
+            _qualityType.MaxSize = 0.01;
+
+            _remoteGame.Release.Size = 4.Megabytes();
+            Subject.IsSatisfiedBy(_remoteGame, new()).Accepted.Should().BeTrue();
+
+            _remoteGame.Release.Size = 20.Megabytes();
+            Subject.IsSatisfiedBy(_remoteGame, new()).Accepted.Should().BeFalse();
         }
 
         [Test]
@@ -69,7 +82,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_return_true_if_unlimited_30_minute()
+        public void should_return_true_if_unlimited_small()
         {
             _remoteGame.Game = _game;
             _remoteGame.Release.Size = 18457280000;
@@ -79,24 +92,13 @@ namespace NzbDrone.Core.Test.DecisionEngineTests
         }
 
         [Test]
-        public void should_return_true_if_unlimited_60_minute()
+        public void should_return_true_if_unlimited_large()
         {
             _remoteGame.Game = _game;
             _remoteGame.Release.Size = 36857280000;
             _qualityType.MaxSize = null;
 
             Subject.IsSatisfiedBy(_remoteGame, new()).Accepted.Should().BeTrue();
-        }
-
-        [Test]
-        public void should_use_110_minutes()
-        {
-            _remoteGame.Game = _game;
-            _remoteGame.Release.Size = 1095.Megabytes();
-
-            Subject.IsSatisfiedBy(_remoteGame, new()).Accepted.Should().Be(true);
-            _remoteGame.Release.Size = 1105.Megabytes();
-            Subject.IsSatisfiedBy(_remoteGame, new()).Accepted.Should().Be(false);
         }
     }
 }

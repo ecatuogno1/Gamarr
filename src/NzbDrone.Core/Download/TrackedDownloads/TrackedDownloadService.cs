@@ -130,7 +130,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
                 {
                     trackedDownload.RemoteGame = downloadHistory is { EventType: DownloadHistoryEventType.DownloadImported }
                         ? _parsingService.Map(parsedGameInfo, downloadHistory.GameId)
-                        : _parsingService.Map(parsedGameInfo, "", 0, null);
+                        : _parsingService.Map(parsedGameInfo, 0, null);
                 }
 
                 var historyItems = _historyService.FindByDownloadId(downloadItem.DownloadId)
@@ -245,7 +245,7 @@ namespace NzbDrone.Core.Download.TrackedDownloads
         {
             var parsedGameInfo = Parser.Parser.ParseGameTitle(trackedDownload.DownloadItem.Title);
 
-            trackedDownload.RemoteGame = parsedGameInfo == null ? null : _parsingService.Map(parsedGameInfo, "", 0, null);
+            trackedDownload.RemoteGame = parsedGameInfo == null ? null : _parsingService.Map(parsedGameInfo, 0, null);
 
             _aggregationService.Augment(trackedDownload.RemoteGame);
         }

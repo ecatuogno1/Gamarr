@@ -157,38 +157,50 @@ namespace Gamarr.Api.V3.CustomFormats
         {
             yield return new ReleaseTitleSpecification
             {
-                Name = "x264",
-                Value = @"(x|h)\.?264"
+                Name = "No-Intro / Redump",
+                Value = @"\b(No-?Intro|Redump)\b"
             };
 
             yield return new ReleaseTitleSpecification
             {
-                Name = "x265",
-                Value = @"(((x|h)\.?265)|(HEVC))"
+                Name = "GoodTools Verified",
+                Value = @"\[!\]"
             };
 
             yield return new ReleaseTitleSpecification
             {
-                Name = "Simple Hardcoded Subs",
-                Value = @"subs?"
+                Name = "Bad Dump",
+                Value = @"\[(b|o)\d*\]"
             };
 
             yield return new ReleaseTitleSpecification
             {
-                Name = "Hardcoded Subs",
-                Value = @"\b(?<hcsub>(\w+SUBS?)\b)|(?<hc>(HC|SUBBED))\b"
+                Name = "Repack Groups",
+                Value = @"\b(FitGirl|DODI|ElAmigos|KaOs)\b"
             };
 
-            yield return new ReleaseTitleSpecification
+            yield return new RegionSpecification
             {
-                Name = "Surround Sound",
-                Value = @"DTS.?(HD|ES|X(?!\D))|TRUEHD|ATMOS|DD(\+|P).?([5-9])|EAC3.?([5-9])"
+                Name = "USA",
+                Value = (int)NzbDrone.Core.Parser.Model.Region.USA
             };
 
-            yield return new ReleaseTitleSpecification
+            yield return new RegionSpecification
             {
-                Name = "Preferred Words",
-                Value = @"\b(SPARKS|Framestor)\b"
+                Name = "Europe",
+                Value = (int)NzbDrone.Core.Parser.Model.Region.Europe
+            };
+
+            yield return new ReleaseTypeSpecification
+            {
+                Name = "Update",
+                Value = (int)NzbDrone.Core.Parser.Model.ReleaseType.Update
+            };
+
+            yield return new ReleaseTypeSpecification
+            {
+                Name = "DLC",
+                Value = (int)NzbDrone.Core.Parser.Model.ReleaseType.Dlc
             };
 
             var formats = _formatService.All();

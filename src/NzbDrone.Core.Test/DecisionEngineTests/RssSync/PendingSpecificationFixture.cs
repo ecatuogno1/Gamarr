@@ -49,7 +49,7 @@ namespace NzbDrone.Core.Test.DecisionEngineTests.RssSync
 
             _remoteGame = Builder<RemoteGame>.CreateNew()
                 .With(r => r.Game = _game)
-                .With(r => r.ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.DVD), Languages = new List<Language> { Language.Spanish } })
+                .With(r => r.ParsedGameInfo = new ParsedGameInfo { Quality = new QualityModel(Quality.RomVerified), Languages = new List<Language> { Language.Spanish } })
                 .With(r => r.CustomFormats = new List<CustomFormat>())
                 .Build();
 

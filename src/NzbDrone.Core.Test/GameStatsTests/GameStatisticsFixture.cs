@@ -36,7 +36,7 @@ namespace NzbDrone.Core.Test.GameStatsTests
 
             _gameFile = Builder<GameFile>.CreateNew()
                 .With(e => e.GameId = _game.Id)
-                .With(e => e.Quality = new QualityModel(Quality.Bluray720p))
+                .With(e => e.Quality = new QualityModel(Quality.Pkg))
                 .With(e => e.Languages = new List<Language> { Language.English })
                 .BuildNew();
         }
