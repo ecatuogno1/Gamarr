@@ -43,7 +43,13 @@ namespace Gamarr.Api.V3.ImportLists
         public Ratings Ratings { get; set; }
         public GameCollection Collection { get; set; }
         public bool IsExcluded { get; set; }
+
+        // In the library on any platform
         public bool IsExisting { get; set; }
+
+        // The platforms the title is in the library on
+        public List<int> LibraryPlatformIds { get; set; } = new();
+
         public bool IsTrending { get; set; }
         public bool IsPopular { get; set; }
 

@@ -32,6 +32,7 @@ namespace NzbDrone.Core.Games
         Dictionary<int, string> AllGamePaths();
         List<int> AllGameIgdbIds();
         HashSet<(int IgdbId, int PlatformId)> AllGameIgdbIdsWithPlatform();
+        Dictionary<int, List<int>> AllGamePlatformsByIgdbId();
         bool GameExists(int igdbId, int platformId);
         List<Game> GetGamesByFileId(int fileId);
         List<Game> GetGamesByCollectionIgdbId(int collectionId);
@@ -214,6 +215,14 @@ namespace NzbDrone.Core.Games
         public HashSet<(int IgdbId, int PlatformId)> AllGameIgdbIdsWithPlatform()
         {
             return _gameRepository.AllGameIgdbIdsWithPlatform().Select(x => (x.Key, x.Value)).ToHashSet();
+        }
+
+        // The platforms each title (IGDB id) is in the library on
+        public Dictionary<int, List<int>> AllGamePlatformsByIgdbId()
+        {
+            return _gameRepository.AllGameIgdbIdsWithPlatform()
+                .GroupBy(x => x.Key)
+                .ToDictionary(g => g.Key, g => g.Select(x => x.Value).Distinct().OrderBy(x => x).ToList());
         }
 
         public void DeleteGame(int gameId, bool deleteFiles, bool addImportListExclusion = false)

@@ -104,3 +104,9 @@ $hoverScale: 1.05;
     display: none;
   }
 }
+
+.platforms {
+  display: inline-flex;
+  margin-left: 10px;
+  vertical-align: middle;
+}

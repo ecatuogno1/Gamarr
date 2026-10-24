@@ -5,7 +5,7 @@ import Link from 'Components/Link/Link';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
 import EditGameModal from 'Game/Edit/EditGameModal';
 import GamePoster from 'Game/GamePoster';
-import GameIndexProgressBar from 'Game/Index/ProgressBar/GameIndexProgressBar';
+import LibraryPlatformBadges, { LibraryTitleProgressBar } from 'Game/Title/LibraryPlatformBadges';
 import translate from 'Utilities/String/translate';
 import styles from './CollectionGame.css';
 
@@ -62,16 +62,12 @@ class CollectionGame extends Component {
     const {
       id,
       title,
-      status,
       overview,
       year,
       igdbId,
       images,
       monitored,
-      hasFile,
       folder,
-      isAvailable,
-      gameFile,
       isExistingGame,
       isExcluded,
       posterWidth,
@@ -108,6 +104,14 @@ class CollectionGame extends Component {
                   onPress={onMonitorTogglePress}
                 />
               </div>
+          }
+
+          {
+            isExistingGame &&
+              <LibraryPlatformBadges
+                className={styles.platforms}
+                igdbId={igdbId}
+              />
           }
 
           {
@@ -149,16 +153,11 @@ class CollectionGame extends Component {
 
               {
                 id ?
-                  <GameIndexProgressBar
-                    gameId={id}
-                    gameFile={gameFile}
-                    monitored={monitored}
-                    hasFile={hasFile}
-                    status={status}
+                  <LibraryTitleProgressBar
+                    igdbId={igdbId}
                     bottomRadius={true}
                     width={posterWidth}
                     detailedProgressBar={detailedProgressBar}
-                    isAvailable={isAvailable}
                   /> :
                   null
               }

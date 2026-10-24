@@ -12,6 +12,7 @@ interface CssExports {
   'lists': string;
   'overview': string;
   'overviewContainer': string;
+  'platforms': string;
   'poster': string;
   'posterContainer': string;
   'title': string;

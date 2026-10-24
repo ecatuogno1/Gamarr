@@ -164,7 +164,7 @@ namespace Gamarr.Api.V3.Collections
             var namingConfig = _namingService.GetConfig();
             var configLanguage = (Language)_configService.GameInfoLanguage;
 
-            var existingGames = _gameService.AllGameIgdbIdsWithPlatform();
+            var existingGames = _gameService.AllGamePlatformsByIgdbId();
             var listExclusions = _importListExclusionService.All();
 
             var allCollectionGames = _gameMetadataService.GetGamesWithCollections()
@@ -189,7 +189,9 @@ namespace Gamarr.Api.V3.Collections
                         var gameResource = game.ToResource(translation);
                         gameResource.Folder = _fileNameBuilder.GetGameFolder(new Game { GameMetadata = game, PlatformId = collection.PlatformId }, namingConfig);
 
-                        var isExisting = IsExisting(existingGames, game.IgdbId, collection.PlatformId);
+                        gameResource.LibraryPlatformIds = existingGames.GetValueOrDefault(game.IgdbId, new List<int>());
+
+                        var isExisting = gameResource.LibraryPlatformIds.Any();
                         gameResource.IsExisting = isExisting;
 
                         var isExcluded = listExclusions.Any(e => e.Matches(game.IgdbId, collection.PlatformId));
@@ -208,14 +210,6 @@ namespace Gamarr.Api.V3.Collections
             }
         }
 
-        // Without a collection platform, a game in the library on any platform counts as existing
-        private static bool IsExisting(HashSet<(int IgdbId, int PlatformId)> existingGames, int igdbId, int platformId)
-        {
-            return platformId > 0
-                ? existingGames.Contains((igdbId, platformId))
-                : existingGames.Any(g => g.IgdbId == igdbId);
-        }
-
         private CollectionResource MapToResource(GameCollection collection)
         {
             var resource = collection.ToResource();
@@ -223,7 +217,7 @@ namespace Gamarr.Api.V3.Collections
             var namingConfig = _namingService.GetConfig();
             var configLanguage = (Language)_configService.GameInfoLanguage;
 
-            var existingGames = _gameService.AllGameIgdbIdsWithPlatform();
+            var existingGames = _gameService.AllGamePlatformsByIgdbId();
             var listExclusions = _importListExclusionService.All();
 
             foreach (var game in _gameMetadataService.GetGamesByCollectionIgdbId(collection.IgdbId))
@@ -234,7 +228,9 @@ namespace Gamarr.Api.V3.Collections
                 var gameResource = game.ToResource(translation);
                 gameResource.Folder = _fileNameBuilder.GetGameFolder(new Game { GameMetadata = game, PlatformId = collection.PlatformId }, namingConfig);
 
-                var isExisting = IsExisting(existingGames, game.IgdbId, collection.PlatformId);
+                gameResource.LibraryPlatformIds = existingGames.GetValueOrDefault(game.IgdbId, new List<int>());
+
+                var isExisting = gameResource.LibraryPlatformIds.Any();
                 gameResource.IsExisting = isExisting;
 
                 var isExcluded = listExclusions.Any(e => e.Matches(game.IgdbId, collection.PlatformId));
