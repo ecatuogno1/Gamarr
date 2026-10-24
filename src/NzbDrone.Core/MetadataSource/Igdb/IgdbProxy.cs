@@ -202,13 +202,7 @@ namespace NzbDrone.Core.MetadataSource.Igdb
                     .Select(MapSearchResult)
                     .ToList();
 
-                if (year.HasValue)
-                {
-                    // Prefer matches from the requested year, but keep the rest in case the year is wrong
-                    results = results.OrderByDescending(g => g.Year == year.Value).ToList();
-                }
-
-                return results;
+                return RankSearchResults(results, term, year);
             }
             catch (IgdbException)
             {
@@ -229,6 +223,38 @@ namespace NzbDrone.Core.MetadataSource.Igdb
                 _logger.Warn(ex);
                 throw new IgdbException("Search for '{0}' failed. Invalid response received from IGDB. {1}", ex, title, ex.Message);
             }
+        }
+
+        // IGDB's relevance puts hacks and spin-offs containing the term ("Super Metroid Arcade") ahead of the game itself.
+        // Exact title matches come first, then titles starting with the term, the most rated first within each, and the
+        // rest keep IGDB's order. A year in the search term ("Title (1994)") still wins, in case of remakes.
+        public static List<Game> RankSearchResults(List<Game> results, string term, int? year = null)
+        {
+            var cleanTerm = term.CleanGameTitle();
+
+            int MatchRank(GameMetadata metadata)
+            {
+                var titles = new[] { metadata.CleanTitle ?? metadata.Title.CleanGameTitle() }
+                    .Concat(metadata.AlternativeTitles?.Select(t => t.CleanTitle) ?? Enumerable.Empty<string>())
+                    .Where(t => t.IsNotNullOrWhiteSpace())
+                    .ToList();
+
+                if (titles.Contains(cleanTerm))
+                {
+                    return 0;
+                }
+
+                return titles.Any(t => t.StartsWith(cleanTerm)) ? 1 : 2;
+            }
+
+            return results
+                .Select((game, index) => new { Game = game, Index = index, Rank = MatchRank(game.GameMetadata.Value) })
+                .OrderByDescending(r => year.HasValue && r.Game.Year == year.Value)
+                .ThenBy(r => r.Rank)
+                .ThenByDescending(r => r.Rank < 2 ? r.Game.GameMetadata.Value.Popularity : 0)
+                .ThenBy(r => r.Index)
+                .Select(r => r.Game)
+                .ToList();
         }
 
         public GameMetadata MapGameToIgdbGame(GameMetadata game)

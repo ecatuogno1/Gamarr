@@ -76,10 +76,10 @@ namespace Gamarr.Api.V3.Games
             var igdbPlatformId = platformId.HasValue ? _platformService.Find(platformId.Value)?.IgdbPlatformId ?? 0 : 0;
             var searchResults = _searchProxy.SearchForNewGame(term, igdbPlatformId);
 
-            return TypedResults.Ok(MapToResource(searchResults));
+            return TypedResults.Ok(MapToResource(searchResults, platformId ?? 0));
         }
 
-        private IEnumerable<GameResource> MapToResource(IEnumerable<Game> games)
+        private IEnumerable<GameResource> MapToResource(IEnumerable<Game> games, int requestedPlatformId = 0)
         {
             var gameInfoLanguage = (Language)_configService.GameInfoLanguage;
             var availDelay = _configService.AvailabilityDelay;
@@ -95,11 +95,16 @@ namespace Gamarr.Api.V3.Games
                     .Where(p => p.Enabled)
                     .ToList();
 
-                // Default to the first platform IGDB lists, the folder preview uses it
-                if (currentGame.PlatformId == 0 && availablePlatforms.Any())
+                // Default to the searched platform, else the original release platform, the folder preview uses it
+                if (currentGame.PlatformId == 0)
                 {
-                    currentGame.PlatformId = availablePlatforms.First().Id;
-                    currentGame.Platform = availablePlatforms.First();
+                    var platform = DefaultPlatformSelector.Select(availablePlatforms, currentGame.GameMetadata.Value, requestedPlatformId);
+
+                    if (platform != null)
+                    {
+                        currentGame.PlatformId = platform.Id;
+                        currentGame.Platform = platform;
+                    }
                 }
 
                 var translation = currentGame.GameMetadata.Value.Translations.FirstOrDefault(t => t.Language == gameInfoLanguage);
