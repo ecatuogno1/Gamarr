@@ -135,22 +135,6 @@ namespace NzbDrone.Core.Indexers.Newznab
 
                     capabilities.TextSearchEngine = xmlBasicSearch.Attribute("searchEngine")?.Value ?? capabilities.TextSearchEngine;
                 }
-
-                var xmlGameSearch = xmlSearching.Element("game-search");
-                if (xmlGameSearch == null || xmlGameSearch.Attribute("available").Value != "yes")
-                {
-                    capabilities.SupportedGameSearchParameters = null;
-                }
-                else
-                {
-                    if (xmlGameSearch.Attribute("supportedParams") != null)
-                    {
-                        capabilities.SupportedGameSearchParameters = xmlGameSearch.Attribute("supportedParams").Value.Split(',');
-                        capabilities.SupportsAggregateIdSearch = true;
-                    }
-
-                    capabilities.GameTextSearchEngine = xmlGameSearch.Attribute("searchEngine")?.Value ?? capabilities.GameTextSearchEngine;
-                }
             }
 
             var xmlCategories = xmlRoot.Element("categories");

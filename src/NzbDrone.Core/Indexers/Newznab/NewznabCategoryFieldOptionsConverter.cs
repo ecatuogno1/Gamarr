@@ -8,34 +8,16 @@ namespace NzbDrone.Core.Indexers.Newznab
     {
         public static List<FieldSelectOption<int>> GetFieldSelectOptions(List<NewznabCategory> categories)
         {
-            // Categories not relevant for Gamarr
-            var ignoreCategories = new[] { 1000, 3000, 4000, 6000, 7000 };
+            // Categories not relevant for Gamarr (Movies, Audio, TV, XXX, Books)
+            var ignoreCategories = new[] { 2000, 3000, 5000, 6000, 7000 };
 
             // And maybe relevant for specific users
-            var unimportantCategories = new[] { 0, 5000 };
+            var unimportantCategories = new[] { 0, 8000 };
 
             var result = new List<FieldSelectOption<int>>();
 
-            if (categories == null)
-            {
-                // Fetching categories failed, use default Newznab categories
-                categories = new List<NewznabCategory>();
-                categories.Add(new NewznabCategory
-                {
-                    Id = 2000,
-                    Name = "Games",
-                    Subcategories = new List<NewznabCategory>
-                    {
-                        new NewznabCategory { Id = 2010, Name = "Foreign" },
-                        new NewznabCategory { Id = 2020, Name = "Other" },
-                        new NewznabCategory { Id = 2030, Name = "SD" },
-                        new NewznabCategory { Id = 2040, Name = "HD" },
-                        new NewznabCategory { Id = 2045, Name = "UHD" },
-                        new NewznabCategory { Id = 2050, Name = "BluRay" },
-                        new NewznabCategory { Id = 2060, Name = "3D" }
-                    }
-                });
-            }
+            // Fetching categories failed, use the default Newznab game categories
+            categories ??= NewznabStandardCategory.GetDefaultCategoryTree();
 
             foreach (var category in categories.Where(cat => !ignoreCategories.Contains(cat.Id)).OrderBy(cat => unimportantCategories.Contains(cat.Id)).ThenBy(cat => cat.Id))
             {

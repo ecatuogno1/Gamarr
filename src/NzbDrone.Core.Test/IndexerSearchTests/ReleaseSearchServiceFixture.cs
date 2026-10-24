@@ -7,15 +7,17 @@ using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.AlternativeTitles;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.IndexerSearchTests
 {
-        public class ReleaseSearchServiceFixture : CoreTest<ReleaseSearchService>
+    public class ReleaseSearchServiceFixture : CoreTest<ReleaseSearchService>
     {
         private Mock<IIndexer> _mockIndexer;
         private Game _game;
@@ -155,6 +157,73 @@ namespace NzbDrone.Core.Test.IndexerSearchTests
             var criteria = allCriteria.OfType<GameSearchCriteria>().ToList();
 
             criteria.Count.Should().Be(0);
+        }
+
+        private void GivenGameMetadata(params string[] alternativeTitles)
+        {
+            _game.GameMetadata = new GameMetadata
+            {
+                Title = "Super Metroid",
+                AlternativeTitles = alternativeTitles.Select(t => new AlternativeTitle(t)).ToList()
+            };
+        }
+
+        [Test]
+        public async Task should_include_game_platform_in_criteria()
+        {
+            var platform = new Platform { Id = 5, ShortName = "SNES", NewznabCategories = new List<int> { 1000 } };
+            _game.Platform = platform;
+            _game.PlatformId = 5;
+
+            var allCriteria = WatchForSearchCriteria();
+
+            await Subject.GameSearch(_game, true, false);
+
+            allCriteria.OfType<GameSearchCriteria>().Single().Platform.Should().Be(platform);
+        }
+
+        [Test]
+        public async Task should_load_platform_if_not_set_on_game()
+        {
+            var platform = new Platform { Id = 5, ShortName = "SNES", NewznabCategories = new List<int> { 1000 } };
+            _game.Platform = null;
+            _game.PlatformId = 5;
+
+            Mocker.GetMock<IPlatformService>()
+                .Setup(s => s.Find(5))
+                .Returns(platform);
+
+            var allCriteria = WatchForSearchCriteria();
+
+            await Subject.GameSearch(_game, true, false);
+
+            allCriteria.OfType<GameSearchCriteria>().Single().Platform.Should().Be(platform);
+        }
+
+        [Test]
+        public async Task should_search_latin_alternative_titles()
+        {
+            GivenGameMetadata("Metroid 3", "\u30b9\u30fc\u30d1\u30fc\u30e1\u30c8\u30ed\u30a4\u30c9", "SM", "Pok\u00e9mon Metroid");
+
+            var allCriteria = WatchForSearchCriteria();
+
+            await Subject.GameSearch(_game, true, false);
+
+            var criteria = allCriteria.OfType<GameSearchCriteria>().Single();
+
+            criteria.SceneTitles.Should().BeEquivalentTo(new[] { "Super Metroid", "Metroid 3", "Pok\u00e9mon Metroid" });
+        }
+
+        [Test]
+        public async Task should_limit_alternative_titles()
+        {
+            GivenGameMetadata(Enumerable.Range(1, 10).Select(i => $"Alternative Title {i}").ToArray());
+
+            var allCriteria = WatchForSearchCriteria();
+
+            await Subject.GameSearch(_game, true, false);
+
+            allCriteria.OfType<GameSearchCriteria>().Single().SceneTitles.Should().HaveCount(6);
         }
     }
 }

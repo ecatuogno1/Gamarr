@@ -33,38 +33,6 @@ namespace NzbDrone.Core.Indexers.Newznab
             }
         }
 
-        private bool SupportsImdbSearch
-        {
-            get
-            {
-                var capabilities = _capabilitiesProvider.GetCapabilities(Settings);
-
-                return capabilities.SupportedGameSearchParameters != null &&
-                       capabilities.SupportedGameSearchParameters.Contains("imdbid");
-            }
-        }
-
-        private bool SupportsIgdbSearch
-        {
-            get
-            {
-                var capabilities = _capabilitiesProvider.GetCapabilities(Settings);
-
-                return capabilities.SupportedGameSearchParameters != null &&
-                       capabilities.SupportedGameSearchParameters.Contains("igdbid");
-            }
-        }
-
-        private bool SupportsAggregatedIdSearch
-        {
-            get
-            {
-                var capabilities = _capabilitiesProvider.GetCapabilities(Settings);
-
-                return capabilities.SupportsAggregateIdSearch;
-            }
-        }
-
         private string TextSearchEngine
         {
             get
@@ -75,31 +43,12 @@ namespace NzbDrone.Core.Indexers.Newznab
             }
         }
 
-        private string GameTextSearchEngine
-        {
-            get
-            {
-                var capabilities = _capabilitiesProvider.GetCapabilities(Settings);
-
-                return capabilities.GameTextSearchEngine;
-            }
-        }
-
         public virtual IndexerPageableRequestChain GetRecentRequests()
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
-            var capabilities = _capabilitiesProvider.GetCapabilities(Settings);
-
-            // Some indexers might forget to enable game search, but normal search still works fine. Thus we force a normal search.
-            if (capabilities.SupportedGameSearchParameters != null)
-            {
-                pageableRequests.Add(GetPagedRequests(MaxPages, Settings.Categories, "game", ""));
-            }
-            else if (capabilities.SupportedSearchParameters != null)
-            {
-                pageableRequests.Add(GetPagedRequests(MaxPages, Settings.Categories, "search", ""));
-            }
+            // Gamarr only uses t=search, the RSS feed is a search without a query
+            pageableRequests.Add(GetPagedRequests(MaxPages, Settings.Categories, "search", ""));
 
             return pageableRequests;
         }
@@ -108,44 +57,41 @@ namespace NzbDrone.Core.Indexers.Newznab
         {
             var pageableRequests = new IndexerPageableRequestChain();
 
-            AddGameIdPageableRequests(pageableRequests, MaxPages, Settings.Categories, searchCriteria);
-
-            return pageableRequests;
-        }
-
-        private void AddGameIdPageableRequests(IndexerPageableRequestChain chain, int maxPages, IEnumerable<int> categories, SearchCriteriaBase searchCriteria)
-        {
-            // Games have no IMDb id, stage 4 replaces id searches with title + platform category searches
-            var includeIgdbSearch = SupportsIgdbSearch && searchCriteria.Game.GameMetadata.Value.IgdbId > 0;
-
-            if (includeIgdbSearch)
+            if (!SupportsSearch)
             {
-                chain.Add(GetPagedRequests(maxPages,
-                    categories,
-                    "game",
-                    $"&igdbid={searchCriteria.Game.GameMetadata.Value.IgdbId}"));
+                return pageableRequests;
             }
 
-            if (SupportsSearch && searchCriteria.Game.Year > 0)
+            // Newznab has no game id parameters, so games are searched by title, restricted to the platform's categories
+            var categories = NewznabStandardCategory.GetSearchCategories(Settings.Categories, searchCriteria.Platform?.NewznabCategories);
+            var raw = TextSearchEngine == "raw";
+            var queryTitles = raw ? searchCriteria.SceneTitles : searchCriteria.CleanSceneTitles;
+
+            foreach (var queryTitle in queryTitles)
             {
-                chain.AddTier();
-                var queryTitles = TextSearchEngine == "raw" ? searchCriteria.SceneTitles : searchCriteria.CleanSceneTitles;
+                pageableRequests.Add(GetPagedRequests(MaxPages,
+                    categories,
+                    "search",
+                    $"&q={NewsnabifyTitle(queryTitle)}"));
+            }
 
-                foreach (var queryTitle in queryTitles)
+            // Fall back to title + platform (e.g. "Super Metroid SNES") if the title alone found nothing
+            var platformQueryTitles = searchCriteria.GetPlatformQueryTitles(queryTitles, !raw);
+
+            if (platformQueryTitles.Any())
+            {
+                pageableRequests.AddTier();
+
+                foreach (var queryTitle in platformQueryTitles)
                 {
-                    var searchQuery = queryTitle;
-
-                    if (!Settings.RemoveYear)
-                    {
-                        searchQuery += $" {searchCriteria.Game.Year}";
-                    }
-
-                    chain.Add(GetPagedRequests(MaxPages,
-                        Settings.Categories,
+                    pageableRequests.Add(GetPagedRequests(MaxPages,
+                        categories,
                         "search",
-                        $"&q={NewsnabifyTitle(searchQuery)}"));
+                        $"&q={NewsnabifyTitle(queryTitle)}"));
                 }
             }
+
+            return pageableRequests;
         }
 
         private IEnumerable<IndexerRequest> GetPagedRequests(int maxPages, IEnumerable<int> categories, string searchType, string parameters)

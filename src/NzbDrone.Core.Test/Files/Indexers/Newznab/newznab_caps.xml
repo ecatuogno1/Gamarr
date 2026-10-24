@@ -3,27 +3,34 @@
   <limits max="60" default="25"/>
   <registration available="yes" open="no"/>
   <searching>
-    <search available="yes"/>
+    <search available="yes" supportedParams="q"/>
     <tv-search available="yes"/>
-    <game-search available="yes"/>
+    <movie-search available="yes" supportedParams="q,imdbid"/>
     <audio-search available="yes"/>
   </searching>
   <categories>
+    <category id="1000" name="Console">
+      <subcat id="1010" name="NDS"/>
+      <subcat id="1020" name="PSP"/>
+      <subcat id="1030" name="Wii"/>
+      <subcat id="1040" name="XBox"/>
+      <subcat id="1050" name="XBox 360"/>
+      <subcat id="1080" name="PS3"/>
+      <subcat id="1110" name="3DS"/>
+      <subcat id="1180" name="PS4"/>
+    </category>
+    <category id="2000" name="Movies">
+      <subcat id="2040" name="HD"/>
+    </category>
+    <category id="4000" name="PC">
+      <subcat id="4020" name="ISO"/>
+      <subcat id="4050" name="Games"/>
+    </category>
     <category id="5000" name="TV">
-      <subcat id="5070" name="Anime"/>
-      <subcat id="5080" name="Documentary"/>
-      <subcat id="5020" name="Foreign"/>
-      <subcat id="5040" name="HD"/>
-      <subcat id="5050" name="Other"/>
       <subcat id="5030" name="SD"/>
-      <subcat id="5060" name="Sport"/>
-      <subcat id="5010" name="WEB-DL"/>
     </category>
     <category id="7000" name="Other">
       <subcat id="7010" name="Misc"/>
-    </category>
-    <category id="8000" name="Books">
-      <subcat id="8020" name="Comics"/>
     </category>
   </categories>
   <groups></groups>

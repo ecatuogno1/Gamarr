@@ -56,7 +56,7 @@ namespace NzbDrone.Core.Indexers.Newznab
         public NewznabSettings()
         {
             ApiPath = "/api";
-            Categories = new[] { 2000, 2010, 2020, 2030, 2040, 2045, 2050, 2060 };
+            Categories = NewznabStandardCategory.DefaultGameCategories;
             MultiLanguages = Array.Empty<int>();
             FailDownloads = Array.Empty<int>();
         }
@@ -83,9 +83,7 @@ namespace NzbDrone.Core.Indexers.Newznab
         [FieldDefinition(6, Type = FieldType.Select, SelectOptions = typeof(FailDownloads), Label = "IndexerSettingsFailDownloads", HelpText = "IndexerSettingsFailDownloadsHelpText", Advanced = true)]
         public IEnumerable<int> FailDownloads { get; set; }
 
-        [FieldDefinition(7, Type = FieldType.Checkbox, Label = "IndexerSettingsRemoveYear", HelpText = "IndexerSettingsRemoveYearHelpText", Advanced = true)]
-        public bool RemoveYear { get; set; }
-
+        // Field 7 was Radarr's RemoveYear, Gamarr doesn't add the year to searches
         // Field 8 is used by TorznabSettings MinimumSeeders
         // If you need to add another field here, update TorznabSettings as well and this comment
         public virtual NzbDroneValidationResult Validate()

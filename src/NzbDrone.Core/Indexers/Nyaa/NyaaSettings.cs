@@ -28,7 +28,9 @@ namespace NzbDrone.Core.Indexers.Nyaa
         public NyaaSettings()
         {
             BaseUrl = "";
-            AdditionalParameters = "&cats=1_0&filter=1";
+
+            // 6_2 is "Software - Games" on nyaa.si
+            AdditionalParameters = "&cats=6_2&filter=0";
             MinimumSeeders = IndexerDefaults.MINIMUM_SEEDERS;
             MultiLanguages = Array.Empty<int>();
             FailDownloads = Array.Empty<int>();
