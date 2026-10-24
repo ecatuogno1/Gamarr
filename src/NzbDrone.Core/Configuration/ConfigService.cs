@@ -327,13 +327,6 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("CalendarWeekColumnHeader", value); }
         }
 
-        public GameRuntimeFormatType GameRuntimeFormat
-        {
-            get { return GetValueEnum("GameRuntimeFormat", GameRuntimeFormatType.HoursMinutes); }
-
-            set { SetValue("GameRuntimeFormat", value); }
-        }
-
         public string ShortDateFormat
         {
             get { return GetValue("ShortDateFormat", "MMM D YYYY"); }

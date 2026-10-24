@@ -78,15 +78,15 @@ function getInfoRowProps(row, props) {
     return {
       title: translate('IgdbRating'),
       iconName: icons.HEART,
-      label: `${(props.ratings.igdb.value * 10).toFixed()}%`
+      label: `${props.ratings.igdb.value.toFixed()}%`
     };
   }
 
   if (name === 'criticRating' && !!props.ratings.critic) {
     return {
       title: translate('CriticRating'),
-      iconName: icons.IMDB,
-      label: `${(props.ratings.critic.value).toFixed(1)}`
+      iconName: icons.HEART_OUTLINE,
+      label: `${props.ratings.critic.value.toFixed()}%`
     };
   }
 

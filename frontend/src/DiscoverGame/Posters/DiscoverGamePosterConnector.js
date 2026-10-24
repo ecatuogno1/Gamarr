@@ -5,11 +5,9 @@ import DiscoverGamePoster from './DiscoverGamePoster';
 
 function createMapStateToProps() {
   return createSelector(
-    (state) => state.settings.ui.item.gameRuntimeFormat,
     createDimensionsSelector(),
-    (gameRuntimeFormat, dimensions) => {
+    (dimensions) => {
       return {
-        gameRuntimeFormat,
         isSmallScreen: dimensions.isSmallScreen
       };
     }

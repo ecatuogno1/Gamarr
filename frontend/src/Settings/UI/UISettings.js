@@ -56,11 +56,6 @@ export const timeFormatOptions = [
   { key: 'HH:mm', value: '17:00/17:30' }
 ];
 
-export const gameRuntimeFormatOptions = [
-  { key: 'hoursMinutes', value: '1h 15m' },
-  { key: 'minutes', value: '75 mins' }
-];
-
 class UISettings extends Component {
 
   //
@@ -134,20 +129,6 @@ class UISettings extends Component {
                       onChange={onInputChange}
                       helpText={translate('WeekColumnHeaderHelpText')}
                       {...settings.calendarWeekColumnHeader}
-                    />
-                  </FormGroup>
-                </FieldSet>
-
-                <FieldSet legend={translate('Games')}>
-                  <FormGroup>
-                    <FormLabel>{translate('RuntimeFormat')}</FormLabel>
-
-                    <FormInputGroup
-                      type={inputTypes.SELECT}
-                      name="gameRuntimeFormat"
-                      values={gameRuntimeFormatOptions}
-                      onChange={onInputChange}
-                      {...settings.gameRuntimeFormat}
                     />
                   </FormGroup>
                 </FieldSet>

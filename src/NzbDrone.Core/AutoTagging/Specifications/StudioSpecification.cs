@@ -21,7 +21,7 @@ namespace NzbDrone.Core.AutoTagging.Specifications
         private static readonly StudioSpecificationValidator Validator = new();
 
         public override int Order => 1;
-        public override string ImplementationName => "Studio";
+        public override string ImplementationName => "Company";
 
         [FieldDefinition(1, Label = "AutoTaggingSpecificationStudio", Type = FieldType.Tag)]
         public IEnumerable<string> Value { get; set; }

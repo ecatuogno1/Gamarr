@@ -65,7 +65,6 @@ namespace NzbDrone.Core.Configuration
         // UI
         int FirstDayOfWeek { get; set; }
         string CalendarWeekColumnHeader { get; set; }
-        GameRuntimeFormatType GameRuntimeFormat { get; set; }
 
         string ShortDateFormat { get; set; }
         string LongDateFormat { get; set; }

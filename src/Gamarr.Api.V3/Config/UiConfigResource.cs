@@ -9,9 +9,6 @@ namespace Gamarr.Api.V3.Config
         public int FirstDayOfWeek { get; set; }
         public string CalendarWeekColumnHeader { get; set; }
 
-        // Games
-        public GameRuntimeFormatType GameRuntimeFormat { get; set; }
-
         // Dates
         public string ShortDateFormat { get; set; }
         public string LongDateFormat { get; set; }
@@ -32,8 +29,6 @@ namespace Gamarr.Api.V3.Config
             {
                 FirstDayOfWeek = model.FirstDayOfWeek,
                 CalendarWeekColumnHeader = model.CalendarWeekColumnHeader,
-
-                GameRuntimeFormat = model.GameRuntimeFormat,
 
                 ShortDateFormat = model.ShortDateFormat,
                 LongDateFormat = model.LongDateFormat,
