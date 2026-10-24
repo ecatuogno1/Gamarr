@@ -73,11 +73,11 @@
 
 .platformRow {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
   margin-bottom: 10px;
   padding-left: 7px;
+  gap: 8px;
 }
 
 .addPlatformButton {
@@ -100,6 +100,7 @@
 .filesScope {
   display: flex;
   gap: 5px;
+
   margin-bottom: 10px;
 }
 
