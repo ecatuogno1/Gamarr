@@ -63,7 +63,7 @@ function Parse() {
             className={styles.input}
             name="title"
             value={title}
-            placeholder="eg. Game.Title.2020.720p.HDTV-RlsGroup"
+            placeholder="eg. Game.Title.Deluxe.Edition.NSW-RlsGroup"
             autoFocus={true}
             onChange={onInputChange}
           />

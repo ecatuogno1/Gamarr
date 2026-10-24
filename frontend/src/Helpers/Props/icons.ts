@@ -1,6 +1,5 @@
 //
 // Brands
-import { faImdb as fabImdb } from '@fortawesome/free-brands-svg-icons';
 //
 // Regular
 import {
@@ -66,7 +65,6 @@ import {
   faFileCircleQuestion as fasFileCircleQuestion,
   faFileExport as fasFileExport,
   faFileInvoice as farFileInvoice,
-  faFilm as fasFilm,
   faFilter as fasFilter,
   faFire as fasFire,
   faFlag as fasFlag,
@@ -111,7 +109,6 @@ import {
   faTheaterMasks as fasTheaterMasks,
   faThList as fasThList,
   faThumbsUp as fasThumbsUp,
-  faTicketAlt as fasTicketAlt,
   faTimes as fasTimes,
   faTimesCircle as fasTimesCircle,
   faTrashAlt as fasTrashAlt,
@@ -167,7 +164,6 @@ export const EXTERNAL_LINK = fasExternalLinkAlt;
 export const FATAL = fasTimesCircle;
 export const FILE = farFile;
 export const FILE_MISSING = fasFileCircleQuestion;
-export const FILM = fasFilm;
 export const FILTER = fasFilter;
 export const FLAG = fasFlag;
 export const FOOTNOTE = fasAsterisk;
@@ -181,8 +177,6 @@ export const HEART_OUTLINE = farHeart;
 export const HISTORY = fasHistory;
 export const HOUSEKEEPING = fasHome;
 export const IGNORE = fasTimesCircle;
-export const IMDB = fabImdb;
-export const IN_CINEMAS = fasTicketAlt;
 export const INFO = fasInfoCircle;
 export const INTERACTIVE = fasUser;
 export const KEYBOARD = farKeyboard;

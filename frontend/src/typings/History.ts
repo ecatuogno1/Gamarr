@@ -25,7 +25,6 @@ export interface GrabbedHistoryData {
   downloadUrl: string;
   guid: string;
   igdbId: string;
-  imdbId: string;
   protocol: string;
   customFormatScore?: string;
   gameMatchType: string;

@@ -26,7 +26,6 @@
     "ImportList": "افزودن لیست واردات",
     "ImportListExclusions": "افزودن لیست واردات مستثنی",
     "ImportLists": "افزودن لیست واردات",
-    "MinutesSixty": "۶۰ دقیقه: {0}",
     "AddDownloadClientError": "افزودن شرط جدید ناموفق بود، لطفا مجددا تلاش کنید.",
     "AddImportListExclusionError": "افزودن شرط جدید ناموفق بود، لطفا مجددا تلاش کنید.",
     "AddIndexerError": "افزودن شرط جدید ناموفق بود، لطفا مجددا تلاش کنید.",
@@ -57,7 +56,6 @@
     "EditConditionImplementation": "افزودن پیوند - {implementationName}",
     "EditConnectionImplementation": "افزودن شرط - {implementationName}",
     "DeleteImportListExclusion": "افزودن لیست واردات مستثنی",
-    "MinutesNinety": "۶۰ دقیقه: {0}",
     "EditCollection": "افزودن پیوند",
     "DeleteReleaseProfile": "افزودن نمایه تاخیر",
     "DeleteDelayProfile": "افزودن نمایه تاخیر"

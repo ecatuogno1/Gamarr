@@ -108,8 +108,8 @@ class ImportGameSelectFolder extends Component {
                 <div className={styles.tips}>
                   {translate('ImportTipsMessage')}
                   <ul>
-                    <li className={styles.tip} dangerouslySetInnerHTML={{ __html: translate('ImportIncludeQuality', ['<code>game.2008.bluray.mkv</code>']) }} />
-                    <li className={styles.tip} dangerouslySetInnerHTML={{ __html: translate('ImportRootPath', [`<code>${isWindows ? 'C:\\games' : '/games'}</code>`, `<code>${isWindows ? 'C:\\games\\the matrix' : '/games/the matrix'}</code>`]) }} />
+                    <li className={styles.tip} dangerouslySetInnerHTML={{ __html: translate('ImportIncludeQuality', ['<code>Super Mario World (USA) (Rev 1).sfc</code>']) }} />
+                    <li className={styles.tip} dangerouslySetInnerHTML={{ __html: translate('ImportRootPath', [`<code>${isWindows ? 'C:\\games' : '/games'}</code>`, `<code>${isWindows ? 'C:\\games\\snes\\Super Mario World (1990)' : '/games/snes/Super Mario World (1990)'}</code>`]) }} />
                     <li className={styles.tip}>{translate('ImportNotForDownloads')}</li>
                   </ul>
                 </div>
