@@ -65,6 +65,27 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
             releaseInfo.Size.Should().Be(1183105773);
         }
 
+        [Test]
+        public async Task should_parse_game_feed_with_categories()
+        {
+            var recentFeed = ReadAllText(@"Files/Indexers/Newznab/newznab_games.xml");
+
+            Mocker.GetMock<IHttpClient>()
+                .Setup(o => o.ExecuteAsync(It.Is<HttpRequest>(v => v.Method == HttpMethod.Get)))
+                .Returns<HttpRequest>(r => Task.FromResult(new HttpResponse(r, new HttpHeader(), recentFeed)));
+
+            var releases = await Subject.FetchRecent();
+
+            releases.Should().HaveCount(2);
+
+            releases[0].Title.Should().Be("Mario.Kart.Wii.PAL.WII-ZRY");
+            releases[0].Categories.Should().BeEquivalentTo(new[] { 1000, 1030 });
+            releases[0].Size.Should().Be(4699979776);
+
+            releases[1].Title.Should().Be("Hades.v1.38290-GOG");
+            releases[1].Categories.Should().BeEquivalentTo(new[] { 4000, 4050 });
+        }
+
         public void should_use_best_pagesize_reported_by_caps()
         {
             _caps.MaxPageSize = 30;

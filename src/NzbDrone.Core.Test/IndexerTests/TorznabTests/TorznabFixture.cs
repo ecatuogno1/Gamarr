@@ -134,6 +134,38 @@ namespace NzbDrone.Core.Test.IndexerTests.TorznabTests
         }
 
         [Test]
+        public async Task should_parse_game_feed_with_categories()
+        {
+            var recentFeed = ReadAllText(@"Files/Indexers/Torznab/torznab_games.xml");
+
+            Mocker.GetMock<IHttpClient>()
+                .Setup(o => o.ExecuteAsync(It.Is<HttpRequest>(v => v.Method == HttpMethod.Get)))
+                .Returns<HttpRequest>(r => Task.FromResult(new HttpResponse(r, new HttpHeader(), recentFeed)));
+
+            var releases = await Subject.FetchRecent();
+
+            releases.Should().HaveCount(3);
+
+            var snes = releases[0] as TorrentInfo;
+            snes.Title.Should().Be("Super Metroid (USA, Europe) (En,Fr,De)");
+            snes.Categories.Should().BeEquivalentTo(new[] { 1000, 100045 });
+            snes.Seeders.Should().Be(25);
+
+            releases[1].Title.Should().Be("Demons.Souls.PS3-DUPLEX");
+            releases[1].Categories.Should().BeEquivalentTo(new[] { 1000, 1080 });
+
+            releases[2].Title.Should().Be("Doom Eternal [FitGirl Repack]");
+            releases[2].Categories.Should().BeEquivalentTo(new[] { 4000, 4050 });
+            releases[2].Size.Should().Be(42949672960);
+        }
+
+        [Test]
+        public void should_default_to_game_categories()
+        {
+            new TorznabSettings().Categories.Should().BeEquivalentTo(NewznabStandardCategory.DefaultGameCategories);
+        }
+
+        [Test]
         public void should_use_best_pagesize_reported_by_caps()
         {
             _caps.MaxPageSize = 30;

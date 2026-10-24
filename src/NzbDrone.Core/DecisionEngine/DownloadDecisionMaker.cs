@@ -76,7 +76,7 @@ namespace NzbDrone.Core.DecisionEngine
 
                     if (parsedGameInfo != null && !parsedGameInfo.PrimaryGameTitle.IsNullOrWhiteSpace())
                     {
-                        var remoteGame = _parsingService.Map(parsedGameInfo, report.ImdbId.ToString(), report.IgdbId, searchCriteria);
+                        var remoteGame = _parsingService.Map(parsedGameInfo, null, report.IgdbId, searchCriteria);
                         remoteGame.Release = report;
                         remoteGame.ReleaseSource = GetReleaseSource(pushedRelease, searchCriteria);
 

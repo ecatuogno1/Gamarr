@@ -14,8 +14,7 @@ namespace NzbDrone.Core.Indexers.FileList
         public uint TimesCompleted { get; set; }
         public uint Comments { get; set; }
         public uint Files { get; set; }
-        [JsonProperty(PropertyName = "imdb")]
-        public string ImdbId { get; set; }
+        public string Category { get; set; }
         public bool Internal { get; set; }
         [JsonProperty(PropertyName = "freeleech")]
         public bool FreeLeech { get; set; }

@@ -39,7 +39,7 @@ namespace Gamarr.Api.V3.Indexers
         public bool TemporarilyRejected { get; set; }
         public bool Rejected { get; set; }
         public int IgdbId { get; set; }
-        public int ImdbId { get; set; }
+        public List<int> Categories { get; set; }
         public IEnumerable<string> Rejections { get; set; }
         public DateTime PublishDate { get; set; }
         public string CommentUrl { get; set; }
@@ -106,7 +106,7 @@ namespace Gamarr.Api.V3.Indexers
                 TemporarilyRejected = model.TemporarilyRejected,
                 Rejected = model.Rejected,
                 IgdbId = releaseInfo.IgdbId,
-                ImdbId = releaseInfo.ImdbId,
+                Categories = releaseInfo.Categories,
                 Rejections = model.Rejections.Select(r => r.Message).ToList(),
                 PublishDate = releaseInfo.PublishDate,
                 CommentUrl = releaseInfo.CommentUrl,
@@ -160,7 +160,7 @@ namespace Gamarr.Api.V3.Indexers
             model.Indexer = resource.Indexer;
             model.DownloadProtocol = resource.Protocol;
             model.IgdbId = resource.IgdbId;
-            model.ImdbId = resource.ImdbId;
+            model.Categories = resource.Categories ?? new List<int>();
             model.PublishDate = resource.PublishDate.ToUniversalTime();
 
             return model;
