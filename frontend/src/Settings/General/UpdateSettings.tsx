@@ -65,7 +65,7 @@ function UpdateSettings({
               ? translate('BranchUpdateMechanism')
               : translate('BranchUpdate')
           }
-          helpLink="https://wiki.servarr.com/gamarr/settings#updates"
+          helpLink="https://github.com/ecatuogno1/Gamarr/wiki/settings#updates"
           {...branch}
           values={branchValues}
           readOnly={usingExternalUpdateMechanism}
@@ -103,7 +103,7 @@ function UpdateSettings({
             name="updateMechanism"
             values={updateOptions}
             helpText={translate('UpdateMechanismHelpText')}
-            helpLink="https://wiki.servarr.com/gamarr/settings#updates"
+            helpLink="https://github.com/ecatuogno1/Gamarr/wiki/settings#updates"
             onChange={onInputChange}
             {...updateMechanism}
           />

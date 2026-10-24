@@ -14,36 +14,24 @@ function MoreInfo() {
           {translate('HomePage')}
         </DescriptionListItemTitle>
         <DescriptionListItemDescription>
-          <Link to="https://gamarr.video/">gamarr.video</Link>
+          <Link to="https://github.com/ecatuogno1/Gamarr">
+            github.com/ecatuogno1/Gamarr
+          </Link>
         </DescriptionListItemDescription>
 
         <DescriptionListItemTitle>{translate('Wiki')}</DescriptionListItemTitle>
         <DescriptionListItemDescription>
-          <Link to="https://wiki.servarr.com/gamarr">
-            wiki.servarr.com/gamarr
+          <Link to="https://github.com/ecatuogno1/Gamarr/wiki">
+            github.com/ecatuogno1/Gamarr/wiki
           </Link>
-        </DescriptionListItemDescription>
-
-        <DescriptionListItemTitle>
-          {translate('Reddit')}
-        </DescriptionListItemTitle>
-        <DescriptionListItemDescription>
-          <Link to="https://www.reddit.com/r/Gamarr/">/r/Gamarr</Link>
-        </DescriptionListItemDescription>
-
-        <DescriptionListItemTitle>
-          {translate('Discord')}
-        </DescriptionListItemTitle>
-        <DescriptionListItemDescription>
-          <Link to="https://gamarr.video/discord">gamarr.video/discord</Link>
         </DescriptionListItemDescription>
 
         <DescriptionListItemTitle>
           {translate('Source')}
         </DescriptionListItemTitle>
         <DescriptionListItemDescription>
-          <Link to="https://github.com/Gamarr/Gamarr/">
-            github.com/Gamarr/Gamarr
+          <Link to="https://github.com/ecatuogno1/Gamarr/">
+            github.com/ecatuogno1/Gamarr
           </Link>
         </DescriptionListItemDescription>
 
@@ -51,8 +39,8 @@ function MoreInfo() {
           {translate('FeatureRequests')}
         </DescriptionListItemTitle>
         <DescriptionListItemDescription>
-          <Link to="https://github.com/Gamarr/Gamarr/issues">
-            github.com/Gamarr/Gamarr/issues
+          <Link to="https://github.com/ecatuogno1/Gamarr/issues">
+            github.com/ecatuogno1/Gamarr/issues
           </Link>
         </DescriptionListItemDescription>
       </DescriptionList>

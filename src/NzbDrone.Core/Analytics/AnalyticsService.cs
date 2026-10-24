@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.History;
@@ -24,7 +23,8 @@ namespace NzbDrone.Core.Analytics
             _historyService = historyService;
         }
 
-        public bool IsEnabled => (_configFileProvider.AnalyticsEnabled && RuntimeInfo.IsProduction) || RuntimeInfo.IsDevelopment;
+        // Gamarr: analytics/error reporting are disabled; nothing is ever sent to third-party services.
+        public bool IsEnabled => false;
 
         public bool InstallIsActive
         {

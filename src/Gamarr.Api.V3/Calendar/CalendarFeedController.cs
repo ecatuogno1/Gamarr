@@ -42,7 +42,7 @@ namespace Gamarr.Api.V3.Calendar
             var games = _gameService.GetGamesBetweenDates(start, end, unmonitored);
             var calendar = new Ical.Net.Calendar
             {
-                ProductId = "-//gamarr.video//Gamarr//EN"
+                ProductId = "-//Gamarr//Gamarr//EN"
             };
 
             var calendarName = "Gamarr Games Calendar";

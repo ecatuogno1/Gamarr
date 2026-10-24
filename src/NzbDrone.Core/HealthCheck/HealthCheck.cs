@@ -41,7 +41,7 @@ namespace NzbDrone.Core.HealthCheck
 
         private static HttpUri MakeWikiUrl(string fragment)
         {
-            return new HttpUri("https://wiki.servarr.com/gamarr/system#") + new HttpUri(fragment);
+            return new HttpUri("https://github.com/ecatuogno1/Gamarr/wiki/system#") + new HttpUri(fragment);
         }
     }
 
@@ -80,7 +80,6 @@ namespace NzbDrone.Core.HealthCheck
         IndexerSearchNoInteractive,
         IndexerStatusAllUnavailable,
         IndexerStatusUnavailable,
-        MetadataKometaDeprecated,
         MinimumApiKeyLength,
         MountGames,
         NamingConfigDeprecatedToken,
@@ -93,7 +92,6 @@ namespace NzbDrone.Core.HealthCheck
         ProxyBadRequest,
         ProxyFailed,
         ProxyResolveIp,
-        PTPOldSettings,
         RecycleBinUnableToWrite,
         ReleaseBranch,
         RemotePathMappingBadDockerPath,

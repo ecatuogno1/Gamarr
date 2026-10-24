@@ -37,10 +37,10 @@ namespace NzbDrone.Core.Notifications.Twitter
             AuthorizeNotification = "startOAuth";
         }
 
-        [FieldDefinition(0, Label = "NotificationsTwitterSettingsConsumerKey", Privacy = PrivacyLevel.ApiKey, HelpText = "NotificationsTwitterSettingsConsumerKeyHelpText", HelpLink = "https://wiki.servarr.com/useful-tools#twitter-connect")]
+        [FieldDefinition(0, Label = "NotificationsTwitterSettingsConsumerKey", Privacy = PrivacyLevel.ApiKey, HelpText = "NotificationsTwitterSettingsConsumerKeyHelpText", HelpLink = "https://github.com/ecatuogno1/Gamarr/wiki/useful-tools#twitter-connect")]
         public string ConsumerKey { get; set; }
 
-        [FieldDefinition(1, Label = "NotificationsTwitterSettingsConsumerSecret", Privacy = PrivacyLevel.ApiKey, HelpText = "NotificationsTwitterSettingsConsumerSecretHelpText", HelpLink = "https://wiki.servarr.com/useful-tools#twitter-connect")]
+        [FieldDefinition(1, Label = "NotificationsTwitterSettingsConsumerSecret", Privacy = PrivacyLevel.ApiKey, HelpText = "NotificationsTwitterSettingsConsumerSecretHelpText", HelpLink = "https://github.com/ecatuogno1/Gamarr/wiki/useful-tools#twitter-connect")]
         public string ConsumerSecret { get; set; }
 
         [FieldDefinition(2, Label = "NotificationsTwitterSettingsAccessToken", Privacy = PrivacyLevel.ApiKey, Advanced = true)]

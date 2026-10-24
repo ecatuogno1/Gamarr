@@ -214,7 +214,7 @@ function EditImportListModalContent({
                 type={inputTypes.AVAILABILITY_SELECT}
                 name="minimumAvailability"
                 {...minimumAvailability}
-                helpLink="https://wiki.servarr.com/gamarr/faq#what-is-minimum-availability"
+                helpLink="https://github.com/ecatuogno1/Gamarr/wiki/faq#what-is-minimum-availability"
                 onChange={handleInputChange}
               />
             </FormGroup>

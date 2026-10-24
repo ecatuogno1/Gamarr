@@ -134,7 +134,7 @@ class AddNewGame extends Component {
                 <Alert kind={kinds.DANGER}>{getErrorMessage(error)}</Alert>
 
                 <div>
-                  <Link to="https://wiki.servarr.com/gamarr/troubleshooting#invalid-response-received-from-igdb">
+                  <Link to="https://github.com/ecatuogno1/Gamarr/wiki/troubleshooting#invalid-response-received-from-igdb">
                     {translate('WhySearchesCouldBeFailing')}
                   </Link>
                 </div>
@@ -167,7 +167,7 @@ class AddNewGame extends Component {
                   {translate('YouCanAlsoSearch')}
                 </div>
                 <div>
-                  <Link to="https://wiki.servarr.com/gamarr/faq#why-can-i-not-add-a-new-game-to-gamarr">
+                  <Link to="https://github.com/ecatuogno1/Gamarr/wiki/faq#why-can-i-not-add-a-new-game-to-gamarr">
                     {translate('CantFindGame')}
                   </Link>
                 </div>

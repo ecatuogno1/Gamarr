@@ -184,7 +184,7 @@ namespace NzbDrone.Core.Configuration
             }
         }
 
-        public int Port => _serverOptions.Port ?? GetValueInt("Port", 7878);
+        public int Port => _serverOptions.Port ?? GetValueInt("Port", 7171);
 
         public int SslPort => _serverOptions.SslPort ?? GetValueInt("SslPort", 9898);
 
@@ -252,7 +252,7 @@ namespace NzbDrone.Core.Configuration
         public string OidcUserIdentifier => _authOptions.OidcUserIdentifier ?? GetValue("OidcUserIdentifier", string.Empty, persist: false);
         public string OidcScopes => _authOptions.OidcScopes ?? GetValue("OidcScopes", "openid profile email", persist: false);
 
-        public bool AnalyticsEnabled => _logOptions.AnalyticsEnabled ?? GetValueBoolean("AnalyticsEnabled", true, persist: false);
+        public bool AnalyticsEnabled => _logOptions.AnalyticsEnabled ?? GetValueBoolean("AnalyticsEnabled", false, persist: false);
 
         public string Branch => _updateOptions.Branch ?? GetValue("Branch", "master").ToLowerInvariant();
 
@@ -316,12 +316,12 @@ namespace NzbDrone.Core.Configuration
             }
         }
 
-        public bool UpdateAutomatically => _updateOptions.Automatically ?? GetValueBoolean("UpdateAutomatically", OsInfo.IsWindows, false);
+        public bool UpdateAutomatically => _updateOptions.Automatically ?? GetValueBoolean("UpdateAutomatically", false, false);
 
         public UpdateMechanism UpdateMechanism =>
             Enum.TryParse<UpdateMechanism>(_updateOptions.Mechanism, out var enumValue)
                 ? enumValue
-                : GetValueEnum("UpdateMechanism", UpdateMechanism.BuiltIn, false);
+                : GetValueEnum("UpdateMechanism", UpdateMechanism.External, false);
 
         public string UpdateScriptPath => _updateOptions.ScriptPath ?? GetValue("UpdateScriptPath", "", false);
 

@@ -48,7 +48,7 @@ function NotificationEventItems(props) {
       <div>
         <FormInputHelpText
           text={translate('NotificationTriggersHelpText')}
-          link="https://wiki.servarr.com/gamarr/settings#connections"
+          link="https://github.com/ecatuogno1/Gamarr/wiki/settings#connections"
         />
         <div className={styles.events}>
           <div>

@@ -141,7 +141,7 @@ class AddNewGameModalContent extends Component {
                     name="minimumAvailability"
                     onChange={onInputChange}
                     {...minimumAvailability}
-                    helpLink="https://wiki.servarr.com/gamarr/faq#what-is-minimum-availability"
+                    helpLink="https://github.com/ecatuogno1/Gamarr/wiki/faq#what-is-minimum-availability"
                   />
                 </FormGroup>
 

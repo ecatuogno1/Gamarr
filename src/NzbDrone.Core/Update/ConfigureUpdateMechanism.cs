@@ -38,7 +38,8 @@ namespace NzbDrone.Core.Update
 
             foreach (var externalMechanism in externalMechanisms)
             {
-                if ((packageUpdateMechanism != externalMechanism && updateMechanism == externalMechanism) ||
+                // Gamarr: External is the default (there is no update server), so don't switch it back to BuiltIn.
+                if ((packageUpdateMechanism != externalMechanism && updateMechanism == externalMechanism && packageUpdateMechanism >= UpdateMechanism.External) ||
                     (packageUpdateMechanism == externalMechanism && updateMechanism == UpdateMechanism.BuiltIn))
                 {
                     _logger.Info("Update mechanism {0} not supported in the current configuration, changing to {1}.", updateMechanism, packageUpdateMechanism);
