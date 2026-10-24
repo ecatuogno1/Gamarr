@@ -1,13 +1,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import CriticRating from 'Components/CriticRating';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
-import TraktRating from 'Components/TraktRating';
 import getGameStatusDetails from 'Game/getGameStatusDetails';
 import { icons } from 'Helpers/Props';
-import formatRuntime from 'Utilities/Date/formatRuntime';
 import getRelativeDate from 'Utilities/Date/getRelativeDate';
 import translate from 'Utilities/String/translate';
 import styles from './DiscoverGamePosterInfo.css';
@@ -15,22 +12,15 @@ import styles from './DiscoverGamePosterInfo.css';
 function DiscoverGamePosterInfo(props) {
   const {
     status,
-    studio,
-    inCinemas,
-    digitalRelease,
-    physicalRelease,
-    certification,
-    runtime,
+    developers,
+    releaseDate,
     ratings,
     sortKey,
     showRelativeDates,
     shortDateFormat,
     timeFormat,
-    gameRuntimeFormat,
     showIgdbRating,
-    showImdbRating,
-    showRottenTomatoesRating,
-    showTraktRating
+    showCriticRating
   } = props;
 
   if (sortKey === 'status' && status) {
@@ -41,17 +31,9 @@ function DiscoverGamePosterInfo(props) {
     );
   }
 
-  if (sortKey === 'studio' && studio) {
-    return (
-      <div className={styles.info} title={translate('Studio')}>
-        {studio}
-      </div>
-    );
-  }
-
-  if (sortKey === 'inCinemas' && inCinemas) {
-    const inCinemasDate = getRelativeDate({
-      date: inCinemas,
+  if (sortKey === 'releaseDate' && releaseDate) {
+    const releaseDateText = getRelativeDate({
+      date: releaseDate,
       shortDateFormat,
       showRelativeDates,
       timeFormat,
@@ -59,56 +41,16 @@ function DiscoverGamePosterInfo(props) {
     });
 
     return (
-      <div className={styles.info} title={translate('InCinemas')}>
-        <Icon name={icons.IN_CINEMAS} /> {inCinemasDate}
+      <div className={styles.info} title={translate('ReleaseDate')}>
+        <Icon name={icons.CALENDAR} /> {releaseDateText}
       </div>
     );
   }
 
-  if (sortKey === 'digitalRelease' && digitalRelease) {
-    const digitalReleaseDate = getRelativeDate({
-      date: digitalRelease,
-      shortDateFormat,
-      showRelativeDates,
-      timeFormat,
-      timeForToday: false
-    });
-
+  if (sortKey === 'developers' && developers && developers.length) {
     return (
-      <div className={styles.info} title={translate('DigitalRelease')}>
-        <Icon name={icons.GAME_FILE} /> {digitalReleaseDate}
-      </div>
-    );
-  }
-
-  if (sortKey === 'physicalRelease' && physicalRelease) {
-    const physicalReleaseDate = getRelativeDate({
-      date: physicalRelease,
-      shortDateFormat,
-      showRelativeDates,
-      timeFormat,
-      timeForToday: false
-    });
-
-    return (
-      <div className={styles.info} title={translate('PhysicalRelease')}>
-        <Icon name={icons.DISC} /> {physicalReleaseDate}
-      </div>
-    );
-  }
-
-  if (sortKey === 'certification' && certification) {
-    return (
-      <div className={styles.info} title={translate('Certification')}>
-        {certification}
-      </div>
-    );
-  }
-
-  if (sortKey === 'runtime' && runtime) {
-    return (
-      <div className={styles.info} title={translate('Runtime')}>
-        {formatRuntime(runtime, gameRuntimeFormat)}
+      <div className={styles.info} title={translate('Developers')}>
+        {developers.join(', ')}
       </div>
     );
   }
@@ -121,26 +63,10 @@ function DiscoverGamePosterInfo(props) {
     );
   }
 
-  if (!showImdbRating && sortKey === 'imdbRating' && !!ratings.imdb) {
+  if (!showCriticRating && sortKey === 'criticRating' && !!ratings.critic) {
     return (
       <div className={styles.info}>
-        <ImdbRating ratings={ratings} iconSize={12} />
-      </div>
-    );
-  }
-
-  if (!showRottenTomatoesRating && sortKey === 'rottenTomatoesRating' && !!ratings.rottenTomatoes) {
-    return (
-      <div className={styles.info}>
-        <RottenTomatoRating ratings={ratings} iconSize={12} />
-      </div>
-    );
-  }
-
-  if (!showTraktRating && sortKey === 'traktRating' && !!ratings.trakt) {
-    return (
-      <div className={styles.info}>
-        <TraktRating ratings={ratings} iconSize={12} />
+        <CriticRating ratings={ratings} iconSize={12} />
       </div>
     );
   }
@@ -150,22 +76,15 @@ function DiscoverGamePosterInfo(props) {
 
 DiscoverGamePosterInfo.propTypes = {
   status: PropTypes.string,
-  studio: PropTypes.string,
-  inCinemas: PropTypes.string,
-  certification: PropTypes.string,
-  digitalRelease: PropTypes.string,
-  physicalRelease: PropTypes.string,
-  runtime: PropTypes.number,
+  developers: PropTypes.arrayOf(PropTypes.string),
+  releaseDate: PropTypes.string,
   ratings: PropTypes.object.isRequired,
   sortKey: PropTypes.string.isRequired,
   showRelativeDates: PropTypes.bool.isRequired,
   shortDateFormat: PropTypes.string.isRequired,
   timeFormat: PropTypes.string.isRequired,
-  gameRuntimeFormat: PropTypes.string.isRequired,
   showIgdbRating: PropTypes.bool.isRequired,
-  showImdbRating: PropTypes.bool.isRequired,
-  showRottenTomatoesRating: PropTypes.bool.isRequired,
-  showTraktRating: PropTypes.bool.isRequired
+  showCriticRating: PropTypes.bool.isRequired
 };
 
 export default DiscoverGamePosterInfo;

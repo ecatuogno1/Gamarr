@@ -1,17 +1,15 @@
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { GAME_SEARCH, REFRESH_GAME } from 'Commands/commandNames';
+import CriticRating from 'Components/CriticRating';
 import GameTagList from 'Components/GameTagList';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
 import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
 import Popover from 'Components/Tooltip/Popover';
-import TraktRating from 'Components/TraktRating';
 import DeleteGameModal from 'Game/Delete/DeleteGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
 import EditGameModal from 'Game/Edit/EditGameModal';
@@ -49,14 +47,9 @@ function GameIndexPoster(props: GameIndexPosterProps) {
     showTitle,
     showMonitored,
     showQualityProfile,
-    showCinemaRelease,
-    showDigitalRelease,
-    showPhysicalRelease,
     showReleaseDate,
     showIgdbRating,
-    showImdbRating,
-    showRottenTomatoesRating,
-    showTraktRating,
+    showCriticRating,
     showTags,
     showSearchAction,
   } = useSelector(selectPosterOptions);
@@ -71,22 +64,18 @@ function GameIndexPoster(props: GameIndexPosterProps) {
     images,
     titleSlug,
     igdbId,
-    imdbId,
+    igdbSlug,
     youTubeTrailerId,
     hasFile,
     isAvailable,
-    studio,
+    platform,
     added,
     year,
-    inCinemas,
-    physicalRelease,
-    digitalRelease,
     releaseDate,
     path,
     gameFile,
     ratings,
     statistics = {} as Statistics,
-    certification,
     originalTitle,
     originalLanguage,
     tags = [],
@@ -187,7 +176,7 @@ function GameIndexPoster(props: GameIndexPosterProps) {
               body={
                 <GameDetailsLinks
                   igdbId={igdbId}
-                  imdbId={imdbId}
+                  igdbSlug={igdbSlug}
                   youTubeTrailerId={youTubeTrailerId}
                 />
               }
@@ -246,63 +235,6 @@ function GameIndexPoster(props: GameIndexPosterProps) {
         </div>
       ) : null}
 
-      {showCinemaRelease && inCinemas ? (
-        <div
-          className={styles.title}
-          title={`${translate('InCinemas')}: ${formatDate(
-            inCinemas,
-            longDateFormat
-          )}`}
-        >
-          <Icon name={icons.IN_CINEMAS} />{' '}
-          {getRelativeDate({
-            date: inCinemas,
-            shortDateFormat,
-            showRelativeDates,
-            timeFormat,
-            timeForToday: false,
-          })}
-        </div>
-      ) : null}
-
-      {showDigitalRelease && digitalRelease ? (
-        <div
-          className={styles.title}
-          title={`${translate('DigitalRelease')}: ${formatDate(
-            digitalRelease,
-            longDateFormat
-          )}`}
-        >
-          <Icon name={icons.GAME_FILE} />{' '}
-          {getRelativeDate({
-            date: digitalRelease,
-            shortDateFormat,
-            showRelativeDates,
-            timeFormat,
-            timeForToday: false,
-          })}
-        </div>
-      ) : null}
-
-      {showPhysicalRelease && physicalRelease ? (
-        <div
-          className={styles.title}
-          title={`${translate('PhysicalRelease')}: ${formatDate(
-            physicalRelease,
-            longDateFormat
-          )}`}
-        >
-          <Icon name={icons.DISC} />{' '}
-          {getRelativeDate({
-            date: physicalRelease,
-            shortDateFormat,
-            showRelativeDates,
-            timeFormat,
-            timeForToday: false,
-          })}
-        </div>
-      ) : null}
-
       {showReleaseDate && releaseDate ? (
         <div
           className={styles.title}
@@ -328,21 +260,9 @@ function GameIndexPoster(props: GameIndexPosterProps) {
         </div>
       ) : null}
 
-      {showImdbRating && !!ratings.imdb ? (
+      {showCriticRating && !!ratings.critic ? (
         <div className={styles.title}>
-          <ImdbRating ratings={ratings} iconSize={12} />
-        </div>
-      ) : null}
-
-      {showRottenTomatoesRating && !!ratings.rottenTomatoes ? (
-        <div className={styles.title}>
-          <RottenTomatoRating ratings={ratings} iconSize={12} />
-        </div>
-      ) : null}
-
-      {showTraktRating && !!ratings.trakt ? (
-        <div className={styles.title}>
-          <TraktRating ratings={ratings} iconSize={12} />
+          <CriticRating ratings={ratings} iconSize={12} />
         </div>
       ) : null}
 
@@ -355,35 +275,26 @@ function GameIndexPoster(props: GameIndexPosterProps) {
       ) : null}
 
       <GameIndexPosterInfo
-        studio={studio}
+        platform={platform?.name}
         qualityProfile={qualityProfile}
         added={added}
         year={year}
         showQualityProfile={showQualityProfile}
-        showCinemaRelease={showCinemaRelease}
-        showDigitalRelease={showDigitalRelease}
-        showPhysicalRelease={showPhysicalRelease}
         showReleaseDate={showReleaseDate}
         showRelativeDates={showRelativeDates}
         shortDateFormat={shortDateFormat}
         longDateFormat={longDateFormat}
         timeFormat={timeFormat}
-        inCinemas={inCinemas}
-        physicalRelease={physicalRelease}
-        digitalRelease={digitalRelease}
         releaseDate={releaseDate}
         ratings={ratings}
         sizeOnDisk={sizeOnDisk}
         sortKey={sortKey}
         path={path}
-        certification={certification}
         originalTitle={originalTitle}
         originalLanguage={originalLanguage}
         tags={tags}
         showIgdbRating={showIgdbRating}
-        showImdbRating={showImdbRating}
-        showRottenTomatoesRating={showRottenTomatoesRating}
-        showTraktRating={showTraktRating}
+        showCriticRating={showCriticRating}
         showTags={showTags}
       />
 

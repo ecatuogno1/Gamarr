@@ -20,14 +20,9 @@ export interface GameIndexAppState {
     showTitle: boolean;
     showMonitored: boolean;
     showQualityProfile: boolean;
-    showCinemaRelease: boolean;
-    showDigitalRelease: boolean;
-    showPhysicalRelease: boolean;
     showReleaseDate: boolean;
     showIgdbRating: boolean;
-    showImdbRating: boolean;
-    showRottenTomatoesRating: boolean;
-    showTraktRating: boolean;
+    showCriticRating: boolean;
     showTags: boolean;
     showSearchAction: boolean;
   };
@@ -36,7 +31,7 @@ export interface GameIndexAppState {
     detailedProgressBar: boolean;
     size: string;
     showMonitored: boolean;
-    showStudio: boolean;
+    showPlatform: boolean;
     showQualityProfile: boolean;
     showAdded: boolean;
     showPath: boolean;

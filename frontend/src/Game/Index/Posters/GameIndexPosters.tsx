@@ -143,14 +143,9 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
       showTitle,
       showMonitored,
       showQualityProfile,
-      showCinemaRelease,
-      showDigitalRelease,
-      showPhysicalRelease,
       showReleaseDate,
       showIgdbRating,
-      showImdbRating,
-      showRottenTomatoesRating,
-      showTraktRating,
+      showCriticRating,
       showTags,
     } = posterOptions;
 
@@ -172,18 +167,6 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
       heights.push(19);
     }
 
-    if (showCinemaRelease) {
-      heights.push(19);
-    }
-
-    if (showDigitalRelease) {
-      heights.push(19);
-    }
-
-    if (showPhysicalRelease) {
-      heights.push(19);
-    }
-
     if (showReleaseDate) {
       heights.push(19);
     }
@@ -192,15 +175,7 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
       heights.push(19);
     }
 
-    if (showImdbRating) {
-      heights.push(19);
-    }
-
-    if (showRottenTomatoesRating) {
-      heights.push(19);
-    }
-
-    if (showTraktRating) {
+    if (showCriticRating) {
       heights.push(19);
     }
 
@@ -209,7 +184,8 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
     }
 
     switch (sortKey) {
-      case 'studio':
+      case 'platform':
+      case 'developers':
       case 'added':
       case 'year':
       case 'path':
@@ -223,21 +199,6 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
           heights.push(19);
         }
         break;
-      case 'inCinemas':
-        if (!showCinemaRelease) {
-          heights.push(19);
-        }
-        break;
-      case 'digitalRelease':
-        if (!showDigitalRelease) {
-          heights.push(19);
-        }
-        break;
-      case 'physicalRelease':
-        if (!showPhysicalRelease) {
-          heights.push(19);
-        }
-        break;
       case 'releaseDate':
         if (!showReleaseDate) {
           heights.push(19);
@@ -248,18 +209,8 @@ export default function GameIndexPosters(props: GameIndexPostersProps) {
           heights.push(19);
         }
         break;
-      case 'imdbRating':
-        if (!showImdbRating) {
-          heights.push(19);
-        }
-        break;
-      case 'rottenTomatoesRating':
-        if (!showRottenTomatoesRating) {
-          heights.push(19);
-        }
-        break;
-      case 'traktRating':
-        if (!showTraktRating) {
+      case 'criticRating':
+        if (!showCriticRating) {
           heights.push(19);
         }
         break;

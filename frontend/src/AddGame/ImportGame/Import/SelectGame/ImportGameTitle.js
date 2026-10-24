@@ -9,7 +9,7 @@ function ImportGameTitle(props) {
   const {
     title,
     year,
-    studio,
+    platform,
     isExistingGame
   } = props;
 
@@ -25,8 +25,8 @@ function ImportGameTitle(props) {
       </div>
 
       {
-        !!studio &&
-          <Label>{studio}</Label>
+        !!platform &&
+          <Label>{platform}</Label>
       }
 
       {
@@ -44,7 +44,7 @@ function ImportGameTitle(props) {
 ImportGameTitle.propTypes = {
   title: PropTypes.string.isRequired,
   year: PropTypes.number.isRequired,
-  studio: PropTypes.string,
+  platform: PropTypes.string,
   isExistingGame: PropTypes.bool.isRequired
 };
 

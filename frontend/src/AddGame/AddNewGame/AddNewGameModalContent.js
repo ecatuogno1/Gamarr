@@ -40,6 +40,8 @@ class AddNewGameModalContent extends Component {
       year,
       overview,
       images,
+      platformId,
+      platformOptions,
       isAdding,
       rootFolderPath,
       monitor,
@@ -51,7 +53,8 @@ class AddNewGameModalContent extends Component {
       isSmallScreen,
       isWindows,
       onModalClose,
-      onInputChange
+      onInputChange,
+      onPlatformChange
     } = this.props;
 
     return (
@@ -84,6 +87,19 @@ class AddNewGameModalContent extends Component {
               ) : null}
 
               <Form>
+                <FormGroup>
+                  <FormLabel>{translate('Platform')}</FormLabel>
+
+                  <FormInputGroup
+                    type={inputTypes.SELECT}
+                    name="platformId"
+                    value={platformId}
+                    values={platformOptions}
+                    helpText={translate('AddNewGamePlatformHelpText')}
+                    onChange={onPlatformChange}
+                  />
+                </FormGroup>
+
                 <FormGroup>
                   <FormLabel>{translate('RootFolder')}</FormLabel>
 
@@ -190,6 +206,7 @@ class AddNewGameModalContent extends Component {
             className={styles.addButton}
             kind={kinds.SUCCESS}
             isSpinning={isAdding}
+            isDisabled={!platformId}
             onPress={this.onAddGamePress}
           >
             {translate('AddGame')}
@@ -201,6 +218,9 @@ class AddNewGameModalContent extends Component {
 }
 
 AddNewGameModalContent.propTypes = {
+  platformId: PropTypes.number,
+  platformOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
+  onPlatformChange: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
   year: PropTypes.number.isRequired,
   overview: PropTypes.string,

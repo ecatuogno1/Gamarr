@@ -39,12 +39,12 @@ function DiscoverGameSortMenu(props) {
         </SortMenuItem>
 
         <SortMenuItem
-          name="studio"
+          name="developers"
           sortKey={sortKey}
           sortDirection={sortDirection}
           onPress={onSortSelect}
         >
-          {translate('Studio')}
+          {translate('Developers')}
         </SortMenuItem>
 
         <SortMenuItem
@@ -57,39 +57,12 @@ function DiscoverGameSortMenu(props) {
         </SortMenuItem>
 
         <SortMenuItem
-          name="inCinemas"
+          name="releaseDate"
           sortKey={sortKey}
           sortDirection={sortDirection}
           onPress={onSortSelect}
         >
-          {translate('InCinemas')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="digitalRelease"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('DigitalRelease')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="physicalRelease"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('PhysicalRelease')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="runtime"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('Runtime')}
+          {translate('ReleaseDate')}
         </SortMenuItem>
 
         <SortMenuItem
@@ -102,40 +75,14 @@ function DiscoverGameSortMenu(props) {
         </SortMenuItem>
 
         <SortMenuItem
-          name="imdbRating"
+          name="criticRating"
           sortKey={sortKey}
           sortDirection={sortDirection}
           onPress={onSortSelect}
         >
-          {translate('ImdbRating')}
+          {translate('CriticRating')}
         </SortMenuItem>
 
-        <SortMenuItem
-          name="rottenTomatoesRating"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('RottenTomatoesRating')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="traktRating"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('TraktRating')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="certification"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('Certification')}
-        </SortMenuItem>
       </MenuContent>
     </SortMenu>
   );

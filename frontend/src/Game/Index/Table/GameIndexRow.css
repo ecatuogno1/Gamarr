@@ -25,7 +25,8 @@
   flex: 0 0 140px;
 }
 
-.studio {
+.platform,
+.developers {
   composes: cell;
 
   flex: 2 0 90px;
@@ -39,9 +40,6 @@
 }
 
 .releaseGroups,
-.inCinemas,
-.physicalRelease,
-.digitalRelease,
 .releaseDate,
 .genres,
 .keywords {
@@ -51,8 +49,7 @@
 }
 
 .added,
-.popularity,
-.runtime {
+.popularity {
   composes: cell;
 
   flex: 0 0 100px;
@@ -73,12 +70,6 @@
   flex: 0 0 220px;
 }
 
-.certification {
-  composes: cell;
-
-  flex: 0 0 90px;
-}
-
 .year {
   composes: cell;
 
@@ -97,10 +88,8 @@
   flex: 0 0 120px;
 }
 
-.imdbRating,
-.igdbRating,
-.rottenTomatoesRating,
-.traktRating {
+.criticRating,
+.igdbRating {
   composes: cell;
 
   flex: 0 0 80px;

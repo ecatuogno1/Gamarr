@@ -75,8 +75,8 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
     hasFile,
     isAvailable,
     igdbId,
-    imdbId,
-    studio,
+    igdbSlug,
+    platform,
     added,
     youTubeTrailerId,
   } = game;
@@ -189,7 +189,7 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
                   body={
                     <GameDetailsLinks
                       igdbId={igdbId}
-                      imdbId={imdbId}
+                      igdbSlug={igdbSlug}
                       youTubeTrailerId={youTubeTrailerId}
                     />
                   }
@@ -242,7 +242,7 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
               height={overviewHeight}
               monitored={monitored}
               qualityProfile={qualityProfile}
-              studio={studio}
+              platform={platform?.name}
               sizeOnDisk={sizeOnDisk}
               added={added}
               path={path}

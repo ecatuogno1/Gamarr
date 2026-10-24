@@ -5,16 +5,16 @@ import Quality from 'Quality/Quality';
 
 export type GameMonitor = 'gameOnly' | 'gameAndCollection' | 'none';
 
-export type GameStatus =
-  | 'tba'
-  | 'announced'
-  | 'inCinemas'
-  | 'released'
-  | 'deleted';
+export type GameStatus = 'tba' | 'announced' | 'released' | 'deleted';
 
-export type GameAvailability = 'announced' | 'inCinemas' | 'released';
+export type GameAvailability = 'announced' | 'released';
 
-export type CoverType = 'poster' | 'fanart' | 'headshot';
+export type CoverType =
+  | 'poster'
+  | 'fanart'
+  | 'screenshot'
+  | 'headshot'
+  | 'clearlogo';
 
 export interface Image {
   coverType: CoverType;
@@ -40,11 +40,31 @@ export interface RatingValues {
 }
 
 export interface Ratings {
-  imdb: RatingValues;
-  igdb: RatingValues;
-  metacritic: RatingValues;
-  rottenTomatoes: RatingValues;
-  trakt: RatingValues;
+  igdb?: RatingValues;
+  critic?: RatingValues;
+}
+
+export interface GamePlatform {
+  id: number;
+  name: string;
+  shortName: string;
+  folderName: string;
+  igdbPlatformId: number;
+}
+
+export interface AgeRating {
+  organization: string;
+  rating: string;
+}
+
+export interface GameWebsite {
+  url: string;
+  type: string;
+}
+
+export interface PlatformReleaseDate {
+  igdbPlatformId: number;
+  date?: string;
 }
 
 export interface AlternativeTitle extends ModelBase {
@@ -59,9 +79,11 @@ export interface GameAddOptions {
 
 interface Game extends ModelBase {
   igdbId: number;
-  imdbId?: string;
+  igdbSlug?: string;
+  igdbUrl?: string;
   sortTitle: string;
   overview: string;
+  storyline?: string;
   youTubeTrailerId?: string;
   monitored: boolean;
   status: GameStatus;
@@ -71,23 +93,30 @@ interface Game extends ModelBase {
   originalLanguage: Language;
   collection: Collection;
   alternateTitles: AlternativeTitle[];
-  studio: string;
+  developers: string[];
+  publishers: string[];
   qualityProfileId: number;
+  platformId: number;
+  platform?: GamePlatform;
+  availablePlatforms?: number[];
+  availablePlatformIgdbIds?: number[];
   added: string;
   year: number;
-  inCinemas?: string;
-  physicalRelease?: string;
-  digitalRelease?: string;
   releaseDate?: string;
+  firstReleaseDate?: string;
+  platformReleaseDates?: PlatformReleaseDate[];
   rootFolderPath: string;
-  runtime: number;
   minimumAvailability: GameAvailability;
   path: string;
   genres: string[];
+  themes: string[];
+  gameModes: string[];
   keywords: string[];
+  ageRatings: AgeRating[];
+  websites: GameWebsite[];
+  website?: string;
   ratings: Ratings;
   popularity: number;
-  certification: string;
   statistics?: Statistics;
   tags: number[];
   images: Image[];

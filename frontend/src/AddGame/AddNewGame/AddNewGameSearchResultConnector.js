@@ -1,25 +1,36 @@
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
+import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
-import createExistingGameSelector from 'Store/Selectors/createExistingGameSelector';
 import AddNewGameSearchResult from './AddNewGameSearchResult';
 
 function createMapStateToProps() {
   return createSelector(
-    createExistingGameSelector(),
+    (state, { igdbId }) => igdbId,
+    (state, { availablePlatforms }) => availablePlatforms,
+    createAllGamesSelector(),
     createDimensionsSelector(),
     (state) => state.gameFiles.items,
-    (state, { internalId }) => internalId,
-    (state) => state.settings.ui.item.gameRuntimeFormat,
-    (isExistingGame, dimensions, gameFiles, internalId, gameRuntimeFormat) => {
-      const gameFile = gameFiles.find((item) => internalId > 0 && item.gameId === internalId);
+    (igdbId, availablePlatforms = [], allGames, dimensions, gameFiles) => {
+      // A title can be in the library once per platform
+      const libraryGames = allGames.filter((game) => game.igdbId === igdbId);
+      const addedPlatformIds = libraryGames.map((game) => game.platformId);
+      const existingGame = libraryGames.length ? libraryGames[0] : null;
+
+      const isExistingGame = availablePlatforms.length ?
+        availablePlatforms.every((platformId) => addedPlatformIds.includes(platformId)) :
+        !!existingGame;
+
+      const existingGameId = existingGame ? existingGame.id : 0;
+      const gameFile = gameFiles.find((item) => existingGameId > 0 && item.gameId === existingGameId);
 
       return {
-        existingGameId: internalId,
+        existingGameId,
+        existingTitleSlug: existingGame ? existingGame.titleSlug : null,
+        addedPlatformIds,
         isExistingGame,
         isSmallScreen: dimensions.isSmallScreen,
-        gameFile,
-        gameRuntimeFormat
+        gameFile
       };
     }
   );

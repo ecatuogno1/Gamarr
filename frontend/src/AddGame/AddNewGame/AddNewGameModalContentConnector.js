@@ -13,7 +13,10 @@ function createMapStateToProps() {
     (state) => state.addGame,
     createDimensionsSelector(),
     createSystemStatusSelector(),
-    (addGameState, dimensions, systemStatus) => {
+    (state) => state.settings.platforms.items,
+    (state, { availablePlatforms }) => availablePlatforms,
+    (state, { addedPlatformIds }) => addedPlatformIds,
+    (addGameState, dimensions, systemStatus, allPlatforms, availablePlatforms = [], addedPlatformIds = []) => {
       const {
         isAdding,
         addError,
@@ -26,9 +29,19 @@ function createMapStateToProps() {
         validationWarnings
       } = selectSettings(defaults, {}, addError);
 
+      // The platforms IGDB lists for the game, already added platforms can't be picked again
+      const platformOptions = allPlatforms
+        .filter((platform) => platform.enabled && (!availablePlatforms.length || availablePlatforms.includes(platform.id)))
+        .map((platform) => ({
+          key: platform.id,
+          value: platform.name,
+          isDisabled: addedPlatformIds.includes(platform.id)
+        }));
+
       return {
         isAdding,
         addError,
+        platformOptions,
         isSmallScreen: dimensions.isSmallScreen,
         validationErrors,
         validationWarnings,
@@ -47,7 +60,26 @@ const mapDispatchToProps = {
 class AddNewGameModalContentConnector extends Component {
 
   //
+  // Lifecycle
+
+  constructor(props, context) {
+    super(props, context);
+
+    // Default to the lookup's platform (the first platform IGDB lists), unless it's already in the library
+    const firstAvailable = props.platformOptions.find((option) => !option.isDisabled);
+    const defaultOption = props.platformOptions.find((option) => option.key === props.platformId && !option.isDisabled);
+
+    this.state = {
+      selectedPlatformId: (defaultOption || firstAvailable || {}).key || 0
+    };
+  }
+
+  //
   // Listeners
+
+  onPlatformChange = ({ value }) => {
+    this.setState({ selectedPlatformId: parseInt(value) });
+  };
 
   onInputChange = ({ name, value }) => {
     this.props.setAddGameDefault({ [name]: value });
@@ -66,6 +98,7 @@ class AddNewGameModalContentConnector extends Component {
 
     this.props.addGame({
       igdbId,
+      platformId: this.state.selectedPlatformId,
       rootFolderPath: rootFolderPath.value,
       monitor: monitor.value,
       qualityProfileId: qualityProfileId.value,
@@ -82,6 +115,8 @@ class AddNewGameModalContentConnector extends Component {
     return (
       <AddNewGameModalContent
         {...this.props}
+        platformId={this.state.selectedPlatformId}
+        onPlatformChange={this.onPlatformChange}
         onInputChange={this.onInputChange}
         onAddGamePress={this.onAddGamePress}
       />
@@ -91,6 +126,8 @@ class AddNewGameModalContentConnector extends Component {
 
 AddNewGameModalContentConnector.propTypes = {
   igdbId: PropTypes.number.isRequired,
+  platformId: PropTypes.number,
+  platformOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
   rootFolderPath: PropTypes.object,
   monitor: PropTypes.object.isRequired,
   qualityProfileId: PropTypes.object,

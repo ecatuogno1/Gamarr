@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import CriticRating from 'Components/CriticRating';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
 import Label from 'Components/Label';
 import Link from 'Components/Link/Link';
 import Tooltip from 'Components/Tooltip/Tooltip';
@@ -12,7 +12,6 @@ import GameGenres from 'Game/GameGenres';
 import GamePoster from 'Game/GamePoster';
 import GameIndexProgressBar from 'Game/Index/ProgressBar/GameIndexProgressBar';
 import { icons, kinds, sizes, tooltipPositions } from 'Helpers/Props';
-import formatRuntime from 'Utilities/Date/formatRuntime';
 import translate from 'Utilities/String/translate';
 import AddNewGameModal from './AddNewGameModal';
 import styles from './AddNewGameSearchResult.css';
@@ -57,12 +56,15 @@ class AddNewGameSearchResult extends Component {
   render() {
     const {
       igdbId,
-      imdbId,
+      igdbSlug,
       youTubeTrailerId,
       title,
       titleSlug,
       year,
-      studio,
+      platform,
+      availablePlatforms,
+      addedPlatformIds,
+      developers,
       originalLanguage,
       genres,
       status,
@@ -71,15 +73,13 @@ class AddNewGameSearchResult extends Component {
       folder,
       images,
       existingGameId,
+      existingTitleSlug,
       isExistingGame,
       isExcluded,
       isSmallScreen,
       monitored,
       isAvailable,
-      gameFile,
-      runtime,
-      gameRuntimeFormat,
-      certification
+      gameFile
     } = this.props;
 
     const {
@@ -88,7 +88,7 @@ class AddNewGameSearchResult extends Component {
 
     const hasGameFile = !!gameFile;
 
-    const linkProps = isExistingGame ? { to: `/game/${titleSlug}` } : { onPress: this.onPress };
+    const linkProps = isExistingGame ? { to: `/game/${existingTitleSlug || titleSlug}` } : { onPress: this.onPress };
     const posterWidth = 167;
     const posterHeight = 250;
 
@@ -179,16 +179,16 @@ class AddNewGameSearchResult extends Component {
 
             <div>
               {
-                !!certification &&
+                !!platform &&
                   <span className={styles.certification}>
-                    {certification}
+                    {platform.shortName}
                   </span>
               }
 
               {
-                !!runtime &&
+                availablePlatforms.length > 1 &&
                   <span className={styles.runtime}>
-                    {formatRuntime(runtime, gameRuntimeFormat)}
+                    {translate('CountPlatforms', { count: availablePlatforms.length })}
                   </span>
               }
             </div>
@@ -202,9 +202,9 @@ class AddNewGameSearchResult extends Component {
               </Label>
 
               {
-                ratings.imdb ?
+                ratings.critic ?
                   <Label size={sizes.LARGE}>
-                    <ImdbRating
+                    <CriticRating
                       ratings={ratings}
                       iconSize={13}
                     />
@@ -227,14 +227,14 @@ class AddNewGameSearchResult extends Component {
               }
 
               {
-                studio ?
+                developers.length ?
                   <Label size={sizes.LARGE}>
                     <Icon
                       name={icons.STUDIO}
                       size={13}
                     />
                     <span className={styles.studio}>
-                      {studio}
+                      {developers.join(', ')}
                     </span>
                   </Label> :
                   null
@@ -270,7 +270,7 @@ class AddNewGameSearchResult extends Component {
                 tooltip={
                   <GameDetailsLinks
                     igdbId={igdbId}
-                    imdbId={imdbId}
+                    igdbSlug={igdbSlug}
                     youTubeTrailerId={youTubeTrailerId}
                   />
                 }
@@ -303,6 +303,9 @@ class AddNewGameSearchResult extends Component {
           igdbId={igdbId}
           title={title}
           year={year}
+          platformId={platform ? platform.id : 0}
+          availablePlatforms={availablePlatforms}
+          addedPlatformIds={addedPlatformIds}
           overview={overview}
           folder={folder}
           images={images}
@@ -315,12 +318,15 @@ class AddNewGameSearchResult extends Component {
 
 AddNewGameSearchResult.propTypes = {
   igdbId: PropTypes.number.isRequired,
-  imdbId: PropTypes.string,
+  igdbSlug: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   title: PropTypes.string.isRequired,
   titleSlug: PropTypes.string.isRequired,
   year: PropTypes.number.isRequired,
-  studio: PropTypes.string,
+  platform: PropTypes.object,
+  availablePlatforms: PropTypes.arrayOf(PropTypes.number),
+  addedPlatformIds: PropTypes.arrayOf(PropTypes.number),
+  developers: PropTypes.arrayOf(PropTypes.string),
   originalLanguage: PropTypes.object,
   genres: PropTypes.arrayOf(PropTypes.string),
   status: PropTypes.string.isRequired,
@@ -329,19 +335,20 @@ AddNewGameSearchResult.propTypes = {
   folder: PropTypes.string.isRequired,
   images: PropTypes.arrayOf(PropTypes.object).isRequired,
   existingGameId: PropTypes.number,
+  existingTitleSlug: PropTypes.string,
   isExistingGame: PropTypes.bool.isRequired,
   isExcluded: PropTypes.bool,
   isSmallScreen: PropTypes.bool.isRequired,
   monitored: PropTypes.bool.isRequired,
   isAvailable: PropTypes.bool.isRequired,
-  gameFile: PropTypes.object,
-  runtime: PropTypes.number.isRequired,
-  gameRuntimeFormat: PropTypes.string.isRequired,
-  certification: PropTypes.string
+  gameFile: PropTypes.object
 };
 
 AddNewGameSearchResult.defaultProps = {
   genres: [],
+  developers: [],
+  availablePlatforms: [],
+  addedPlatformIds: [],
   isExcluded: false
 };
 

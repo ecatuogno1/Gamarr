@@ -24,7 +24,7 @@ function GameSearchResult(props: GameSearchResultProps) {
     images,
     alternateTitles,
     igdbId,
-    imdbId,
+    igdbSlug,
     tags,
   } = props;
 
@@ -64,8 +64,8 @@ function GameSearchResult(props: GameSearchResultProps) {
           <div className={styles.alternateTitle}>IgdbId: {igdbId}</div>
         ) : null}
 
-        {match.key === 'imdbId' && imdbId ? (
-          <div className={styles.alternateTitle}>ImdbId: {imdbId}</div>
+        {match.key === 'igdbSlug' && igdbSlug ? (
+          <div className={styles.alternateTitle}>IGDB: {igdbSlug}</div>
         ) : null}
 
         {tag ? (

@@ -11,6 +11,7 @@ import {
   fetchImportLists,
   fetchIndexerFlags,
   fetchLanguages,
+  fetchPlatforms,
   fetchQualityProfiles,
   fetchUISettings,
 } from 'Store/Actions/settingsActions';
@@ -118,6 +119,7 @@ const useAppPage = () => {
     dispatch(fetchTags());
     dispatch(fetchQualityProfiles());
     dispatch(fetchLanguages());
+    dispatch(fetchPlatforms());
     dispatch(fetchImportLists());
     dispatch(fetchIndexerFlags());
     dispatch(fetchUISettings());

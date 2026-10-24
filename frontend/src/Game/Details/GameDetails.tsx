@@ -12,10 +12,10 @@ import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import * as commandNames from 'Commands/commandNames';
 import Alert from 'Components/Alert';
+import CriticRating from 'Components/CriticRating';
 import FieldSet from 'Components/FieldSet';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
 import InfoLabel from 'Components/InfoLabel';
 import IconButton from 'Components/Link/IconButton';
 import Marquee from 'Components/Marquee';
@@ -26,10 +26,8 @@ import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
 import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
 import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
 import Popover from 'Components/Tooltip/Popover';
 import Tooltip from 'Components/Tooltip/Tooltip';
-import TraktRating from 'Components/TraktRating';
 import DeleteGameModal from 'Game/Delete/DeleteGameModal';
 import EditGameModal from 'Game/Edit/EditGameModal';
 import { Image, Statistics } from 'Game/Game';
@@ -77,11 +75,9 @@ import { fetchImportListSchema } from 'Store/Actions/Settings/importLists';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
-import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import fonts from 'Styles/Variables/fonts';
 import sortByProp from 'Utilities/Array/sortByProp';
 import { findCommand, isCommandExecuting } from 'Utilities/Command';
-import formatRuntime from 'Utilities/Date/formatRuntime';
 import getPathWithUrlBase from 'Utilities/getPathWithUrlBase';
 import formatBytes from 'Utilities/Number/formatBytes';
 import {
@@ -89,8 +85,7 @@ import {
   unregisterPagePopulator,
 } from 'Utilities/pagePopulator';
 import translate from 'Utilities/String/translate';
-import GameCastPosters from './Credits/Cast/GameCastPosters';
-import GameCrewPosters from './Credits/Crew/GameCrewPosters';
+import GameCompanyCredits from './Credits/GameCompanyCredits';
 import GameDetailsLinks from './GameDetailsLinks';
 import GameReleaseDates from './GameReleaseDates';
 import GameStatusLabel from './GameStatusLabel';
@@ -168,7 +163,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const { isGameCreditsFetching, gameCreditsError } = useSelector(
     createGameCreditsSelector()
   );
-  const { gameRuntimeFormat } = useSelector(createUISettingsSelector());
   const isSidebarVisible = useSelector(
     (state: AppState) => state.app.isSidebarVisible
   );
@@ -517,21 +511,20 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const {
     id,
     igdbId,
-    imdbId,
+    igdbSlug,
     title,
     originalTitle,
     year,
-    inCinemas,
-    physicalRelease,
-    digitalRelease,
-    runtime,
-    certification,
+    releaseDate,
     ratings,
     path,
     statistics = {} as Statistics,
     qualityProfileId,
     monitored,
-    studio,
+    platform,
+    developers = [],
+    publishers = [],
+    websites = [],
     originalLanguage,
     genres = [],
     collection,
@@ -688,12 +681,12 @@ function GameDetails({ gameId }: GameDetailsProps) {
 
               <div className={styles.details}>
                 <div>
-                  {certification ? (
+                  {platform ? (
                     <span
                       className={styles.certification}
-                      title={translate('Certification')}
+                      title={translate('Platform')}
                     >
-                      {certification}
+                      {platform.shortName}
                     </span>
                   ) : null}
 
@@ -714,23 +707,13 @@ function GameDetails({ gameId }: GameDetailsProps) {
                       body={
                         <GameReleaseDates
                           igdbId={igdbId}
-                          inCinemas={inCinemas}
-                          digitalRelease={digitalRelease}
-                          physicalRelease={physicalRelease}
+                          igdbSlug={igdbSlug}
+                          releaseDate={releaseDate}
                         />
                       }
                       position={tooltipPositions.BOTTOM}
                     />
                   </span>
-
-                  {runtime ? (
-                    <span
-                      className={styles.runtime}
-                      title={translate('Runtime')}
-                    >
-                      {formatRuntime(runtime, gameRuntimeFormat)}
-                    </span>
-                  ) : null}
 
                   <span className={styles.links}>
                     <Tooltip
@@ -738,8 +721,9 @@ function GameDetails({ gameId }: GameDetailsProps) {
                       tooltip={
                         <GameDetailsLinks
                           igdbId={igdbId}
-                          imdbId={imdbId}
+                          igdbSlug={igdbSlug}
                           youTubeTrailerId={youTubeTrailerId}
+                          websites={websites}
                         />
                       }
                       position={tooltipPositions.BOTTOM}
@@ -764,19 +748,9 @@ function GameDetails({ gameId }: GameDetailsProps) {
                     <IgdbRating ratings={ratings} iconSize={20} />
                   </span>
                 ) : null}
-                {ratings.imdb ? (
+                {ratings.critic ? (
                   <span className={styles.rating}>
-                    <ImdbRating ratings={ratings} iconSize={20} />
-                  </span>
-                ) : null}
-                {ratings.rottenTomatoes ? (
-                  <span className={styles.rating}>
-                    <RottenTomatoRating ratings={ratings} iconSize={20} />
-                  </span>
-                ) : null}
-                {ratings.trakt ? (
-                  <span className={styles.rating}>
-                    <TraktRating ratings={ratings} iconSize={20} />
+                    <CriticRating ratings={ratings} iconSize={20} />
                   </span>
                 ) : null}
               </div>
@@ -851,13 +825,37 @@ function GameDetails({ gameId }: GameDetailsProps) {
                   </InfoLabel>
                 ) : null}
 
-                {studio && !isSmallScreen ? (
+                {platform ? (
                   <InfoLabel
                     className={styles.detailsInfoLabel}
-                    name={translate('Studio')}
+                    name={translate('Platform')}
                     size={sizes.LARGE}
                   >
-                    <span className={styles.studio}>{studio}</span>
+                    <span className={styles.studio}>{platform.name}</span>
+                  </InfoLabel>
+                ) : null}
+
+                {developers.length && !isSmallScreen ? (
+                  <InfoLabel
+                    className={styles.detailsInfoLabel}
+                    name={translate('Developers')}
+                    size={sizes.LARGE}
+                  >
+                    <span className={styles.studio}>
+                      {developers.join(', ')}
+                    </span>
+                  </InfoLabel>
+                ) : null}
+
+                {publishers.length && !isSmallScreen ? (
+                  <InfoLabel
+                    className={styles.detailsInfoLabel}
+                    name={translate('Publishers')}
+                    size={sizes.LARGE}
+                  >
+                    <span className={styles.studio}>
+                      {publishers.join(', ')}
+                    </span>
                   </InfoLabel>
                 ) : null}
 
@@ -909,12 +907,8 @@ function GameDetails({ gameId }: GameDetailsProps) {
             <ExtraFileTable gameId={id} />
           </FieldSet>
 
-          <FieldSet legend={translate('Cast')}>
-            <GameCastPosters isSmallScreen={isSmallScreen} />
-          </FieldSet>
-
-          <FieldSet legend={translate('Crew')}>
-            <GameCrewPosters isSmallScreen={isSmallScreen} />
+          <FieldSet legend={translate('Companies')}>
+            <GameCompanyCredits />
           </FieldSet>
 
           <FieldSet legend={translate('Titles')}>

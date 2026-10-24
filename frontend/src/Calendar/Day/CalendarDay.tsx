@@ -11,8 +11,8 @@ import styles from './CalendarDay.css';
 
 function sort(items: CalendarEventModel[]) {
   return items.sort((a, b) => {
-    const aDate = moment(a.inCinemas).unix();
-    const bDate = moment(b.inCinemas).unix();
+    const aDate = moment(a.releaseDate).unix();
+    const bDate = moment(b.releaseDate).unix();
 
     return aDate - bDate;
   });
@@ -23,25 +23,17 @@ function createCalendarEventsConnector(date: string) {
     (state: AppState) => state.calendar.items,
     (state: AppState) => state.calendar.options,
     (items, options) => {
-      const { showCinemaRelease, showDigitalRelease, showPhysicalRelease } =
-        options;
+      const { showReleaseDate } = options;
       const momentDate = moment(date);
 
-      const filtered = items.filter(
-        ({ inCinemas, digitalRelease, physicalRelease }) => {
-          return (
-            (showCinemaRelease &&
-              inCinemas &&
-              momentDate.isSame(moment(inCinemas), 'day')) ||
-            (showDigitalRelease &&
-              digitalRelease &&
-              momentDate.isSame(moment(digitalRelease), 'day')) ||
-            (showPhysicalRelease &&
-              physicalRelease &&
-              momentDate.isSame(moment(physicalRelease), 'day'))
-          );
-        }
-      );
+      // Games have one release date (on the game's platform)
+      const filtered = items.filter(({ releaseDate }) => {
+        return (
+          showReleaseDate &&
+          releaseDate &&
+          momentDate.isSame(moment(releaseDate), 'day')
+        );
+      });
 
       return sort(filtered);
     }

@@ -41,20 +41,8 @@ export const defaultState = {
         isVisible: true
       },
       {
-        name: 'gameMetadata.inCinemas',
-        label: () => translate('InCinemas'),
-        isSortable: true,
-        isVisible: false
-      },
-      {
-        name: 'gameMetadata.digitalRelease',
-        label: () => translate('DigitalRelease'),
-        isSortable: true,
-        isVisible: false
-      },
-      {
-        name: 'gameMetadata.physicalRelease',
-        label: () => translate('PhysicalRelease'),
+        name: 'gameMetadata.releaseDate',
+        label: () => translate('ReleaseDate'),
         isSortable: true,
         isVisible: false
       },
@@ -127,20 +115,8 @@ export const defaultState = {
         isVisible: true
       },
       {
-        name: 'gameMetadata.inCinemas',
-        label: () => translate('InCinemas'),
-        isSortable: true,
-        isVisible: false
-      },
-      {
-        name: 'gameMetadata.digitalRelease',
-        label: () => translate('DigitalRelease'),
-        isSortable: true,
-        isVisible: false
-      },
-      {
-        name: 'gameMetadata.physicalRelease',
-        label: () => translate('PhysicalRelease'),
+        name: 'gameMetadata.releaseDate',
+        label: () => translate('ReleaseDate'),
         isSortable: true,
         isVisible: false
       },

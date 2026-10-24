@@ -38,12 +38,12 @@ function GameIndexSortMenu(props: GameIndexSortMenuProps) {
         </SortMenuItem>
 
         <SortMenuItem
-          name="studio"
+          name="platform"
           sortKey={sortKey}
           sortDirection={sortDirection}
           onPress={onSortSelect}
         >
-          {translate('Studio')}
+          {translate('Platform')}
         </SortMenuItem>
 
         <SortMenuItem
@@ -74,33 +74,6 @@ function GameIndexSortMenu(props: GameIndexSortMenuProps) {
         </SortMenuItem>
 
         <SortMenuItem
-          name="inCinemas"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('InCinemas')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="digitalRelease"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('DigitalRelease')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="physicalRelease"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('PhysicalRelease')}
-        </SortMenuItem>
-
-        <SortMenuItem
           name="releaseDate"
           sortKey={sortKey}
           sortDirection={sortDirection}
@@ -119,30 +92,12 @@ function GameIndexSortMenu(props: GameIndexSortMenuProps) {
         </SortMenuItem>
 
         <SortMenuItem
-          name="imdbRating"
+          name="criticRating"
           sortKey={sortKey}
           sortDirection={sortDirection}
           onPress={onSortSelect}
         >
-          {translate('ImdbRating')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="rottenTomatoesRating"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('RottenTomatoesRating')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="traktRating"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('TraktRating')}
+          {translate('CriticRating')}
         </SortMenuItem>
 
         <SortMenuItem
@@ -170,15 +125,6 @@ function GameIndexSortMenu(props: GameIndexSortMenuProps) {
           onPress={onSortSelect}
         >
           {translate('SizeOnDisk')}
-        </SortMenuItem>
-
-        <SortMenuItem
-          name="certification"
-          sortKey={sortKey}
-          sortDirection={sortDirection}
-          onPress={onSortSelect}
-        >
-          {translate('Certification')}
         </SortMenuItem>
 
         <SortMenuItem

@@ -33,14 +33,9 @@ export const defaultState = {
     showTitle: false,
     showMonitored: true,
     showQualityProfile: true,
-    showCinemaRelease: false,
-    showDigitalRelease: false,
-    showPhysicalRelease: false,
     showReleaseDate: false,
     showIgdbRating: false,
-    showImdbRating: false,
-    showRottenTomatoesRating: false,
-    showTraktRating: false,
+    showCriticRating: false,
     showTags: false,
     showSearchAction: false
   },
@@ -49,7 +44,7 @@ export const defaultState = {
     detailedProgressBar: true,
     size: 'medium',
     showMonitored: true,
-    showStudio: true,
+    showPlatform: true,
     showQualityProfile: true,
     showAdded: false,
     showPath: false,
@@ -98,10 +93,16 @@ export const defaultState = {
       isVisible: false
     },
     {
-      name: 'studio',
-      label: () => translate('Studio'),
+      name: 'platform',
+      label: () => translate('Platform'),
       isSortable: true,
       isVisible: true
+    },
+    {
+      name: 'developers',
+      label: () => translate('Developers'),
+      isSortable: true,
+      isVisible: false
     },
     {
       name: 'qualityProfileId',
@@ -128,32 +129,8 @@ export const defaultState = {
       isVisible: false
     },
     {
-      name: 'inCinemas',
-      label: () => translate('InCinemas'),
-      isSortable: true,
-      isVisible: false
-    },
-    {
-      name: 'digitalRelease',
-      label: () => translate('DigitalRelease'),
-      isSortable: true,
-      isVisible: false
-    },
-    {
-      name: 'physicalRelease',
-      label: () => translate('PhysicalRelease'),
-      isSortable: true,
-      isVisible: false
-    },
-    {
       name: 'releaseDate',
       label: () => translate('ReleaseDate'),
-      isSortable: true,
-      isVisible: false
-    },
-    {
-      name: 'runtime',
-      label: () => translate('Runtime'),
       isSortable: true,
       isVisible: false
     },
@@ -200,32 +177,14 @@ export const defaultState = {
       isVisible: false
     },
     {
-      name: 'imdbRating',
-      label: () => translate('ImdbRating'),
-      isSortable: true,
-      isVisible: false
-    },
-    {
-      name: 'rottenTomatoesRating',
-      label: () => translate('RottenTomatoesRating'),
-      isSortable: true,
-      isVisible: false
-    },
-    {
-      name: 'traktRating',
-      label: () => translate('TraktRating'),
+      name: 'criticRating',
+      label: () => translate('CriticRating'),
       isSortable: true,
       isVisible: false
     },
     {
       name: 'popularity',
       label: () => translate('Popularity'),
-      isSortable: true,
-      isVisible: false
-    },
-    {
-      name: 'certification',
-      label: () => translate('Certification'),
       isSortable: true,
       isVisible: false
     },
@@ -258,10 +217,16 @@ export const defaultState = {
   sortPredicates: {
     ...sortPredicates,
 
-    studio: function(item) {
-      const studio = item.studio;
+    platform: function(item) {
+      const { platform } = item;
 
-      return studio ? studio.toLowerCase() : '';
+      return platform ? platform.name.toLowerCase() : '';
+    },
+
+    developers: function(item) {
+      const { developers = [] } = item;
+
+      return developers.length ? developers[0].toLowerCase() : '';
     },
 
     collection: function(item) {
@@ -291,17 +256,10 @@ export const defaultState = {
       return ratings.igdb ? ratings.igdb.value : 0;
     },
 
-    imdbRating: function({ ratings = {} }) {
-      return ratings.imdb ? ratings.imdb.value : 0;
-    },
-
-    rottenTomatoesRating: function({ ratings = {} }) {
-      return ratings.rottenTomatoes ? ratings.rottenTomatoes.value : -1;
-    },
-
-    traktRating: function({ ratings = {} }) {
-      return ratings.trakt ? ratings.trakt.value : 0;
+    criticRating: function({ ratings = {} }) {
+      return ratings.critic ? ratings.critic.value : 0;
     }
+
   },
 
   selectedFilterKey: 'all',
@@ -392,22 +350,43 @@ export const defaultState = {
       valueType: filterBuilderValueTypes.RELEASE_STATUS
     },
     {
-      name: 'studio',
-      label: () => translate('Studio'),
+      name: 'platformId',
+      label: () => translate('Platform'),
       type: filterBuilderTypes.EXACT,
       optionsSelector: function(items) {
-        const tagList = items.reduce((acc, game) => {
-          if (game.studio) {
+        const platformList = items.reduce((acc, game) => {
+          if (game.platform && acc.findIndex((a) => a.id === game.platform.id) === -1) {
             acc.push({
-              id: game.studio,
-              name: game.studio
+              id: game.platform.id,
+              name: game.platform.name
             });
           }
 
           return acc;
         }, []);
 
-        return tagList.sort(sortByProp('name'));
+        return platformList.sort(sortByProp('name'));
+      }
+    },
+    {
+      name: 'developers',
+      label: () => translate('Developers'),
+      type: filterBuilderTypes.ARRAY,
+      optionsSelector: function(items) {
+        const developerList = items.reduce((acc, { developers = [] }) => {
+          developers.forEach((developer) => {
+            if (acc.findIndex((a) => a.id === developer) === -1) {
+              acc.push({
+                id: developer,
+                name: developer
+              });
+            }
+          });
+
+          return acc;
+        }, []);
+
+        return developerList.sort(sortByProp('name'));
       }
     },
     {
@@ -447,33 +426,10 @@ export const defaultState = {
       type: filterBuilderTypes.NUMBER
     },
     {
-      name: 'inCinemas',
-      label: () => translate('InCinemas'),
-      type: filterBuilderTypes.DATE,
-      valueType: filterBuilderValueTypes.DATE
-    },
-    {
-      name: 'physicalRelease',
-      label: () => translate('PhysicalRelease'),
-      type: filterBuilderTypes.DATE,
-      valueType: filterBuilderValueTypes.DATE
-    },
-    {
-      name: 'digitalRelease',
-      label: () => translate('DigitalRelease'),
-      type: filterBuilderTypes.DATE,
-      valueType: filterBuilderValueTypes.DATE
-    },
-    {
       name: 'releaseDate',
       label: () => translate('ReleaseDate'),
       type: filterBuilderTypes.DATE,
       valueType: filterBuilderValueTypes.DATE
-    },
-    {
-      name: 'runtime',
-      label: () => translate('Runtime'),
-      type: filterBuilderTypes.NUMBER
     },
     {
       name: 'path',
@@ -537,54 +493,14 @@ export const defaultState = {
       type: filterBuilderTypes.NUMBER
     },
     {
-      name: 'imdbRating',
-      label: () => translate('ImdbRating'),
-      type: filterBuilderTypes.NUMBER,
-      numberFractionDigits: 1
-    },
-    {
-      name: 'imdbVotes',
-      label: () => translate('ImdbVotes'),
-      type: filterBuilderTypes.NUMBER
-    },
-    {
-      name: 'rottenTomatoesRating',
-      label: () => translate('RottenTomatoesRating'),
-      type: filterBuilderTypes.NUMBER
-    },
-    {
-      name: 'traktRating',
-      label: () => translate('TraktRating'),
-      type: filterBuilderTypes.NUMBER
-    },
-    {
-      name: 'traktVotes',
-      label: () => translate('TraktVotes'),
+      name: 'criticRating',
+      label: () => translate('CriticRating'),
       type: filterBuilderTypes.NUMBER
     },
     {
       name: 'popularity',
       label: () => translate('Popularity'),
       type: filterBuilderTypes.NUMBER
-    },
-    {
-      name: 'certification',
-      label: () => translate('Certification'),
-      type: filterBuilderTypes.EXACT,
-      optionsSelector: function(items) {
-        const certificationList = items.reduce((acc, game) => {
-          if (game.certification) {
-            acc.push({
-              id: game.certification,
-              name: game.certification
-            });
-          }
-
-          return acc;
-        }, []);
-
-        return certificationList.sort(sortByProp('name'));
-      }
     },
     {
       name: 'tags',
@@ -631,7 +547,6 @@ export const setGameOverviewOption = createAction(SET_GAME_OVERVIEW_OPTION);
 // Reducers
 
 export const reducers = createHandleActions({
-
   [SET_GAME_SORT]: createSetClientSideCollectionSortReducer(section),
   [SET_GAME_FILTER]: createSetClientSideCollectionFilterReducer(section),
 

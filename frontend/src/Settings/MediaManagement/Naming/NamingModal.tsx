@@ -124,14 +124,13 @@ const gameTokens = [
     example: 'Games Collection, The',
     footNotes: '1',
   },
-  { token: '{Game Certification}', example: 'R' },
   { token: '{Release Year}', example: '2009' },
+  { token: '{Platform}', example: 'Super Nintendo Entertainment System' },
+  { token: '{Platform Short}', example: 'SNES' },
+  { token: '{Platform Folder}', example: 'snes' },
 ];
 
-const gameIdTokens = [
-  { token: '{ImdbId}', example: 'tt12345' },
-  { token: '{IgdbId}', example: '123456' },
-];
+const gameIdTokens = [{ token: '{IgdbId}', example: '123456' }];
 
 const qualityTokens = [
   { token: '{Quality Full}', example: 'HDTV-720p Proper' },

@@ -23,7 +23,7 @@ class ImportGameSearchResult extends Component {
       igdbId,
       title,
       year,
-      studio,
+      platform,
       isExistingGame
     } = this.props;
 
@@ -36,7 +36,7 @@ class ImportGameSearchResult extends Component {
           <ImportGameTitle
             title={title}
             year={year}
-            network={studio}
+            network={platform}
             isExistingGame={isExistingGame}
           />
         </Link>
@@ -60,7 +60,7 @@ ImportGameSearchResult.propTypes = {
   igdbId: PropTypes.number.isRequired,
   title: PropTypes.string.isRequired,
   year: PropTypes.number.isRequired,
-  studio: PropTypes.string,
+  platform: PropTypes.string,
   isExistingGame: PropTypes.bool.isRequired,
   onPress: PropTypes.func.isRequired
 };

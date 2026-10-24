@@ -2,19 +2,17 @@ import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSelect } from 'App/SelectContext';
 import { GAME_SEARCH, REFRESH_GAME } from 'Commands/commandNames';
+import CriticRating from 'Components/CriticRating';
 import GameTagList from 'Components/GameTagList';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
 import IconButton from 'Components/Link/IconButton';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
 import RelativeDateCell from 'Components/Table/Cells/RelativeDateCell';
 import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import VirtualTableSelectCell from 'Components/Table/Cells/VirtualTableSelectCell';
 import Column from 'Components/Table/Column';
 import Tooltip from 'Components/Tooltip/Tooltip';
-import TraktRating from 'Components/TraktRating';
 import DeleteGameModal from 'Game/Delete/DeleteGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
 import EditGameModal from 'Game/Edit/EditGameModal';
@@ -24,9 +22,7 @@ import GameTitleLink from 'Game/GameTitleLink';
 import createGameIndexItemSelector from 'Game/Index/createGameIndexItemSelector';
 import { icons, kinds } from 'Helpers/Props';
 import { executeCommand } from 'Store/Actions/commandActions';
-import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import { SelectStateInputProps } from 'typings/props';
-import formatRuntime from 'Utilities/Date/formatRuntime';
 import formatBytes from 'Utilities/Number/formatBytes';
 import firstCharToUpper from 'Utilities/String/firstCharToUpper';
 import translate from 'Utilities/String/translate';
@@ -50,35 +46,29 @@ function GameIndexRow(props: GameIndexRowProps) {
 
   const { showSearchAction } = useSelector(selectTableOptions);
 
-  const { gameRuntimeFormat } = useSelector(createUISettingsSelector());
-
   const {
     monitored,
     titleSlug,
     title,
     collection,
-    studio,
+    platform,
+    developers = [],
     status,
     originalLanguage,
     originalTitle,
     added,
     statistics = {} as Statistics,
     year,
-    inCinemas,
-    digitalRelease,
-    physicalRelease,
     releaseDate,
-    runtime,
     minimumAvailability,
     path,
     genres = [],
     keywords = [],
     ratings,
     popularity,
-    certification,
     tags = [],
     igdbId,
-    imdbId,
+    igdbSlug,
     isAvailable,
     hasFile,
     gameFile,
@@ -193,10 +183,18 @@ function GameIndexRow(props: GameIndexRowProps) {
           );
         }
 
-        if (name === 'studio') {
+        if (name === 'platform') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              {studio}
+              {platform ? platform.name : null}
+            </VirtualTableRowCell>
+          );
+        }
+
+        if (name === 'developers') {
+          return (
+            <VirtualTableRowCell key={name} className={styles[name]}>
+              {developers.join(', ')}
             </VirtualTableRowCell>
           );
         }
@@ -246,48 +244,6 @@ function GameIndexRow(props: GameIndexRowProps) {
           );
         }
 
-        if (name === 'inCinemas') {
-          return (
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore ts(2739)
-            <RelativeDateCell
-              key={name}
-              className={styles[name]}
-              date={inCinemas}
-              timeForToday={false}
-              component={VirtualTableRowCell}
-            />
-          );
-        }
-
-        if (name === 'digitalRelease') {
-          return (
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore ts(2739)
-            <RelativeDateCell
-              key={name}
-              className={styles[name]}
-              date={digitalRelease}
-              timeForToday={false}
-              component={VirtualTableRowCell}
-            />
-          );
-        }
-
-        if (name === 'physicalRelease') {
-          return (
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore ts(2739)
-            <RelativeDateCell
-              key={name}
-              className={styles[name]}
-              date={physicalRelease}
-              timeForToday={false}
-              component={VirtualTableRowCell}
-            />
-          );
-        }
-
         if (name === 'releaseDate') {
           return (
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -299,14 +255,6 @@ function GameIndexRow(props: GameIndexRowProps) {
               timeForToday={false}
               component={VirtualTableRowCell}
             />
-          );
-        }
-
-        if (name === 'runtime') {
-          return (
-            <VirtualTableRowCell key={name} className={styles[name]}>
-              {formatRuntime(runtime, gameRuntimeFormat)}
-            </VirtualTableRowCell>
           );
         }
 
@@ -385,28 +333,10 @@ function GameIndexRow(props: GameIndexRowProps) {
           );
         }
 
-        if (name === 'imdbRating') {
+        if (name === 'criticRating') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              {ratings.imdb ? <ImdbRating ratings={ratings} /> : null}
-            </VirtualTableRowCell>
-          );
-        }
-
-        if (name === 'rottenTomatoesRating') {
-          return (
-            <VirtualTableRowCell key={name} className={styles[name]}>
-              {ratings.rottenTomatoes ? (
-                <RottenTomatoRating ratings={ratings} />
-              ) : null}
-            </VirtualTableRowCell>
-          );
-        }
-
-        if (name === 'traktRating') {
-          return (
-            <VirtualTableRowCell key={name} className={styles[name]}>
-              {ratings.trakt ? <TraktRating ratings={ratings} /> : null}
+              {ratings.critic ? <CriticRating ratings={ratings} /> : null}
             </VirtualTableRowCell>
           );
         }
@@ -415,14 +345,6 @@ function GameIndexRow(props: GameIndexRowProps) {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
               <GamePopularityIndex popularity={popularity} />
-            </VirtualTableRowCell>
-          );
-        }
-
-        if (name === 'certification') {
-          return (
-            <VirtualTableRowCell key={name} className={styles[name]}>
-              {certification}
             </VirtualTableRowCell>
           );
         }
@@ -477,7 +399,7 @@ function GameIndexRow(props: GameIndexRowProps) {
                   tooltip={
                     <GameDetailsLinks
                       igdbId={igdbId}
-                      imdbId={imdbId}
+                      igdbSlug={igdbSlug}
                       youTubeTrailerId={youTubeTrailerId}
                     />
                   }

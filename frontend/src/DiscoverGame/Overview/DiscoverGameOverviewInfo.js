@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
 import { icons } from 'Helpers/Props';
 import dimensions from 'Styles/Variables/dimensions';
 import translate from 'Utilities/String/translate';
@@ -17,9 +16,9 @@ const rows = [
     valueProp: 'year'
   },
   {
-    name: 'studio',
-    showProp: 'showStudio',
-    valueProp: 'studio'
+    name: 'developers',
+    showProp: 'showPlatform',
+    valueProp: 'developers'
   },
   {
     name: 'genres',
@@ -32,19 +31,9 @@ const rows = [
     valueProp: 'ratings.igdb.value'
   },
   {
-    name: 'imdbRating',
-    showProp: 'showImdbRating',
-    valueProp: 'ratings.imdb.value'
-  },
-  {
-    name: 'rottenTomatoesRating',
-    showProp: 'showRottenTomatoesRating',
-    valueProp: 'ratings.rottenTomatoes.value'
-  },
-  {
-    name: 'certification',
-    showProp: 'showCertification',
-    valueProp: 'certification'
+    name: 'criticRating',
+    showProp: 'showCriticRating',
+    valueProp: 'ratings.critic.value'
   }
 ];
 
@@ -69,11 +58,11 @@ function getInfoRowProps(row, props) {
     };
   }
 
-  if (name === 'studio') {
+  if (name === 'developers') {
     return {
-      title: translate('Studio'),
+      title: translate('Developers'),
       iconName: icons.STUDIO,
-      label: props.studio
+      label: (props.developers || []).join(', ')
     };
   }
 
@@ -93,35 +82,14 @@ function getInfoRowProps(row, props) {
     };
   }
 
-  if (name === 'imdbRating' && !!props.ratings.imdb) {
+  if (name === 'criticRating' && !!props.ratings.critic) {
     return {
-      title: translate('ImdbRating'),
+      title: translate('CriticRating'),
       iconName: icons.IMDB,
-      label: `${(props.ratings.imdb.value).toFixed(1)}`
+      label: `${(props.ratings.critic.value).toFixed(1)}`
     };
   }
 
-  if (name === 'rottenTomatoesRating' && !!props.ratings.rottenTomatoes) {
-    return {
-      title: translate('RottenTomatoesRating'),
-      icon: (
-        <RottenTomatoRating
-          ratings={props.ratings}
-          iconSize={14}
-          hideValue={true}
-        />
-      ),
-      label: `${props.ratings.rottenTomatoes.value}%`
-    };
-  }
-
-  if (name === 'certification') {
-    return {
-      title: translate('Certification'),
-      iconName: icons.FILM,
-      label: props.certification
-    };
-  }
 }
 
 function DiscoverGameOverviewInfo(props) {
@@ -163,15 +131,12 @@ function DiscoverGameOverviewInfo(props) {
 DiscoverGameOverviewInfo.propTypes = {
   height: PropTypes.number.isRequired,
   showYear: PropTypes.bool.isRequired,
-  showStudio: PropTypes.bool.isRequired,
+  showPlatform: PropTypes.bool.isRequired,
   showGenres: PropTypes.bool.isRequired,
   showIgdbRating: PropTypes.bool.isRequired,
-  showImdbRating: PropTypes.bool.isRequired,
-  showRottenTomatoesRating: PropTypes.bool.isRequired,
-  showCertification: PropTypes.bool.isRequired,
-  studio: PropTypes.string,
+  showCriticRating: PropTypes.bool.isRequired,
+  developers: PropTypes.arrayOf(PropTypes.string),
   year: PropTypes.number,
-  certification: PropTypes.string,
   ratings: PropTypes.object,
   genres: PropTypes.arrayOf(PropTypes.string).isRequired,
   sortKey: PropTypes.string.isRequired

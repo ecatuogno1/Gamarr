@@ -18,7 +18,8 @@
   flex: 0 0 140px;
 }
 
-.studio {
+.platform,
+.developers {
   composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
 
   flex: 2 0 90px;
@@ -32,9 +33,6 @@
 }
 
 .releaseGroups,
-.inCinemas,
-.physicalRelease,
-.digitalRelease,
 .releaseDate,
 .genres,
 .keywords {
@@ -44,8 +42,7 @@
 }
 
 .added,
-.popularity,
-.runtime {
+.popularity {
   composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
 
   flex: 0 0 100px;
@@ -61,12 +58,6 @@
   composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
 
   flex: 0 0 220px;
-}
-
-.certification {
-  composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
-
-  flex: 0 0 90px;
 }
 
 .year {
@@ -87,10 +78,8 @@
   flex: 0 0 120px;
 }
 
-.imdbRating,
-.igdbRating,
-.rottenTomatoesRating,
-.traktRating {
+.criticRating,
+.igdbRating {
   composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
 
   flex: 0 0 80px;

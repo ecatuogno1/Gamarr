@@ -3,33 +3,27 @@
 interface CssExports {
   'actions': string;
   'added': string;
-  'certification': string;
   'collection': string;
-  'digitalRelease': string;
+  'criticRating': string;
+  'developers': string;
   'gameFileQualities': string;
   'gameStatus': string;
   'genres': string;
   'igdbRating': string;
-  'imdbRating': string;
-  'inCinemas': string;
   'keywords': string;
   'minimumAvailability': string;
   'originalLanguage': string;
   'originalTitle': string;
   'path': string;
-  'physicalRelease': string;
+  'platform': string;
   'popularity': string;
   'qualityProfileId': string;
   'releaseDate': string;
   'releaseGroups': string;
-  'rottenTomatoesRating': string;
-  'runtime': string;
   'sizeOnDisk': string;
   'sortTitle': string;
   'status': string;
-  'studio': string;
   'tags': string;
-  'traktRating': string;
   'year': string;
 }
 export const cssExports: CssExports;

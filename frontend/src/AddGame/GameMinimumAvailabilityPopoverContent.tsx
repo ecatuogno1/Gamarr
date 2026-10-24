@@ -12,11 +12,6 @@ function GameMinimumAvailabilityPopoverContent() {
       />
 
       <DescriptionListItem
-        title={translate('InCinemas')}
-        data={translate('InCinemasGameAvailabilityDescription')}
-      />
-
-      <DescriptionListItem
         title={translate('Released')}
         data={translate('ReleasedGameAvailabilityDescription')}
       />

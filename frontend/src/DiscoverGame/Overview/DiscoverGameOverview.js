@@ -82,7 +82,7 @@ class DiscoverGameOverview extends Component {
   render() {
     const {
       igdbId,
-      imdbId,
+      igdbSlug,
       youTubeTrailerId,
       title,
       folder,
@@ -191,7 +191,7 @@ class DiscoverGameOverview extends Component {
                     body={
                       <GameDetailsLinks
                         igdbId={igdbId}
-                        imdbId={imdbId}
+                        igdbSlug={igdbSlug}
                         youTubeTrailerId={youTubeTrailerId}
                       />
                     }
@@ -292,7 +292,7 @@ class DiscoverGameOverview extends Component {
 
 DiscoverGameOverview.propTypes = {
   igdbId: PropTypes.number.isRequired,
-  imdbId: PropTypes.string,
+  igdbSlug: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   title: PropTypes.string.isRequired,
   folder: PropTypes.string.isRequired,

@@ -7,10 +7,8 @@ import { kinds, sizes } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import styles from './GameDetailsLinks.css';
 
-type GameDetailsLinksProps = Pick<
-  Game,
-  'igdbId' | 'imdbId' | 'youTubeTrailerId'
->;
+type GameDetailsLinksProps = Pick<Game, 'igdbId' | 'youTubeTrailerId'> &
+  Partial<Pick<Game, 'igdbSlug' | 'websites'>>;
 
 interface GameDetailsLink {
   externalId?: string | number;
@@ -20,50 +18,31 @@ interface GameDetailsLink {
 }
 
 function GameDetailsLinks(props: GameDetailsLinksProps) {
-  const { igdbId, imdbId, youTubeTrailerId } = props;
+  const { igdbId, igdbSlug, youTubeTrailerId, websites = [] } = props;
 
   const links = useMemo(() => {
     const validLinks: GameDetailsLink[] = [];
 
-    if (igdbId) {
-      validLinks.push(
-        {
-          externalId: igdbId,
-          name: 'IGDB',
-          url: `https://www.thegamedb.org/game/${igdbId}`,
-        },
-        {
-          name: 'Letterboxd',
-          url: `https://letterboxd.com/igdb/${igdbId}`,
-        }
-      );
+    if (igdbSlug) {
+      validLinks.push({
+        externalId: igdbId,
+        name: 'IGDB',
+        url: `https://www.igdb.com/games/${igdbSlug}`,
+      });
     }
 
-    if (imdbId) {
-      validLinks.push(
-        {
-          externalId: imdbId,
-          name: 'IMDb',
-          url: `https://imdb.com/title/${imdbId}/`,
-        },
-        {
-          name: 'Trakt',
-          url: `https://trakt.tv/games/${imdbId}`,
-        },
-        {
-          name: 'Game Chat',
-          url: `https://gamechat.org/${imdbId}/`,
-        },
-        {
-          name: 'MDBList',
-          url: `https://mdblist.com/game/${imdbId}`,
-        },
-        {
-          name: 'Blu-ray',
-          url: `https://www.blu-ray.com/search/?quicksearch=1&quicksearch_keyword=${imdbId}&section=theatrical`,
-        }
-      );
-    }
+    websites
+      .filter((website) =>
+        ['Official', 'Steam', 'GOG', 'Epic', 'Itch', 'Wikipedia'].includes(
+          website.type
+        )
+      )
+      .forEach((website) => {
+        validLinks.push({
+          name: website.type,
+          url: website.url,
+        });
+      });
 
     if (youTubeTrailerId) {
       validLinks.push({
@@ -76,7 +55,7 @@ function GameDetailsLinks(props: GameDetailsLinksProps) {
     return validLinks.sort(
       (a, b) => Number(!a.externalId) - Number(!b.externalId)
     );
-  }, [igdbId, imdbId, youTubeTrailerId]);
+  }, [igdbId, igdbSlug, youTubeTrailerId, websites]);
 
   return (
     <div className={styles.links}>

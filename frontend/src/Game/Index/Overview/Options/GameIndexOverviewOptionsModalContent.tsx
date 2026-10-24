@@ -48,7 +48,7 @@ function GameIndexOverviewOptionsModalContent(
     detailedProgressBar,
     size,
     showMonitored,
-    showStudio,
+    showPlatform,
     showQualityProfile,
     showAdded,
     showPath,
@@ -108,12 +108,12 @@ function GameIndexOverviewOptionsModalContent(
           </FormGroup>
 
           <FormGroup>
-            <FormLabel>{translate('ShowStudio')}</FormLabel>
+            <FormLabel>{translate('ShowPlatform')}</FormLabel>
 
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="showStudio"
-              value={showStudio}
+              name="showPlatform"
+              value={showPlatform}
               onChange={onOverviewOptionChange}
             />
           </FormGroup>

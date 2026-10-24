@@ -7,9 +7,7 @@ import { CalendarItem } from 'typings/Calendar';
 
 interface CalendarOptions {
   showGameInformation: boolean;
-  showCinemaRelease: boolean;
-  showDigitalRelease: boolean;
-  showPhysicalRelease: boolean;
+  showReleaseDate: boolean;
   showCutoffUnmetIcon: boolean;
   fullColorEvents: boolean;
 }

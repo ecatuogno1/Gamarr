@@ -1,23 +1,20 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import CriticRating from 'Components/CriticRating';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
 import ImportListList from 'Components/ImportListList';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
 import RelativeDateCell from 'Components/Table/Cells/RelativeDateCell';
 import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import VirtualTableSelectCell from 'Components/Table/Cells/VirtualTableSelectCell';
 import Popover from 'Components/Tooltip/Popover';
-import TraktRating from 'Components/TraktRating';
 import AddNewDiscoverGameModal from 'DiscoverGame/AddNewDiscoverGameModal';
 import ExcludeGameModal from 'DiscoverGame/Exclusion/ExcludeGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
 import GamePopularityIndex from 'Game/GamePopularityIndex';
 import { icons } from 'Helpers/Props';
-import formatRuntime from 'Utilities/Date/formatRuntime';
 import translate from 'Utilities/String/translate';
 import ListGameStatusCell from './ListGameStatusCell';
 import styles from './DiscoverGameRow.css';
@@ -62,15 +59,12 @@ class DiscoverGameRow extends Component {
     const {
       status,
       igdbId,
-      imdbId,
+      igdbSlug,
       youTubeTrailerId,
       title,
       originalLanguage,
-      studio,
-      inCinemas,
-      physicalRelease,
-      digitalRelease,
-      runtime,
+      developers = [],
+      releaseDate,
       year,
       overview,
       folder,
@@ -78,8 +72,6 @@ class DiscoverGameRow extends Component {
       genres,
       ratings,
       popularity,
-      certification,
-      gameRuntimeFormat,
       collection,
       columns,
       isExisting,
@@ -194,61 +186,26 @@ class DiscoverGameRow extends Component {
               );
             }
 
-            if (name === 'studio') {
+            if (name === 'developers') {
               return (
                 <VirtualTableRowCell
                   key={name}
                   className={styles[name]}
                 >
-                  {studio}
+                  {developers.join(', ')}
                 </VirtualTableRowCell>
               );
             }
 
-            if (name === 'inCinemas') {
+            if (name === 'releaseDate') {
               return (
                 <RelativeDateCell
                   key={name}
                   className={styles[name]}
-                  date={inCinemas}
+                  date={releaseDate}
                   timeForToday={false}
                   component={VirtualTableRowCell}
                 />
-              );
-            }
-
-            if (name === 'physicalRelease') {
-              return (
-                <RelativeDateCell
-                  key={name}
-                  className={styles[name]}
-                  date={physicalRelease}
-                  timeForToday={false}
-                  component={VirtualTableRowCell}
-                />
-              );
-            }
-
-            if (name === 'digitalRelease') {
-              return (
-                <RelativeDateCell
-                  key={name}
-                  className={styles[name]}
-                  date={digitalRelease}
-                  timeForToday={false}
-                  component={VirtualTableRowCell}
-                />
-              );
-            }
-
-            if (name === 'runtime') {
-              return (
-                <VirtualTableRowCell
-                  key={name}
-                  className={styles[name]}
-                >
-                  {formatRuntime(runtime, gameRuntimeFormat)}
-                </VirtualTableRowCell>
               );
             }
 
@@ -278,35 +235,13 @@ class DiscoverGameRow extends Component {
               );
             }
 
-            if (name === 'imdbRating') {
+            if (name === 'criticRating') {
               return (
                 <VirtualTableRowCell
                   key={name}
                   className={styles[name]}
                 >
-                  {ratings.imdb ? <ImdbRating ratings={ratings} /> : null}
-                </VirtualTableRowCell>
-              );
-            }
-
-            if (name === 'rottenTomatoesRating') {
-              return (
-                <VirtualTableRowCell
-                  key={name}
-                  className={styles[name]}
-                >
-                  {ratings.rottenTomatoes ? <RottenTomatoRating ratings={ratings} /> : null}
-                </VirtualTableRowCell>
-              );
-            }
-
-            if (name === 'traktRating') {
-              return (
-                <VirtualTableRowCell
-                  key={name}
-                  className={styles[name]}
-                >
-                  {ratings.trakt ? <TraktRating ratings={ratings} /> : null}
+                  {ratings.critic ? <CriticRating ratings={ratings} /> : null}
                 </VirtualTableRowCell>
               );
             }
@@ -315,17 +250,6 @@ class DiscoverGameRow extends Component {
               return (
                 <VirtualTableRowCell key={name} className={styles[name]}>
                   <GamePopularityIndex popularity={popularity} />
-                </VirtualTableRowCell>
-              );
-            }
-
-            if (name === 'certification') {
-              return (
-                <VirtualTableRowCell
-                  key={name}
-                  className={styles[name]}
-                >
-                  {certification}
                 </VirtualTableRowCell>
               );
             }
@@ -421,7 +345,7 @@ class DiscoverGameRow extends Component {
                       body={
                         <GameDetailsLinks
                           igdbId={igdbId}
-                          imdbId={imdbId}
+                          igdbSlug={igdbSlug}
                           youTubeTrailerId={youTubeTrailerId}
                         />
                       }
@@ -467,7 +391,7 @@ class DiscoverGameRow extends Component {
 
 DiscoverGameRow.propTypes = {
   igdbId: PropTypes.number.isRequired,
-  imdbId: PropTypes.string,
+  igdbSlug: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   status: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
@@ -476,17 +400,12 @@ DiscoverGameRow.propTypes = {
   overview: PropTypes.string.isRequired,
   folder: PropTypes.string.isRequired,
   images: PropTypes.arrayOf(PropTypes.object).isRequired,
-  studio: PropTypes.string,
-  inCinemas: PropTypes.string,
-  physicalRelease: PropTypes.string,
-  digitalRelease: PropTypes.string,
-  runtime: PropTypes.number,
+  developers: PropTypes.arrayOf(PropTypes.string),
+  releaseDate: PropTypes.string,
   genres: PropTypes.arrayOf(PropTypes.string).isRequired,
   ratings: PropTypes.object.isRequired,
   popularity: PropTypes.number.isRequired,
-  certification: PropTypes.string,
   collection: PropTypes.object,
-  gameRuntimeFormat: PropTypes.string.isRequired,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   isExisting: PropTypes.bool.isRequired,
   isExcluded: PropTypes.bool.isRequired,

@@ -7,6 +7,7 @@ interface NewGamePayload {
   minimumAvailability: GameAvailability;
   tags: number[];
   searchForGame?: boolean;
+  platformId?: number;
 }
 
 function getNewGame(game: Game, payload: NewGamePayload) {
@@ -17,6 +18,7 @@ function getNewGame(game: Game, payload: NewGamePayload) {
     minimumAvailability,
     tags,
     searchForGame = false,
+    platformId,
   } = payload;
 
   const addOptions = {
@@ -30,6 +32,11 @@ function getNewGame(game: Game, payload: NewGamePayload) {
   game.minimumAvailability = minimumAvailability;
   game.rootFolderPath = rootFolderPath;
   game.tags = tags;
+
+  // Lists and collections may not know the platform, the API then picks the first enabled IGDB platform
+  if (platformId) {
+    game.platformId = platformId;
+  }
 
   return game;
 }

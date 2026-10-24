@@ -4,7 +4,6 @@ import FormGroup from 'Components/Form/FormGroup';
 import FormInputButton from 'Components/Form/FormInputButton';
 import FormInputGroup from 'Components/Form/FormInputGroup';
 import FormLabel from 'Components/Form/FormLabel';
-import { EnhancedSelectInputValue } from 'Components/Form/Select/EnhancedSelectInput';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
 import ClipboardButton from 'Components/Link/ClipboardButton';
@@ -16,27 +15,6 @@ import { icons, inputTypes, kinds, sizes } from 'Helpers/Props';
 import { InputChanged } from 'typings/inputs';
 import translate from 'Utilities/String/translate';
 
-const releaseTypeOptions: EnhancedSelectInputValue<string>[] = [
-  {
-    key: 'cinemaRelease',
-    get value() {
-      return translate('CinemaRelease');
-    },
-  },
-  {
-    key: 'digitalRelease',
-    get value() {
-      return translate('DigitalRelease');
-    },
-  },
-  {
-    key: 'physicalRelease',
-    get value() {
-      return translate('PhysicalRelease');
-    },
-  },
-];
-
 interface CalendarLinkModalContentProps {
   onModalClose: () => void;
 }
@@ -47,16 +25,14 @@ function CalendarLinkModalContent({
   const [state, setState] = useState<{
     unmonitored: boolean;
     asAllDay: boolean;
-    releaseTypes: string[];
     tags: number[];
   }>({
     unmonitored: false,
     asAllDay: false,
-    releaseTypes: [],
     tags: [],
   });
 
-  const { unmonitored, asAllDay, releaseTypes, tags } = state;
+  const { unmonitored, asAllDay, tags } = state;
 
   const handleInputChange = useCallback(({ name, value }: InputChanged) => {
     setState((prevState) => ({ ...prevState, [name]: value }));
@@ -80,12 +56,6 @@ function CalendarLinkModalContent({
       icalUrl += 'asAllDay=true&';
     }
 
-    if (releaseTypes.length) {
-      releaseTypes.forEach((releaseType) => {
-        icalUrl += `releaseTypes=${releaseType}&`;
-      });
-    }
-
     if (tags.length) {
       icalUrl += `tags=${tags.toString()}&`;
     }
@@ -96,7 +66,7 @@ function CalendarLinkModalContent({
       iCalHttpUrl: `${window.location.protocol}//${icalUrl}`,
       iCalWebCalUrl: `webcal://${icalUrl}`,
     };
-  }, [unmonitored, asAllDay, releaseTypes, tags]);
+  }, [unmonitored, asAllDay, tags]);
 
   return (
     <ModalContent onModalClose={onModalClose}>
@@ -124,19 +94,6 @@ function CalendarLinkModalContent({
               name="asAllDay"
               value={asAllDay}
               helpText={translate('ICalShowAsAllDayEventsHelpText')}
-              onChange={handleInputChange}
-            />
-          </FormGroup>
-
-          <FormGroup>
-            <FormLabel>{translate('ICalReleaseTypes')}</FormLabel>
-
-            <FormInputGroup
-              type={inputTypes.SELECT}
-              name="releaseTypes"
-              value={releaseTypes}
-              values={releaseTypeOptions}
-              helpText={translate('ICalReleaseTypesGamesHelpText')}
               onChange={handleInputChange}
             />
           </FormGroup>

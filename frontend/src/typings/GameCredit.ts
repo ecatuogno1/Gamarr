@@ -1,16 +1,18 @@
 import ModelBase from 'App/ModelBase';
 import { Image } from 'Game/Game';
 
-export type GameCreditType = 'cast' | 'crew';
+export type GameCreditType =
+  | 'developer'
+  | 'publisher'
+  | 'porting'
+  | 'supporting';
 
+// A company credit from IGDB involved companies
 interface GameCredit extends ModelBase {
-  personIgdbId: number;
-  personName: string;
+  companyIgdbId: number;
+  companyName: string;
   images: Image[];
   type: GameCreditType;
-  department: string;
-  job: string;
-  character: string;
   order: number;
 }
 

@@ -13,7 +13,7 @@ const fuseOptions = {
     'year',
     'alternateTitles.title',
     'igdbId',
-    'imdbId',
+    'igdbSlug',
     'tags.label',
   ],
 };

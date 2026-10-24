@@ -5,6 +5,7 @@ import { filterBuilderTypes, filterBuilderValueTypes, filterTypePredicates, filt
 import { createThunk, handleThunks } from 'Store/thunks';
 import sortByProp from 'Utilities/Array/sortByProp';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
+import getDefaultPlatformId from 'Utilities/Game/getDefaultPlatformId';
 import getNewGame from 'Utilities/Game/getNewGame';
 import translate from 'Utilities/String/translate';
 import { set, update, updateItem } from './baseActions';
@@ -252,7 +253,16 @@ export const actionHandlers = handleThunks({
 
     const { igdbId, title } = payload;
 
-    const newGame = getNewGame({ igdbId, title }, payload);
+    // Use the collection's platform, or the first enabled platform IGDB lists for the game
+    const gameCollection = getState().gameCollections.items.find((c) => c.games.some((g) => g.igdbId === igdbId));
+    const collectionGame = gameCollection ? gameCollection.games.find((g) => g.igdbId === igdbId) : null;
+    const platformId = getDefaultPlatformId(
+      getState().settings.platforms.items,
+      collectionGame ? collectionGame.availablePlatformIgdbIds : [],
+      gameCollection ? gameCollection.platformId : 0
+    );
+
+    const newGame = getNewGame({ igdbId, title }, { ...payload, platformId });
     newGame.id = 0;
 
     const promise = createAjaxRequest({

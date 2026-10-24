@@ -6,11 +6,11 @@ import styles from './SelectGameRow.css';
 interface SelectGameRowProps {
   title: string;
   igdbId: number;
-  imdbId?: string;
+  platform?: string;
   year: number;
 }
 
-function SelectGameRow({ title, year, igdbId, imdbId }: SelectGameRowProps) {
+function SelectGameRow({ title, year, igdbId, platform }: SelectGameRowProps) {
   return (
     <>
       <VirtualTableRowCell className={styles.title}>
@@ -19,8 +19,8 @@ function SelectGameRow({ title, year, igdbId, imdbId }: SelectGameRowProps) {
 
       <VirtualTableRowCell className={styles.year}>{year}</VirtualTableRowCell>
 
-      <VirtualTableRowCell className={styles.imdbId}>
-        {imdbId ? <Label>{imdbId}</Label> : null}
+      <VirtualTableRowCell className={styles.platform}>
+        {platform ? <Label>{platform}</Label> : null}
       </VirtualTableRowCell>
 
       <VirtualTableRowCell className={styles.igdbId}>

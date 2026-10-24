@@ -20,9 +20,7 @@ interface AgendaEventProps {
   title: string;
   titleSlug: string;
   genres: string[];
-  inCinemas?: string;
-  digitalRelease?: string;
-  physicalRelease?: string;
+  releaseDate?: string;
   sortDate: moment.Moment;
   isAvailable: boolean;
   monitored: boolean;
@@ -37,9 +35,7 @@ function AgendaEvent({
   title,
   titleSlug,
   genres = [],
-  inCinemas,
-  digitalRelease,
-  physicalRelease,
+  releaseDate,
   sortDate,
   isAvailable,
   monitored: isMonitored,
@@ -58,27 +54,11 @@ function AgendaEvent({
   );
 
   const { eventDate, eventTitle, releaseIcon } = useMemo(() => {
-    if (physicalRelease && sortDate.isSame(moment(physicalRelease), 'day')) {
+    if (releaseDate && sortDate.isSame(moment(releaseDate), 'day')) {
       return {
-        eventDate: physicalRelease,
-        eventTitle: translate('PhysicalRelease'),
+        eventDate: releaseDate,
+        eventTitle: translate('ReleaseDate'),
         releaseIcon: icons.DISC,
-      };
-    }
-
-    if (digitalRelease && sortDate.isSame(moment(digitalRelease), 'day')) {
-      return {
-        eventDate: digitalRelease,
-        eventTitle: translate('DigitalRelease'),
-        releaseIcon: icons.GAME_FILE,
-      };
-    }
-
-    if (inCinemas && sortDate.isSame(moment(inCinemas), 'day')) {
-      return {
-        eventDate: inCinemas,
-        eventTitle: translate('InCinemas'),
-        releaseIcon: icons.IN_CINEMAS,
       };
     }
 
@@ -87,7 +67,7 @@ function AgendaEvent({
       eventTitle: null,
       releaseIcon: null,
     };
-  }, [inCinemas, digitalRelease, physicalRelease, sortDate]);
+  }, [releaseDate, sortDate]);
 
   const downloading = !!(queueItem || grabbed);
   const statusStyle = getStatusStyle(

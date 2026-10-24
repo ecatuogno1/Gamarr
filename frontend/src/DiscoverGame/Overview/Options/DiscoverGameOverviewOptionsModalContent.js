@@ -45,12 +45,10 @@ class DiscoverGameOverviewOptionsModalContent extends Component {
     this.state = {
       size: props.size,
       showYear: props.showYear,
-      showStudio: props.showStudio,
+      showPlatform: props.showPlatform,
       showGenres: props.showGenres,
       showIgdbRating: props.showIgdbRating,
-      showImdbRating: props.showImdbRating,
-      showRottenTomatoesRating: props.showRottenTomatoesRating,
-      showCertification: props.showCertification,
+      showCriticRating: props.showCriticRating,
       includeRecommendations: props.includeRecommendations,
       includeTrending: props.includeTrending,
       includePopular: props.includePopular
@@ -61,12 +59,10 @@ class DiscoverGameOverviewOptionsModalContent extends Component {
     const {
       size,
       showYear,
-      showStudio,
+      showPlatform,
       showGenres,
       showIgdbRating,
-      showImdbRating,
-      showRottenTomatoesRating,
-      showCertification,
+      showCriticRating,
       includeRecommendations,
       includeTrending,
       includePopular
@@ -82,8 +78,8 @@ class DiscoverGameOverviewOptionsModalContent extends Component {
       state.showYear = showYear;
     }
 
-    if (showStudio !== prevProps.showStudio) {
-      state.showStudio = showStudio;
+    if (showPlatform !== prevProps.showPlatform) {
+      state.showPlatform = showPlatform;
     }
 
     if (showGenres !== prevProps.showGenres) {
@@ -94,16 +90,8 @@ class DiscoverGameOverviewOptionsModalContent extends Component {
       state.showIgdbRating = showIgdbRating;
     }
 
-    if (showImdbRating !== prevProps.showImdbRating) {
-      state.showImdbRating = showImdbRating;
-    }
-
-    if (showRottenTomatoesRating !== prevProps.showRottenTomatoesRating) {
-      state.showRottenTomatoesRating = showRottenTomatoesRating;
-    }
-
-    if (showCertification !== prevProps.showCertification) {
-      state.showCertification = showCertification;
+    if (showCriticRating !== prevProps.showCriticRating) {
+      state.showCriticRating = showCriticRating;
     }
 
     if (includeRecommendations !== prevProps.includeRecommendations) {
@@ -155,12 +143,10 @@ class DiscoverGameOverviewOptionsModalContent extends Component {
     const {
       size,
       showYear,
-      showStudio,
+      showPlatform,
       showGenres,
       showIgdbRating,
-      showImdbRating,
-      showRottenTomatoesRating,
-      showCertification,
+      showCriticRating,
       includeRecommendations,
       includeTrending,
       includePopular
@@ -234,12 +220,12 @@ class DiscoverGameOverviewOptionsModalContent extends Component {
             </FormGroup>
 
             <FormGroup>
-              <FormLabel>{translate('ShowStudio')}</FormLabel>
+              <FormLabel>{translate('ShowPlatform')}</FormLabel>
 
               <FormInputGroup
                 type={inputTypes.CHECK}
-                name="showStudio"
-                value={showStudio}
+                name="showPlatform"
+                value={showPlatform}
                 onChange={this.onChangeOverviewOption}
               />
             </FormGroup>
@@ -267,37 +253,16 @@ class DiscoverGameOverviewOptionsModalContent extends Component {
             </FormGroup>
 
             <FormGroup>
-              <FormLabel>{translate('ShowImdbRating')}</FormLabel>
+              <FormLabel>{translate('ShowCriticRating')}</FormLabel>
 
               <FormInputGroup
                 type={inputTypes.CHECK}
-                name="showImdbRating"
-                value={showImdbRating}
+                name="showCriticRating"
+                value={showCriticRating}
                 onChange={this.onChangeOverviewOption}
               />
             </FormGroup>
 
-            <FormGroup>
-              <FormLabel>{translate('ShowRottenTomatoesRating')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showRottenTomatoesRating"
-                value={showRottenTomatoesRating}
-                onChange={this.onChangeOverviewOption}
-              />
-            </FormGroup>
-
-            <FormGroup>
-              <FormLabel>{translate('ShowCertification')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="showCertification"
-                value={showCertification}
-                onChange={this.onChangeOverviewOption}
-              />
-            </FormGroup>
           </Form>
         </ModalBody>
 
@@ -316,12 +281,10 @@ class DiscoverGameOverviewOptionsModalContent extends Component {
 DiscoverGameOverviewOptionsModalContent.propTypes = {
   size: PropTypes.string.isRequired,
   showYear: PropTypes.bool.isRequired,
-  showStudio: PropTypes.bool.isRequired,
+  showPlatform: PropTypes.bool.isRequired,
   showGenres: PropTypes.bool.isRequired,
   showIgdbRating: PropTypes.bool.isRequired,
-  showImdbRating: PropTypes.bool.isRequired,
-  showRottenTomatoesRating: PropTypes.bool.isRequired,
-  showCertification: PropTypes.bool.isRequired,
+  showCriticRating: PropTypes.bool.isRequired,
   includeRecommendations: PropTypes.bool.isRequired,
   includeTrending: PropTypes.bool.isRequired,
   includePopular: PropTypes.bool.isRequired,

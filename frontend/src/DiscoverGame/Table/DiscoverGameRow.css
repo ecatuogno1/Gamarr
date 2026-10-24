@@ -30,25 +30,17 @@
   flex: 4 0 110px;
 }
 
-.studio {
+.developers {
   composes: cell;
 
   flex: 2 0 90px;
 }
 
-.inCinemas,
-.physicalRelease,
-.digitalRelease,
+.releaseDate,
 .genres {
   composes: cell;
 
   flex: 0 0 180px;
-}
-
-.certification {
-  composes: cell;
-
-  flex: 0 0 115px;
 }
 
 .originalLanguage {
@@ -58,10 +50,7 @@
 }
 
 .igdbRating,
-.imdbRating,
-.rottenTomatoesRating,
-.traktRating,
-.runtime,
+.criticRating,
 .year {
   composes: cell;
 

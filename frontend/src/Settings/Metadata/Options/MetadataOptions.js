@@ -10,24 +10,6 @@ import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import { inputTypes, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 
-// Note: Do Not Translate Certification Countries
-
-export const certificationCountryOptions = [
-  { key: 'us', value: 'United States' },
-  { key: 'au', value: 'Australia' },
-  { key: 'br', value: 'Brazil' },
-  { key: 'ca', value: 'Canada' },
-  { key: 'fr', value: 'France' },
-  { key: 'de', value: 'Germany' },
-  { key: 'gb', value: 'Great Britain' },
-  { key: 'in', value: 'India' },
-  { key: 'ie', value: 'Ireland' },
-  { key: 'it', value: 'Italy' },
-  { key: 'nz', value: 'New Zealand' },
-  { key: 'ro', value: 'Romania' },
-  { key: 'es', value: 'Spain' }
-];
-
 function MetadataOptions(props) {
   const {
     isFetching,
@@ -55,15 +37,27 @@ function MetadataOptions(props) {
         hasSettings && !isFetching && !error &&
           <Form>
             <FormGroup>
-              <FormLabel>{translate('CertificationCountry')}</FormLabel>
+              <FormLabel>{translate('IgdbClientId')}</FormLabel>
 
               <FormInputGroup
-                type={inputTypes.SELECT}
-                name="certificationCountry"
-                values={certificationCountryOptions}
+                type={inputTypes.TEXT}
+                name="igdbClientId"
                 onChange={onInputChange}
-                helpText={translate('CertificationCountryHelpText')}
-                {...settings.certificationCountry}
+                helpText={translate('IgdbClientIdHelpText')}
+                helpLink="https://dev.twitch.tv/console/apps"
+                {...settings.igdbClientId}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <FormLabel>{translate('IgdbClientSecret')}</FormLabel>
+
+              <FormInputGroup
+                type={inputTypes.PASSWORD}
+                name="igdbClientSecret"
+                onChange={onInputChange}
+                helpText={translate('IgdbClientSecretHelpText')}
+                {...settings.igdbClientSecret}
               />
             </FormGroup>
           </Form>

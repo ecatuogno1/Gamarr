@@ -3,7 +3,7 @@
 interface CssExports {
   'cell': string;
   'igdbId': string;
-  'imdbId': string;
+  'platform': string;
   'title': string;
   'year': string;
 }

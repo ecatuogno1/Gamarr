@@ -50,7 +50,7 @@ export interface SuggestedGame
     | 'images'
     | 'alternateTitles'
     | 'igdbId'
-    | 'imdbId'
+    | 'igdbSlug'
   > {
   firstCharacter: string;
   tags: Tag[];
@@ -85,7 +85,7 @@ function createUnoptimizedSelector() {
           images,
           alternateTitles = [],
           igdbId,
-          imdbId,
+          igdbSlug,
           tags = [],
         } = game;
 
@@ -98,7 +98,7 @@ function createUnoptimizedSelector() {
           images,
           alternateTitles,
           igdbId,
-          imdbId,
+          igdbSlug,
           firstCharacter: title.charAt(0).toLowerCase(),
           tags: tags.reduce<Tag[]>((acc, id) => {
             const matchingTag = allTags.find((tag) => tag.id === id);

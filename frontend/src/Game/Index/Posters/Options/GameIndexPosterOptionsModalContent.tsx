@@ -52,14 +52,9 @@ function GameIndexPosterOptionsModalContent(
     showTitle,
     showMonitored,
     showQualityProfile,
-    showCinemaRelease,
-    showDigitalRelease,
-    showPhysicalRelease,
     showReleaseDate,
     showIgdbRating,
-    showImdbRating,
-    showRottenTomatoesRating,
-    showTraktRating,
+    showCriticRating,
     showTags,
     showSearchAction,
   } = posterOptions;
@@ -140,42 +135,6 @@ function GameIndexPosterOptionsModalContent(
           </FormGroup>
 
           <FormGroup size={sizes.MEDIUM}>
-            <FormLabel>{translate('ShowCinemaReleaseDate')}</FormLabel>
-
-            <FormInputGroup
-              type={inputTypes.CHECK}
-              name="showCinemaRelease"
-              value={showCinemaRelease}
-              helpText={translate('ShowCinemaReleaseDatePosterHelpText')}
-              onChange={onPosterOptionChange}
-            />
-          </FormGroup>
-
-          <FormGroup size={sizes.MEDIUM}>
-            <FormLabel>{translate('ShowDigitalReleaseDate')}</FormLabel>
-
-            <FormInputGroup
-              type={inputTypes.CHECK}
-              name="showDigitalRelease"
-              value={showDigitalRelease}
-              helpText={translate('ShowDigitalReleaseDatePosterHelpText')}
-              onChange={onPosterOptionChange}
-            />
-          </FormGroup>
-
-          <FormGroup size={sizes.MEDIUM}>
-            <FormLabel>{translate('ShowPhysicalReleaseDate')}</FormLabel>
-
-            <FormInputGroup
-              type={inputTypes.CHECK}
-              name="showPhysicalRelease"
-              value={showPhysicalRelease}
-              helpText={translate('ShowPhysicalReleaseDatePosterHelpText')}
-              onChange={onPosterOptionChange}
-            />
-          </FormGroup>
-
-          <FormGroup size={sizes.MEDIUM}>
             <FormLabel>{translate('ShowReleaseDate')}</FormLabel>
 
             <FormInputGroup
@@ -200,37 +159,13 @@ function GameIndexPosterOptionsModalContent(
           </FormGroup>
 
           <FormGroup size={sizes.MEDIUM}>
-            <FormLabel>{translate('ShowImdbRating')}</FormLabel>
+            <FormLabel>{translate('ShowCriticRating')}</FormLabel>
 
             <FormInputGroup
               type={inputTypes.CHECK}
-              name="showImdbRating"
-              value={showImdbRating}
-              helpText={translate('ShowImdbRatingHelpText')}
-              onChange={onPosterOptionChange}
-            />
-          </FormGroup>
-
-          <FormGroup size={sizes.MEDIUM}>
-            <FormLabel>{translate('ShowRottenTomatoesRating')}</FormLabel>
-
-            <FormInputGroup
-              type={inputTypes.CHECK}
-              name="showRottenTomatoesRating"
-              value={showRottenTomatoesRating}
-              helpText={translate('ShowRottenTomatoesRatingHelpText')}
-              onChange={onPosterOptionChange}
-            />
-          </FormGroup>
-
-          <FormGroup size={sizes.MEDIUM}>
-            <FormLabel>{translate('ShowTraktRating')}</FormLabel>
-
-            <FormInputGroup
-              type={inputTypes.CHECK}
-              name="showTraktRating"
-              value={showTraktRating}
-              helpText={translate('ShowTraktRatingPosterHelpText')}
+              name="showCriticRating"
+              value={showCriticRating}
+              helpText={translate('ShowCriticRatingHelpText')}
               onChange={onPosterOptionChange}
             />
           </FormGroup>

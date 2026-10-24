@@ -152,18 +152,6 @@ export const filterPredicates = {
     return predicate(sizeOnDisk, filterValue);
   },
 
-  inCinemas: function(item, filterValue, type) {
-    return dateFilterPredicate(item.inCinemas, filterValue, type);
-  },
-
-  physicalRelease: function(item, filterValue, type) {
-    return dateFilterPredicate(item.physicalRelease, filterValue, type);
-  },
-
-  digitalRelease: function(item, filterValue, type) {
-    return dateFilterPredicate(item.digitalRelease, filterValue, type);
-  },
-
   releaseDate: function(item, filterValue, type) {
     return dateFilterPredicate(item.releaseDate, filterValue, type);
   },
@@ -173,53 +161,21 @@ export const filterPredicates = {
 
     const rating = ratings.igdb ? ratings.igdb.value : 0;
 
-    return predicate(rating * 10, filterValue);
+    return predicate(rating, filterValue);
+  },
+
+  criticRating: function({ ratings = {} }, filterValue, type) {
+    const predicate = filterTypePredicates[type];
+
+    const rating = ratings.critic ? ratings.critic.value : 0;
+
+    return predicate(rating, filterValue);
   },
 
   igdbVotes: function({ ratings = {} }, filterValue, type) {
     const predicate = filterTypePredicates[type];
 
     const rating = ratings.igdb ? ratings.igdb.votes : 0;
-
-    return predicate(rating, filterValue);
-  },
-
-  imdbRating: function({ ratings = {} }, filterValue, type) {
-    const predicate = filterTypePredicates[type];
-
-    const rating = ratings.imdb ? ratings.imdb.value : 0;
-
-    return predicate(rating, filterValue);
-  },
-
-  imdbVotes: function({ ratings = {} }, filterValue, type) {
-    const predicate = filterTypePredicates[type];
-
-    const rating = ratings.imdb ? ratings.imdb.votes : 0;
-
-    return predicate(rating, filterValue);
-  },
-
-  rottenTomatoesRating: function({ ratings = {} }, filterValue, type) {
-    const predicate = filterTypePredicates[type];
-
-    const rating = ratings.rottenTomatoes ? ratings.rottenTomatoes.value : 0;
-
-    return predicate(rating, filterValue);
-  },
-
-  traktRating: function({ ratings = {} }, filterValue, type) {
-    const predicate = filterTypePredicates[type];
-
-    const rating = ratings.trakt ? ratings.trakt.value : 0;
-
-    return predicate(rating * 10, filterValue);
-  },
-
-  traktVotes: function({ ratings = {} }, filterValue, type) {
-    const predicate = filterTypePredicates[type];
-
-    const rating = ratings.trakt ? ratings.trakt.votes : 0;
 
     return predicate(rating, filterValue);
   },
@@ -241,10 +197,6 @@ export const sortPredicates = {
 
     if (item.status === 'announced') {
       result++;
-    }
-
-    if (item.status === 'inCinemas') {
-      result += 2;
     }
 
     if (item.status === 'released') {
@@ -283,48 +235,6 @@ export const sortPredicates = {
 
   year: function(item) {
     return item.year || undefined;
-  },
-
-  inCinemas: function(item, direction) {
-    const { inCinemas } = item;
-
-    if (inCinemas) {
-      return moment(inCinemas).unix();
-    }
-
-    if (direction === sortDirections.DESCENDING) {
-      return -1 * Number.MAX_VALUE;
-    }
-
-    return Number.MAX_VALUE;
-  },
-
-  physicalRelease: function(item, direction) {
-    const { physicalRelease } = item;
-
-    if (physicalRelease) {
-      return moment(physicalRelease).unix();
-    }
-
-    if (direction === sortDirections.DESCENDING) {
-      return -1 * Number.MAX_VALUE;
-    }
-
-    return Number.MAX_VALUE;
-  },
-
-  digitalRelease: function(item, direction) {
-    const { digitalRelease } = item;
-
-    if (digitalRelease) {
-      return moment(digitalRelease).unix();
-    }
-
-    if (direction === sortDirections.DESCENDING) {
-      return -1 * Number.MAX_VALUE;
-    }
-
-    return Number.MAX_VALUE;
   },
 
   releaseDate: function(item, direction) {
@@ -444,7 +354,6 @@ function getSaveAjaxOptions({ ajaxOptions, payload }) {
 // Action Handlers
 
 export const actionHandlers = handleThunks({
-
   [FETCH_GAMES]: createFetchHandler(section, '/game'),
   [SAVE_GAME]: createSaveProviderHandler(section, '/game', { getAjaxOptions: getSaveAjaxOptions }),
   [DELETE_GAME]: (getState, payload, dispatch) => {
@@ -588,7 +497,6 @@ export const actionHandlers = handleThunks({
 // Reducers
 
 export const reducers = createHandleActions({
-
   [SET_GAME_VALUE]: createSetSettingValueReducer(section),
   [SET_DELETE_OPTION]: (state, { payload }) => {
     return {

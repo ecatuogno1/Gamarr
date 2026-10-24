@@ -103,7 +103,7 @@ class AddNewGame extends Component {
               className={styles.searchInput}
               name="gameLookup"
               value={term}
-              placeholder="e.g. The Dark Knight, igdb:155, imdb:tt0468569"
+              placeholder="e.g. Super Metroid, igdb:1103, https://www.igdb.com/games/super-metroid"
               autoFocus={true}
               onChange={this.onSearchInputChange}
             />

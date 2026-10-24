@@ -10,21 +10,18 @@ import getRelativeDate from 'Utilities/Date/getRelativeDate';
 import translate from 'Utilities/String/translate';
 import styles from './GameReleaseDates.css';
 
-type GameReleaseDatesProps = Pick<
-  Game,
-  'igdbId' | 'inCinemas' | 'digitalRelease' | 'physicalRelease'
->;
+type GameReleaseDatesProps = Pick<Game, 'igdbId' | 'igdbSlug' | 'releaseDate'>;
 
+// Release date on the game's platform (IGDB first release date when the platform has none)
 function GameReleaseDates({
   igdbId,
-  inCinemas,
-  digitalRelease,
-  physicalRelease,
+  igdbSlug,
+  releaseDate,
 }: GameReleaseDatesProps) {
   const { showRelativeDates, shortDateFormat, longDateFormat, timeFormat } =
     useSelector(createUISettingsSelector());
 
-  if (!inCinemas && !physicalRelease && !digitalRelease) {
+  if (!releaseDate) {
     return (
       <div>
         <div className={styles.dateIcon}>
@@ -33,7 +30,9 @@ function GameReleaseDates({
 
         <InlineMarkdown
           data={translate('NoGameReleaseDatesAvailable', {
-            url: `https://www.thegamedb.org/game/${igdbId}`,
+            url: igdbSlug
+              ? `https://www.igdb.com/games/${igdbSlug}`
+              : `https://www.igdb.com/search?q=${igdbId}`,
           })}
         />
       </div>
@@ -41,70 +40,24 @@ function GameReleaseDates({
   }
 
   return (
-    <>
-      {inCinemas ? (
-        <div
-          title={`${translate('InCinemas')}: ${formatDate(
-            inCinemas,
-            longDateFormat
-          )}`}
-        >
-          <div className={styles.dateIcon}>
-            <Icon name={icons.IN_CINEMAS} />
-          </div>
+    <div
+      title={`${translate('ReleaseDate')}: ${formatDate(
+        releaseDate,
+        longDateFormat
+      )}`}
+    >
+      <div className={styles.dateIcon}>
+        <Icon name={icons.CALENDAR} />
+      </div>
 
-          {getRelativeDate({
-            date: inCinemas,
-            shortDateFormat,
-            showRelativeDates,
-            timeFormat,
-            timeForToday: false,
-          })}
-        </div>
-      ) : null}
-
-      {digitalRelease ? (
-        <div
-          title={`${translate('DigitalRelease')}: ${formatDate(
-            digitalRelease,
-            longDateFormat
-          )}`}
-        >
-          <div className={styles.dateIcon}>
-            <Icon name={icons.GAME_FILE} />
-          </div>
-
-          {getRelativeDate({
-            date: digitalRelease,
-            shortDateFormat,
-            showRelativeDates,
-            timeFormat,
-            timeForToday: false,
-          })}
-        </div>
-      ) : null}
-
-      {physicalRelease ? (
-        <div
-          title={`${translate('PhysicalRelease')}: ${formatDate(
-            physicalRelease,
-            longDateFormat
-          )}`}
-        >
-          <div className={styles.dateIcon}>
-            <Icon name={icons.DISC} />
-          </div>
-
-          {getRelativeDate({
-            date: physicalRelease,
-            shortDateFormat,
-            showRelativeDates,
-            timeFormat,
-            timeForToday: false,
-          })}
-        </div>
-      ) : null}
-    </>
+      {getRelativeDate({
+        date: releaseDate,
+        shortDateFormat,
+        showRelativeDates,
+        timeFormat,
+        timeForToday: false,
+      })}
+    </div>
   );
 }
 

@@ -1,10 +1,8 @@
 import React from 'react';
+import CriticRating from 'Components/CriticRating';
 import GameTagList from 'Components/GameTagList';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
-import TraktRating from 'Components/TraktRating';
 import { Ratings } from 'Game/Game';
 import { icons } from 'Helpers/Props';
 import Language from 'Language/Language';
@@ -17,76 +15,58 @@ import translate from 'Utilities/String/translate';
 import styles from './GameIndexPosterInfo.css';
 
 interface GameIndexPosterInfoProps {
-  studio?: string;
+  platform?: string;
   showQualityProfile: boolean;
   qualityProfile?: QualityProfile;
   added?: string;
   year: number;
-  inCinemas?: string;
-  digitalRelease?: string;
-  physicalRelease?: string;
   releaseDate?: string;
   path: string;
   ratings: Ratings;
-  certification: string;
   originalTitle: string;
   originalLanguage: Language;
   sizeOnDisk?: number;
   tags: number[];
   sortKey: string;
   showRelativeDates: boolean;
-  showCinemaRelease: boolean;
-  showDigitalRelease: boolean;
-  showPhysicalRelease: boolean;
   showReleaseDate: boolean;
   shortDateFormat: string;
   longDateFormat: string;
   timeFormat: string;
   showIgdbRating: boolean;
-  showImdbRating: boolean;
-  showRottenTomatoesRating: boolean;
-  showTraktRating: boolean;
+  showCriticRating: boolean;
   showTags: boolean;
 }
 
 function GameIndexPosterInfo(props: GameIndexPosterInfoProps) {
   const {
-    studio,
+    platform,
     showQualityProfile,
     qualityProfile,
     added,
     year,
-    inCinemas,
-    digitalRelease,
-    physicalRelease,
     releaseDate,
     path,
     ratings,
-    certification,
     originalTitle,
     originalLanguage,
     sizeOnDisk = 0,
     tags = [],
     sortKey,
     showRelativeDates,
-    showCinemaRelease,
-    showDigitalRelease,
-    showPhysicalRelease,
     showReleaseDate,
     shortDateFormat,
     longDateFormat,
     timeFormat,
     showIgdbRating,
-    showImdbRating,
-    showRottenTomatoesRating,
-    showTraktRating,
+    showCriticRating,
     showTags,
   } = props;
 
-  if (sortKey === 'studio' && studio) {
+  if (sortKey === 'platform' && platform) {
     return (
-      <div className={styles.info} title={translate('Studio')}>
-        {studio}
+      <div className={styles.info} title={translate('Platform')}>
+        {platform}
       </div>
     );
   }
@@ -130,76 +110,6 @@ function GameIndexPosterInfo(props: GameIndexPosterInfoProps) {
     );
   }
 
-  if (sortKey === 'inCinemas' && inCinemas && !showCinemaRelease) {
-    const inCinemasDate = getRelativeDate({
-      date: inCinemas,
-      shortDateFormat,
-      showRelativeDates,
-      timeFormat,
-      timeForToday: false,
-    });
-
-    return (
-      <div
-        className={styles.info}
-        title={`${translate('InCinemas')}: ${formatDate(
-          inCinemas,
-          longDateFormat
-        )}`}
-      >
-        <Icon name={icons.IN_CINEMAS} /> {inCinemasDate}
-      </div>
-    );
-  }
-
-  if (sortKey === 'digitalRelease' && digitalRelease && !showDigitalRelease) {
-    const digitalReleaseDate = getRelativeDate({
-      date: digitalRelease,
-      shortDateFormat,
-      showRelativeDates,
-      timeFormat,
-      timeForToday: false,
-    });
-
-    return (
-      <div
-        className={styles.info}
-        title={`${translate('DigitalRelease')}: ${formatDate(
-          digitalRelease,
-          longDateFormat
-        )}`}
-      >
-        <Icon name={icons.GAME_FILE} /> {digitalReleaseDate}
-      </div>
-    );
-  }
-
-  if (
-    sortKey === 'physicalRelease' &&
-    physicalRelease &&
-    !showPhysicalRelease
-  ) {
-    const physicalReleaseDate = getRelativeDate({
-      date: physicalRelease,
-      shortDateFormat,
-      showRelativeDates,
-      timeFormat,
-      timeForToday: false,
-    });
-
-    return (
-      <div
-        className={styles.info}
-        title={`${translate('PhysicalRelease')}: ${formatDate(
-          physicalRelease,
-          longDateFormat
-        )}`}
-      >
-        <Icon name={icons.DISC} /> {physicalReleaseDate}
-      </div>
-    );
-  }
-
   if (sortKey === 'releaseDate' && releaseDate && !showReleaseDate) {
     return (
       <div
@@ -229,30 +139,10 @@ function GameIndexPosterInfo(props: GameIndexPosterInfoProps) {
     );
   }
 
-  if (!showImdbRating && sortKey === 'imdbRating' && !!ratings.imdb) {
+  if (!showCriticRating && sortKey === 'criticRating' && !!ratings.critic) {
     return (
       <div className={styles.info}>
-        <ImdbRating ratings={ratings} iconSize={12} />
-      </div>
-    );
-  }
-
-  if (
-    !showRottenTomatoesRating &&
-    sortKey === 'rottenTomatoesRating' &&
-    !!ratings.rottenTomatoes
-  ) {
-    return (
-      <div className={styles.info}>
-        <RottenTomatoRating ratings={ratings} iconSize={12} />
-      </div>
-    );
-  }
-
-  if (!showTraktRating && sortKey === 'traktRating' && !!ratings.trakt) {
-    return (
-      <div className={styles.info}>
-        <TraktRating ratings={ratings} iconSize={12} />
+        <CriticRating ratings={ratings} iconSize={12} />
       </div>
     );
   }
@@ -281,10 +171,6 @@ function GameIndexPosterInfo(props: GameIndexPosterInfoProps) {
         {formatBytes(sizeOnDisk)}
       </div>
     );
-  }
-
-  if (sortKey === 'certification') {
-    return <div className={styles.info}>{certification}</div>;
   }
 
   if (sortKey === 'originalTitle' && originalTitle) {

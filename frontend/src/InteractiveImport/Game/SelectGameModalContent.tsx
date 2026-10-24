@@ -40,8 +40,8 @@ const columns = [
     isVisible: true,
   },
   {
-    name: 'imdbId',
-    label: () => translate('IMDbId'),
+    name: 'platform',
+    label: () => translate('Platform'),
     isVisible: true,
   },
   {
@@ -92,7 +92,7 @@ function Row({ index, style, data }: ListChildComponentProps<RowItemData>) {
         key={game.id}
         title={game.title}
         igdbId={game.igdbId}
-        imdbId={game.imdbId}
+        platform={game.platform?.shortName}
         year={game.year}
       />
     </VirtualTableRowButton>
@@ -173,7 +173,7 @@ function SelectGameModalContent(props: SelectGameModalContentProps) {
         (item) =>
           item.title.toLowerCase().includes(filter.toLowerCase()) ||
           item.igdbId.toString().includes(filter) ||
-          item.imdbId?.includes(filter)
+          item.platform?.name.toLowerCase().includes(filter.toLowerCase())
       ),
     [sortedGames, filter]
   );

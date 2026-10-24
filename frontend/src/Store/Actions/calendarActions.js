@@ -43,9 +43,7 @@ export const defaultState = {
 
   options: {
     showGameInformation: true,
-    showCinemaRelease: true,
-    showDigitalRelease: true,
-    showPhysicalRelease: true,
+    showReleaseDate: true,
     showCutoffUnmetIcon: false,
     fullColorEvents: false
   },

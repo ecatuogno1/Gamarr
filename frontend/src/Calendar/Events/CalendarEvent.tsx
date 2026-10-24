@@ -6,6 +6,7 @@ import AppState from 'App/State/AppState';
 import getStatusStyle from 'Calendar/getStatusStyle';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
+import { GamePlatform } from 'Game/Game';
 import useGameFile from 'GameFile/useGameFile';
 import { icons, kinds } from 'Helpers/Props';
 import { createQueueItemSelectorForHook } from 'Store/Selectors/createQueueItemSelector';
@@ -20,11 +21,9 @@ interface CalendarEventProps {
   title: string;
   titleSlug: string;
   genres: string[];
-  certification?: string;
+  platform?: GamePlatform;
   date: string;
-  inCinemas?: string;
-  digitalRelease?: string;
-  physicalRelease?: string;
+  releaseDate?: string;
   isAvailable: boolean;
   monitored: boolean;
   hasFile: boolean;
@@ -37,11 +36,9 @@ function CalendarEvent({
   title,
   titleSlug,
   genres = [],
-  certification,
+  platform,
   date,
-  inCinemas,
-  digitalRelease,
-  physicalRelease,
+  releaseDate,
   isAvailable,
   monitored: isMonitored,
   hasFile,
@@ -54,9 +51,7 @@ function CalendarEvent({
 
   const {
     showGameInformation,
-    showCinemaRelease,
-    showDigitalRelease,
-    showPhysicalRelease,
+    showReleaseDate,
     showCutoffUnmetIcon,
     fullColorEvents,
   } = useSelector((state: AppState) => state.calendar.options);
@@ -77,39 +72,15 @@ function CalendarEvent({
     const types = [];
 
     if (
-      showCinemaRelease &&
-      inCinemas &&
-      momentDate.isSame(moment(inCinemas), 'day')
+      showReleaseDate &&
+      releaseDate &&
+      momentDate.isSame(moment(releaseDate), 'day')
     ) {
-      types.push('Cinemas');
-    }
-
-    if (
-      showDigitalRelease &&
-      digitalRelease &&
-      momentDate.isSame(moment(digitalRelease), 'day')
-    ) {
-      types.push('Digital');
-    }
-
-    if (
-      showPhysicalRelease &&
-      physicalRelease &&
-      momentDate.isSame(moment(physicalRelease), 'day')
-    ) {
-      types.push('Physical');
+      types.push('Release');
     }
 
     return types;
-  }, [
-    date,
-    showCinemaRelease,
-    showDigitalRelease,
-    showPhysicalRelease,
-    inCinemas,
-    digitalRelease,
-    physicalRelease,
-  ]);
+  }, [date, showReleaseDate, releaseDate]);
 
   return (
     <div
@@ -168,7 +139,7 @@ function CalendarEvent({
             <div className={styles.gameInfo}>
               <div className={styles.eventType}>{eventTypes.join(', ')}</div>
 
-              <div>{certification}</div>
+              <div>{platform?.shortName}</div>
             </div>
           </>
         ) : null}

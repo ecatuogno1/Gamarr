@@ -1,15 +1,13 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import CriticRating from 'Components/CriticRating';
 import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import ImdbRating from 'Components/ImdbRating';
 import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
-import RottenTomatoRating from 'Components/RottenTomatoRating';
 import Popover from 'Components/Tooltip/Popover';
-import TraktRating from 'Components/TraktRating';
 import AddNewDiscoverGameModal from 'DiscoverGame/AddNewDiscoverGameModal';
 import ExcludeGameModal from 'DiscoverGame/Exclusion/ExcludeGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
@@ -80,7 +78,7 @@ class DiscoverGamePoster extends Component {
   render() {
     const {
       igdbId,
-      imdbId,
+      igdbSlug,
       youTubeTrailerId,
       title,
       year,
@@ -91,9 +89,7 @@ class DiscoverGamePoster extends Component {
       posterHeight,
       showTitle,
       showIgdbRating,
-      showImdbRating,
-      showRottenTomatoesRating,
-      showTraktRating,
+      showCriticRating,
       ratings,
       isExisting,
       isExcluded,
@@ -101,7 +97,6 @@ class DiscoverGamePoster extends Component {
       showRelativeDates,
       shortDateFormat,
       timeFormat,
-      gameRuntimeFormat,
       ...otherProps
     } = this.props;
 
@@ -152,7 +147,7 @@ class DiscoverGamePoster extends Component {
                 body={
                   <GameDetailsLinks
                     igdbId={igdbId}
-                    imdbId={imdbId}
+                    igdbSlug={igdbSlug}
                     youTubeTrailerId={youTubeTrailerId}
                   />
                 }
@@ -213,21 +208,9 @@ class DiscoverGamePoster extends Component {
           </div>
         ) : null}
 
-        {showImdbRating && !!ratings.imdb ? (
+        {showCriticRating && !!ratings.critic ? (
           <div className={styles.title}>
-            <ImdbRating ratings={ratings} iconSize={12} />
-          </div>
-        ) : null}
-
-        {showRottenTomatoesRating && !!ratings.rottenTomatoes ? (
-          <div className={styles.title}>
-            <RottenTomatoRating ratings={ratings} iconSize={12} />
-          </div>
-        ) : null}
-
-        {showTraktRating && !!ratings.trakt ? (
-          <div className={styles.title}>
-            <TraktRating ratings={ratings} iconSize={12} />
+            <CriticRating ratings={ratings} iconSize={12} />
           </div>
         ) : null}
 
@@ -235,12 +218,9 @@ class DiscoverGamePoster extends Component {
           showRelativeDates={showRelativeDates}
           shortDateFormat={shortDateFormat}
           timeFormat={timeFormat}
-          gameRuntimeFormat={gameRuntimeFormat}
           ratings={ratings}
           showIgdbRating={showIgdbRating}
-          showImdbRating={showImdbRating}
-          showRottenTomatoesRating={showRottenTomatoesRating}
-          showTraktRating={showTraktRating}
+          showCriticRating={showCriticRating}
           {...otherProps}
         />
 
@@ -269,7 +249,7 @@ class DiscoverGamePoster extends Component {
 
 DiscoverGamePoster.propTypes = {
   igdbId: PropTypes.number.isRequired,
-  imdbId: PropTypes.string,
+  igdbSlug: PropTypes.string,
   youTubeTrailerId: PropTypes.string,
   title: PropTypes.string.isRequired,
   year: PropTypes.number.isRequired,
@@ -281,14 +261,11 @@ DiscoverGamePoster.propTypes = {
   posterHeight: PropTypes.number.isRequired,
   showTitle: PropTypes.bool.isRequired,
   showIgdbRating: PropTypes.bool.isRequired,
-  showImdbRating: PropTypes.bool.isRequired,
-  showRottenTomatoesRating: PropTypes.bool.isRequired,
-  showTraktRating: PropTypes.bool.isRequired,
+  showCriticRating: PropTypes.bool.isRequired,
   ratings: PropTypes.object.isRequired,
   showRelativeDates: PropTypes.bool.isRequired,
   shortDateFormat: PropTypes.string.isRequired,
   timeFormat: PropTypes.string.isRequired,
-  gameRuntimeFormat: PropTypes.string.isRequired,
   isExisting: PropTypes.bool.isRequired,
   isExcluded: PropTypes.bool.isRequired,
   isSelected: PropTypes.bool,

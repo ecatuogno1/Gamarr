@@ -51,9 +51,7 @@ namespace Gamarr.Api.V3.Wanted
             var pagingSpec = pagingResource.MapToPagingSpec<GameResource, Game>(
                 new HashSet<string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    "gameMetadata.digitalRelease",
-                    "gameMetadata.inCinemas",
-                    "gameMetadata.physicalRelease",
+                    "gameMetadata.releaseDate",
                     "gameMetadata.sortTitle",
                     "gameMetadata.year",
                     "games.lastSearchTime"

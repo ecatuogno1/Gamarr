@@ -2,26 +2,20 @@
 // Please do not change this file!
 interface CssExports {
   'actions': string;
-  'certification': string;
   'collection': string;
-  'digitalRelease': string;
+  'criticRating': string;
+  'developers': string;
   'genres': string;
   'igdbRating': string;
-  'imdbRating': string;
-  'inCinemas': string;
   'isPopular': string;
   'isRecommendation': string;
   'isTrending': string;
   'lists': string;
   'originalLanguage': string;
-  'physicalRelease': string;
   'popularity': string;
-  'rottenTomatoesRating': string;
-  'runtime': string;
+  'releaseDate': string;
   'sortTitle': string;
   'status': string;
-  'studio': string;
-  'traktRating': string;
   'year': string;
 }
 export const cssExports: CssExports;

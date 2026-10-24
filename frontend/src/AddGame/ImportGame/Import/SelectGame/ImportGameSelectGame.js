@@ -160,7 +160,7 @@ class ImportGameSelectGame extends Component {
                     <ImportGameTitle
                       title={selectedGame.title}
                       year={selectedGame.year}
-                      studio={selectedGame.studio}
+                      platform={selectedGame.platform ? selectedGame.platform.shortName : null}
                       isExistingGame={isExistingGame}
                     /> :
                     null
@@ -259,7 +259,7 @@ class ImportGameSelectGame extends Component {
                                   igdbId={item.igdbId}
                                   title={item.title}
                                   year={item.year}
-                                  studio={item.studio}
+                                  platform={item.platform ? item.platform.shortName : null}
                                   onPress={this.onGameSelect}
                                 />
                               );

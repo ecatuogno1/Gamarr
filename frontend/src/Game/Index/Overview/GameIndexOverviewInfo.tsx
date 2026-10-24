@@ -26,14 +26,14 @@ interface RowInfoProps {
 
 interface GameIndexOverviewInfoProps {
   height: number;
-  showStudio: boolean;
+  showPlatform: boolean;
   showMonitored: boolean;
   showQualityProfile: boolean;
   showAdded: boolean;
   showPath: boolean;
   showSizeOnDisk: boolean;
   monitored: boolean;
-  studio?: string;
+  platform?: string;
   qualityProfile?: QualityProfile;
   added?: string;
   path: string;
@@ -50,9 +50,9 @@ const rows = [
     valueProp: 'monitored',
   },
   {
-    name: 'studio',
-    showProp: 'showStudio',
-    valueProp: 'studio',
+    name: 'platform',
+    showProp: 'showPlatform',
+    valueProp: 'platform',
   },
   {
     name: 'qualityProfileId',
@@ -93,11 +93,11 @@ function getInfoRowProps(
     };
   }
 
-  if (name === 'studio') {
+  if (name === 'platform') {
     return {
-      title: 'Studio',
+      title: 'Platform',
       iconName: icons.STUDIO,
-      label: props.studio ?? '',
+      label: props.platform ?? '',
     };
   }
 

@@ -6,6 +6,7 @@ import { filterBuilderTypes, filterBuilderValueTypes, filterTypes, sortDirection
 import { createThunk, handleThunks } from 'Store/thunks';
 import sortByProp from 'Utilities/Array/sortByProp';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
+import getDefaultPlatformId from 'Utilities/Game/getDefaultPlatformId';
 import getNewGame from 'Utilities/Game/getNewGame';
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
@@ -60,19 +61,16 @@ export const defaultState = {
     size: 'large',
     showTitle: false,
     showIgdbRating: false,
-    showImdbRating: false,
-    showRottenTomatoesRating: false,
-    showTraktRating: false
+    showCriticRating: false
   },
 
   overviewOptions: {
     size: 'medium',
     showYear: true,
-    showStudio: true,
+    showPlatform: true,
     showGenres: true,
     showIgdbRating: false,
-    showImdbRating: false,
-    showRottenTomatoesRating: false,
+    showCriticRating: false,
     showCertification: true
   },
 
@@ -129,8 +127,8 @@ export const defaultState = {
       isVisible: false
     },
     {
-      name: 'studio',
-      label: () => translate('Studio'),
+      name: 'developers',
+      label: () => translate('Developers'),
       isSortable: true,
       isVisible: true
     },
@@ -141,28 +139,10 @@ export const defaultState = {
       isVisible: false
     },
     {
-      name: 'inCinemas',
-      label: () => translate('InCinemas'),
+      name: 'releaseDate',
+      label: () => translate('ReleaseDate'),
       isSortable: true,
       isVisible: true
-    },
-    {
-      name: 'digitalRelease',
-      label: () => translate('DigitalRelease'),
-      isSortable: true,
-      isVisible: false
-    },
-    {
-      name: 'physicalRelease',
-      label: () => translate('PhysicalRelease'),
-      isSortable: true,
-      isVisible: false
-    },
-    {
-      name: 'runtime',
-      label: () => translate('Runtime'),
-      isSortable: true,
-      isVisible: false
     },
     {
       name: 'genres',
@@ -177,32 +157,8 @@ export const defaultState = {
       isVisible: false
     },
     {
-      name: 'imdbRating',
-      label: () => translate('ImdbRating'),
-      isSortable: true,
-      isVisible: false
-    },
-    {
-      name: 'rottenTomatoesRating',
-      label: () => translate('RottenTomatoesRating'),
-      isSortable: true,
-      isVisible: false
-    },
-    {
-      name: 'traktRating',
-      label: () => translate('TraktRating'),
-      isSortable: true,
-      isVisible: false
-    },
-    {
       name: 'popularity',
       label: () => translate('Popularity'),
-      isSortable: true,
-      isVisible: false
-    },
-    {
-      name: 'certification',
-      label: () => translate('Certification'),
       isSortable: true,
       isVisible: false
     },
@@ -232,10 +188,6 @@ export const defaultState = {
         result++;
       }
 
-      if (item.status === 'inCinemas') {
-        result += 2;
-      }
-
       if (item.status === 'released') {
         result += 3;
       }
@@ -255,39 +207,15 @@ export const defaultState = {
       return originalLanguage.name;
     },
 
-    studio: function(item) {
-      const studio = item.studio;
+    developers: function(item) {
+      const { developers = [] } = item;
 
-      return studio ? studio.toLowerCase() : '';
+      return developers.length ? developers[0].toLowerCase() : '';
     },
 
-    inCinemas: function(item, direction) {
-      if (item.inCinemas) {
-        return moment(item.inCinemas).unix();
-      }
-
-      if (direction === sortDirections.DESCENDING) {
-        return -1 * Number.MAX_VALUE;
-      }
-
-      return Number.MAX_VALUE;
-    },
-
-    physicalRelease: function(item, direction) {
-      if (item.physicalRelease) {
-        return moment(item.physicalRelease).unix();
-      }
-
-      if (direction === sortDirections.DESCENDING) {
-        return -1 * Number.MAX_VALUE;
-      }
-
-      return Number.MAX_VALUE;
-    },
-
-    digitalRelease: function(item, direction) {
-      if (item.digitalRelease) {
-        return moment(item.digitalRelease).unix();
+    releaseDate: function(item, direction) {
+      if (item.releaseDate) {
+        return moment(item.releaseDate).unix();
       }
 
       if (direction === sortDirections.DESCENDING) {
@@ -299,19 +227,8 @@ export const defaultState = {
 
     igdbRating: function({ ratings = {} }) {
       return ratings.igdb ? ratings.igdb.value : 0;
-    },
-
-    imdbRating: function({ ratings = {} }) {
-      return ratings.imdb ? ratings.imdb.value : 0;
-    },
-
-    rottenTomatoesRating: function({ ratings = {} }) {
-      return ratings.rottenTomatoes ? ratings.rottenTomatoes.value : -1;
-    },
-
-    traktRating: function({ ratings = {} }) {
-      return ratings.trakt ? ratings.trakt.value : 0;
     }
+
   },
 
   selectedFilterKey: 'newNotExcluded',
@@ -372,20 +289,24 @@ export const defaultState = {
       valueType: filterBuilderValueTypes.RELEASE_STATUS
     },
     {
-      name: 'studio',
-      label: () => translate('Studio'),
+      name: 'developers',
+      label: () => translate('Developers'),
       type: filterBuilderTypes.ARRAY,
       optionsSelector: function(items) {
-        const tagList = items.reduce((acc, game) => {
-          acc.push({
-            id: game.studio,
-            name: game.studio
+        const developerList = items.reduce((acc, { developers = [] }) => {
+          developers.forEach((developer) => {
+            if (acc.findIndex((a) => a.id === developer) === -1) {
+              acc.push({
+                id: developer,
+                name: developer
+              });
+            }
           });
 
           return acc;
         }, []);
 
-        return tagList.sort(sortByProp('name'));
+        return developerList.sort(sortByProp('name'));
       }
     },
     {
@@ -427,27 +348,10 @@ export const defaultState = {
       }
     },
     {
-      name: 'inCinemas',
-      label: () => translate('InCinemas'),
+      name: 'releaseDate',
+      label: () => translate('ReleaseDate'),
       type: filterBuilderTypes.DATE,
       valueType: filterBuilderValueTypes.DATE
-    },
-    {
-      name: 'physicalRelease',
-      label: () => translate('PhysicalRelease'),
-      type: filterBuilderTypes.DATE,
-      valueType: filterBuilderValueTypes.DATE
-    },
-    {
-      name: 'digitalRelease',
-      label: () => translate('DigitalRelease'),
-      type: filterBuilderTypes.DATE,
-      valueType: filterBuilderValueTypes.DATE
-    },
-    {
-      name: 'runtime',
-      label: () => translate('Runtime'),
-      type: filterBuilderTypes.NUMBER
     },
     {
       name: 'genres',
@@ -491,34 +395,9 @@ export const defaultState = {
       type: filterBuilderTypes.NUMBER
     },
     {
-      name: 'imdbRating',
-      label: () => translate('ImdbRating'),
-      type: filterBuilderTypes.NUMBER
-    },
-    {
-      name: 'imdbVotes',
-      label: () => translate('ImdbVotes'),
-      type: filterBuilderTypes.NUMBER
-    },
-    {
-      name: 'traktRating',
-      label: () => translate('TraktRating'),
-      type: filterBuilderTypes.NUMBER
-    },
-    {
-      name: 'traktVotes',
-      label: () => translate('TraktVotes'),
-      type: filterBuilderTypes.NUMBER
-    },
-    {
       name: 'popularity',
       label: () => translate('Popularity'),
       type: filterBuilderTypes.NUMBER
-    },
-    {
-      name: 'certification',
-      label: () => translate('Certification'),
-      type: filterBuilderTypes.EXACT
     },
     {
       name: 'lists',
@@ -625,7 +504,6 @@ export const setAddGameValue = createAction(SET_ADD_GAME_VALUE, (payload) => {
 // Action Handlers
 
 export const actionHandlers = handleThunks({
-
   [FETCH_DISCOVER_GAMES]: function(getState, payload, dispatch) {
     dispatch(set({ section, isFetching: true }));
 
@@ -679,7 +557,13 @@ export const actionHandlers = handleThunks({
     const items = getState().discoverGame.items;
     const itemToUpdate = _.find(items, { igdbId });
 
-    const newGame = getNewGame(_.cloneDeep(itemToUpdate), payload);
+    const platformId = getDefaultPlatformId(
+      getState().settings.platforms.items,
+      itemToUpdate.availablePlatformIgdbIds,
+      itemToUpdate.platformId
+    );
+
+    const newGame = getNewGame(_.cloneDeep(itemToUpdate), { ...payload, platformId });
     newGame.id = 0;
 
     const promise = createAjaxRequest({
@@ -776,7 +660,6 @@ export const actionHandlers = handleThunks({
   },
 
   [ADD_IMPORT_LIST_EXCLUSIONS]: function(getState, payload, dispatch) {
-
     const ids = payload.ids;
     const items = getState().discoverGame.items;
 
@@ -829,7 +712,6 @@ export const actionHandlers = handleThunks({
 // Reducers
 
 export const reducers = createHandleActions({
-
   [SET_ADD_GAME_VALUE]: createSetSettingValueReducer(section),
 
   [SET_ADD_GAME_DEFAULT]: function(state, { payload }) {

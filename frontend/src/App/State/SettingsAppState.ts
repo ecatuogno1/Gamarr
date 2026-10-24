@@ -17,6 +17,7 @@ import ImportListOptionsSettings from 'typings/ImportListOptionsSettings';
 import Indexer from 'typings/Indexer';
 import IndexerFlag from 'typings/IndexerFlag';
 import Notification from 'typings/Notification';
+import Platform from 'typings/Platform';
 import QualityProfile from 'typings/QualityProfile';
 import General from 'typings/Settings/General';
 import IndexerOptions from 'typings/Settings/IndexerOptions';
@@ -121,6 +122,7 @@ export interface ImportListExclusionsSettingsAppState
 
 export type IndexerFlagSettingsAppState = AppSectionState<IndexerFlag>;
 export type LanguageSettingsAppState = AppSectionState<Language>;
+export type PlatformSettingsAppState = AppSectionState<Platform>;
 export type UiSettingsAppState = AppSectionItemState<UiSettings>;
 
 interface SettingsAppState {
@@ -143,6 +145,7 @@ interface SettingsAppState {
   naming: NamingAppState;
   namingExamples: NamingExamplesAppState;
   notifications: NotificationAppState;
+  platforms: PlatformSettingsAppState;
   qualityProfiles: QualityProfilesAppState;
   releaseProfiles: ReleaseProfilesAppState;
   ui: UiSettingsAppState;
