@@ -10,9 +10,10 @@ using NzbDrone.Core.MediaFiles;
 
 namespace NzbDrone.Core.Extras.Metadata.Consumers.EmulationStation
 {
-    // EmulationStation (ES-DE, RetroPie, Batocera) frontends: a gamelist.xml in the platform folder (the parent of the
-    // game folders) and cover, screenshot and fanart images in a media folder inside the game folder, referenced from
-    // the gamelist so they don't depend on ES-DE's downloaded_media folder.
+    // EmulationStation (ES-DE, RetroPie, Batocera) frontends: a gamelist.xml per platform folder (system) and cover,
+    // screenshot and fanart images. Either in the ROM folders (gamelist.xml in the platform folder, images in a media
+    // folder inside the game folder referenced from the gamelist) or in ES-DE's gamelists and downloaded_media
+    // directories, see EmulationStationGamelistService.
     public class EmulationStationMetadata : MetadataBase<EmulationStationMetadataSettings>
     {
         public const string MediaFolder = "media";
@@ -58,7 +59,7 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.EmulationStation
             {
                 // gamelist.xml is shared by every game of the platform folder, so it isn't tracked as a metadata file
                 // of the game (which would delete it with the game).
-                _gamelistService.UpdateGame(game, gameFile, Settings.GameImages ? GetImages(game) : new List<ImageFileResult>());
+                _gamelistService.UpdateGame(game, gameFile, Settings.GameImages ? GetImages(game) : new List<ImageFileResult>(), Settings);
             }
 
             return null;
@@ -66,7 +67,8 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.EmulationStation
 
         public override List<ImageFileResult> GameImages(Game game)
         {
-            return Settings.GameImages ? GetImages(game) : new List<ImageFileResult>();
+            // With ES-DE's directories the images go to its downloaded_media folder (written with the gamelist)
+            return Settings.GameImages && !Settings.UseEsDeDirectories ? GetImages(game) : new List<ImageFileResult>();
         }
 
         public static List<ImageFileResult> GetImages(Game game)

@@ -109,22 +109,38 @@ container or on another machine, set up remote path mappings like in the other \
 
 ## 6. EmulationStation (ES-DE) metadata
 
-**Settings > Metadata > EmulationStation (ES-DE)** keeps a `gamelist.xml` in each platform folder (the parent of the
-game folders) when games are imported or rescanned:
+**Settings > Metadata > EmulationStation (ES-DE)** keeps a `gamelist.xml` per platform (ES-DE "system") when games are
+imported or rescanned:
 
 - one `<game>` entry per Gamarr game with path, name, description, release date, developer, publisher, genre,
-  players (only when IGDB says single player), rating (0–1) and image paths;
-- with **Game Images** on, `media/cover.jpg`, `media/screenshot.jpg` and `media/fanart.jpg` are saved inside the game
-  folder and referenced from the entry (`<image>`, `<thumbnail>`, `<fanart>`);
-- existing entries of other games are kept. Gamarr finds its own entries by `id`/`source="IGDB"` or by a path inside
-  the game folder, updates the fields it manages and keeps the rest (favorite, playcount, lastplayed, hidden…). An
-  invalid gamelist.xml isn't touched. Deleting a game with its files removes its entry.
+  players (only when IGDB says single player) and rating (0–1). `<path>` is relative to the platform folder, e.g.
+  `./Super Mario World (1990)/Super Mario World (1990) (USA).sfc`;
+- existing entries of other games are kept. Gamarr finds its own entries by `id`/`source="IGDB"` or by a path inside the
+  game folder, updates the fields it manages and keeps the rest (favorite, playcount, lastplayed, hidden…). An
+  invalid gamelist.xml isn't touched. Deleting a game with its files removes its entry, moving a game (new root folder or
+  platform) moves its entry to the gamelist of the new location.
 
-Frontend notes: EmulationStation, RetroPie and Batocera read `gamelist.xml` and the image tags from the ROM folders.
-ES-DE keeps its gamelists in its own `ES-DE/gamelists/<system>/` folder by default and uses its own
-`downloaded_media` folder for images; to use Gamarr's files there, either enable ES-DE's legacy gamelist location
-option (reads gamelist.xml from the ROM directories) or copy/link the files into `ES-DE/gamelists/<system>/`. Check
-the ES-DE documentation for your version.
+Pick the **gamelist.xml Location** that matches your frontend:
+
+| Location | gamelist.xml | Images (with **Game Images** on) | Frontends |
+|---|---|---|---|
+| ROM folder (default) | `<root>/<platform folder>/gamelist.xml` | `<game folder>/media/cover.jpg`, `screenshot.jpg`, `fanart.jpg`, referenced from `<image>`, `<thumbnail>`, `<fanart>` | RetroPie, Batocera, EmulationStation, ES-DE with `LegacyGamelistFileLocation` |
+| ES-DE gamelists directory | `<ES-DE Gamelists Directory>/<platform folder>/gamelist.xml` (default `~/ES-DE/gamelists`) | `<ES-DE Media Directory>/<platform folder>/covers\|screenshots\|fanart/<game folder>/<game file name>.jpg` (default `~/ES-DE/downloaded_media`) | ES-DE 2.0 and later |
+
+How the frontends read them:
+
+- **ES-DE 2.0+** only reads `~/ES-DE/gamelists/<system>/gamelist.xml` and ignores `gamelist.xml` files in the ROM
+  folders unless `LegacyGamelistFileLocation` is set to `true` in `es_settings.xml`. It ignores image tags and finds media
+  by the ROM's path and file name below `downloaded_media/<system>/<covers|screenshots|fanart…>/`, mirroring sub folders,
+  which is the layout the ES-DE location writes. Use the ES-DE location, with the directories pointing at the ES-DE folder
+  of the machine running ES-DE (`~` is the home folder of the user Gamarr runs as; in Docker map the ES-DE folder into the
+  container and use the mapped path). ES-DE system names are the platform folder names (`snes`, `psx`, `gc`…), so the
+  root folder works as ES-DE's ROM directory.
+- **RetroPie** reads `<ROM folder>/gamelist.xml` first, then `~/.emulationstation/gamelists/<system>/`, and **Batocera**
+  reads `/userdata/roms/<system>/gamelist.xml`; both use the `./media/...` image tags. Use the ROM folder location.
+
+When ES-DE itself saves an entry (e.g. after you mark a favorite) it rewrites the whole entry; Gamarr's fields are written
+again on the next rescan.
 
 ## Troubleshooting
 
