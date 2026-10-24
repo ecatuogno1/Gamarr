@@ -7,9 +7,7 @@ import Label from 'Components/Label';
 import Link from 'Components/Link/Link';
 import Game from 'Game/Game';
 import { kinds, sizes } from 'Helpers/Props';
-import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
-import sortByProp from 'Utilities/Array/sortByProp';
 import formatDate from 'Utilities/Date/formatDate';
 import translate from 'Utilities/String/translate';
 import styles from './GameDetailsInfo.css';
@@ -20,12 +18,10 @@ interface GameDetailsInfoProps {
   game: Game;
 }
 
-// Game specific details from IGDB: release dates per platform, the same game on other platforms of the library,
-// series, themes, game modes, age ratings and store links.
+// Game specific details from IGDB: release dates per platform (the platform versions in the library are in the
+// title page's platform switcher), series, themes, game modes, age ratings and store links.
 function GameDetailsInfo({ game }: GameDetailsInfoProps) {
   const {
-    id,
-    igdbId,
     platform,
     platformReleaseDates = [],
     themes = [],
@@ -34,17 +30,10 @@ function GameDetailsInfo({ game }: GameDetailsInfoProps) {
     websites = [],
   } = game;
 
-  const allGames = useSelector(createAllGamesSelector());
   const platforms = useSelector(
     (state: AppState) => state.settings.platforms.items
   );
   const { longDateFormat } = useSelector(createUISettingsSelector());
-
-  const otherPlatformGames = useMemo(() => {
-    return allGames
-      .filter((g) => g.igdbId === igdbId && g.id !== id)
-      .sort(sortByProp('title'));
-  }, [allGames, igdbId, id]);
 
   const releaseDates = useMemo(() => {
     return platformReleaseDates
@@ -68,23 +57,6 @@ function GameDetailsInfo({ game }: GameDetailsInfoProps) {
 
   return (
     <DescriptionList>
-      {otherPlatformGames.length ? (
-        <DescriptionListItem
-          title={translate('AlsoInLibraryOn')}
-          data={
-            <div className={styles.labels}>
-              {otherPlatformGames.map((g) => (
-                <Link key={g.id} to={`/game/${g.titleSlug}`}>
-                  <Label kind={kinds.INFO} size={sizes.MEDIUM}>
-                    {g.platform?.name ?? g.platformId}
-                  </Label>
-                </Link>
-              ))}
-            </div>
-          }
-        />
-      ) : null}
-
       {releaseDates.length ? (
         <DescriptionListItem
           title={translate('ReleaseDates')}

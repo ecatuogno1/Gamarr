@@ -77,7 +77,6 @@
   "AllowedHostsNotConfiguredHealthCheckMessage": "Allowed Hosts is not configured, {appName} will accept requests for any hostname. Set Allowed Hosts in General settings to restrict which hostnames can be used to reach {appName}.",
   "AlreadyInLibraryOn": "Already in your library on {platforms}, pick another platform to add it again",
   "AlreadyInYourLibrary": "Already in your library",
-  "AlsoInLibraryOn": "Also in Library On",
   "AlternativeTitle": "Alternative Title",
   "AlternativeTitlesLoadError": "Unable to load alternative titles.",
   "Always": "Always",
