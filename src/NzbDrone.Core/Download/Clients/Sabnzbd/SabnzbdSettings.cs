@@ -39,7 +39,7 @@ namespace NzbDrone.Core.Download.Clients.Sabnzbd
         {
             Host = "localhost";
             Port = 8080;
-            GameCategory = "games";
+            GameCategory = "gamarr";
             RecentGamePriority = (int)SabnzbdPriority.Default;
             OlderGamePriority = (int)SabnzbdPriority.Default;
         }

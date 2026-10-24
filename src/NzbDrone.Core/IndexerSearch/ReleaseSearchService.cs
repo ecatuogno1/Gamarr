@@ -7,10 +7,12 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.DecisionEngine;
 using NzbDrone.Core.Games;
+using NzbDrone.Core.Games.AlternativeTitles;
 using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Indexers;
 using NzbDrone.Core.IndexerSearch.Definitions;
 using NzbDrone.Core.Parser.Model;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Profiles.Qualities;
 
 namespace NzbDrone.Core.IndexerSearch
@@ -23,11 +25,14 @@ namespace NzbDrone.Core.IndexerSearch
 
     public class ReleaseSearchService : ISearchForReleases
     {
+        private const int MaxAlternativeTitles = 5;
+
         private readonly IIndexerFactory _indexerFactory;
         private readonly IMakeDownloadDecision _makeDownloadDecision;
         private readonly IGameService _gameService;
         private readonly IGameTranslationService _gameTranslationService;
         private readonly IQualityProfileService _qualityProfileService;
+        private readonly IPlatformService _platformService;
         private readonly Logger _logger;
 
         public ReleaseSearchService(IIndexerFactory indexerFactory,
@@ -35,6 +40,7 @@ namespace NzbDrone.Core.IndexerSearch
                                 IGameService gameService,
                                 IGameTranslationService gameTranslationService,
                                 IQualityProfileService qualityProfileService,
+                                IPlatformService platformService,
                                 Logger logger)
         {
             _indexerFactory = indexerFactory;
@@ -42,6 +48,7 @@ namespace NzbDrone.Core.IndexerSearch
             _gameService = gameService;
             _gameTranslationService = gameTranslationService;
             _qualityProfileService = qualityProfileService;
+            _platformService = platformService;
             _logger = logger;
         }
 
@@ -71,6 +78,7 @@ namespace NzbDrone.Core.IndexerSearch
             var spec = new TSpec
             {
                 Game = game,
+                Platform = game.Platform ?? (game.PlatformId > 0 ? _platformService.Find(game.PlatformId) : null),
                 UserInvokedSearch = userInvokedSearch,
                 InteractiveSearch = interactiveSearch
             };
@@ -90,9 +98,28 @@ namespace NzbDrone.Core.IndexerSearch
                 queryTranslations.Add(translation.Title);
             }
 
+            // IGDB alternative names (regional titles, subtitles left out etc.), skipping ones in non-latin scripts
+            // since releases are named in latin script. Capped so a game with many names doesn't flood the indexers.
+            var alternativeTitles = game.GameMetadata.Value.AlternativeTitles?
+                .Where(a => a.SourceType != SourceType.Indexer && IsSearchableTitle(a.Title))
+                .Select(a => a.Title)
+                .Take(MaxAlternativeTitles) ?? Enumerable.Empty<string>();
+
+            queryTranslations.AddRange(alternativeTitles);
+
             spec.SceneTitles = queryTranslations.Where(t => t.IsNotNullOrWhiteSpace()).Distinct(StringComparer.InvariantCultureIgnoreCase).ToList();
 
             return spec;
+        }
+
+        private static bool IsSearchableTitle(string title)
+        {
+            if (title.IsNullOrWhiteSpace() || title.Trim().Length < 3)
+            {
+                return false;
+            }
+
+            return title.RemoveAccent().All(c => c < 0x250);
         }
 
         private async Task<List<DownloadDecision>> Dispatch(Func<IIndexer, Task<IList<ReleaseInfo>>> searchAction, SearchCriteriaBase criteriaBase)

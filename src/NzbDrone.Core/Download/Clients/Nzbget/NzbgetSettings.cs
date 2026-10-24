@@ -28,7 +28,7 @@ namespace NzbDrone.Core.Download.Clients.Nzbget
         {
             Host = "localhost";
             Port = 6789;
-            GameCategory = "Games";
+            GameCategory = "gamarr";
             Username = "nzbget";
             Password = "tegbzn6789";
             RecentGamePriority = (int)NzbgetPriority.Normal;

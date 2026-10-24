@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Indexers.Newznab
                 yield return GetDefinition("DrunkenSlug", GetSettings("https://drunkenslug.com"));
                 yield return GetDefinition("Nzb.su", GetSettings("https://api.nzb.su"));
                 yield return GetDefinition("NZBCat", GetSettings("https://nzb.cat"));
-                yield return GetDefinition("NZBFinder.ws", GetSettings("https://nzbfinder.ws", categories: new[] { 2030, 2040, 2045, 2050, 2060, 2070 }));
+                yield return GetDefinition("NZBFinder.ws", GetSettings("https://nzbfinder.ws"));
                 yield return GetDefinition("NZBgeek", GetSettings("https://api.nzbgeek.info"));
                 yield return GetDefinition("nzbplanet.net", GetSettings("https://api.nzbplanet.net"));
                 yield return GetDefinition("SimplyNZBs", GetSettings("https://simplynzbs.com"));
@@ -141,13 +141,7 @@ namespace NzbDrone.Core.Indexers.Newznab
                     return null;
                 }
 
-                if (capabilities.SupportedGameSearchParameters != null &&
-                    new[] { "q", "igdbid", "imdbid" }.Any(v => capabilities.SupportedGameSearchParameters.Contains(v)))
-                {
-                    return null;
-                }
-
-                return new ValidationFailure(string.Empty, "This indexer does not support searching for games :(. Tell your indexer staff to enable this or force add the indexer by disabling search, adding the indexer and then enabling it again.");
+                return new ValidationFailure(string.Empty, "This indexer does not support text searches (t=search with q), which Gamarr needs to search for games. Tell your indexer staff to enable this or force add the indexer by disabling search, adding the indexer and then enabling it again.");
             }
             catch (Exception ex)
             {

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Equ;
 using FluentValidation;
 using NzbDrone.Core.Annotations;
+using NzbDrone.Core.Indexers.Newznab;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Validation;
@@ -34,10 +36,8 @@ namespace NzbDrone.Core.Indexers.FileList
 
             Categories = new[]
             {
-                (int)FileListCategories.Game_SD,
-                (int)FileListCategories.Game_HD,
-                (int)FileListCategories.Game_HDRO,
-                (int)FileListCategories.Game_4K
+                (int)FileListCategories.PcGames,
+                (int)FileListCategories.ConsoleGames
             };
 
             MultiLanguages = Array.Empty<int>();
@@ -81,33 +81,82 @@ namespace NzbDrone.Core.Indexers.FileList
         }
     }
 
+    // FileList's own category ids (the same ones Prowlarr and Jackett map to Newznab categories)
     public enum FileListCategories
     {
-        [FieldOption(Label = "Anime")]
-        Anime = 24,
-        [FieldOption(Label = "Animation")]
-        Animation = 15,
-        [FieldOption("Games SD")]
-        Game_SD = 1,
-        [FieldOption("Games DVD")]
-        Game_DVD = 2,
-        [FieldOption("Games DVD-RO")]
-        Game_DVDRO = 3,
-        [FieldOption("Games HD")]
-        Game_HD = 4,
-        [FieldOption("Games HD-RO")]
-        Game_HDRO = 19,
-        [FieldOption("Games 4K")]
-        Game_4K = 6,
-        [FieldOption("Games Blu-Ray")]
-        Game_BluRay = 20,
-        [FieldOption("Games 4K Blu-Ray")]
-        Game_BluRay4K = 26,
-        [FieldOption("Games 3D")]
-        Game_3D = 25,
-        [FieldOption("RO Dubbed")]
-        RoDubbed = 28,
-        [FieldOption("XXX")]
-        Xxx = 7
+        [FieldOption(Label = "Jocuri PC (PC Games)")]
+        PcGames = 9,
+        [FieldOption(Label = "Jocuri Console (Console Games)")]
+        ConsoleGames = 10,
+        [FieldOption(Label = "Programe (Software)")]
+        Software = 8,
+        [FieldOption(Label = "Linux")]
+        Linux = 17,
+        [FieldOption(Label = "Mobile")]
+        Mobile = 22,
+        [FieldOption(Label = "Diverse (Other)")]
+        Other = 18
+    }
+
+    public static class FileListCategoryMapping
+    {
+        private static readonly Dictionary<int, int> NewznabCategories = new()
+        {
+            { (int)FileListCategories.PcGames, NewznabStandardCategory.PCGames },
+            { (int)FileListCategories.ConsoleGames, NewznabStandardCategory.Console },
+            { (int)FileListCategories.Software, NewznabStandardCategory.PC },
+            { (int)FileListCategories.Linux, NewznabStandardCategory.PCIso },
+            { (int)FileListCategories.Mobile, NewznabStandardCategory.PCMobileOther }
+        };
+
+        public static int? ToNewznabCategory(int fileListCategory)
+        {
+            return NewznabCategories.TryGetValue(fileListCategory, out var category) ? category : null;
+        }
+
+        // The API returns the category name ("Jocuri PC"), not its id
+        public static List<int> ToNewznabCategories(string fileListCategory)
+        {
+            var result = new List<int>();
+
+            if (string.IsNullOrWhiteSpace(fileListCategory))
+            {
+                return result;
+            }
+
+            var category = fileListCategory.Trim();
+
+            if (category.Equals("Jocuri PC", StringComparison.InvariantCultureIgnoreCase))
+            {
+                result.Add(NewznabStandardCategory.PCGames);
+            }
+            else if (category.Equals("Jocuri Console", StringComparison.InvariantCultureIgnoreCase))
+            {
+                result.Add(NewznabStandardCategory.Console);
+            }
+
+            return result;
+        }
+
+        // The configured FileList categories that match the platform's Newznab categories, or all of them if none do
+        public static List<int> GetSearchCategories(IEnumerable<int> configuredCategories, IEnumerable<int> platformCategories)
+        {
+            var configured = configuredCategories.Distinct().ToList();
+            var platform = platformCategories?.ToList() ?? new List<int>();
+
+            if (platform.Count == 0)
+            {
+                return configured;
+            }
+
+            var matching = configured.Where(c =>
+            {
+                var newznab = ToNewznabCategory(c);
+
+                return newznab.HasValue && platform.Any(p => NewznabStandardCategory.Covers(newznab.Value, p) || NewznabStandardCategory.Covers(p, newznab.Value));
+            }).ToList();
+
+            return matching.Count > 0 ? matching : configured;
+        }
     }
 }

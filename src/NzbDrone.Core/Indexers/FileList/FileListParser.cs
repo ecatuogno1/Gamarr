@@ -39,12 +39,6 @@ namespace NzbDrone.Core.Indexers.FileList
             {
                 var id = result.Id;
 
-                var imdbId = 0;
-                if (result.ImdbId != null && result.ImdbId.Length > 2)
-                {
-                    imdbId = int.Parse(result.ImdbId.Substring(2));
-                }
-
                 torrentInfos.Add(new TorrentInfo
                 {
                     Guid = $"FileList-{id}",
@@ -55,7 +49,7 @@ namespace NzbDrone.Core.Indexers.FileList
                     Seeders = result.Seeders,
                     Peers = result.Leechers + result.Seeders,
                     PublishDate = result.UploadDate,
-                    ImdbId = imdbId,
+                    Categories = FileListCategoryMapping.ToNewznabCategories(result.Category),
                     IndexerFlags = GetIndexerFlags(result)
                 });
             }

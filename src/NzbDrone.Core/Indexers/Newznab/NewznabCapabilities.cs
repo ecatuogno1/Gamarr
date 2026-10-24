@@ -2,15 +2,14 @@ using System.Collections.Generic;
 
 namespace NzbDrone.Core.Indexers.Newznab
 {
+    // Gamarr only uses the basic t=search function. Newznab/Torznab have no game id parameters, so
+    // movie-search/tv-search (or a non-standard game-search) in the caps are ignored.
     public class NewznabCapabilities
     {
         public int DefaultPageSize { get; set; }
         public int MaxPageSize { get; set; }
         public string[] SupportedSearchParameters { get; set; }
-        public string[] SupportedGameSearchParameters { get; set; }
-        public bool SupportsAggregateIdSearch { get; set; }
         public string TextSearchEngine { get; set; }
-        public string GameTextSearchEngine { get; set; }
         public List<NewznabCategory> Categories { get; set; }
 
         public NewznabCapabilities()
@@ -18,10 +17,7 @@ namespace NzbDrone.Core.Indexers.Newznab
             DefaultPageSize = 100;
             MaxPageSize = 100;
             SupportedSearchParameters = new[] { "q" };
-            SupportedGameSearchParameters = new[] { "q", "imdbid", "imdbtitle", "imdbyear" };
-            SupportsAggregateIdSearch = false;
             TextSearchEngine = "sphinx"; // This should remain 'sphinx' for older newznab installs
-            GameTextSearchEngine = "sphinx"; // This should remain 'sphinx' for older newznab installs
             Categories = new List<NewznabCategory>();
         }
     }

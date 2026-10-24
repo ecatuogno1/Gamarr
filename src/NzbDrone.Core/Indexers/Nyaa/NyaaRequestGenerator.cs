@@ -24,7 +24,20 @@ namespace NzbDrone.Core.Indexers.Nyaa
 
             foreach (var queryTitle in searchCriteria.SceneTitles)
             {
-                pageableRequests.Add(GetPagedRequests(PrepareQuery($"{queryTitle} {searchCriteria.Game.Year}")));
+                pageableRequests.Add(GetPagedRequests(PrepareQuery(queryTitle)));
+            }
+
+            // Nyaa has a single games category (Software - Games, 6_2), so fall back to title + platform
+            var platformQueryTitles = searchCriteria.GetPlatformQueryTitles(searchCriteria.SceneTitles, false);
+
+            if (platformQueryTitles.Count > 0)
+            {
+                pageableRequests.AddTier();
+
+                foreach (var queryTitle in platformQueryTitles)
+                {
+                    pageableRequests.Add(GetPagedRequests(PrepareQuery(queryTitle)));
+                }
             }
 
             return pageableRequests;

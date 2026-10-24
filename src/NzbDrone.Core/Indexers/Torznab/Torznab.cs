@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Indexers.Torznab
                 Name = name,
                 Implementation = GetType().Name,
                 Settings = settings,
-                Protocol = DownloadProtocol.Usenet,
+                Protocol = DownloadProtocol.Torrent,
                 SupportsRss = SupportsRss,
                 SupportsSearch = SupportsSearch
             };
@@ -134,13 +134,7 @@ namespace NzbDrone.Core.Indexers.Torznab
                     return null;
                 }
 
-                if (capabilities.SupportedGameSearchParameters != null &&
-                    new[] { "q", "igdbid", "imdbid" }.Any(v => capabilities.SupportedGameSearchParameters.Contains(v)))
-                {
-                    return null;
-                }
-
-                return new ValidationFailure(string.Empty, "This indexer does not support searching for games :(. Tell your indexer staff to enable this or force add the indexer by disabling search, adding the indexer and then enabling it again.");
+                return new ValidationFailure(string.Empty, "This indexer does not support text searches (t=search with q), which Gamarr needs to search for games. Tell your indexer staff to enable this or force add the indexer by disabling search, adding the indexer and then enabling it again.");
             }
             catch (Exception ex)
             {

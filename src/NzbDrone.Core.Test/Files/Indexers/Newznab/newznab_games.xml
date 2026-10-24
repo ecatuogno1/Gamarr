@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:newznab="http://www.newznab.com/DTD/2010/feeds/attributes/">
+  <channel>
+    <atom:link href="https://nzbindexer.local/api" rel="self" type="application/rss+xml" />
+    <title>nzbindexer.local</title>
+    <description>nzbindexer.local Feed</description>
+    <link>https://nzbindexer.local/</link>
+    <language>en-gb</language>
+    <webMaster>info@nzbindexer.local (nzbindexer.local)</webMaster>
+    <category></category>
+    <newznab:response offset="0" total="2" />
+    <item>
+      <title>Mario.Kart.Wii.PAL.WII-ZRY</title>
+      <guid isPermaLink="true">https://nzbindexer.local/details/4f2a1b3c</guid>
+      <link>https://nzbindexer.local/getnzb/4f2a1b3c.nzb&amp;i=1&amp;r=xxx</link>
+      <comments>https://nzbindexer.local/details/4f2a1b3c#comments</comments>
+      <pubDate>Fri, 02 Oct 2026 10:00:00 +0000</pubDate>
+      <category>Console &gt; Wii</category>
+      <description>Mario.Kart.Wii.PAL.WII-ZRY</description>
+      <enclosure url="https://nzbindexer.local/getnzb/4f2a1b3c.nzb&amp;i=1&amp;r=xxx" length="4699979776" type="application/x-nzb" />
+      <newznab:attr name="category" value="1000" />
+      <newznab:attr name="category" value="1030" />
+      <newznab:attr name="size" value="4699979776" />
+      <newznab:attr name="guid" value="4f2a1b3c" />
+    </item>
+    <item>
+      <title>Hades.v1.38290-GOG</title>
+      <guid isPermaLink="true">https://nzbindexer.local/details/5e3b2c4d</guid>
+      <link>https://nzbindexer.local/getnzb/5e3b2c4d.nzb&amp;i=1&amp;r=xxx</link>
+      <comments>https://nzbindexer.local/details/5e3b2c4d#comments</comments>
+      <pubDate>Thu, 01 Oct 2026 22:45:00 +0000</pubDate>
+      <category>PC &gt; Games</category>
+      <description>Hades.v1.38290-GOG</description>
+      <enclosure url="https://nzbindexer.local/getnzb/5e3b2c4d.nzb&amp;i=1&amp;r=xxx" length="11811160064" type="application/x-nzb" />
+      <newznab:attr name="category" value="4000" />
+      <newznab:attr name="category" value="4050" />
+      <newznab:attr name="size" value="11811160064" />
+      <newznab:attr name="guid" value="5e3b2c4d" />
+    </item>
+  </channel>
+</rss>

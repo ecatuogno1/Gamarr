@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="1.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:torznab="http://torznab.com/schemas/2015/feed">
+  <channel>
+    <atom:link href="http://localhost:9696/1/api" rel="self" type="application/rss+xml" />
+    <title>GameTracker</title>
+    <description>GameTracker (Prowlarr)</description>
+    <link>https://gametracker.local/</link>
+    <language>en-US</language>
+    <category>search</category>
+
+    <item>
+      <title>Super Metroid (USA, Europe) (En,Fr,De)</title>
+      <guid>https://gametracker.local/torrents/1001</guid>
+      <comments>https://gametracker.local/torrents/1001</comments>
+      <pubDate>Mon, 05 Oct 2026 12:00:00 +0000</pubDate>
+      <size>1052672</size>
+      <link>https://gametracker.local/download/1001.torrent</link>
+      <enclosure url="https://gametracker.local/download/1001.torrent" length="1052672" type="application/x-bittorrent" />
+      <torznab:attr name="category" value="1000" />
+      <torznab:attr name="category" value="100045" />
+      <torznab:attr name="seeders" value="25" />
+      <torznab:attr name="peers" value="27" />
+      <torznab:attr name="infohash" value="0a1b2c3d4e5f60718293a4b5c6d7e8f901234567" />
+    </item>
+
+    <item>
+      <title>Demons.Souls.PS3-DUPLEX</title>
+      <guid>https://gametracker.local/torrents/1002</guid>
+      <comments>https://gametracker.local/torrents/1002</comments>
+      <pubDate>Sun, 04 Oct 2026 18:30:00 +0000</pubDate>
+      <size>7516192768</size>
+      <link>https://gametracker.local/download/1002.torrent</link>
+      <enclosure url="https://gametracker.local/download/1002.torrent" length="7516192768" type="application/x-bittorrent" />
+      <torznab:attr name="category" value="1000" />
+      <torznab:attr name="category" value="1080" />
+      <torznab:attr name="seeders" value="12" />
+      <torznab:attr name="peers" value="15" />
+      <torznab:attr name="infohash" value="1a1b2c3d4e5f60718293a4b5c6d7e8f901234567" />
+    </item>
+
+    <item>
+      <title>Doom Eternal [FitGirl Repack]</title>
+      <guid>https://gametracker.local/torrents/1003</guid>
+      <comments>https://gametracker.local/torrents/1003</comments>
+      <pubDate>Sat, 03 Oct 2026 08:15:00 +0000</pubDate>
+      <size>42949672960</size>
+      <link>https://gametracker.local/download/1003.torrent</link>
+      <enclosure url="https://gametracker.local/download/1003.torrent" length="42949672960" type="application/x-bittorrent" />
+      <torznab:attr name="category" value="4000" />
+      <torznab:attr name="category" value="4050" />
+      <torznab:attr name="seeders" value="320" />
+      <torznab:attr name="peers" value="400" />
+      <torznab:attr name="infohash" value="2a1b2c3d4e5f60718293a4b5c6d7e8f901234567" />
+    </item>
+  </channel>
+</rss>

@@ -5,6 +5,7 @@ using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Indexers.Newznab;
 using NzbDrone.Core.IndexerSearch.Definitions;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.Test.Framework;
 
 namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
@@ -13,6 +14,9 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
     {
         private GameSearchCriteria _gameSearchCriteria;
         private NewznabCapabilities _capabilities;
+        private Platform _snes;
+        private Platform _ps3;
+        private Platform _pc;
 
         [SetUp]
         public void SetUp()
@@ -24,10 +28,14 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
                 ApiKey = "abcd",
             };
 
+            _snes = new Platform { Id = 10, Name = "Super Nintendo Entertainment System", ShortName = "SNES", NewznabCategories = new List<int> { 1000 } };
+            _ps3 = new Platform { Id = 11, Name = "PlayStation 3", ShortName = "PS3", NewznabCategories = new List<int> { 1000, 1080 } };
+            _pc = new Platform { Id = 1, Name = "PC (Microsoft Windows)", ShortName = "PC", NewznabCategories = new List<int> { 4050 } };
+
             _gameSearchCriteria = new GameSearchCriteria
             {
-                Game = new Games.Game { Title = "Star Wars", Year = 1977, IgdbId = 11 },
-                SceneTitles = new List<string> { "Star Wars" }
+                Game = new Games.Game { Title = "Super Metroid", Year = 1994, IgdbId = 1103 },
+                SceneTitles = new List<string> { "Super Metroid" }
             };
 
             _capabilities = new NewznabCapabilities();
@@ -35,6 +43,20 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
             Mocker.GetMock<INewznabCapabilitiesProvider>()
                 .Setup(v => v.GetCapabilities(It.IsAny<NewznabSettings>()))
                 .Returns(_capabilities);
+        }
+
+        private void GivenGameCategories()
+        {
+            Subject.Settings.Categories = NewznabStandardCategory.DefaultGameCategories;
+        }
+
+        [Test]
+        public void should_default_to_game_categories()
+        {
+            var settings = new NewznabSettings();
+
+            settings.Categories.Should().Contain(new[] { 1000, 1080, 1180, 4050 });
+            settings.Categories.Should().NotContain(c => c >= 2000 && c < 3000);
         }
 
         [Test]
@@ -46,6 +68,7 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var page = results.GetAllTiers().First().First();
 
+            page.Url.Query.Should().Contain("t=search");
             page.Url.Query.Should().Contain("&cat=1,2&");
         }
 
@@ -68,7 +91,6 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         {
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
-            // Default caps have no igdbid, and imdb searches are gone, so only the text search tier remains
             results.GetAllTiers().Should().HaveCount(1);
 
             var pages = results.GetAllTiers().First().Take(3).ToList();
@@ -91,125 +113,135 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         }
 
         [Test]
-        public void should_not_search_by_imdbid_if_not_supported()
+        public void should_search_by_title_without_year_or_ids()
         {
-            _capabilities.SupportedGameSearchParameters = new[] { "q" };
-
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
-
-            results.GetAllTiers().Should().HaveCount(1);
-
-            var page = results.GetAllTiers().First().First();
-
-            page.Url.Query.Should().NotContain("imdbid=0076759");
-            page.Url.Query.Should().Contain("q=Star");
-        }
-
-        [Test]
-        public void should_not_search_by_imdbid_even_if_supported()
-        {
-            _capabilities.SupportedGameSearchParameters = new[] { "q", "imdbid" };
-
-            var results = Subject.GetSearchRequests(_gameSearchCriteria);
-
-            var page = results.GetAllTiers().First().First();
-
-            page.Url.Query.Should().NotContain("imdbid=");
-            page.Url.Query.Should().Contain("q=Star");
-        }
-
-        [Test]
-        public void should_search_by_igdbid_if_supported()
-        {
-            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid" };
-
-            var results = Subject.GetSearchRequests(_gameSearchCriteria);
-            results.GetTier(0).Should().HaveCount(1);
-
-            var page = results.GetAllTiers().First().First();
-
-            page.Url.Query.Should().Contain("igdbid=11");
-        }
-
-        [Test]
-        public void should_prefer_search_by_igdbid_if_rid_supported()
-        {
-            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid", "imdbid" };
-
-            var results = Subject.GetSearchRequests(_gameSearchCriteria);
-            results.GetTier(0).Should().HaveCount(1);
-
-            var page = results.GetAllTiers().First().First();
-
-            page.Url.Query.Should().Contain("igdbid=11");
-            page.Url.Query.Should().NotContain("imdbid=0076759");
-        }
-
-        [Test]
-        public void should_use_aggregrated_id_search_if_supported()
-        {
-            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid", "imdbid" };
-            _capabilities.SupportsAggregateIdSearch = true;
-
-            var results = Subject.GetSearchRequests(_gameSearchCriteria);
-            results.GetTier(0).Should().HaveCount(1);
 
             var page = results.GetTier(0).First().First();
 
-            page.Url.Query.Should().Contain("igdbid=11");
-            page.Url.Query.Should().NotContain("imdbid=");
+            page.Url.Query.Should().Contain("t=search");
+            page.Url.Query.Should().EndWith("q=Super%20Metroid");
+            page.Url.Query.Should().NotContain("1994");
+            page.Url.Query.Should().NotContain("imdbid");
+            page.Url.Query.Should().NotContain("igdbid");
+            page.Url.Query.Should().NotContain("tmdbid");
         }
 
         [Test]
-        public void should_not_use_aggregrated_id_search_if_no_ids_supported()
+        public void should_not_search_if_basic_search_not_supported()
         {
-            _capabilities.SupportedGameSearchParameters = new[] { "q" };
-            _capabilities.SupportsAggregateIdSearch = true; // Turns true if indexer supplies supportedParams.
+            _capabilities.SupportedSearchParameters = null;
 
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
-            results.Tiers.Should().Be(1);
-            results.GetTier(0).Should().HaveCount(1);
 
-            var page = results.GetTier(0).First().First();
-
-            page.Url.Query.Should().Contain("q=");
+            results.GetAllTiers().Should().BeEmpty();
         }
 
         [Test]
-        public void should_not_use_aggregrated_id_search_if_no_ids_are_known()
+        public void should_search_each_title()
         {
-            _capabilities.SupportedGameSearchParameters = new[] { "q", "imdbid" };
-            _capabilities.SupportsAggregateIdSearch = true; // Turns true if indexer supplies supportedParams.
+            _gameSearchCriteria.SceneTitles = new List<string> { "Super Metroid", "Metroid 3" };
 
-            _gameSearchCriteria.Game.IgdbId = 0;
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
+
+            results.GetTier(0).Should().HaveCount(2);
+            results.GetTier(0).Last().First().Url.Query.Should().EndWith("q=Metroid%203");
+        }
+
+        [Test]
+        public void should_restrict_categories_to_platform()
+        {
+            GivenGameCategories();
+            _gameSearchCriteria.Platform = _ps3;
 
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
 
             var page = results.GetTier(0).First().First();
 
-            page.Url.Query.Should().Contain("q=");
+            page.Url.Query.Should().Contain("&cat=1000,1080&");
         }
 
         [Test]
-        public void should_fallback_to_q()
+        public void should_use_pc_games_category_for_pc()
         {
-            _capabilities.SupportedGameSearchParameters = new[] { "q", "igdbid", "imdbid" };
-            _capabilities.SupportsAggregateIdSearch = true;
+            GivenGameCategories();
+            _gameSearchCriteria.Platform = _pc;
 
             var results = Subject.GetSearchRequests(_gameSearchCriteria);
+
+            var page = results.GetTier(0).First().First();
+
+            page.Url.Query.Should().Contain("&cat=4050&");
+        }
+
+        [Test]
+        public void should_use_configured_parent_category_covering_platform_category()
+        {
+            Subject.Settings.Categories = new[] { 1000, 4000 };
+            _gameSearchCriteria.Platform = _pc;
+
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
+
+            var page = results.GetTier(0).First().First();
+
+            page.Url.Query.Should().Contain("&cat=4000&");
+        }
+
+        [Test]
+        public void should_use_configured_categories_if_platform_categories_not_configured()
+        {
+            Subject.Settings.Categories = new[] { 1080, 1180 };
+            _gameSearchCriteria.Platform = _snes;
+
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
+
+            var page = results.GetTier(0).First().First();
+
+            page.Url.Query.Should().Contain("&cat=1080,1180&");
+        }
+
+        [Test]
+        public void should_use_configured_categories_without_platform()
+        {
+            GivenGameCategories();
+
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
+
+            var page = results.GetTier(0).First().First();
+
+            page.Url.Query.Should().Contain($"&cat={string.Join(",", NewznabStandardCategory.DefaultGameCategories)}&");
+        }
+
+        [Test]
+        public void should_fall_back_to_title_and_platform()
+        {
+            GivenGameCategories();
+            _gameSearchCriteria.Platform = _snes;
+
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
+
             results.Tiers.Should().Be(2);
 
-            var pageTier2 = results.GetTier(1).First().First();
+            var tier1 = results.GetTier(0).First().First();
+            var tier2 = results.GetTier(1).First().First();
 
-            pageTier2.Url.Query.Should().NotContain("igdbid=11");
-            pageTier2.Url.Query.Should().NotContain("imdbid=0076759");
-            pageTier2.Url.Query.Should().Contain("q=");
+            tier1.Url.Query.Should().EndWith("q=Super%20Metroid");
+            tier1.Url.Query.Should().Contain("&cat=1000&");
+            tier2.Url.Query.Should().EndWith("q=Super%20Metroid%20SNES");
+            tier2.Url.Query.Should().Contain("&cat=1000&");
+        }
+
+        [Test]
+        public void should_not_add_platform_tier_without_platform()
+        {
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
+
+            results.Tiers.Should().Be(1);
         }
 
         [Test]
         public void should_encode_raw_title()
         {
-            _capabilities.SupportedGameSearchParameters = new[] { "q" };
             _capabilities.TextSearchEngine = "raw";
 
             var gameRawSearchCriteria = new GameSearchCriteria
@@ -230,7 +262,6 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
         [Test]
         public void should_use_clean_title_and_encode()
         {
-            _capabilities.SupportedGameSearchParameters = new[] { "q" };
             _capabilities.TextSearchEngine = "sphinx";
 
             var gameRawSearchCriteria = new GameSearchCriteria
@@ -243,10 +274,21 @@ namespace NzbDrone.Core.Test.IndexerTests.NewznabTests
 
             var page = results.GetTier(0).First().First();
 
-            page.Url.Query.Should().Contain("q=Some%20Game%20and%20Title%20Words%202021");
-            page.Url.Query.Should().Contain("and");
+            page.Url.Query.Should().EndWith("q=Some%20Game%20and%20Title%20Words");
             page.Url.Query.Should().NotContain(" & ");
             page.Url.Query.Should().NotContain("%26");
+        }
+
+        [Test]
+        public void should_clean_platform_short_name()
+        {
+            _gameSearchCriteria.Platform = new Platform { Id = 12, ShortName = "Wii U", NewznabCategories = new List<int> { 1000, 1130 } };
+
+            var results = Subject.GetSearchRequests(_gameSearchCriteria);
+
+            var page = results.GetTier(1).First().First();
+
+            page.Url.Query.Should().EndWith("q=Super%20Metroid%20Wii%20U");
         }
     }
 }
