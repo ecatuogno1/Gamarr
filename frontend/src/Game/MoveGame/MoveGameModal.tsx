@@ -13,6 +13,7 @@ interface MoveGameModalProps {
   originalPath?: string;
   destinationPath?: string;
   destinationRootFolder?: string;
+  destinationPlatform?: boolean;
   isOpen: boolean;
   onModalClose: () => void;
   onSavePress: () => void;
@@ -23,12 +24,19 @@ function MoveGameModal({
   originalPath,
   destinationPath,
   destinationRootFolder,
+  destinationPlatform,
   isOpen,
   onModalClose,
   onSavePress,
   onMoveGamePress,
 }: MoveGameModalProps) {
-  if (isOpen && !originalPath && !destinationPath && !destinationRootFolder) {
+  if (
+    isOpen &&
+    !originalPath &&
+    !destinationPath &&
+    !destinationRootFolder &&
+    !destinationPlatform
+  ) {
     console.error(
       'originalPath and destinationPath OR destinationRootFolder must be provided'
     );
@@ -49,6 +57,10 @@ function MoveGameModal({
             ? translate('MoveGameFoldersToRootFolder', {
                 destinationRootFolder,
               })
+            : null}
+
+          {destinationPlatform
+            ? translate('MoveGameFoldersToPlatformFolder')
             : null}
 
           {originalPath && destinationPath

@@ -49,6 +49,7 @@ namespace Gamarr.Api.V3.Games
         private readonly IUpgradableSpecification _qualityUpgradableSpecification;
         private readonly IConfigService _configService;
         private readonly IPlatformService _platformService;
+        private readonly IBuildGamePaths _gamePathBuilder;
 
         public GameController(IBroadcastSignalRMessage signalRBroadcaster,
                            IGameService gamesService,
@@ -61,6 +62,7 @@ namespace Gamarr.Api.V3.Games
                            IUpgradableSpecification qualityUpgradableSpecification,
                            IConfigService configService,
                            IPlatformService platformService,
+                           IBuildGamePaths gamePathBuilder,
                            RootFolderValidator rootFolderValidator,
                            MappedNetworkDriveValidator mappedNetworkDriveValidator,
                            GamePathValidator gamesPathValidator,
@@ -81,6 +83,7 @@ namespace Gamarr.Api.V3.Games
             _qualityUpgradableSpecification = qualityUpgradableSpecification;
             _configService = configService;
             _platformService = platformService;
+            _gamePathBuilder = gamePathBuilder;
             _coverMapper = coverMapper;
             _commandQueueManager = commandQueueManager;
             _rootFolderService = rootFolderService;
@@ -282,6 +285,22 @@ namespace Gamarr.Api.V3.Games
         public Results<Accepted<GameResource>, NotFound> UpdateGame([FromBody] GameResource gamesResource, [FromQuery] bool moveFiles = false)
         {
             var game = _gamesService.GetGame(gamesResource.Id);
+
+            // A platform change without a new path (API clients): the folder follows the platform when files are moved.
+            // The UI sends the new path itself.
+            if (moveFiles &&
+                gamesResource.PlatformId != game.PlatformId &&
+                gamesResource.Path.IsNotNullOrWhiteSpace() &&
+                gamesResource.Path.PathEquals(game.Path))
+            {
+                var oldPlatform = game.Platform ?? _platformService.Find(game.PlatformId);
+                var newPath = _gamePathBuilder.BuildPathForPlatform(game, oldPlatform, _platformService.Find(gamesResource.PlatformId));
+
+                if (newPath != null)
+                {
+                    gamesResource.Path = newPath;
+                }
+            }
 
             if (moveFiles)
             {

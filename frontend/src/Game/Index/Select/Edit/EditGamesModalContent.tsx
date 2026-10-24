@@ -1,15 +1,21 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import AppState from 'App/State/AppState';
+import Alert from 'Components/Alert';
 import FormGroup from 'Components/Form/FormGroup';
 import FormInputGroup from 'Components/Form/FormInputGroup';
 import FormLabel from 'Components/Form/FormLabel';
 import Button from 'Components/Link/Button';
+import SpinnerButton from 'Components/Link/SpinnerButton';
 import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import MoveGameModal from 'Game/MoveGame/MoveGameModal';
-import { inputTypes } from 'Helpers/Props';
+import usePrevious from 'Helpers/Hooks/usePrevious';
+import { inputTypes, kinds } from 'Helpers/Props';
 import { InputChanged } from 'typings/inputs';
+import getErrorMessage from 'Utilities/Object/getErrorMessage';
 import translate from 'Utilities/String/translate';
 import styles from './EditGamesModalContent.css';
 
@@ -52,8 +58,29 @@ const monitoredOptions = [
   },
 ];
 
+// The editor answers with a list of validation failures (one per conflicting game) or a single message
+function getSaveErrorMessages(saveError: AppState['games']['saveError']) {
+  if (!saveError) {
+    return [];
+  }
+
+  const { responseJSON } = saveError;
+
+  if (Array.isArray(responseJSON)) {
+    return responseJSON.map((failure) => failure.errorMessage);
+  }
+
+  return [getErrorMessage(saveError, translate('EditGamesSaveFailed'))];
+}
+
 function EditGamesModalContent(props: EditGamesModalContentProps) {
   const { gameIds, onSavePress, onModalClose } = props;
+
+  const { isSaving, saveError } = useSelector(
+    (state: AppState) => state.games
+  );
+  const wasSaving = usePrevious(isSaving);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const [monitored, setMonitored] = useState(NO_CHANGE);
   const [qualityProfileId, setQualityProfileId] = useState<string | number>(
@@ -92,14 +119,19 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
       if (rootFolderPath !== NO_CHANGE) {
         hasChanges = true;
         payload.rootFolderPath = rootFolderPath;
+      }
+
+      if (rootFolderPath !== NO_CHANGE || platformId !== NO_CHANGE) {
         payload.moveFiles = moveFiles;
       }
 
       if (hasChanges) {
+        // Stays open until the save succeeds, so a rejected change (e.g. a platform conflict) is shown here
+        setHasSubmitted(true);
         onSavePress(payload);
+      } else {
+        onModalClose();
       }
-
-      onModalClose();
     },
     [
       monitored,
@@ -137,13 +169,19 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
     [setMonitored]
   );
 
+  useEffect(() => {
+    if (hasSubmitted && wasSaving && !isSaving && !saveError) {
+      onModalClose();
+    }
+  }, [hasSubmitted, wasSaving, isSaving, saveError, onModalClose]);
+
   const onSavePressWrapper = useCallback(() => {
-    if (rootFolderPath === NO_CHANGE) {
+    if (rootFolderPath === NO_CHANGE && platformId === NO_CHANGE) {
       save(false);
     } else {
       setIsConfirmMoveModalOpen(true);
     }
-  }, [rootFolderPath, save]);
+  }, [rootFolderPath, platformId, save]);
 
   const onCancelPress = useCallback(() => {
     setIsConfirmMoveModalOpen(false);
@@ -160,12 +198,25 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
   }, [setIsConfirmMoveModalOpen, save]);
 
   const selectedCount = gameIds.length;
+  const saveErrorMessages =
+    hasSubmitted && !isSaving ? getSaveErrorMessages(saveError) : [];
 
   return (
     <ModalContent onModalClose={onModalClose}>
       <ModalHeader>{translate('EditSelectedGames')}</ModalHeader>
 
       <ModalBody>
+        {saveErrorMessages.length ? (
+          <Alert kind={kinds.DANGER}>
+            <div>{translate('EditGamesSaveFailed')}</div>
+            <ul>
+              {saveErrorMessages.map((message, index) => (
+                <li key={index}>{message}</li>
+              ))}
+            </ul>
+          </Alert>
+        ) : null}
+
         <FormGroup>
           <FormLabel>{translate('Monitored')}</FormLabel>
 
@@ -242,15 +293,23 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
         <div>
           <Button onPress={onModalClose}>{translate('Cancel')}</Button>
 
-          <Button onPress={onSavePressWrapper}>
+          <SpinnerButton
+            isSpinning={hasSubmitted && isSaving}
+            onPress={onSavePressWrapper}
+          >
             {translate('ApplyChanges')}
-          </Button>
+          </SpinnerButton>
         </div>
       </ModalFooter>
 
       <MoveGameModal
         isOpen={isConfirmMoveModalOpen}
-        destinationRootFolder={rootFolderPath}
+        destinationRootFolder={
+          rootFolderPath === NO_CHANGE ? undefined : rootFolderPath
+        }
+        destinationPlatform={
+          rootFolderPath === NO_CHANGE && platformId !== NO_CHANGE
+        }
         onModalClose={onCancelPress}
         onSavePress={onDoNotMoveGamePress}
         onMoveGamePress={onMoveGamePress}

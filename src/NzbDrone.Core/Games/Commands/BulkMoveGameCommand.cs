@@ -18,6 +18,9 @@ namespace NzbDrone.Core.Games.Commands
         public int GameId { get; set; }
         public string SourcePath { get; set; }
 
+        // Set when the destination isn't the game folder in DestinationRootFolder (platform changes)
+        public string DestinationPath { get; set; }
+
         public bool Equals(BulkMoveGame other)
         {
             if (other == null)

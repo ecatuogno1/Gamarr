@@ -30,6 +30,7 @@ namespace Gamarr.Api.V3.Games
         private readonly GameEditorValidator _gameEditorValidator;
         private readonly IUpgradableSpecification _upgradableSpecification;
         private readonly IPlatformService _platformService;
+        private readonly IBuildGamePaths _gamePathBuilder;
 
         public GameEditorController(IGameService gameService,
             IGameTranslationService gameTranslationService,
@@ -38,9 +39,11 @@ namespace Gamarr.Api.V3.Games
             IManageCommandQueue commandQueueManager,
             GameEditorValidator gameEditorValidator,
             IUpgradableSpecification upgradableSpecification,
-            IPlatformService platformService)
+            IPlatformService platformService,
+            IBuildGamePaths gamePathBuilder)
         {
             _platformService = platformService;
+            _gamePathBuilder = gamePathBuilder;
             _gameService = gameService;
             _gameTranslationService = gameTranslationService;
             _coverMapper = coverMapper;
@@ -57,11 +60,16 @@ namespace Gamarr.Api.V3.Games
         {
             var gamesToUpdate = _gameService.GetGames(resource.GameIds);
             var gamesToMove = new List<BulkMoveGame>();
+            var platformMoves = new List<BulkMoveGame>();
             var platform = resource.PlatformId is > 0 ? _platformService.Find(resource.PlatformId.Value) : null;
+            var changeRootFolder = resource.RootFolderPath.IsNotNullOrWhiteSpace();
+
+            // Everything is validated before anything is saved, the response lists every game that can't be changed
+            var failures = new List<ValidationFailure>();
 
             if (resource.PlatformId is > 0)
             {
-                ValidatePlatformChange(gamesToUpdate, platform, resource.PlatformId.Value);
+                failures.AddRange(ValidatePlatformChange(gamesToUpdate, platform, resource.PlatformId.Value));
             }
 
             foreach (var game in gamesToUpdate)
@@ -76,10 +84,35 @@ namespace Gamarr.Api.V3.Games
                     game.QualityProfileId = resource.QualityProfileId.Value;
                 }
 
-                if (platform != null)
+                if (platform != null && game.PlatformId != platform.Id)
                 {
+                    var oldPlatform = game.Platform ?? _platformService.Find(game.PlatformId);
+
                     game.PlatformId = platform.Id;
                     game.Platform = platform;
+
+                    // A new root folder builds the whole game folder (with the new platform folder) anyway
+                    if (!changeRootFolder)
+                    {
+                        var newPath = _gamePathBuilder.BuildPathForPlatform(game, oldPlatform, platform);
+
+                        if (newPath != null && newPath.PathNotEquals(game.Path))
+                        {
+                            if (_gameService.GamePathExists(newPath))
+                            {
+                                failures.Add(new ValidationFailure("Path", $"{game.Title}: another game already uses '{newPath}'"));
+                            }
+
+                            platformMoves.Add(new BulkMoveGame
+                            {
+                                GameId = game.Id,
+                                SourcePath = game.Path,
+                                DestinationPath = newPath
+                            });
+
+                            game.Path = newPath;
+                        }
+                    }
                 }
 
                 if (resource.MinimumAvailability.HasValue)
@@ -87,7 +120,7 @@ namespace Gamarr.Api.V3.Games
                     game.MinimumAvailability = resource.MinimumAvailability.Value;
                 }
 
-                if (resource.RootFolderPath.IsNotNullOrWhiteSpace())
+                if (changeRootFolder)
                 {
                     game.RootFolderPath = resource.RootFolderPath;
                     gamesToMove.Add(new BulkMoveGame
@@ -120,8 +153,13 @@ namespace Gamarr.Api.V3.Games
 
                 if (!validationResult.IsValid)
                 {
-                    throw new ValidationException(validationResult.Errors);
+                    failures.AddRange(validationResult.Errors.Select(e => new ValidationFailure(e.PropertyName, $"{game.Title}: {e.ErrorMessage}")));
                 }
+            }
+
+            if (failures.Any())
+            {
+                throw new ValidationException(failures.DistinctBy(f => f.ErrorMessage));
             }
 
             if (resource.MoveFiles && gamesToMove.Any())
@@ -130,6 +168,14 @@ namespace Gamarr.Api.V3.Games
                 {
                     DestinationRootFolder = resource.RootFolderPath,
                     Games = gamesToMove
+                });
+            }
+
+            if (resource.MoveFiles && platformMoves.Any())
+            {
+                _commandQueueManager.Push(new BulkMoveGameCommand
+                {
+                    Games = platformMoves
                 });
             }
 
@@ -194,11 +240,11 @@ namespace Gamarr.Api.V3.Games
         }
 
         // A game (IGDB id) can only be in the library once per platform
-        private void ValidatePlatformChange(List<Game> games, Platform platform, int platformId)
+        private List<ValidationFailure> ValidatePlatformChange(List<Game> games, Platform platform, int platformId)
         {
             if (platform == null)
             {
-                throw new ValidationException(new[] { new ValidationFailure("PlatformId", $"Platform {platformId} doesn't exist") });
+                return new List<ValidationFailure> { new("PlatformId", $"Platform {platformId} doesn't exist") };
             }
 
             var selectedIds = games.Select(g => g.Id).ToHashSet();
@@ -208,7 +254,9 @@ namespace Gamarr.Api.V3.Games
             {
                 if (group.Count() > 1)
                 {
-                    failures.Add(new ValidationFailure("PlatformId", $"{group.First().Title} is selected on several platforms, only one of them can be moved to {platform.Name}"));
+                    var platforms = string.Join(", ", group.Select(g => (g.Platform ?? _platformService.Find(g.PlatformId))?.Name ?? g.PlatformId.ToString()));
+
+                    failures.Add(new ValidationFailure("PlatformId", $"{group.First().Title} is selected on several platforms ({platforms}), only one of them can be changed to {platform.Name}"));
                     continue;
                 }
 
@@ -220,10 +268,7 @@ namespace Gamarr.Api.V3.Games
                 }
             }
 
-            if (failures.Any())
-            {
-                throw new ValidationException(failures);
-            }
+            return failures;
         }
     }
 }
