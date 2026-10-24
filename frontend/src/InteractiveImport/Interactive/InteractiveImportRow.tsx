@@ -12,6 +12,7 @@ import GameFormats from 'Game/GameFormats';
 import GameLanguages from 'Game/GameLanguages';
 import GameQuality from 'Game/GameQuality';
 import IndexerFlags from 'Game/IndexerFlags';
+import { getTitleWithPlatform } from 'Game/Title/gameTitle';
 import { icons, kinds, tooltipPositions } from 'Helpers/Props';
 import SelectGameModal from 'InteractiveImport/Game/SelectGameModal';
 import SelectIndexerFlagsModal from 'InteractiveImport/IndexerFlags/SelectIndexerFlagsModal';
@@ -275,7 +276,7 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
     [id, dispatch, setSelectModalOpen, selectRowAfterChange]
   );
 
-  const gameTitle = game ? game.title : '';
+  const gameTitle = game ? getTitleWithPlatform(game.title, game.platform) : '';
 
   const showGamePlaceholder = isSelected && !game;
   const showReleaseGroupPlaceholder = isSelected && !releaseGroup;

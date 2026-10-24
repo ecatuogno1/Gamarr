@@ -6,6 +6,7 @@ import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
 import Game from 'Game/Game';
+import { getTitleWithPlatform } from 'Game/Title/gameTitle';
 import useGame from 'Game/useGame';
 import { scrollDirections } from 'Helpers/Props';
 import InteractiveSearch from 'InteractiveSearch/InteractiveSearch';
@@ -26,7 +27,7 @@ function GameInteractiveSearchModalContent({
 }: GameInteractiveSearchModalContentProps) {
   const dispatch = useDispatch();
 
-  const { title, year } = useGame(gameId) as Game;
+  const { title, year, platform } = useGame(gameId) as Game;
 
   useEffect(() => {
     return () => {
@@ -35,7 +36,10 @@ function GameInteractiveSearchModalContent({
     };
   }, [dispatch]);
 
-  const gameTitle = `${title}${year > 0 ? ` (${year})` : ''}`;
+  const gameTitle = getTitleWithPlatform(
+    `${title}${year > 0 ? ` (${year})` : ''}`,
+    platform
+  );
 
   return (
     <ModalContent onModalClose={onModalClose}>
