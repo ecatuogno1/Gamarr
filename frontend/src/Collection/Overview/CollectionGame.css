@@ -144,3 +144,18 @@ $hoverScale: 1.05;
   border-color: transparent var(--dangerColor) transparent transparent;
   color: var(--white);
 }
+
+.platforms {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  left: 36px;
+  z-index: 3;
+  justify-content: flex-end;
+  pointer-events: none;
+
+  a {
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.6);
+    pointer-events: auto;
+  }
+}

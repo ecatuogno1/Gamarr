@@ -12,6 +12,7 @@ import AddNewDiscoverGameModal from 'DiscoverGame/AddNewDiscoverGameModal';
 import ExcludeGameModal from 'DiscoverGame/Exclusion/ExcludeGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
 import GamePoster from 'Game/GamePoster';
+import LibraryPlatformBadges from 'Game/Title/LibraryPlatformBadges';
 import { icons, kinds } from 'Helpers/Props';
 import dimensions from 'Styles/Variables/dimensions';
 import fonts from 'Styles/Variables/fonts';
@@ -165,6 +166,13 @@ class DiscoverGameOverview extends Component {
                       name={icons.CHECK_CIRCLE}
                       size={30}
                       title={translate('AlreadyInYourLibrary')}
+                    /> : null
+                }
+                {
+                  isExisting ?
+                    <LibraryPlatformBadges
+                      className={styles.platforms}
+                      igdbId={igdbId}
                     /> : null
                 }
                 {

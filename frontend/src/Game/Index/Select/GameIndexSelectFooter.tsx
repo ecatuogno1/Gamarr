@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { useSelect } from 'App/SelectContext';
@@ -6,13 +6,13 @@ import AppState from 'App/State/AppState';
 import { RENAME_GAME } from 'Commands/commandNames';
 import SpinnerButton from 'Components/Link/SpinnerButton';
 import PageContentFooter from 'Components/Page/PageContentFooter';
+import useSelectedGameIds from 'Game/Title/useSelectedGameIds';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import { kinds } from 'Helpers/Props';
 import { saveGameEditor } from 'Store/Actions/gameActions';
 import { fetchRootFolders } from 'Store/Actions/rootFolderActions';
 import createCommandExecutingSelector from 'Store/Selectors/createCommandExecutingSelector';
 import translate from 'Utilities/String/translate';
-import getSelectedIds from 'Utilities/Table/getSelectedIds';
 import DeleteGameModal from './Delete/DeleteGameModal';
 import EditGamesModal from './Edit/EditGamesModal';
 import OrganizeGamesModal from './Organize/OrganizeGamesModal';
@@ -56,12 +56,10 @@ function GameIndexSelectFooter() {
   const [isSavingTags, setIsSavingTags] = useState(false);
   const previousIsDeleting = usePrevious(isDeleting);
 
-  const [selectState, selectDispatch] = useSelect();
-  const { selectedState } = selectState;
+  const [, selectDispatch] = useSelect();
 
-  const gameIds = useMemo(() => {
-    return getSelectedIds(selectedState);
-  }, [selectedState]);
+  // Selecting a title selects all its platform versions
+  const gameIds = useSelectedGameIds();
 
   const selectedCount = gameIds.length ? gameIds.length : 0;
 

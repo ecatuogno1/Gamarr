@@ -92,6 +92,7 @@ class GameFileEditorRow extends Component {
       indexerFlags,
       languages,
       dateAdded,
+      platformName,
       columns
     } = this.props;
 
@@ -115,6 +116,17 @@ class GameFileEditorRow extends Component {
 
             if (!isVisible) {
               return null;
+            }
+
+            if (name === 'platform') {
+              return (
+                <TableRowCell
+                  key={name}
+                  className={styles.platform}
+                >
+                  {platformName ?? '-'}
+                </TableRowCell>
+              );
             }
 
             if (name === 'relativePath') {
@@ -368,6 +380,7 @@ GameFileEditorRow.propTypes = {
   discNumber: PropTypes.number,
   discCount: PropTypes.number,
   dateAdded: PropTypes.string,
+  platformName: PropTypes.string,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   onDeletePress: PropTypes.func.isRequired
 };

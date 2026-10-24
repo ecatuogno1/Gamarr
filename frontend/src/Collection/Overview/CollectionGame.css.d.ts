@@ -13,6 +13,7 @@ interface CssExports {
   'overlayHover': string;
   'overlayHoverTitle': string;
   'overlayTitle': string;
+  'platforms': string;
   'poster': string;
   'posterContainer': string;
   'title': string;

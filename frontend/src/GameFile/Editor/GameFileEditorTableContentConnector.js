@@ -1,3 +1,4 @@
+import { sortBy } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -5,30 +6,46 @@ import { createSelector } from 'reselect';
 import { deleteGameFile, setGameFilesSort, setGameFilesTableOption } from 'Store/Actions/gameFileActions';
 import { fetchLanguages, fetchQualityProfileSchema } from 'Store/Actions/settingsActions';
 import createClientSideCollectionSelector from 'Store/Selectors/createClientSideCollectionSelector';
-import createGameSelector from 'Store/Selectors/createGameSelector';
 import getQualities from 'Utilities/Quality/getQualities';
 import GameFileEditorTableContent from './GameFileEditorTableContent';
 
+const PLATFORM_COLUMN = 'platform';
+
 function createMapStateToProps() {
   return createSelector(
-    (state, { gameId }) => gameId,
+    (state, { gameIds }) => gameIds,
     createClientSideCollectionSelector('gameFiles'),
     (state) => state.settings.languages,
     (state) => state.settings.qualityProfiles,
-    createGameSelector(),
+    (state) => state.games,
     (
-      gameId,
+      gameIds,
       gameFiles,
       languageProfiles,
-      qualityProfiles
+      qualityProfiles,
+      games
     ) => {
       const languages = languageProfiles.items;
       const qualities = getQualities(qualityProfiles.schema.items);
-      const filesForGame = gameFiles.items.filter((file) => file.gameId === gameId);
+      const filesForGames = gameFiles.items.filter((file) => gameIds.includes(file.gameId));
+
+      // The files of several platform versions of a title get a Platform column, grouped by platform
+      const showPlatform = gameIds.length > 1;
+      const platformNames = {};
+
+      filesForGames.forEach((file) => {
+        const game = games.items[games.itemMap[file.gameId]];
+
+        platformNames[file.id] = game?.platform?.name;
+      });
 
       return {
-        items: filesForGame,
-        columns: gameFiles.columns,
+        items: showPlatform ? sortBy(filesForGames, (file) => platformNames[file.id] ?? '') : filesForGames,
+        allColumns: gameFiles.columns,
+        columns: showPlatform ?
+          gameFiles.columns :
+          gameFiles.columns.filter((column) => column.name !== PLATFORM_COLUMN),
+        platformNames,
         sortKey: gameFiles.sortKey,
         sortDirection: gameFiles.sortDirection,
         isDeleting: gameFiles.isDeleting,
@@ -69,6 +86,22 @@ class GameFileEditorTableContentConnector extends Component {
   };
 
   onTableOptionChange = (payload) => {
+    const { allColumns } = this.props;
+
+    // The platform column is hidden for a single platform, keep it in the saved columns
+    if (payload.columns && !payload.columns.some((column) => column.name === PLATFORM_COLUMN)) {
+      const index = allColumns.findIndex((column) => column.name === PLATFORM_COLUMN);
+
+      if (index > -1) {
+        const columns = [...payload.columns];
+        columns.splice(Math.min(index, columns.length), 0, allColumns[index]);
+
+        this.props.setGameFilesTableOption({ ...payload, columns });
+
+        return;
+      }
+    }
+
     this.props.setGameFilesTableOption(payload);
   };
 
@@ -95,7 +128,8 @@ class GameFileEditorTableContentConnector extends Component {
 }
 
 GameFileEditorTableContentConnector.propTypes = {
-  gameId: PropTypes.number.isRequired,
+  gameIds: PropTypes.arrayOf(PropTypes.number).isRequired,
+  allColumns: PropTypes.arrayOf(PropTypes.object).isRequired,
   languages: PropTypes.arrayOf(PropTypes.object).isRequired,
   qualities: PropTypes.arrayOf(PropTypes.object).isRequired,
   fetchLanguages: PropTypes.func.isRequired,

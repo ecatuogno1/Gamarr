@@ -7,6 +7,8 @@ import { createThunk, handleThunks } from 'Store/thunks';
 // import { batchActions } from 'redux-batched-actions';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
 import dateFilterPredicate from 'Utilities/Date/dateFilterPredicate';
+import addGamePlatformsRequest from 'Utilities/Game/addGamePlatforms';
+import getNewGame from 'Utilities/Game/getNewGame';
 import padNumber from 'Utilities/Number/padNumber';
 import translate from 'Utilities/String/translate';
 import { set, updateItem } from './baseActions';
@@ -275,6 +277,8 @@ export const defaultState = {
   saveError: null,
   isDeleting: false,
   deleteError: null,
+  isAddingPlatforms: false,
+  addPlatformsError: null,
   items: [],
   sortKey: 'sortTitle',
   sortDirection: sortDirections.ASCENDING,
@@ -297,6 +301,7 @@ export const SAVE_GAME = 'games/saveGame';
 export const DELETE_GAME = 'games/deleteGame';
 export const SAVE_GAME_EDITOR = 'games/saveGameEditor';
 export const BULK_DELETE_GAME = 'games/bulkDeleteGame';
+export const ADD_GAME_PLATFORMS = 'games/addGamePlatforms';
 
 export const SET_DELETE_OPTION = 'games/setDeleteOption';
 
@@ -335,6 +340,7 @@ export const deleteGame = createThunk(DELETE_GAME, (payload) => {
 export const toggleGameMonitored = createThunk(TOGGLE_GAME_MONITORED);
 export const saveGameEditor = createThunk(SAVE_GAME_EDITOR);
 export const bulkDeleteGame = createThunk(BULK_DELETE_GAME);
+export const addGamePlatforms = createThunk(ADD_GAME_PLATFORMS);
 
 export const setGameValue = createAction(SET_GAME_VALUE, (payload) => {
   return {
@@ -462,6 +468,57 @@ export const actionHandlers = handleThunks({
         section,
         isSaving: false,
         saveError: xhr
+      }));
+    });
+  },
+
+  // Adds a title that's in the library on other platforms, based on one of its games
+  [ADD_GAME_PLATFORMS]: function(getState, payload, dispatch) {
+    const {
+      gameId,
+      platformIds,
+      ...options
+    } = payload;
+
+    const game = _.find(getState().games.items, { id: gameId });
+
+    const {
+      // Per platform values the new games don't share
+      id,
+      path,
+      titleSlug,
+      folderName,
+      gameFile,
+      gameFileId,
+      hasFile,
+      statistics,
+      added,
+      lastSearchTime,
+      isSaving,
+      ...titleValues
+    } = game;
+
+    const newGame = getNewGame(_.cloneDeep(titleValues), options);
+
+    dispatch(set({
+      section,
+      isAddingPlatforms: true,
+      addPlatformsError: null
+    }));
+
+    addGamePlatformsRequest(newGame, platformIds, (data) => {
+      dispatch(updateItem({ section, ...data }));
+    }).then(() => {
+      dispatch(set({
+        section,
+        isAddingPlatforms: false,
+        addPlatformsError: null
+      }));
+    }).catch((xhr) => {
+      dispatch(set({
+        section,
+        isAddingPlatforms: false,
+        addPlatformsError: xhr
       }));
     });
   },

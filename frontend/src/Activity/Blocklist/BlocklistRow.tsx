@@ -80,7 +80,11 @@ function BlocklistRow(props: BlocklistRowProps) {
         if (name === 'gameMetadata.sortTitle') {
           return (
             <TableRowCell key={name}>
-              <GameTitleLink titleSlug={game.titleSlug} title={game.title} />
+              <GameTitleLink
+                titleSlug={game.titleSlug}
+                title={game.title}
+                platform={game.platform}
+              />
             </TableRowCell>
           );
         }

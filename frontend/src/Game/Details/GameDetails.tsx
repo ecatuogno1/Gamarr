@@ -17,6 +17,7 @@ import FieldSet from 'Components/FieldSet';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
 import InfoLabel from 'Components/InfoLabel';
+import Button from 'Components/Link/Button';
 import IconButton from 'Components/Link/IconButton';
 import Marquee from 'Components/Marquee';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
@@ -28,6 +29,7 @@ import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
 import Popover from 'Components/Tooltip/Popover';
 import Tooltip from 'Components/Tooltip/Tooltip';
+import AddGamePlatformModal from 'Game/AddPlatform/AddGamePlatformModal';
 import DeleteGameModal from 'Game/Delete/DeleteGameModal';
 import EditGameModal from 'Game/Edit/EditGameModal';
 import { Image, Statistics } from 'Game/Game';
@@ -37,6 +39,10 @@ import GamePoster from 'Game/GamePoster';
 import getGameStatusDetails from 'Game/getGameStatusDetails';
 import GameHistoryModal from 'Game/History/GameHistoryModal';
 import GameInteractiveSearchModal from 'Game/Search/GameInteractiveSearchModal';
+import GamePlatformBadges from 'Game/Title/GamePlatformBadges';
+import { groupGamesByTitle } from 'Game/Title/gameTitle';
+import { getPlatformsPresentText } from 'Game/Title/GameTitleProgressBar';
+import useGameTitle from 'Game/Title/useGameTitle';
 import useGame from 'Game/useGame';
 import GameFileEditorTable from 'GameFile/Editor/GameFileEditorTable';
 import ExtraFileTable from 'GameFile/Extras/ExtraFileTable';
@@ -103,11 +109,12 @@ function getFanartUrl(images: Image[]) {
   return image?.url ?? image?.remoteUrl;
 }
 
-function createGameFilesSelector() {
+function createGameFilesSelector(gameId: number) {
   return createSelector(
     (state: AppState) => state.gameFiles,
     ({ items, isFetching, isPopulated, error }) => {
-      const hasGameFiles = !!items.length;
+      // The files of all platform versions are loaded, these are the selected platform's
+      const hasGameFiles = items.some((file) => file.gameId === gameId);
 
       return {
         isGameFilesFetching: isFetching,
@@ -146,18 +153,29 @@ function createGameCreditsSelector() {
 }
 
 interface GameDetailsProps {
+  // The selected platform version
   gameId: number;
+  // Every platform version of the title
+  titleGameIds: number[];
+  onPlatformSelect: (gameId: number) => void;
 }
 
-function GameDetails({ gameId }: GameDetailsProps) {
+function GameDetails({
+  gameId,
+  titleGameIds,
+  onPlatformSelect,
+}: GameDetailsProps) {
   const dispatch = useDispatch();
   const history = useHistory();
 
   const game = useGame(gameId);
   const allGames = useSelector(createAllGamesSelector());
+  const titleSummary = useGameTitle(titleGameIds);
+  const titleGameIdsKey = titleGameIds.join();
+  const isMultiPlatform = titleGameIds.length > 1;
 
   const { isGameFilesFetching, gameFilesError, hasGameFiles } = useSelector(
-    createGameFilesSelector()
+    createGameFilesSelector(gameId)
   );
   const { isExtraFilesFetching, extraFilesError } = useSelector(
     createExtraFilesSelector()
@@ -219,8 +237,13 @@ function GameDetails({ gameId }: GameDetailsProps) {
   }, [gameId, commands]);
 
   const { nextGame, previousGame } = useMemo(() => {
-    const sortedGames = [...allGames].sort(sortByProp('sortTitle'));
-    const gameIndex = sortedGames.findIndex((game) => game.id === gameId);
+    // Navigate between titles, not their platform versions
+    const titles = [...groupGamesByTitle(allGames).values()].map(
+      (versions) => versions[0]
+    );
+    const sortedGames = titles.sort(sortByProp('sortTitle'));
+    const igdbId = allGames.find((g) => g.id === gameId)?.igdbId;
+    const gameIndex = sortedGames.findIndex((game) => game.igdbId === igdbId);
 
     if (gameIndex === -1) {
       return {
@@ -236,11 +259,11 @@ function GameDetails({ gameId }: GameDetailsProps) {
     return {
       nextGame: {
         title: nextGame.title,
-        titleSlug: nextGame.titleSlug,
+        titleSlug: `${nextGame.igdbId}`,
       },
       previousGame: {
         title: previousGame.title,
-        titleSlug: previousGame.titleSlug,
+        titleSlug: `${previousGame.igdbId}`,
       },
     };
   }, [gameId, allGames]);
@@ -253,6 +276,8 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const [isEditGameModalOpen, setIsEditGameModalOpen] = useState(false);
   const [isDeleteGameModalOpen, setIsDeleteGameModalOpen] = useState(false);
   const [isGameHistoryModalOpen, setIsGameHistoryModalOpen] = useState(false);
+  const [isAddPlatformModalOpen, setIsAddPlatformModalOpen] = useState(false);
+  const [showAllPlatformFiles, setShowAllPlatformFiles] = useState(false);
   const [titleRef, { width: titleWidth }] = useMeasure();
   const [overviewRef, { height: overviewHeight }] = useMeasure();
   const wasRefreshing = usePrevious(isRefreshing);
@@ -305,6 +330,22 @@ function GameDetails({ gameId }: GameDetailsProps) {
 
   const handleGameHistoryModalClose = useCallback(() => {
     setIsGameHistoryModalOpen(false);
+  }, []);
+
+  const handleAddPlatformPress = useCallback(() => {
+    setIsAddPlatformModalOpen(true);
+  }, []);
+
+  const handleAddPlatformModalClose = useCallback(() => {
+    setIsAddPlatformModalOpen(false);
+  }, []);
+
+  const handleThisPlatformFilesPress = useCallback(() => {
+    setShowAllPlatformFiles(false);
+  }, []);
+
+  const handleAllPlatformFilesPress = useCallback(() => {
+    setShowAllPlatformFiles(true);
   }, []);
 
   const handleMonitorTogglePress = useCallback(
@@ -360,7 +401,8 @@ function GameDetails({ gameId }: GameDetailsProps) {
         isDeleteGameModalOpen ||
         isManageGamesModalOpen ||
         isInteractiveSearchModalOpen ||
-        isGameHistoryModalOpen
+        isGameHistoryModalOpen ||
+        isAddPlatformModalOpen
       ) {
         return;
       }
@@ -375,6 +417,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
       isManageGamesModalOpen,
       isInteractiveSearchModalOpen,
       isGameHistoryModalOpen,
+      isAddPlatformModalOpen,
     ]
   );
 
@@ -424,7 +467,8 @@ function GameDetails({ gameId }: GameDetailsProps) {
         isInteractiveSearchModalOpen ||
         isEditGameModalOpen ||
         isDeleteGameModalOpen ||
-        isGameHistoryModalOpen
+        isGameHistoryModalOpen ||
+        isAddPlatformModalOpen
       ) {
         return;
       }
@@ -446,6 +490,7 @@ function GameDetails({ gameId }: GameDetailsProps) {
       isEditGameModalOpen,
       isDeleteGameModalOpen,
       isGameHistoryModalOpen,
+      isAddPlatformModalOpen,
       previousGame,
       nextGame,
       history,
@@ -453,12 +498,15 @@ function GameDetails({ gameId }: GameDetailsProps) {
   );
 
   const populate = useCallback(() => {
-    dispatch(fetchGameFiles({ gameId }));
+    // Files of every platform version, for the all platforms view
+    dispatch(
+      fetchGameFiles({ gameId: titleGameIdsKey.split(',').map(Number) })
+    );
     dispatch(fetchExtraFiles({ gameId }));
     dispatch(fetchGameCredits({ gameId }));
     dispatch(fetchQueueDetails({ gameId }));
     dispatch(fetchImportListSchema());
-  }, [gameId, dispatch]);
+  }, [gameId, titleGameIdsKey, dispatch]);
 
   useEffect(() => {
     populate();
@@ -683,17 +731,31 @@ function GameDetails({ gameId }: GameDetailsProps) {
                 </div>
               </div>
 
+              <div className={styles.platformRow}>
+                {titleSummary ? (
+                  <GamePlatformBadges
+                    versions={titleSummary.versions}
+                    size="large"
+                    selectedGameId={id}
+                    onSelect={onPlatformSelect}
+                  />
+                ) : null}
+
+                <Button
+                  className={styles.addPlatformButton}
+                  size={sizes.SMALL}
+                  title={translate('AddPlatformHelpText')}
+                  onPress={handleAddPlatformPress}
+                >
+                  <Icon name={icons.ADD} />
+                  <span className={styles.addPlatformLabel}>
+                    {translate('AddPlatform')}
+                  </span>
+                </Button>
+              </div>
+
               <div className={styles.details}>
                 <div>
-                  {platform ? (
-                    <span
-                      className={styles.certification}
-                      title={translate('Platform')}
-                    >
-                      {platform.shortName}
-                    </span>
-                  ) : null}
-
                   <span className={styles.year}>
                     <Popover
                       anchor={
@@ -805,6 +867,21 @@ function GameDetails({ gameId }: GameDetailsProps) {
                   </span>
                 </InfoLabel>
 
+                {isMultiPlatform && titleSummary ? (
+                  <InfoLabel
+                    className={styles.detailsInfoLabel}
+                    name={translate('Platforms')}
+                    title={titleSummary.versions
+                      .map((v) => v.tooltip)
+                      .join('\n')}
+                    size={sizes.LARGE}
+                  >
+                    <span className={styles.statusName}>
+                      {getPlatformsPresentText(titleSummary)}
+                    </span>
+                  </InfoLabel>
+                ) : null}
+
                 {collection ? (
                   <InfoLabel
                     className={styles.detailsInfoLabel}
@@ -907,9 +984,35 @@ function GameDetails({ gameId }: GameDetailsProps) {
           ) : null}
 
           <FieldSet legend={translate('Files')}>
-            <GameFileEditorTable gameId={id} />
+            {isMultiPlatform ? (
+              <div className={styles.filesScope}>
+                <Button
+                  size={sizes.SMALL}
+                  kind={showAllPlatformFiles ? kinds.DEFAULT : kinds.PRIMARY}
+                  onPress={handleThisPlatformFilesPress}
+                >
+                  {platform?.name ?? translate('Platform')}
+                </Button>
 
-            <ExtraFileTable gameId={id} />
+                <Button
+                  size={sizes.SMALL}
+                  kind={showAllPlatformFiles ? kinds.PRIMARY : kinds.DEFAULT}
+                  onPress={handleAllPlatformFilesPress}
+                >
+                  {translate('AllPlatforms')}
+                </Button>
+              </div>
+            ) : null}
+
+            <GameFileEditorTable
+              gameIds={
+                isMultiPlatform && showAllPlatformFiles ? titleGameIds : [id]
+              }
+            />
+
+            {showAllPlatformFiles && isMultiPlatform ? null : (
+              <ExtraFileTable gameId={id} />
+            )}
           </FieldSet>
 
           <FieldSet legend={translate('Companies')}>
@@ -943,7 +1046,14 @@ function GameDetails({ gameId }: GameDetailsProps) {
         <DeleteGameModal
           isOpen={isDeleteGameModalOpen}
           gameId={id}
+          titleGameIds={titleGameIds}
           onModalClose={handleDeleteGameModalClose}
+        />
+
+        <AddGamePlatformModal
+          isOpen={isAddPlatformModalOpen}
+          gameId={id}
+          onModalClose={handleAddPlatformModalClose}
         />
 
         <InteractiveImportModal

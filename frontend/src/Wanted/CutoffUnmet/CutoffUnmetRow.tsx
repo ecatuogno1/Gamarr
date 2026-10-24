@@ -4,6 +4,7 @@ import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import TableSelectCell from 'Components/Table/Cells/TableSelectCell';
 import Column from 'Components/Table/Column';
 import TableRow from 'Components/Table/TableRow';
+import { GamePlatform } from 'Game/Game';
 import GameSearchCell from 'Game/GameSearchCell';
 import GameStatus from 'Game/GameStatus';
 import GameTitleLink from 'Game/GameTitleLink';
@@ -19,6 +20,7 @@ interface CutoffUnmetRowProps {
   title: string;
   year: number;
   titleSlug: string;
+  platform?: GamePlatform;
   isSelected?: boolean;
   columns: Column[];
   onSelectedChange: (options: SelectStateInputProps) => void;
@@ -32,6 +34,7 @@ function CutoffUnmetRow({
   title,
   year,
   titleSlug,
+  platform,
   isSelected,
   columns,
   onSelectedChange,
@@ -58,7 +61,11 @@ function CutoffUnmetRow({
         if (name === 'gameMetadata.sortTitle') {
           return (
             <TableRowCell key={name}>
-              <GameTitleLink titleSlug={titleSlug} title={title} />
+              <GameTitleLink
+                titleSlug={titleSlug}
+                title={title}
+                platform={platform}
+              />
             </TableRowCell>
           );
         }

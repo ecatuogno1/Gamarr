@@ -288,6 +288,36 @@ Repack/Proper and revisions map onto the existing Revision model.
 - en.json: unused movie strings (Trakt, Plex, Kodi, IMDb, certification, cinema/physical/digital releases, runtime…)
   were removed (also from the other locales), remaining movie wording was rewritten.
 
+## Title grouping
+
+A Game stays one title on one platform (the "platform version"): path, quality profile, monitoring, file, searches,
+imports and decisions are per platform. The UI groups games by IGDB id into titles, like the multi-version movies of the
+Radarr fork (one card, several versions):
+
+- The grouping is done in the frontend (`frontend/src/Game/Title/`), `/api/v3/game` is unchanged. `groupFilterAndSortTitles`
+  builds the library index items (`{ id: igdbId, gameIds, matchingGameIds }`). A title passes a filter when one version
+  meets all positive conditions; negative conditions (not equal, not contains…) have to hold for every version. A title
+  sorts by its best placed matching version, except size on disk, which is the size of all versions.
+- Library index: one poster/overview/table row per title with a badge per platform version (green downloaded, red
+  missing and monitored, orange missing and unmonitored, purple downloading, blue not available, grey downloaded but
+  unmonitored; the tooltip has quality and size) and an "x of y platforms" progress bar. The footer counts titles and
+  platform versions. Selection is by title (IGDB id) and selects every version for the editor; search/refresh filtered
+  use the matching versions. Edit on a multi-platform card opens the bulk editor for its versions.
+- Title page: `/game/{igdbId}` opens a title, `/game/{igdbId}-{platformId}` (the game's `titleSlug`, so old links keep
+  working) opens it with that platform selected. The header has the platform switcher (badges, switching replaces the
+  URL) and Add Platform; the toolbar and the path/status/profile/size labels are for the selected platform. Files can be
+  shown for the selected platform or all platforms; the Platform column only shows for titles on several platforms.
+  Delete offers the platform version or all platform versions of the title (bulk delete). Previous/next go by title.
+- Add Platform lists the enabled platforms IGDB has for the title (`availablePlatformIgdbIds`, every enabled platform
+  when IGDB lists none) and POSTs a game per selected platform based on the selected version (root folder, profile,
+  availability, tags, monitor and search options). Add New works the same way: one search result per title, the modal
+  has platform check boxes (platforms in the library are checked and disabled) and adds one game per platform.
+- Calendar, wanted, queue, history, blocklist, manual import and interactive search stay per platform and show
+  "Title (SNES)", linking to the title page with the platform selected. The header search suggests a title once.
+- Collections and discover: an entry counts as existing when the title is in the library on any platform
+  (`isExisting`) and `libraryPlatformIds` lists the platforms (`IGameService.AllGamePlatformsByIgdbId`); the posters
+  show the badges of the library versions. Adding missing collection games is unchanged (per collection platform).
+
 ## Integrations
 
 - Metadata consumers write frontend files: an ES-DE / EmulationStation `gamelist.xml` (per platform folder)

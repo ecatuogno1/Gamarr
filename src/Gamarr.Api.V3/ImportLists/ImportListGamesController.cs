@@ -63,7 +63,7 @@ namespace Gamarr.Api.V3.ImportLists
 
             var realResults = new List<ImportListGamesResource>();
             var listExclusions = _importListExclusionService.All();
-            var existingGames = _gameService.AllGameIgdbIdsWithPlatform();
+            var existingGames = _gameService.AllGamePlatformsByIgdbId();
 
             if (includeRecommendations)
             {
@@ -107,9 +107,8 @@ namespace Gamarr.Api.V3.ImportLists
 
                 game.Lists = x.SelectMany(m => m.Lists).ToHashSet();
                 game.IsExcluded = listExclusions.Any(e => e.Matches(game.IgdbId, game.PlatformId));
-                game.IsExisting = game.PlatformId > 0
-                    ? existingGames.Contains((game.IgdbId, game.PlatformId))
-                    : existingGames.Any(e => e.IgdbId == game.IgdbId);
+                game.LibraryPlatformIds = existingGames.GetValueOrDefault(game.IgdbId, new List<int>());
+                game.IsExisting = game.LibraryPlatformIds.Any();
                 game.IsRecommendation = x.Any(m => m.IsRecommendation);
                 game.IsPopular = x.Any(m => m.IsPopular);
                 game.IsTrending = x.Any(m => m.IsTrending);

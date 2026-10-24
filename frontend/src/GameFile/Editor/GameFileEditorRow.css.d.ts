@@ -10,6 +10,7 @@ interface CssExports {
   'indexerFlags': string;
   'language': string;
   'languages': string;
+  'platform': string;
   'quality': string;
   'regions': string;
   'rejected': string;

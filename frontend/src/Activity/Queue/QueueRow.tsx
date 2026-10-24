@@ -189,7 +189,11 @@ function QueueRow(props: QueueRowProps) {
           return (
             <TableRowCell key={name}>
               {game ? (
-                <GameTitleLink titleSlug={game.titleSlug} title={game.title} />
+                <GameTitleLink
+                  titleSlug={game.titleSlug}
+                  title={game.title}
+                  platform={game.platform}
+                />
               ) : (
                 title
               )}

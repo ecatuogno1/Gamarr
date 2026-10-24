@@ -1,0 +1,28 @@
+.message {
+  margin-bottom: 15px;
+}
+
+.noPlatforms {
+  color: var(--helpTextColor);
+}
+
+.modalFooter {
+  composes: modalFooter from '~Components/Modal/ModalFooter.css';
+}
+
+.searchLabelContainer {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+}
+
+.searchLabel {
+  margin-right: 8px;
+  font-weight: normal;
+}
+
+.searchInputContainer {
+  composes: container from '~Components/Form/CheckInput.css';
+
+  flex: 0 0 auto;
+}

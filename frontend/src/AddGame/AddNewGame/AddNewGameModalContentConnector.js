@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
+import { getPlatformOptions } from 'Game/Title/PlatformCheckList';
 import { addGame, setAddGameDefault } from 'Store/Actions/addGameActions';
 import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
 import createSystemStatusSelector from 'Store/Selectors/createSystemStatusSelector';
@@ -30,13 +31,7 @@ function createMapStateToProps() {
       } = selectSettings(defaults, {}, addError);
 
       // The platforms IGDB lists for the game, already added platforms can't be picked again
-      const platformOptions = allPlatforms
-        .filter((platform) => platform.enabled && (!availablePlatforms.length || availablePlatforms.includes(platform.id)))
-        .map((platform) => ({
-          key: platform.id,
-          value: platform.name,
-          isDisabled: addedPlatformIds.includes(platform.id)
-        }));
+      const platformOptions = getPlatformOptions(allPlatforms, availablePlatforms, addedPlatformIds);
 
       return {
         isAdding,
@@ -66,19 +61,27 @@ class AddNewGameModalContentConnector extends Component {
     super(props, context);
 
     // Default to the lookup's platform (the first platform IGDB lists), unless it's already in the library
-    const firstAvailable = props.platformOptions.find((option) => !option.isDisabled);
-    const defaultOption = props.platformOptions.find((option) => option.key === props.platformId && !option.isDisabled);
+    const firstAvailable = props.platformOptions.find((option) => !option.isOwned);
+    const defaultOption = props.platformOptions.find((option) => option.id === props.platformId && !option.isOwned);
+    const defaultPlatform = defaultOption || firstAvailable;
 
     this.state = {
-      selectedPlatformId: (defaultOption || firstAvailable || {}).key || 0
+      selectedPlatformIds: defaultPlatform ? [defaultPlatform.id] : []
     };
+  }
+
+  componentDidUpdate(prevProps) {
+    // Close once the platforms are added, the title can still be missing other platforms
+    if (prevProps.isAdding && !this.props.isAdding && !this.props.addError) {
+      this.props.onModalClose();
+    }
   }
 
   //
   // Listeners
 
-  onPlatformChange = ({ value }) => {
-    this.setState({ selectedPlatformId: parseInt(value) });
+  onPlatformsChange = (selectedPlatformIds) => {
+    this.setState({ selectedPlatformIds });
   };
 
   onInputChange = ({ name, value }) => {
@@ -96,9 +99,12 @@ class AddNewGameModalContentConnector extends Component {
       tags
     } = this.props;
 
+    const { selectedPlatformIds } = this.state;
+
     this.props.addGame({
       igdbId,
-      platformId: this.state.selectedPlatformId,
+      platformId: selectedPlatformIds[0],
+      platformIds: selectedPlatformIds,
       rootFolderPath: rootFolderPath.value,
       monitor: monitor.value,
       qualityProfileId: qualityProfileId.value,
@@ -115,8 +121,8 @@ class AddNewGameModalContentConnector extends Component {
     return (
       <AddNewGameModalContent
         {...this.props}
-        platformId={this.state.selectedPlatformId}
-        onPlatformChange={this.onPlatformChange}
+        selectedPlatformIds={this.state.selectedPlatformIds}
+        onPlatformsChange={this.onPlatformsChange}
         onInputChange={this.onInputChange}
         onAddGamePress={this.onAddGamePress}
       />
@@ -128,6 +134,8 @@ AddNewGameModalContentConnector.propTypes = {
   igdbId: PropTypes.number.isRequired,
   platformId: PropTypes.number,
   platformOptions: PropTypes.arrayOf(PropTypes.object).isRequired,
+  isAdding: PropTypes.bool.isRequired,
+  addError: PropTypes.object,
   rootFolderPath: PropTypes.object,
   monitor: PropTypes.object.isRequired,
   qualityProfileId: PropTypes.object,

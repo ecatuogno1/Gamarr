@@ -175,6 +175,7 @@ function ParseResult(props: ParseResultProps) {
                 titleSlug={game.titleSlug}
                 title={game.title}
                 year={game.year}
+                platform={game.platform}
               />
             ) : (
               '-'

@@ -6,13 +6,15 @@ import VirtualTableRowCell from 'Components/Table/Cells/TableRowCell';
 import { GameStatus } from 'Game/Game';
 import getGameStatusDetails from 'Game/getGameStatusDetails';
 import { icons } from 'Helpers/Props';
-import { toggleGameMonitored } from 'Store/Actions/gameActions';
+import { saveGameEditor, toggleGameMonitored } from 'Store/Actions/gameActions';
 import translate from 'Utilities/String/translate';
 import styles from './GameStatusCell.css';
 
 interface GameStatusCellProps {
   className: string;
   gameId: number;
+  // All platform versions of a title, toggled together
+  gameIds?: number[];
   monitored: boolean;
   status: GameStatus;
   isSelectMode: boolean;
@@ -24,6 +26,7 @@ function GameStatusCell(props: GameStatusCellProps) {
   const {
     className,
     gameId,
+    gameIds,
     monitored,
     status,
     isSelectMode,
@@ -37,8 +40,13 @@ function GameStatusCell(props: GameStatusCellProps) {
   const dispatch = useDispatch();
 
   const onMonitoredPress = useCallback(() => {
+    if (gameIds && gameIds.length > 1) {
+      dispatch(saveGameEditor({ gameIds, monitored: !monitored }));
+      return;
+    }
+
     dispatch(toggleGameMonitored({ gameId, monitored: !monitored }));
-  }, [gameId, monitored, dispatch]);
+  }, [gameId, gameIds, monitored, dispatch]);
 
   return (
     <Component className={className} {...otherProps}>

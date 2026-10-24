@@ -18,6 +18,7 @@ import { Tag } from 'App/State/TagsAppState';
 import Icon from 'Components/Icon';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import Game from 'Game/Game';
+import { groupGamesByTitle, sortVersions } from 'Game/Title/gameTitle';
 import useKeyboardShortcuts from 'Helpers/Hooks/useKeyboardShortcuts';
 import { icons } from 'Helpers/Props';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
@@ -54,6 +55,8 @@ export interface SuggestedGame
   > {
   firstCharacter: string;
   tags: Tag[];
+  // Short names of the title's platforms in the library
+  platforms: string[];
 }
 
 interface GameSuggestion {
@@ -75,42 +78,49 @@ function createUnoptimizedSelector() {
     createAllGamesSelector(),
     createTagsSelector(),
     (allGames, allTags) => {
-      return allGames.map((game): SuggestedGame => {
-        const {
-          title,
-          originalTitle,
-          year,
-          titleSlug,
-          sortTitle,
-          images,
-          alternateTitles = [],
-          igdbId,
-          igdbSlug,
-          tags = [],
-        } = game;
+      // One suggestion per title, it opens the title page
+      return [...groupGamesByTitle(allGames).values()].map(
+        (versions): SuggestedGame => {
+          const sortedVersions = sortVersions(versions);
+          const game = sortedVersions[0];
+          const {
+            title,
+            originalTitle,
+            year,
+            sortTitle,
+            images,
+            alternateTitles = [],
+            igdbId,
+            igdbSlug,
+          } = game;
+          const tags = [...new Set(versions.flatMap((v) => v.tags ?? []))];
 
-        return {
-          title,
-          originalTitle,
-          year,
-          titleSlug,
-          sortTitle,
-          images,
-          alternateTitles,
-          igdbId,
-          igdbSlug,
-          firstCharacter: title.charAt(0).toLowerCase(),
-          tags: tags.reduce<Tag[]>((acc, id) => {
-            const matchingTag = allTags.find((tag) => tag.id === id);
+          return {
+            title,
+            originalTitle,
+            year,
+            titleSlug: `${igdbId}`,
+            sortTitle,
+            images,
+            alternateTitles,
+            igdbId,
+            igdbSlug,
+            firstCharacter: title.charAt(0).toLowerCase(),
+            platforms: sortedVersions.map(
+              (v) => v.platform?.shortName ?? `${v.platformId}`
+            ),
+            tags: tags.reduce<Tag[]>((acc, id) => {
+              const matchingTag = allTags.find((tag) => tag.id === id);
 
-            if (matchingTag) {
-              acc.push(matchingTag);
-            }
+              if (matchingTag) {
+                acc.push(matchingTag);
+              }
 
-            return acc;
-          }, []),
-        };
-      });
+              return acc;
+            }, []),
+          };
+        }
+      );
     }
   );
 }

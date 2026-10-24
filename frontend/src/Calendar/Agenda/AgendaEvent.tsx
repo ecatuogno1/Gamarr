@@ -7,6 +7,8 @@ import CalendarEventQueueDetails from 'Calendar/Events/CalendarEventQueueDetails
 import getStatusStyle from 'Calendar/getStatusStyle';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
+import { GamePlatform } from 'Game/Game';
+import { getTitleWithPlatform } from 'Game/Title/gameTitle';
 import useGameFile from 'GameFile/useGameFile';
 import { icons, kinds } from 'Helpers/Props';
 import { createQueueItemSelectorForHook } from 'Store/Selectors/createQueueItemSelector';
@@ -19,6 +21,7 @@ interface AgendaEventProps {
   gameFileId: number;
   title: string;
   titleSlug: string;
+  platform?: GamePlatform;
   genres: string[];
   releaseDate?: string;
   sortDate: moment.Moment;
@@ -34,6 +37,7 @@ function AgendaEvent({
   gameFileId,
   title,
   titleSlug,
+  platform,
   genres = [],
   releaseDate,
   sortDate,
@@ -103,7 +107,9 @@ function AgendaEvent({
             enableColorImpairedMode && 'colorImpaired'
           )}
         >
-          <div className={styles.gameTitle}>{title}</div>
+          <div className={styles.gameTitle}>
+            {getTitleWithPlatform(title, platform)}
+          </div>
 
           {showGameInformation ? (
             <div className={styles.genres}>{joinedGenres}</div>

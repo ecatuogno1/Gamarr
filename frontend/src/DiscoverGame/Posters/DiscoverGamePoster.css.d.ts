@@ -11,6 +11,7 @@ interface CssExports {
   'externalLinks': string;
   'link': string;
   'overlayTitle': string;
+  'platforms': string;
   'posterContainer': string;
   'title': string;
 }

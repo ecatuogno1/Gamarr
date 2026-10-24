@@ -6,7 +6,7 @@ import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import Scroller from 'Components/Scroller/Scroller';
 import Column from 'Components/Table/Column';
-import Game from 'Game/Game';
+import { GameTitleItem } from 'Game/Title/gameTitle';
 import useMeasure from 'Helpers/Hooks/useMeasure';
 import { SortDirection } from 'Helpers/Props/sortDirections';
 import dimensions from 'Styles/Variables/dimensions';
@@ -21,14 +21,14 @@ const bodyPaddingSmallScreen = parseInt(
 );
 
 interface RowItemData {
-  items: Game[];
+  items: GameTitleItem[];
   sortKey: string;
   columns: Column[];
   isSelectMode: boolean;
 }
 
 interface GameIndexTableProps {
-  items: Game[];
+  items: GameTitleItem[];
   sortKey: string;
   sortDirection?: SortDirection;
   jumpToCharacter?: string;
@@ -50,7 +50,7 @@ function Row({ index, style, data }: ListChildComponentProps<RowItemData>) {
     return null;
   }
 
-  const game = items[index];
+  const title = items[index];
 
   return (
     <div
@@ -62,7 +62,7 @@ function Row({ index, style, data }: ListChildComponentProps<RowItemData>) {
       className={styles.row}
     >
       <GameIndexRow
-        gameId={game.id}
+        gameIds={title.gameIds}
         sortKey={sortKey}
         columns={columns}
         isSelectMode={isSelectMode}

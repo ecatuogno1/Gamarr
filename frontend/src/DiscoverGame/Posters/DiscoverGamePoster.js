@@ -12,6 +12,7 @@ import AddNewDiscoverGameModal from 'DiscoverGame/AddNewDiscoverGameModal';
 import ExcludeGameModal from 'DiscoverGame/Exclusion/ExcludeGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
 import GamePoster from 'Game/GamePoster';
+import LibraryPlatformBadges from 'Game/Title/LibraryPlatformBadges';
 import { icons } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import DiscoverGamePosterInfo from './DiscoverGamePosterInfo';
@@ -168,6 +169,14 @@ class DiscoverGamePoster extends Component {
               <div
                 className={styles.existing}
                 title={translate('Existing')}
+              />
+          }
+
+          {
+            isExisting &&
+              <LibraryPlatformBadges
+                className={styles.platforms}
+                igdbId={igdbId}
               />
           }
 

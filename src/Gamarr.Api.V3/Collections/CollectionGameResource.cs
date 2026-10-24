@@ -23,7 +23,13 @@ namespace Gamarr.Api.V3.Collections
         public Ratings Ratings { get; set; }
         public List<string> Genres { get; set; }
         public string Folder { get; set; }
+
+        // In the library on any platform
         public bool IsExisting { get; set; }
+
+        // The platforms the title is in the library on
+        public List<int> LibraryPlatformIds { get; set; } = new();
+
         public bool IsExcluded { get; set; }
     }
 

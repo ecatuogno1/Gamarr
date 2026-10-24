@@ -1,0 +1,81 @@
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.badge {
+  composes: link from '~Components/Link/Link.css';
+
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--white);
+  white-space: nowrap;
+  font-weight: bold;
+  font-size: $smallFontSize;
+  line-height: 16px;
+
+  &:hover,
+  &:focus {
+    color: var(--white);
+    text-decoration: none;
+    filter: brightness(1.15);
+  }
+}
+
+.large {
+  padding: 3px 10px;
+  border-width: 2px;
+  font-size: $defaultFontSize;
+  line-height: 20px;
+  opacity: 0.6;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+  }
+}
+
+.selected {
+  border-color: var(--white);
+  opacity: 1;
+}
+
+.default {
+  background-color: var(--darkGray);
+}
+
+.inverse {
+  background-color: var(--inverseLabelColor);
+  color: var(--inverseLabelTextColor);
+}
+
+.primary {
+  background-color: var(--primaryColor);
+}
+
+.danger {
+  background-color: var(--dangerColor);
+}
+
+.success {
+  background-color: var(--successColor);
+}
+
+.purple {
+  background-color: var(--purple);
+}
+
+.warning {
+  background-color: var(--warningColor);
+}
+
+.info {
+  background-color: var(--infoColor);
+}
+
+.queue {
+  background-color: var(--queueColor);
+}

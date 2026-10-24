@@ -3,6 +3,7 @@ import { createAction } from 'redux-actions';
 import { batchActions } from 'redux-batched-actions';
 import { createThunk, handleThunks } from 'Store/thunks';
 import createAjaxRequest from 'Utilities/createAjaxRequest';
+import addGamePlatforms from 'Utilities/Game/addGamePlatforms';
 import getNewGame from 'Utilities/Game/getNewGame';
 import getSectionState from 'Utilities/State/getSectionState';
 import updateSectionState from 'Utilities/State/updateSectionState';
@@ -88,7 +89,8 @@ export const actionHandlers = handleThunks({
     abortCurrentRequest = abortRequest;
 
     request.done((data) => {
-      data = data.map((game) => ({ ...game, internalId: game.id, id: game.igdbId }));
+      // One result per title, the platforms are picked when adding it
+      data = _.uniqBy(data, 'igdbId').map((game) => ({ ...game, internalId: game.id, id: game.igdbId }));
 
       dispatch(batchActions([
         update({ section, data }),
@@ -120,24 +122,16 @@ export const actionHandlers = handleThunks({
     const newGame = getNewGame(_.cloneDeep(_.find(items, { igdbId })), payload);
     newGame.id = 0;
 
-    const promise = createAjaxRequest({
-      url: '/game',
-      method: 'POST',
-      dataType: 'json',
-      contentType: 'application/json',
-      data: JSON.stringify(newGame)
-    }).request;
+    // Several platforms can be added at once, one game per platform
+    const platformIds = payload.platformIds?.length ? payload.platformIds : [newGame.platformId];
+    let addedCount = 0;
 
-    promise.done((data) => {
-      const updatedItem = _.cloneDeep(data);
-      updatedItem.internalId = updatedItem.id;
-      updatedItem.id = updatedItem.igdbId;
-      delete updatedItem.images;
+    addGamePlatforms(newGame, platformIds, (data) => {
+      addedCount++;
 
+      dispatch(updateItem({ section: 'games', ...data }));
+    }).then(() => {
       const actions = [
-        updateItem({ section: 'games', ...data }),
-        updateItem({ section: 'addGame', ...updatedItem }),
-
         set({
           section,
           isAdding: false,
@@ -159,13 +153,11 @@ export const actionHandlers = handleThunks({
       }
 
       dispatch(batchActions(actions));
-    });
-
-    promise.fail((xhr) => {
+    }).catch((xhr) => {
       dispatch(set({
         section,
         isAdding: false,
-        isAdded: false,
+        isAdded: addedCount > 0,
         addError: xhr
       }));
     });
