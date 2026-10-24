@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FizzWare.NBuilder;
 using FluentAssertions;
 using NUnit.Framework;
@@ -56,6 +57,18 @@ namespace NzbDrone.Core.Test.GameTests.GameMetadataRepositoryTests
 
             updated = _gameMetadataRepo.UpsertMany(_metadataList);
             updated.Should().BeTrue();
+            AllStoredModels.Should().HaveCount(_metadataList.Count);
+        }
+
+        [Test]
+        public void concurrent_upserts_of_the_same_games_should_not_insert_twice()
+        {
+            var tasks = Enumerable.Range(0, 8)
+                .Select(_ => Task.Run(() => _gameMetadataRepo.UpsertMany(_metadataList.JsonClone())))
+                .ToArray();
+
+            Task.WaitAll(tasks);
+
             AllStoredModels.Should().HaveCount(_metadataList.Count);
         }
     }

@@ -17,6 +17,10 @@ namespace NzbDrone.Core.Games
 
     public class GameMetadataRepository : BasicRepository<GameMetadata>, IGameMetadataRepository
     {
+        // Adding a game and the background refresh of its series both upsert the same IGDB ids, the lookup and insert
+        // must not interleave or the second insert hits the unique IgdbId index
+        private static readonly object UpsertLock = new object();
+
         private readonly Logger _logger;
 
         public GameMetadataRepository(IMainDatabase database, IEventAggregator eventAggregator, Logger logger)
@@ -46,6 +50,14 @@ namespace NzbDrone.Core.Games
         }
 
         public bool UpsertMany(List<GameMetadata> metadatas)
+        {
+            lock (UpsertLock)
+            {
+                return UpsertManyLocked(metadatas);
+            }
+        }
+
+        private bool UpsertManyLocked(List<GameMetadata> metadatas)
         {
             var updateList = new List<GameMetadata>();
             var addList = new List<GameMetadata>();
