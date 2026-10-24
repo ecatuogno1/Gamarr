@@ -5,7 +5,7 @@ We're always looking for people to help make Gamarr even better, there are a num
 
 # Documentation
 
-Setup guides, [FAQ](/gamarr/faq), the more information we have on the [wiki](https://wiki.servarr.com/gamarr) the better.
+Setup guides, FAQ, the more information we have on the [wiki](https://github.com/ecatuogno1/Gamarr/wiki) the better.
 
 # Development
 
@@ -65,7 +65,7 @@ The backend solution is most easily built and ran in Visual Studio or Rider, how
 
 1. First `Build` the solution in Visual Studio, this will ensure all projects are correctly built and dependencies restored
 1. Next `Debug/Run` the project in Visual Studio to start Gamarr
-1. Open <http://localhost:7878>
+1. Open <http://localhost:7171>
 
 #### Command line
 
@@ -85,11 +85,11 @@ dotnet msbuild -restore src/Gamarr.sln -p:Configuration=Debug -p:Platform=Posix 
 
 ## Contributing Code
 
-- If you're adding a new, already requested feature, please comment on [GitHub Issues](https://github.com/Gamarr/Gamarr/issues) so work is not duplicated (If you want to add something not already on there, please talk to us first)
+- If you're adding a new, already requested feature, please comment on [GitHub Issues](https://github.com/ecatuogno1/Gamarr/issues) so work is not duplicated (If you want to add something not already on there, please talk to us first)
 - Rebase from Gamarr's develop branch, do not merge
 - Make meaningful commits, or squash them
 - Feel free to make a pull request before work is complete, this will let us see where its at and make comments/suggest improvements
-- Reach out to us on the discord if you have any questions
+- Open an issue or discussion on GitHub if you have any questions
 - Add tests (unit/integration)
 - Commit with \*nix line endings for consistency (We checkout Windows and commit \*nix)
 - One feature/bug fix per pull request to keep things clean and easy to understand
@@ -136,20 +136,7 @@ If you have any questions about any of this, please let us know.
 
 # Translation
 
-Gamarr uses a self hosted open access [Weblate](https://translate.servarr.com) instance to manage its json translation files. These files are stored in the repo at `src/NzbDrone.Core/Localization`
-
-## Contributing to an Existing Translation
-
-Weblate handles synchronization and translation of strings for all languages other than English. Editing of translated strings and translating existing strings for supported languages should be performed there for the Gamarr project.
-
-The English translation, `en.json`, serves as the source for all other translations and is managed on GitHub repo.
-
-## Adding a Language
-
-Adding translations to Gamarr requires two steps
-
-- Adding the Language to weblate
-- Adding the Language to Gamarr codebase
+Translations are stored in the repo at `src/NzbDrone.Core/Localization`.
 
 ## Adding Translation Strings in Code
 

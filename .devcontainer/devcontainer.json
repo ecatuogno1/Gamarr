@@ -10,7 +10,7 @@
       "nvmVersion": "latest"
     }
   },
-  "forwardPorts": [7878],
+  "forwardPorts": [7171],
   "customizations": {
     "vscode": {
       "extensions": ["esbenp.prettier-vscode"]

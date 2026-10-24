@@ -143,7 +143,7 @@ namespace NzbDrone.Host
                     Variables = new Dictionary<string, OpenApiServerVariable>
                     {
                         { "protocol", new OpenApiServerVariable { Default = "http", Enum = new List<string> { "http", "https" } } },
-                        { "hostpath", new OpenApiServerVariable { Default = "localhost:7878" } }
+                        { "hostpath", new OpenApiServerVariable { Default = "localhost:7171" } }
                     }
                 });
 

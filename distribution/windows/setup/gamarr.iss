@@ -3,8 +3,8 @@
 
 #define AppName "Gamarr"
 #define AppPublisher "Team Gamarr"
-#define AppURL "https://gamarr.video/"
-#define ForumsURL "https://gamarr.video/discord"
+#define AppURL "https://github.com/ecatuogno1/Gamarr"
+#define ForumsURL "https://github.com/ecatuogno1/Gamarr/issues"
 #define AppExeName "Gamarr.exe"
 #define BaseVersion GetEnv('MAJORVERSION')
 #define BuildNumber GetEnv('MINORVERSION')
