@@ -11,11 +11,12 @@ for indexers, download clients, import lists, notifications and metadata.
   profile, tags and at most one GameFile.
 - **Platform** is new. It's a seeded reference table:
   `Id, Name, ShortName, IgdbPlatformId, Family (Nintendo|Sony|Microsoft|Sega|PC|Arcade|Atari|NEC|SNK|Other),
-  Generation, FolderName (ES-DE/RetroArch style: "snes", "psx", "pc"), FileExtensions (csv),
-  NewznabCategories (csv), Enabled`.
+  Generation, FolderName (ES-DE/RetroArch style: "snes", "psx", "pc"), FileExtensions (JSON array),
+  NewznabCategories (JSON array), Enabled`. Only `Enabled` is user editable (`/api/v3/platform`).
   Every Game has a required `PlatformId`. A title released on several platforms is one Game record per
   platform. The unique key is **(IgdbId, PlatformId)**, not IgdbId on its own, so every lookup or uniqueness
-  check that used to be by TmdbId has to take the platform into account.
+  check that used to be by TmdbId has to take the platform into account. In the database this is a unique
+  index on Games (GameMetadataId, PlatformId).
 - **GameMetadata** (IGDB-backed, shared by Games with the same IgdbId):
   IgdbId, Title, CleanTitle, SortTitle, OriginalTitle, AlternativeTitles (IGDB alternative_names),
   Year, ReleaseDate (first_release_date), PlatformReleaseDates (json: igdbPlatformId→date),
@@ -26,7 +27,9 @@ for indexers, download clients, import lists, notifications and metadata.
   YouTubeTrailerId (IGDB videos), Status (released/upcoming/cancelled → maps onto the existing GameStatusType),
   AvailablePlatformIgdbIds, LastInfoSync.
   Removed from Radarr: ImdbId, runtime, certification, studio, cinema/physical/digital dates,
-  "minimum availability" based on cinema dates. Availability is just "Released" or "Announced".
+  "minimum availability" based on cinema dates. Availability is just "Released" or "Announced": the
+  `MinimumAvailability` field is kept (Announced/Released, InCinemas was removed) and is evaluated against the
+  game's release date on its own platform (PlatformReleaseDates), falling back to the first release date.
 - **Credits** are repurposed as company credits (developer/publisher/porting/supporting).
   **Collections** become IGDB collections ("series").
 
@@ -40,6 +43,27 @@ for indexers, download clients, import lists, notifications and metadata.
   `MetadataSource/Igdb/`. SkyHook is deleted.
 - Search terms: `igdb:1234` → lookup by id, otherwise a name search. A platform filter is optional.
 - Requests are rate-limited to 4/s (IGDB's limit).
+
+## Stage 2 implementation notes
+
+- 93 platforms are seeded (migration 243, `PlatformDefinitions`), PC (Microsoft Windows) gets Id 1 and existing
+  games were assigned to it. IGDB ids that couldn't be verified are marked in `PlatformDefinitions`. New entries in
+  `PlatformDefinitions` are added on startup.
+- Adding a game through `POST /api/v3/game` requires `platformId`. Internal adds (import lists, collections, the
+  library import) may leave it at 0, then the first enabled platform IGDB lists for the game is used.
+- Import list exclusions and list items have a PlatformId, 0 meaning "any platform". Collections have a PlatformId
+  used for their missing games (0 = per game, as above).
+- `titleSlug` is `{igdbId}-{platformId}` because IgdbId isn't unique in the library anymore.
+- Lookup results (`/api/v3/game/lookup`) have `availablePlatforms` (enabled Gamarr platform ids mapped from the IGDB
+  platforms) and default `platformId`/`platform` to the first of them. `/game/lookup` accepts an optional
+  `platformId` filter.
+- Credits are company credits with `type` developer/publisher/porting/supporting, one row per company and role.
+  Ratings are `igdb` (users) and `critic` (aggregated), both 0-100.
+- Images: cover -> Poster (`t_original`), first artwork (or first screenshot) -> Fanart (`t_1080p`), screenshots ->
+  Screenshot (`t_1080p`), company logos (`t_logo_med`).
+- The Twitch Client ID/Secret are sent in the token request body, not the URL, so they don't end up in logs.
+- Quality size limits are still Radarr's MB-per-minute values multiplied by a fixed 110 minutes until stage 3
+  replaces them. Game translations are kept but IGDB doesn't fill them; OriginalLanguage defaults to English.
 
 ## Releases: qualities
 
