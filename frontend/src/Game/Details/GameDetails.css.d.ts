@@ -21,7 +21,6 @@ interface CssExports {
   'innerContentBody': string;
   'links': string;
   'monitorToggleButton': string;
-  'originalLanguage': string;
   'overview': string;
   'path': string;
   'poster': string;

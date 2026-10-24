@@ -44,9 +44,23 @@ type SelectedChangeProps = SelectStateInputProps & {
   hasGameFileId: boolean;
 };
 
+// Companion files are full paths, show them relative to the primary file's folder
+function getPathInRelease(primaryPath: string, file: string) {
+  const separator = Math.max(
+    primaryPath.lastIndexOf('/'),
+    primaryPath.lastIndexOf('\\')
+  );
+  const folder = primaryPath.substring(0, separator + 1);
+
+  return folder && file.startsWith(folder)
+    ? file.substring(folder.length)
+    : file;
+}
+
 interface InteractiveImportRowProps {
   id: number;
   allowGameChange: boolean;
+  path: string;
   relativePath: string;
   game?: Game;
   releaseGroup?: string;
@@ -59,6 +73,7 @@ interface InteractiveImportRowProps {
   rejections: Rejection[];
   columns: Column[];
   gameFileId?: number;
+  companionFiles?: string[];
   isReprocessing?: boolean;
   isSelected?: boolean;
   modalTitle: string;
@@ -70,6 +85,7 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
   const {
     id,
     allowGameChange,
+    path,
     relativePath,
     game,
     quality,
@@ -83,6 +99,7 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
     isSelected,
     modalTitle,
     gameFileId,
+    companionFiles = [],
     columns,
     onSelectedChange,
     onValidRowChange,
@@ -276,6 +293,30 @@ function InteractiveImportRow(props: InteractiveImportRowProps) {
 
       <TableRowCell className={styles.relativePath} title={relativePath}>
         {relativePath}
+
+        {companionFiles.length ? (
+          <div className={styles.companionFiles}>
+            <Popover
+              anchor={
+                <span>
+                  <Icon name={icons.FILE} size={11} />{' '}
+                  {translate('CompanionFilesCount', {
+                    count: companionFiles.length,
+                  })}
+                </span>
+              }
+              title={translate('CompanionFiles')}
+              body={
+                <ul className={styles.companionFilesList}>
+                  {companionFiles.map((file) => (
+                    <li key={file}>{getPathInRelease(path, file)}</li>
+                  ))}
+                </ul>
+              }
+              position={tooltipPositions.RIGHT}
+            />
+          </div>
+        ) : null}
       </TableRowCell>
 
       {isGameColumnVisible ? (

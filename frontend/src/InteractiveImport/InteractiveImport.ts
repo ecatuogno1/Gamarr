@@ -32,6 +32,8 @@ interface InteractiveImport extends ModelBase {
   indexerFlags: number;
   rejections: Rejection[];
   gameFileId?: number;
+  // Other files of the release (bin tracks, other discs, installer parts), imported with the game file
+  companionFiles?: string[];
 }
 
 export default InteractiveImport;

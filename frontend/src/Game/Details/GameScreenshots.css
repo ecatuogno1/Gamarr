@@ -1,0 +1,18 @@
+.screenshots {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+
+  padding-bottom: 10px;
+}
+
+.screenshot {
+  flex: 0 0 auto;
+}
+
+.image {
+  display: block;
+  height: 180px;
+  border-radius: 4px;
+  background-color: var(--inputBackgroundColor);
+}

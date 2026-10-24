@@ -6,6 +6,8 @@ interface CssExports {
   'collection': string;
   'criticRating': string;
   'developers': string;
+  'fileRegions': string;
+  'fileVersion': string;
   'gameFileQualities': string;
   'gameStatus': string;
   'genres': string;
@@ -17,6 +19,7 @@ interface CssExports {
   'path': string;
   'platform': string;
   'popularity': string;
+  'publishers': string;
   'qualityProfileId': string;
   'releaseDate': string;
   'releaseGroups': string;

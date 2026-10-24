@@ -35,6 +35,11 @@ function GameCompanyCredits() {
     return <div>{translate('NoCompanyCredits')}</div>;
   }
 
+  // Only reserve room for logos when IGDB has any, most companies don't have one
+  const hasLogos = items.some((credit) =>
+    credit.images.some((image) => image.coverType === 'clearlogo')
+  );
+
   return (
     <div className={styles.credits}>
       {items.map((credit) => {
@@ -44,16 +49,18 @@ function GameCompanyCredits() {
 
         return (
           <div key={credit.id} className={styles.credit}>
-            <div className={styles.logoContainer}>
-              {logo ? (
-                <img
-                  className={styles.logo}
-                  src={logo.remoteUrl}
-                  alt={credit.companyName}
-                  loading="lazy"
-                />
-              ) : null}
-            </div>
+            {hasLogos ? (
+              <div className={styles.logoContainer}>
+                {logo ? (
+                  <img
+                    className={styles.logo}
+                    src={logo.remoteUrl}
+                    alt={credit.companyName}
+                    loading="lazy"
+                  />
+                ) : null}
+              </div>
+            ) : null}
 
             <div className={styles.name}>{credit.companyName}</div>
 

@@ -64,6 +64,8 @@ class AddNewGameSearchResult extends Component {
       platform,
       availablePlatforms,
       addedPlatformIds,
+      platformBadges,
+      libraryPlatformNames,
       developers,
       originalLanguage,
       genres,
@@ -177,21 +179,34 @@ class AddNewGameSearchResult extends Component {
               </div>
             </div>
 
-            <div>
+            <div className={styles.platforms}>
               {
-                !!platform &&
-                  <span className={styles.certification}>
-                    {platform.shortName}
-                  </span>
-              }
-
-              {
-                availablePlatforms.length > 1 &&
-                  <span className={styles.runtime}>
-                    {translate('CountPlatforms', { count: availablePlatforms.length })}
-                  </span>
+                platformBadges.length ?
+                  platformBadges.map((badge) => (
+                    <span
+                      key={badge.id}
+                      className={badge.isAdded ? styles.addedPlatform : styles.platform}
+                      title={badge.isAdded ? translate('GameIsInLibraryOnPlatform', { platform: badge.name }) : badge.name}
+                    >
+                      {badge.isAdded ? <Icon name={icons.CHECK} size={12} /> : null} {badge.shortName}
+                    </span>
+                  )) :
+                  (
+                    !!platform &&
+                      <span className={styles.platform}>
+                        {platform.shortName}
+                      </span>
+                  )
               }
             </div>
+
+            {
+              libraryPlatformNames.length && !isExistingGame ?
+                <div className={styles.inLibrary}>
+                  {translate('AlreadyInLibraryOn', { platforms: libraryPlatformNames.join(', ') })}
+                </div> :
+                null
+            }
 
             <div>
               <Label size={sizes.LARGE}>
@@ -326,6 +341,8 @@ AddNewGameSearchResult.propTypes = {
   platform: PropTypes.object,
   availablePlatforms: PropTypes.arrayOf(PropTypes.number),
   addedPlatformIds: PropTypes.arrayOf(PropTypes.number),
+  platformBadges: PropTypes.arrayOf(PropTypes.object).isRequired,
+  libraryPlatformNames: PropTypes.arrayOf(PropTypes.string).isRequired,
   developers: PropTypes.arrayOf(PropTypes.string),
   originalLanguage: PropTypes.object,
   genres: PropTypes.arrayOf(PropTypes.string),

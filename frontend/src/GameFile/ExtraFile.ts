@@ -1,6 +1,6 @@
 import ModelBase from 'App/ModelBase';
 
-export type ExtraFileType = 'subtitle' | 'metadata' | 'other';
+export type ExtraFileType = 'subtitle' | 'metadata' | 'other' | 'companion';
 
 export interface ExtraFile extends ModelBase {
   gameId: number;

@@ -104,17 +104,33 @@
   position: relative;
 }
 
-.certification {
-  margin-left: 2px;
+.platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+
+  margin-bottom: 5px;
+}
+
+.platform {
   padding: 0 5px;
   border: 1px solid;
   border-radius: 5px;
-  font-size: 16px;
+  font-size: 14px;
 }
 
-.runtime {
-  margin-left: 8px;
-  font-size: 16px;
+.addedPlatform {
+  composes: platform;
+
+  border-color: var(--successColor);
+  background-color: var(--successColor);
+  color: var(--white);
+}
+
+.inLibrary {
+  margin-bottom: 5px;
+  color: var(--successColor);
+  font-size: 14px;
 }
 
 .statusContainer {

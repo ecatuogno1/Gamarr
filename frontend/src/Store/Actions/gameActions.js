@@ -180,6 +180,12 @@ export const filterPredicates = {
     return predicate(rating, filterValue);
   },
 
+  fileRegions: function(item, filterValue, type) {
+    const predicate = filterTypePredicates[type];
+
+    return predicate(item.gameFile?.regions ?? [], filterValue);
+  },
+
   qualityCutoffNotMet: function(item) {
     const { gameFile = {} } = item;
 

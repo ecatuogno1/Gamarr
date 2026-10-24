@@ -20,6 +20,7 @@ import { Statistics } from 'Game/Game';
 import GamePopularityIndex from 'Game/GamePopularityIndex';
 import GameTitleLink from 'Game/GameTitleLink';
 import createGameIndexItemSelector from 'Game/Index/createGameIndexItemSelector';
+import { formatVersion, getRegionNames } from 'GameFile/releaseDetails';
 import { icons, kinds } from 'Helpers/Props';
 import { executeCommand } from 'Store/Actions/commandActions';
 import { SelectStateInputProps } from 'typings/props';
@@ -53,6 +54,7 @@ function GameIndexRow(props: GameIndexRowProps) {
     collection,
     platform,
     developers = [],
+    publishers = [],
     status,
     originalLanguage,
     originalTitle,
@@ -195,6 +197,30 @@ function GameIndexRow(props: GameIndexRowProps) {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
               {developers.join(', ')}
+            </VirtualTableRowCell>
+          );
+        }
+
+        if (name === 'publishers') {
+          return (
+            <VirtualTableRowCell key={name} className={styles[name]}>
+              {publishers.join(', ')}
+            </VirtualTableRowCell>
+          );
+        }
+
+        if (name === 'fileRegions') {
+          return (
+            <VirtualTableRowCell key={name} className={styles[name]}>
+              {getRegionNames(gameFile?.regions)}
+            </VirtualTableRowCell>
+          );
+        }
+
+        if (name === 'fileVersion') {
+          return (
+            <VirtualTableRowCell key={name} className={styles[name]}>
+              {formatVersion(gameFile?.version)}
             </VirtualTableRowCell>
           );
         }

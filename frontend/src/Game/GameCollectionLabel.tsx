@@ -9,9 +9,13 @@ import styles from './GameCollectionLabel.css';
 
 interface GameCollectionLabelProps {
   igdbId: number;
+  title?: string;
 }
 
-function GameCollectionLabel({ igdbId }: GameCollectionLabelProps) {
+function GameCollectionLabel({
+  igdbId,
+  title: gameCollectionTitle,
+}: GameCollectionLabelProps) {
   const {
     id,
     monitored,
@@ -31,8 +35,9 @@ function GameCollectionLabel({ igdbId }: GameCollectionLabelProps) {
     [id, dispatch]
   );
 
+  // The series isn't a collection in Gamarr (yet), show the title IGDB gave the game
   if (!id) {
-    return translate('Unknown');
+    return gameCollectionTitle ?? translate('Unknown');
   }
 
   return (

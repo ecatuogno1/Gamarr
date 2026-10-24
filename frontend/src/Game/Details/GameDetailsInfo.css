@@ -1,0 +1,9 @@
+.labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.gamePlatform {
+  font-weight: bold;
+}

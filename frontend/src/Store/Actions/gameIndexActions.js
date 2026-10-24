@@ -1,4 +1,5 @@
 import { createAction } from 'redux-actions';
+import { getRegionName } from 'GameFile/releaseDetails';
 import { filterBuilderTypes, filterBuilderValueTypes, sortDirections } from 'Helpers/Props';
 import sortByProp from 'Utilities/Array/sortByProp';
 import translate from 'Utilities/String/translate';
@@ -30,6 +31,7 @@ export const defaultState = {
   posterOptions: {
     detailedProgressBar: true,
     size: 'large',
+    showPlatform: true,
     showTitle: false,
     showMonitored: true,
     showQualityProfile: true,
@@ -102,6 +104,12 @@ export const defaultState = {
       name: 'developers',
       label: () => translate('Developers'),
       isSortable: true,
+      isVisible: true
+    },
+    {
+      name: 'publishers',
+      label: () => translate('Publishers'),
+      isSortable: true,
       isVisible: false
     },
     {
@@ -132,7 +140,7 @@ export const defaultState = {
       name: 'releaseDate',
       label: () => translate('ReleaseDate'),
       isSortable: true,
-      isVisible: false
+      isVisible: true
     },
     {
       name: 'minimumAvailability',
@@ -149,6 +157,18 @@ export const defaultState = {
     {
       name: 'sizeOnDisk',
       label: () => translate('SizeOnDisk'),
+      isSortable: true,
+      isVisible: true
+    },
+    {
+      name: 'fileRegions',
+      label: () => translate('Region'),
+      isSortable: true,
+      isVisible: false
+    },
+    {
+      name: 'fileVersion',
+      label: () => translate('Version'),
       isSortable: true,
       isVisible: false
     },
@@ -227,6 +247,24 @@ export const defaultState = {
       const { developers = [] } = item;
 
       return developers.length ? developers[0].toLowerCase() : '';
+    },
+
+    publishers: function(item) {
+      const { publishers = [] } = item;
+
+      return publishers.length ? publishers[0].toLowerCase() : '';
+    },
+
+    fileRegions: function(item) {
+      const { gameFile } = item;
+
+      return gameFile?.regions?.length ? gameFile.regions.join(',') : '';
+    },
+
+    fileVersion: function(item) {
+      const { gameFile } = item;
+
+      return gameFile?.version ?? '';
     },
 
     collection: function(item) {
@@ -390,8 +428,50 @@ export const defaultState = {
       }
     },
     {
+      name: 'publishers',
+      label: () => translate('Publishers'),
+      type: filterBuilderTypes.ARRAY,
+      optionsSelector: function(items) {
+        const publisherList = items.reduce((acc, { publishers = [] }) => {
+          publishers.forEach((publisher) => {
+            if (acc.findIndex((a) => a.id === publisher) === -1) {
+              acc.push({
+                id: publisher,
+                name: publisher
+              });
+            }
+          });
+
+          return acc;
+        }, []);
+
+        return publisherList.sort(sortByProp('name'));
+      }
+    },
+    {
+      name: 'fileRegions',
+      label: () => translate('Region'),
+      type: filterBuilderTypes.ARRAY,
+      optionsSelector: function(items) {
+        const regionList = items.reduce((acc, { gameFile }) => {
+          (gameFile?.regions ?? []).forEach((region) => {
+            if (acc.findIndex((a) => a.id === region) === -1) {
+              acc.push({
+                id: region,
+                name: getRegionName(region)
+              });
+            }
+          });
+
+          return acc;
+        }, []);
+
+        return regionList.sort(sortByProp('name'));
+      }
+    },
+    {
       name: 'collection',
-      label: () => translate('Collection'),
+      label: () => translate('Series'),
       type: filterBuilderTypes.ARRAY,
       optionsSelector: function(items) {
         const collectionList = items.reduce((acc, game) => {

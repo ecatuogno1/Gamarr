@@ -26,7 +26,8 @@
 }
 
 .platform,
-.developers {
+.developers,
+.publishers {
   composes: cell;
 
   flex: 2 0 90px;
@@ -118,4 +119,16 @@
   margin: 0 2px;
   width: 22px;
   text-align: center;
+}
+
+.fileRegions {
+  composes: cell;
+
+  flex: 0 0 140px;
+}
+
+.fileVersion {
+  composes: cell;
+
+  flex: 0 0 100px;
 }

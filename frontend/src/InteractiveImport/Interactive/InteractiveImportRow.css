@@ -4,6 +4,19 @@
   word-break: break-all;
 }
 
+.companionFiles {
+  margin-top: 2px;
+  color: var(--helpTextColor);
+  font-size: $smallFontSize;
+  cursor: default;
+}
+
+.companionFilesList {
+  margin: 0;
+  padding-left: 15px;
+  word-break: break-all;
+}
+
 .quality,
 .languages {
   composes: cell from '~Components/Table/Cells/TableRowCell.css';

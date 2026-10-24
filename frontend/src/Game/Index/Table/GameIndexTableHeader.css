@@ -19,7 +19,8 @@
 }
 
 .platform,
-.developers {
+.developers,
+.publishers {
   composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
 
   flex: 2 0 90px;
@@ -95,4 +96,16 @@
   composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
 
   flex: 0 1 90px;
+}
+
+.fileRegions {
+  composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
+
+  flex: 0 0 140px;
+}
+
+.fileVersion {
+  composes: headerCell from '~Components/Table/VirtualTableHeaderCell.css';
+
+  flex: 0 0 100px;
 }

@@ -44,6 +44,7 @@ function GameIndexPoster(props: GameIndexPosterProps) {
 
   const {
     detailedProgressBar,
+    showPlatform,
     showTitle,
     showMonitored,
     showQualityProfile,
@@ -186,6 +187,12 @@ function GameIndexPoster(props: GameIndexPosterProps) {
 
         {status === 'deleted' ? (
           <div className={styles.deleted} title={translate('Deleted')} />
+        ) : null}
+
+        {showPlatform && platform ? (
+          <div className={styles.platform} title={platform.name}>
+            {platform.shortName}
+          </div>
         ) : null}
 
         <Link className={styles.link} style={elementStyle} to={link}>

@@ -86,8 +86,10 @@ import {
 } from 'Utilities/pagePopulator';
 import translate from 'Utilities/String/translate';
 import GameCompanyCredits from './Credits/GameCompanyCredits';
+import GameDetailsInfo from './GameDetailsInfo';
 import GameDetailsLinks from './GameDetailsLinks';
 import GameReleaseDates from './GameReleaseDates';
+import GameScreenshots from './GameScreenshots';
 import GameStatusLabel from './GameStatusLabel';
 import GameTags from './GameTags';
 import GameTitlesTable from './Titles/GameTitlesTable';
@@ -525,7 +527,6 @@ function GameDetails({ gameId }: GameDetailsProps) {
     developers = [],
     publishers = [],
     websites = [],
-    originalLanguage,
     genres = [],
     collection,
     overview,
@@ -542,6 +543,9 @@ function GameDetails({ gameId }: GameDetailsProps) {
   const statusDetails = getGameStatusDetails(status);
 
   const fanartUrl = getFanartUrl(images);
+  const screenshots = images.filter(
+    (image) => image.coverType === 'screenshot'
+  );
   const isFetching =
     isGameFilesFetching || isExtraFilesFetching || isGameCreditsFetching;
 
@@ -804,24 +808,15 @@ function GameDetails({ gameId }: GameDetailsProps) {
                 {collection ? (
                   <InfoLabel
                     className={styles.detailsInfoLabel}
-                    name={translate('Collection')}
+                    name={translate('Series')}
                     size={sizes.LARGE}
                   >
                     <div className={styles.collection}>
-                      <GameCollectionLabel igdbId={collection.igdbId} />
+                      <GameCollectionLabel
+                        igdbId={collection.igdbId}
+                        title={collection.title}
+                      />
                     </div>
-                  </InfoLabel>
-                ) : null}
-
-                {originalLanguage?.name && !isSmallScreen ? (
-                  <InfoLabel
-                    className={styles.detailsInfoLabel}
-                    name={translate('OriginalLanguage')}
-                    size={sizes.LARGE}
-                  >
-                    <span className={styles.originalLanguage}>
-                      {originalLanguage.name}
-                    </span>
                   </InfoLabel>
                 ) : null}
 
@@ -899,6 +894,16 @@ function GameDetails({ gameId }: GameDetailsProps) {
             <Alert kind={kinds.DANGER}>
               {translate('LoadingGameCreditsFailed')}
             </Alert>
+          ) : null}
+
+          <FieldSet legend={translate('Details')}>
+            <GameDetailsInfo game={game} />
+          </FieldSet>
+
+          {screenshots.length ? (
+            <FieldSet legend={translate('Screenshots')}>
+              <GameScreenshots screenshots={screenshots} />
+            </FieldSet>
           ) : null}
 
           <FieldSet legend={translate('Files')}>

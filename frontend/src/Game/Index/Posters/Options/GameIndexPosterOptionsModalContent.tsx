@@ -49,6 +49,7 @@ function GameIndexPosterOptionsModalContent(
   const {
     detailedProgressBar,
     size,
+    showPlatform,
     showTitle,
     showMonitored,
     showQualityProfile,
@@ -94,6 +95,18 @@ function GameIndexPosterOptionsModalContent(
               name="detailedProgressBar"
               value={detailedProgressBar}
               helpText={translate('DetailedProgressBarHelpText')}
+              onChange={onPosterOptionChange}
+            />
+          </FormGroup>
+
+          <FormGroup size={sizes.MEDIUM}>
+            <FormLabel>{translate('ShowPlatform')}</FormLabel>
+
+            <FormInputGroup
+              type={inputTypes.CHECK}
+              name="showPlatform"
+              value={showPlatform}
+              helpText={translate('ShowPlatformPosterHelpText')}
               onChange={onPosterOptionChange}
             />
           </FormGroup>

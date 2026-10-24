@@ -89,6 +89,20 @@ $hoverScale: 1.05;
   overflow: hidden;
 }
 
+.platform {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.75);
+  color: var(--white);
+  font-weight: bold;
+  font-size: $smallFontSize;
+  pointer-events: none;
+}
+
 .deleted {
   position: absolute;
   top: 0;
