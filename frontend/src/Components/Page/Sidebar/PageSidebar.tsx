@@ -150,6 +150,10 @@ const LINKS: SidebarItem[] = [
         to: '/settings/connect',
       },
       {
+        title: () => translate('Platforms'),
+        to: '/settings/platforms',
+      },
+      {
         title: () => translate('Metadata'),
         to: '/settings/metadata',
       },

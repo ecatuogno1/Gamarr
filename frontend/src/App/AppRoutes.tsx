@@ -20,6 +20,7 @@ import IndexerSettings from 'Settings/Indexers/IndexerSettings';
 import MediaManagement from 'Settings/MediaManagement/MediaManagement';
 import MetadataSettings from 'Settings/Metadata/MetadataSettings';
 import NotificationSettings from 'Settings/Notifications/NotificationSettings';
+import PlatformSettings from 'Settings/Platforms/PlatformSettings';
 import Profiles from 'Settings/Profiles/Profiles';
 import QualityConnector from 'Settings/Quality/QualityConnector';
 import Settings from 'Settings/Settings';
@@ -120,6 +121,8 @@ function AppRoutes() {
       <Route path="/settings/importlists" component={ImportListSettings} />
 
       <Route path="/settings/connect" component={NotificationSettings} />
+
+      <Route path="/settings/platforms" component={PlatformSettings} />
 
       <Route path="/settings/metadata" component={MetadataSettings} />
 

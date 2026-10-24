@@ -76,6 +76,14 @@ function Settings() {
           {translate('ConnectSettingsSummary')}
         </div>
 
+        <Link className={styles.link} to="/settings/platforms">
+          {translate('Platforms')}
+        </Link>
+
+        <div className={styles.summary}>
+          {translate('PlatformsSettingsSummary')}
+        </div>
+
         <Link className={styles.link} to="/settings/metadata">
           {translate('Metadata')}
         </Link>

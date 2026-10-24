@@ -1,0 +1,29 @@
+.filter {
+  margin-bottom: 20px;
+  max-width: 400px;
+}
+
+.enabled {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+
+  width: 80px;
+}
+
+.code {
+  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+
+  font-family: $monoSpaceFontFamily;
+}
+
+.extensions {
+  composes: code;
+
+  max-width: 300px;
+  word-break: break-word;
+}
+
+.disabled {
+  composes: row from '~Components/Table/TableRow.css';
+
+  color: var(--disabledColor);
+}
