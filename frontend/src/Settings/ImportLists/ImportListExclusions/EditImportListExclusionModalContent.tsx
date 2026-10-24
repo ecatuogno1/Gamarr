@@ -31,6 +31,7 @@ const newImportListExclusion = {
   gameTitle: '',
   gameYear: 0,
   igdbId: 0,
+  platformId: 0,
 };
 
 function createImportListExclusionSelector(id?: number) {
@@ -71,7 +72,7 @@ function EditImportListExclusionModalContent({
   const { isFetching, isSaving, item, error, saveError, ...otherProps } =
     useSelector(createImportListExclusionSelector(id));
 
-  const { gameTitle, gameYear, igdbId } = item;
+  const { gameTitle, gameYear, igdbId, platformId } = item;
 
   const dispatch = useDispatch();
   const previousIsSaving = usePrevious(isSaving);
@@ -162,6 +163,19 @@ function EditImportListExclusionModalContent({
                 name="gameYear"
                 helpText={translate('GameYearToExcludeHelpText')}
                 {...gameYear}
+                onChange={onInputChange}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <FormLabel>{translate('Platform')}</FormLabel>
+
+              <FormInputGroup
+                type={inputTypes.PLATFORM_SELECT}
+                name="platformId"
+                includeAny={true}
+                helpText={translate('PlatformToExcludeHelpText')}
+                {...platformId}
                 onChange={onInputChange}
               />
             </FormGroup>

@@ -26,6 +26,7 @@ import {
   tooltipPositions,
 } from 'Helpers/Props';
 import { saveGame, setGameValue } from 'Store/Actions/gameActions';
+import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import selectSettings from 'Store/Selectors/selectSettings';
 import { InputChanged } from 'typings/inputs';
 import translate from 'Utilities/String/translate';
@@ -47,13 +48,24 @@ function EditGameModalContent({
   const dispatch = useDispatch();
   const {
     title,
+    igdbId,
     monitored,
     minimumAvailability,
     qualityProfileId,
+    platformId,
     path,
     tags,
     rootFolderPath: initialRootFolderPath,
   } = useGame(gameId)!;
+
+  const allGames = useSelector(createAllGamesSelector());
+
+  // The same game can only be in the library once per platform
+  const takenPlatformIds = useMemo(() => {
+    return allGames
+      .filter((game) => game.igdbId === igdbId && game.id !== gameId)
+      .map((game) => game.platformId);
+  }, [allGames, igdbId, gameId]);
 
   const { isSaving, saveError, pendingChanges } = useSelector(
     (state: AppState) => state.games
@@ -75,6 +87,7 @@ function EditGameModalContent({
         monitored,
         minimumAvailability,
         qualityProfileId,
+        platformId,
         path,
         tags,
       },
@@ -85,6 +98,7 @@ function EditGameModalContent({
     monitored,
     minimumAvailability,
     qualityProfileId,
+    platformId,
     path,
     tags,
     pendingChanges,
@@ -200,6 +214,19 @@ function EditGameModalContent({
               type={inputTypes.QUALITY_PROFILE_SELECT}
               name="qualityProfileId"
               {...settings.qualityProfileId}
+              onChange={handleInputChange}
+            />
+          </FormGroup>
+
+          <FormGroup size={sizes.MEDIUM}>
+            <FormLabel>{translate('Platform')}</FormLabel>
+
+            <FormInputGroup
+              type={inputTypes.PLATFORM_SELECT}
+              name="platformId"
+              helpText={translate('GamePlatformHelpText')}
+              disabledPlatformIds={takenPlatformIds}
+              {...settings.platformId}
               onChange={handleInputChange}
             />
           </FormGroup>

@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import AppState from 'App/State/AppState';
 import IconButton from 'Components/Link/IconButton';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
@@ -20,8 +21,20 @@ interface ImportListExclusionRowProps extends ImportListExclusion {
 }
 
 function ImportListExclusionRow(props: ImportListExclusionRowProps) {
-  const { id, igdbId, gameTitle, gameYear, isSelected, onSelectedChange } =
-    props;
+  const {
+    id,
+    igdbId,
+    gameTitle,
+    gameYear,
+    platformId,
+    isSelected,
+    onSelectedChange,
+  } = props;
+
+  const platformName = useSelector(
+    (state: AppState) =>
+      state.settings.platforms.items.find((p) => p.id === platformId)?.name
+  );
 
   const dispatch = useDispatch();
 
@@ -52,6 +65,9 @@ function ImportListExclusionRow(props: ImportListExclusionRowProps) {
       <TableRowCell>{igdbId}</TableRowCell>
       <TableRowCell>{gameTitle}</TableRowCell>
       <TableRowCell>{gameYear}</TableRowCell>
+      <TableRowCell>
+        {platformId ? platformName ?? platformId : translate('AnyPlatform')}
+      </TableRowCell>
 
       <TableRowCell className={styles.actions}>
         <IconButton

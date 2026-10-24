@@ -41,6 +41,7 @@ function EditGameCollectionModalContent({
     overview,
     monitored,
     qualityProfileId,
+    platformId,
     minimumAvailability,
     rootFolderPath,
     searchOnAdd,
@@ -61,6 +62,7 @@ function EditGameCollectionModalContent({
         monitored,
         minimumAvailability,
         qualityProfileId,
+        platformId,
         rootFolderPath,
         searchOnAdd,
         tags,
@@ -72,6 +74,7 @@ function EditGameCollectionModalContent({
     monitored,
     minimumAvailability,
     qualityProfileId,
+    platformId,
     rootFolderPath,
     searchOnAdd,
     tags,
@@ -153,6 +156,19 @@ function EditGameCollectionModalContent({
                   type={inputTypes.QUALITY_PROFILE_SELECT}
                   name="qualityProfileId"
                   {...settings.qualityProfileId}
+                  onChange={handleInputChange}
+                />
+              </FormGroup>
+
+              <FormGroup>
+                <FormLabel>{translate('Platform')}</FormLabel>
+
+                <FormInputGroup
+                  type={inputTypes.PLATFORM_SELECT}
+                  name="platformId"
+                  includeAny={true}
+                  helpText={translate('CollectionPlatformHelpText')}
+                  {...settings.platformId}
                   onChange={handleInputChange}
                 />
               </FormGroup>

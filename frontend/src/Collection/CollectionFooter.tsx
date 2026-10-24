@@ -15,6 +15,7 @@ interface SavePayload {
   monitored?: boolean;
   monitor?: string;
   qualityProfileId?: number;
+  platformId?: number;
   minimumAvailability?: string;
   rootFolderPath?: string;
   searchOnAdd?: boolean;
@@ -83,6 +84,7 @@ function CollectionFooter({
   const [qualityProfileId, setQualityProfileId] = useState<string | number>(
     NO_CHANGE
   );
+  const [platformId, setPlatformId] = useState<string | number>(NO_CHANGE);
   const [minimumAvailability, setMinimumAvailability] = useState(NO_CHANGE);
   const [rootFolderPath, setRootFolderPath] = useState(NO_CHANGE);
   const [searchOnAdd, setSearchOnAdd] = useState(NO_CHANGE);
@@ -108,6 +110,11 @@ function CollectionFooter({
       payload.qualityProfileId = qualityProfileId as number;
     }
 
+    if (platformId !== NO_CHANGE) {
+      hasChanges = true;
+      payload.platformId = platformId as number;
+    }
+
     if (minimumAvailability !== NO_CHANGE) {
       hasChanges = true;
       payload.minimumAvailability = minimumAvailability as string;
@@ -130,6 +137,7 @@ function CollectionFooter({
     monitor,
     monitored,
     qualityProfileId,
+    platformId,
     minimumAvailability,
     rootFolderPath,
     searchOnAdd,
@@ -146,6 +154,9 @@ function CollectionFooter({
         break;
       case 'qualityProfileId':
         setQualityProfileId(value as string);
+        break;
+      case 'platformId':
+        setPlatformId(value as number);
         break;
       case 'minimumAvailability':
         setMinimumAvailability(value as string);
@@ -166,6 +177,7 @@ function CollectionFooter({
       setMonitored(NO_CHANGE);
       setMonitor(NO_CHANGE);
       setQualityProfileId(NO_CHANGE);
+      setPlatformId(NO_CHANGE);
       setMinimumAvailability(NO_CHANGE);
       setRootFolderPath(NO_CHANGE);
       setSearchOnAdd(NO_CHANGE);
@@ -228,6 +240,24 @@ function CollectionFooter({
           type={inputTypes.QUALITY_PROFILE_SELECT}
           name="qualityProfileId"
           value={qualityProfileId}
+          includeNoChange={true}
+          includeNoChangeDisabled={false}
+          isDisabled={!selectedCount}
+          onChange={handleInputChange}
+        />
+      </div>
+
+      <div className={styles.inputContainer}>
+        <CollectionFooterLabel
+          label={translate('Platform')}
+          isSaving={isSaving && platformId !== NO_CHANGE}
+        />
+
+        <FormInputGroup
+          type={inputTypes.PLATFORM_SELECT}
+          name="platformId"
+          value={platformId}
+          includeAny={true}
           includeNoChange={true}
           includeNoChangeDisabled={false}
           isDisabled={!selectedCount}

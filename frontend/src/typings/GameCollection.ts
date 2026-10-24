@@ -9,6 +9,8 @@ interface GameCollection extends ModelBase {
   monitored: boolean;
   minimumAvailability: GameAvailability;
   qualityProfileId: number;
+  // 0: each game is added on the first enabled platform IGDB lists for it
+  platformId: number;
   rootFolderPath: string;
   searchOnAdd: boolean;
   images: Image[];

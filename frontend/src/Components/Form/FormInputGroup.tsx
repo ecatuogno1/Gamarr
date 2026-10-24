@@ -35,6 +35,9 @@ import LanguageSelectInput, {
 import MonitorGamesSelectInput, {
   MonitorGamesSelectInputProps,
 } from './Select/MonitorGamesSelectInput';
+import PlatformSelectInput, {
+  PlatformSelectInputProps,
+} from './Select/PlatformSelectInput';
 import ProviderDataSelectInput, {
   ProviderOptionSelectInputProps,
 } from './Select/ProviderOptionSelectInput';
@@ -74,6 +77,7 @@ const componentMap: Record<InputType, ElementType> = {
   oauth: OAuthInput,
   password: PasswordInput,
   path: PathInput,
+  platformSelect: PlatformSelectInput,
   qualityProfileSelect: QualityProfileSelectInput,
   rootFolderSelect: RootFolderSelectInput,
   select: EnhancedSelectInput,
@@ -129,6 +133,8 @@ type PickProps<V, C extends InputType> = C extends 'text'
   ? TextInputProps
   : C extends 'path'
   ? PathInputProps
+  : C extends 'platformSelect'
+  ? PlatformSelectInputProps
   : C extends 'qualityProfileSelect'
   ? QualityProfileSelectInputProps
   : C extends 'rootFolderSelect'

@@ -10,6 +10,7 @@ export const NUMBER = 'number';
 export const OAUTH = 'oauth';
 export const PASSWORD = 'password';
 export const PATH = 'path';
+export const PLATFORM_SELECT = 'platformSelect';
 export const QUALITY_PROFILE_SELECT = 'qualityProfileSelect';
 export const INDEXER_SELECT = 'indexerSelect';
 export const ROOT_FOLDER_SELECT = 'rootFolderSelect';
@@ -39,6 +40,7 @@ export const all = [
   OAUTH,
   PASSWORD,
   PATH,
+  PLATFORM_SELECT,
   QUALITY_PROFILE_SELECT,
   INDEXER_SELECT,
   DOWNLOAD_CLIENT_SELECT,
@@ -71,6 +73,7 @@ export type InputType =
   | 'oauth'
   | 'password'
   | 'path'
+  | 'platformSelect'
   | 'qualityProfileSelect'
   | 'indexerSelect'
   | 'indexerFlagsSelect'

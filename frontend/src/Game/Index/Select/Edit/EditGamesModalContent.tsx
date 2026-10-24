@@ -16,6 +16,7 @@ import styles from './EditGamesModalContent.css';
 interface SavePayload {
   monitored?: boolean;
   qualityProfileId?: number;
+  platformId?: number;
   minimumAvailability?: string;
   rootFolderPath?: string;
   moveFiles?: boolean;
@@ -58,6 +59,7 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
   const [qualityProfileId, setQualityProfileId] = useState<string | number>(
     NO_CHANGE
   );
+  const [platformId, setPlatformId] = useState<string | number>(NO_CHANGE);
   const [minimumAvailability, setMinimumAvailability] = useState(NO_CHANGE);
   const [rootFolderPath, setRootFolderPath] = useState(NO_CHANGE);
   const [isConfirmMoveModalOpen, setIsConfirmMoveModalOpen] = useState(false);
@@ -75,6 +77,11 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
       if (qualityProfileId !== NO_CHANGE) {
         hasChanges = true;
         payload.qualityProfileId = qualityProfileId as number;
+      }
+
+      if (platformId !== NO_CHANGE) {
+        hasChanges = true;
+        payload.platformId = platformId as number;
       }
 
       if (minimumAvailability !== NO_CHANGE) {
@@ -97,6 +104,7 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
     [
       monitored,
       qualityProfileId,
+      platformId,
       minimumAvailability,
       rootFolderPath,
       onSavePress,
@@ -112,6 +120,9 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
           break;
         case 'qualityProfileId':
           setQualityProfileId(value as string);
+          break;
+        case 'platformId':
+          setPlatformId(value as number);
           break;
         case 'minimumAvailability':
           setMinimumAvailability(value as string);
@@ -176,6 +187,20 @@ function EditGamesModalContent(props: EditGamesModalContentProps) {
             value={qualityProfileId}
             includeNoChange={true}
             includeNoChangeDisabled={false}
+            onChange={onInputChange}
+          />
+        </FormGroup>
+
+        <FormGroup>
+          <FormLabel>{translate('Platform')}</FormLabel>
+
+          <FormInputGroup
+            type={inputTypes.PLATFORM_SELECT}
+            name="platformId"
+            value={platformId}
+            includeNoChange={true}
+            includeNoChangeDisabled={false}
+            helpText={translate('EditGamesPlatformHelpText')}
             onChange={onInputChange}
           />
         </FormGroup>

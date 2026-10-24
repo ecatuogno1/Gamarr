@@ -61,6 +61,12 @@ const COLUMNS: Column[] = [
     isSortable: true,
   },
   {
+    name: 'platformId',
+    label: () => translate('Platform'),
+    isVisible: true,
+    isSortable: true,
+  },
+  {
     className: styles.actions,
     name: 'actions',
     label: '',
