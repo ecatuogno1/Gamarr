@@ -30,6 +30,9 @@ namespace Gamarr.Api.V3.ManualImport
         public int CustomFormatScore { get; set; }
         public int IndexerFlags { get; set; }
         public IEnumerable<ImportRejectionResource> Rejections { get; set; }
+
+        // The other files of a multi-file release, imported with this one
+        public List<string> CompanionFiles { get; set; }
     }
 
     public static class ManualImportResourceMapper
@@ -63,7 +66,8 @@ namespace Gamarr.Api.V3.ManualImport
                 // QualityWeight
                 DownloadId = model.DownloadId,
                 IndexerFlags = model.IndexerFlags,
-                Rejections = model.Rejections.Select(r => r.ToResource())
+                Rejections = model.Rejections.Select(r => r.ToResource()),
+                CompanionFiles = model.CompanionFiles
             };
         }
 

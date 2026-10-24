@@ -2,7 +2,6 @@ using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.History;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
-using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation.Aggregators.Augmenters.Quality
 {
@@ -32,25 +31,12 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation.Aggregators.Augmenters
                 return null;
             }
 
-            var historyQuality = QualityParser.ParseQuality(history.SourceTitle);
+            var platform = localGame.Game?.Platform?.IgdbPlatformId ?? 0;
+            var historyQuality = platform > 0
+                ? QualityParser.ParseQuality(history.SourceTitle, platform)
+                : QualityParser.ParseQuality(history.SourceTitle);
 
-            var sourceConfidence = historyQuality.SourceDetectionSource == QualityDetectionSource.Name
-                ? Confidence.Tag
-                : Confidence.Fallback;
-
-            var resolutionConfidence = historyQuality.ResolutionDetectionSource == QualityDetectionSource.Name
-                ? Confidence.Tag
-                : Confidence.Fallback;
-
-            var modifierConfidence = historyQuality.ModifierDetectionSource == QualityDetectionSource.Name
-                ? Confidence.Tag
-                : Confidence.Fallback;
-
-            var revisionConfidence = historyQuality.RevisionDetectionSource == QualityDetectionSource.Name
-                ? Confidence.Tag
-                : Confidence.Fallback;
-
-            return new AugmentQualityResult(historyQuality.Quality.Source, sourceConfidence, historyQuality.Quality.Resolution, resolutionConfidence, historyQuality.Quality.Modifier, modifierConfidence, historyQuality.Revision, revisionConfidence);
+            return AugmentQualityResult.From(historyQuality);
         }
     }
 }

@@ -8,7 +8,6 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Processes;
 using NzbDrone.Core.Configuration;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Tags;
@@ -23,7 +22,6 @@ namespace NzbDrone.Core.MediaFiles
     public class ImportScriptService : IImportScript
     {
         private readonly IConfigFileProvider _configFileProvider;
-        private readonly IVideoFileInfoReader _videoFileInfoReader;
         private readonly IProcessProvider _processProvider;
         private readonly IConfigService _configService;
         private readonly ITagRepository _tagRepository;
@@ -31,7 +29,6 @@ namespace NzbDrone.Core.MediaFiles
         private readonly Logger _logger;
 
         public ImportScriptService(IProcessProvider processProvider,
-                                   IVideoFileInfoReader videoFileInfoReader,
                                    IConfigService configService,
                                    IConfigFileProvider configFileProvider,
                                    ITagRepository tagRepository,
@@ -39,7 +36,6 @@ namespace NzbDrone.Core.MediaFiles
                                    Logger logger)
         {
             _processProvider = processProvider;
-            _videoFileInfoReader = videoFileInfoReader;
             _configService = configService;
             _configFileProvider = configFileProvider;
             _tagRepository = tagRepository;
@@ -155,16 +151,10 @@ namespace NzbDrone.Core.MediaFiles
             environmentVariables.Add("Gamarr_Download_Client", downloadClientInfo?.Name ?? string.Empty);
             environmentVariables.Add("Gamarr_Download_Client_Type", downloadClientInfo?.Type ?? string.Empty);
             environmentVariables.Add("Gamarr_Download_Id", downloadId ?? string.Empty);
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_AudioChannels", MediaInfoFormatter.FormatAudioChannels(localGame.MediaInfo).ToString());
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_AudioCodec", MediaInfoFormatter.FormatAudioCodec(gameFile.MediaInfo, null));
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_AudioLanguages", gameFile.MediaInfo.AudioLanguages.Distinct().ConcatToString(" / "));
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Languages", gameFile.MediaInfo.AudioLanguages.ConcatToString(" / "));
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Height", gameFile.MediaInfo.Height.ToString());
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Width", gameFile.MediaInfo.Width.ToString());
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_Subtitles", gameFile.MediaInfo.Subtitles.ConcatToString(" / "));
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_VideoCodec", MediaInfoFormatter.FormatVideoCodec(gameFile.MediaInfo, null));
-            environmentVariables.Add("Gamarr_GameFile_MediaInfo_VideoDynamicRangeType", MediaInfoFormatter.FormatVideoDynamicRangeType(gameFile.MediaInfo));
 
+            environmentVariables.Add("Gamarr_GameFile_Regions", string.Join("|", gameFile.Regions?.Select(r => r.GetName()) ?? Enumerable.Empty<string>()));
+            environmentVariables.Add("Gamarr_GameFile_Version", gameFile.Version ?? string.Empty);
+            environmentVariables.Add("Gamarr_GameFile_ReleaseType", gameFile.ReleaseType.GetName());
             environmentVariables.Add("Gamarr_GameFile_CustomFormat", string.Join("|", localGame.CustomFormats));
             environmentVariables.Add("Gamarr_GameFile_CustomFormatScore", localGame.CustomFormatScore.ToString());
 
@@ -205,7 +195,6 @@ namespace NzbDrone.Core.MediaFiles
 
             if (scriptImportInfo.Decision == ScriptImportDecision.RenameRequested)
             {
-                gameFile.MediaInfo = _videoFileInfoReader.GetMediaInfo(mediaFile);
                 gameFile.Path = null;
             }
 

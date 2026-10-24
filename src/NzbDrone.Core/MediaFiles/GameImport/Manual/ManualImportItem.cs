@@ -23,5 +23,9 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
         public int CustomFormatScore { get; set; }
         public int IndexerFlags { get; set; }
         public IEnumerable<ImportRejection> Rejections { get; set; } = new List<ImportRejection>();
+
+        // The other files of a multi-file release, imported together with this one
+        public List<string> CompanionFiles { get; set; } = new();
+        public string ReleaseRoot { get; set; }
     }
 }

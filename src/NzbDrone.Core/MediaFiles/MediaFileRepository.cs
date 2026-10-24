@@ -9,7 +9,6 @@ namespace NzbDrone.Core.MediaFiles
     {
         List<GameFile> GetFilesByGame(int gameId);
         List<GameFile> GetFilesByGames(IEnumerable<int> gameIds);
-        List<GameFile> GetFilesWithoutMediaInfo();
         void DeleteForGames(List<int> gameIds);
 
         List<GameFile> GetFilesWithRelativePath(int gameId, string relativePath);
@@ -30,11 +29,6 @@ namespace NzbDrone.Core.MediaFiles
         public List<GameFile> GetFilesByGames(IEnumerable<int> gameIds)
         {
             return Query(x => gameIds.Contains(x.GameId));
-        }
-
-        public List<GameFile> GetFilesWithoutMediaInfo()
-        {
-            return Query(x => x.MediaInfo == null);
         }
 
         public void DeleteForGames(List<int> gameIds)

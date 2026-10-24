@@ -24,12 +24,12 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators.Augme
         {
             _hdtvParsedEpisodeInfo = Builder<ParsedGameInfo>.CreateNew()
                                                                .With(p => p.Quality =
-                                                                   new QualityModel(Core.Qualities.Quality.HDTV720p))
+                                                                   new QualityModel(Core.Qualities.Quality.DiscRedump))
                                                                .Build();
 
             _webdlParsedEpisodeInfo = Builder<ParsedGameInfo>.CreateNew()
                                                                 .With(p => p.Quality =
-                                                                    new QualityModel(Core.Qualities.Quality.WEBDL720p))
+                                                                    new QualityModel(Core.Qualities.Quality.NspXci))
                                                                 .Build();
 
             _localGame = Builder<LocalGame>.CreateNew()
@@ -55,10 +55,11 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators.Augme
             Subject.AugmentQuality(_localGame, _downloadClientItem).Should().BeNull();
         }
 
-        [TestCase("Series.Title.S01E01.1080p.WEB.x264", QualitySource.WEBDL, Confidence.Tag, 1080, Confidence.Tag)]
-        [TestCase("Series.Title.S01E01.WEB.x264", QualitySource.WEBDL, Confidence.Tag, 480, Confidence.Fallback)]
-        [TestCase("Series.Title.S01E01.720p.x264", QualitySource.TV, Confidence.Fallback, 720, Confidence.Tag)]
-        public void should_return_augmented_quality(string title, QualitySource source, Confidence sourceConfidence, int resolution, Confidence resolutionConfidence)
+        [TestCase("Game.Name.v1.2-CODEX", 133, Confidence.Tag)]
+        [TestCase("Game Name (USA) [Redump]", 113, Confidence.Tag)]
+        [TestCase("Game Name [FitGirl Repack]", 132, Confidence.Tag)]
+        [TestCase("Game.Name.NSW-VENOM", 120, Confidence.Fallback)]
+        public void should_return_augmented_quality(string title, int qualityId, Confidence confidence)
         {
             Mocker.GetMock<IDownloadHistoryService>()
                   .Setup(s => s.GetLatestGrab(It.IsAny<string>()))
@@ -66,13 +67,13 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators.Augme
                                                    .With(h => h.SourceTitle = title)
                                                    .Build());
 
+            _localGame.Game = null;
+
             var result = Subject.AugmentQuality(_localGame, _downloadClientItem);
 
             result.Should().NotBe(null);
-            result.Source.Should().Be(source);
-            result.SourceConfidence.Should().Be(sourceConfidence);
-            result.Resolution.Should().Be(resolution);
-            result.ResolutionConfidence.Should().Be(resolutionConfidence);
+            result.Quality.Id.Should().Be(qualityId);
+            result.QualityConfidence.Should().Be(confidence);
         }
     }
 }

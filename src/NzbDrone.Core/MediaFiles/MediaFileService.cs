@@ -17,7 +17,6 @@ namespace NzbDrone.Core.MediaFiles
         void Delete(GameFile gameFile, DeleteMediaFileReason reason);
         List<GameFile> GetFilesByGame(int gameId);
         List<GameFile> GetFilesByGames(IEnumerable<int> gameIds);
-        List<GameFile> GetFilesWithoutMediaInfo();
         List<string> FilterExistingFiles(List<string> files, Game game);
         GameFile GetGame(int id);
         List<GameFile> GetGames(IEnumerable<int> ids);
@@ -84,11 +83,6 @@ namespace NzbDrone.Core.MediaFiles
         public List<GameFile> GetFilesByGames(IEnumerable<int> gameIds)
         {
             return _mediaFileRepository.GetFilesByGames(gameIds);
-        }
-
-        public List<GameFile> GetFilesWithoutMediaInfo()
-        {
-            return _mediaFileRepository.GetFilesWithoutMediaInfo();
         }
 
         public List<string> FilterExistingFiles(List<string> files, Game game)

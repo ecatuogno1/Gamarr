@@ -173,20 +173,6 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("PreferIndexerFlags", value); }
         }
 
-        public bool AllowHardcodedSubs
-        {
-            get { return GetValueBoolean("AllowHardcodedSubs", false); }
-
-            set { SetValue("AllowHardcodedSubs", value); }
-        }
-
-        public string WhitelistedHardcodedSubs
-        {
-            get { return GetValue("WhitelistedHardcodedSubs", ""); }
-
-            set { SetValue("WhitelistedHardcodedSubs", value); }
-        }
-
         public bool AutoRedownloadFailed
         {
             get { return GetValueBoolean("AutoRedownloadFailed", true); }
@@ -262,13 +248,6 @@ namespace NzbDrone.Core.Configuration
             get { return GetValueBoolean("CopyUsingHardlinks", true); }
 
             set { SetValue("CopyUsingHardlinks", value); }
-        }
-
-        public bool EnableMediaInfo
-        {
-            get { return GetValueBoolean("EnableMediaInfo", true); }
-
-            set { SetValue("EnableMediaInfo", value); }
         }
 
         public bool UseScriptImport

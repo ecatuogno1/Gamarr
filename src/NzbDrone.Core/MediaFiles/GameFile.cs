@@ -4,7 +4,6 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Datastore;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Languages;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
@@ -12,6 +11,12 @@ namespace NzbDrone.Core.MediaFiles
 {
     public class GameFile : ModelBase
     {
+        public GameFile()
+        {
+            Regions = new List<Region>();
+            Languages = new List<Language>();
+        }
+
         public int GameId { get; set; }
         public string RelativePath { get; set; }
         public string Path { get; set; }
@@ -22,8 +27,12 @@ namespace NzbDrone.Core.MediaFiles
         public string ReleaseGroup { get; set; }
         public QualityModel Quality { get; set; }
         public IndexerFlags IndexerFlags { get; set; }
-        public MediaInfoModel MediaInfo { get; set; }
         public string Edition { get; set; }
+        public List<Region> Regions { get; set; }
+        public string Version { get; set; }
+        public ReleaseType ReleaseType { get; set; }
+        public int DiscNumber { get; set; }
+        public int DiscCount { get; set; }
         public Game Game { get; set; }
         public List<Language> Languages { get; set; }
 

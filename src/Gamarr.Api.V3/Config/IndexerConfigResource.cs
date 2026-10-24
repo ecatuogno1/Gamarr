@@ -11,8 +11,6 @@ namespace Gamarr.Api.V3.Config
         public int RssSyncInterval { get; set; }
         public bool PreferIndexerFlags { get; set; }
         public int AvailabilityDelay { get; set; }
-        public bool AllowHardcodedSubs { get; set; }
-        public string WhitelistedHardcodedSubs { get; set; }
     }
 
     public static class IndexerConfigResourceMapper
@@ -27,8 +25,6 @@ namespace Gamarr.Api.V3.Config
                 RssSyncInterval = model.RssSyncInterval,
                 PreferIndexerFlags = model.PreferIndexerFlags,
                 AvailabilityDelay = model.AvailabilityDelay,
-                AllowHardcodedSubs = model.AllowHardcodedSubs,
-                WhitelistedHardcodedSubs = model.WhitelistedHardcodedSubs,
             };
         }
     }

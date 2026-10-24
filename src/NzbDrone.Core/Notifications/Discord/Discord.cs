@@ -9,7 +9,6 @@ using NzbDrone.Core.Games;
 using NzbDrone.Core.Localization;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Notifications.Discord.Payloads;
 using NzbDrone.Core.Tags;
 using NzbDrone.Core.Validation;
@@ -195,14 +194,6 @@ namespace NzbDrone.Core.Notifications.Discord
                         discordField.Inline = true;
                         discordField.Value = message.GameFile.Quality.Quality.Name;
                         break;
-                    case DiscordImportFieldType.Codecs:
-                        discordField.Name = "Codecs";
-                        discordField.Inline = true;
-                        discordField.Value = string.Format("{0} / {1} {2}",
-                            MediaInfoFormatter.FormatVideoCodec(message.GameFile.MediaInfo, null),
-                            MediaInfoFormatter.FormatAudioCodec(message.GameFile.MediaInfo, null),
-                            MediaInfoFormatter.FormatAudioChannels(message.GameFile.MediaInfo));
-                        break;
                     case DiscordImportFieldType.Group:
                         discordField.Name = "Group";
                         discordField.Value = message.GameFile.ReleaseGroup;
@@ -214,11 +205,7 @@ namespace NzbDrone.Core.Notifications.Discord
                         break;
                     case DiscordImportFieldType.Languages:
                         discordField.Name = "Languages";
-                        discordField.Value = message.GameFile.MediaInfo.AudioLanguages.ConcatToString("/");
-                        break;
-                    case DiscordImportFieldType.Subtitles:
-                        discordField.Name = "Subtitles";
-                        discordField.Value = message.GameFile.MediaInfo.Subtitles.ConcatToString("/");
+                        discordField.Value = message.GameFile.Languages.Select(l => l.Name).ConcatToString("/");
                         break;
                     case DiscordImportFieldType.Release:
                         discordField.Name = "Release";

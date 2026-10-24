@@ -5,15 +5,16 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using NLog;
+using NzbDrone.Common;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Extras.Companions;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.MediaFiles.GameImport;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
 using NzbDrone.Core.RootFolders;
@@ -40,7 +41,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IMediaFileService _mediaFileService;
         private readonly IMediaFileTableCleanupService _mediaFileTableCleanupService;
         private readonly IRootFolderService _rootFolderService;
-        private readonly IUpdateMediaInfo _updateMediaInfoService;
+        private readonly ICompanionFileService _companionFileService;
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
 
@@ -52,7 +53,7 @@ namespace NzbDrone.Core.MediaFiles
                                IMediaFileService mediaFileService,
                                IMediaFileTableCleanupService mediaFileTableCleanupService,
                                IRootFolderService rootFolderService,
-                               IUpdateMediaInfo updateMediaInfoService,
+                               ICompanionFileService companionFileService,
                                IEventAggregator eventAggregator,
                                Logger logger)
         {
@@ -64,14 +65,14 @@ namespace NzbDrone.Core.MediaFiles
             _mediaFileService = mediaFileService;
             _mediaFileTableCleanupService = mediaFileTableCleanupService;
             _rootFolderService = rootFolderService;
-            _updateMediaInfoService = updateMediaInfoService;
+            _companionFileService = companionFileService;
             _eventAggregator = eventAggregator;
             _logger = logger;
         }
 
-        private static readonly Regex ExcludedExtrasSubFolderRegex = new Regex(@"(?:\\|\/|^)(?:extras|extrafanart|behind the scenes|deleted scenes|featurettes|interviews|other|scenes|sample[s]?|shorts|trailers)(?:\\|\/)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex ExcludedExtrasSubFolderRegex = new Regex(@"(?:\\|\/|^)(?:extrafanart|sample[s]?|trailers)(?:\\|\/)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex ExcludedSubFoldersRegex = new Regex(@"(?:\\|\/|^)(?:@eadir|\.@__thumb|plex versions|\.[^\\/]+)(?:\\|\/)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex ExcludedExtraFilesRegex = new Regex(@"(-(trailer|other|behindthescenes|deleted|featurette|interview|scene|short)\.[^.]+$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex ExcludedExtraFilesRegex = new Regex(@"(-(trailer|sample)\.[^.]+$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex ExcludedFilesRegex = new Regex(@"^\.(_|unmanic|DS_Store$)|^Thumbs\.db$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public void Scan(Game game)
@@ -134,13 +135,31 @@ namespace NzbDrone.Core.MediaFiles
             CleanMediaFiles(game, mediaFileList);
 
             var gameFiles = _mediaFileService.GetFilesByGame(game.Id);
-            var unmappedFiles = MediaFileService.FilterExistingFiles(mediaFileList, gameFiles, game);
+            var companionFiles = (_companionFileService.GetFilesByGame(game.Id) ?? new List<CompanionFile>()).Select(c => Path.Combine(game.Path, c.RelativePath)).ToHashSet(PathEqualityComparer.Instance);
+            var unmappedFiles = MediaFileService.FilterExistingFiles(mediaFileList, gameFiles, game)
+                .Where(f => !companionFiles.Contains(f))
+                .ToList();
 
-            var decisionsStopwatch = Stopwatch.StartNew();
-            var decisions = _importDecisionMaker.GetImportDecisions(unmappedFiles, game, false);
-            decisionsStopwatch.Stop();
-            _logger.Trace("Import decisions complete for: {0} [{1}]", game, decisionsStopwatch.Elapsed);
-            _importApprovedGames.Import(decisions, false);
+            // Other game files next to an existing game file belong to its release (tracks, discs, updates),
+            // they're picked up as companion files. Without a game file all files in the folder are one release.
+            var possibleCompanionFiles = new List<string>();
+
+            if (gameFiles.Any())
+            {
+                possibleCompanionFiles.AddRange(unmappedFiles);
+            }
+            else if (unmappedFiles.Any())
+            {
+                var decisionsStopwatch = Stopwatch.StartNew();
+                var decisions = _importDecisionMaker.GetImportDecisions(unmappedFiles, game, false);
+                decisionsStopwatch.Stop();
+                _logger.Trace("Import decisions complete for: {0} [{1}]", game, decisionsStopwatch.Elapsed);
+
+                var imported = _importApprovedGames.Import(decisions, false);
+
+                possibleCompanionFiles.AddRange((imported ?? new List<ImportResult>()).Where(i => i.Result == ImportResultType.Imported)
+                    .SelectMany(i => i.ImportDecision.LocalGame.CompanionFiles));
+            }
 
             // Update existing files that have a different file size
             var fileInfoStopwatch = Stopwatch.StartNew();
@@ -157,24 +176,20 @@ namespace NzbDrone.Core.MediaFiles
                 }
 
                 file.Size = fileSize;
-
-                if (!_updateMediaInfoService.Update(file, game))
-                {
-                    filesToUpdate.Add(file);
-                }
+                filesToUpdate.Add(file);
             }
 
-            // Update any files that had a file size change, but didn't get media info updated.
+            // Update any files that had a file size change
             if (filesToUpdate.Any())
             {
                 _mediaFileService.Update(filesToUpdate);
             }
 
             fileInfoStopwatch.Stop();
-            _logger.Trace("Reprocessing existing files complete for: {0} [{1}]", game, decisionsStopwatch.Elapsed);
+            _logger.Trace("Reprocessing existing files complete for: {0} [{1}]", game, fileInfoStopwatch.Elapsed);
 
             var filesOnDisk = GetNonVideoFiles(game.Path);
-            var possibleExtraFiles = FilterPaths(game.Path, filesOnDisk);
+            var possibleExtraFiles = possibleCompanionFiles.Concat(FilterPaths(game.Path, filesOnDisk)).ToList();
 
             RemoveEmptyGameFolder(game.Path);
             CompletedScanning(game, possibleExtraFiles);
@@ -198,7 +213,7 @@ namespace NzbDrone.Core.MediaFiles
 
             var filesOnDisk = _diskProvider.GetFiles(path, allDirectories).ToList();
 
-            var mediaFileList = filesOnDisk.Where(file => MediaFileExtensions.Extensions.Contains(Path.GetExtension(file)))
+            var mediaFileList = filesOnDisk.Where(file => MediaFileExtensions.IsGameFile(Path.GetExtension(file)))
                                            .ToList();
 
             _logger.Trace("{0} files were found in {1}", filesOnDisk.Count, path);
@@ -213,7 +228,7 @@ namespace NzbDrone.Core.MediaFiles
 
             var filesOnDisk = _diskProvider.GetFiles(path, allDirectories).ToList();
 
-            var mediaFileList = filesOnDisk.Where(file => !MediaFileExtensions.Extensions.Contains(Path.GetExtension(file)))
+            var mediaFileList = filesOnDisk.Where(file => !MediaFileExtensions.IsGameFile(Path.GetExtension(file)))
                                            .ToList();
 
             _logger.Trace("{0} files were found in {1}", filesOnDisk.Count, path);

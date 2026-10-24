@@ -1,13 +1,8 @@
-using System;
 using FizzWare.NBuilder;
 using FluentAssertions;
-using Moq;
 using NUnit.Framework;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.MediaFiles.GameImport;
-using NzbDrone.Core.MediaFiles.MediaInfo;
-using NzbDrone.Core.Parser.Model;
-using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
 
@@ -17,129 +12,40 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
     public class DetectSampleFixture : CoreTest<DetectSample>
     {
         private GameMetadata _game;
-        private LocalGame _localGame;
 
         [SetUp]
         public void Setup()
         {
             _game = Builder<GameMetadata>.CreateNew()
-                                     .Build();
-
-            _localGame = new LocalGame
-            {
-                Path = @"C:\Test\30 Rock\30.rock.s01e01.avi",
-                Game = new Game { GameMetadata = _game },
-                Quality = new QualityModel(Quality.HDTV720p)
-            };
+                                         .With(g => g.Title = "Super Mario World")
+                                         .Build();
         }
 
-        private void GivenRuntime(int seconds)
+        [TestCase(@"C:\Test\Super Mario World (USA).sfc")]
+        [TestCase(@"C:\Test\Game.Name-CODEX\codex-game.name.iso")]
+        [TestCase(@"C:\Test\Game Name (Europe)\Game Name (Europe) (Track 1).bin")]
+        [TestCase(@"C:\Test\Game Name\setup_game_name_1.2.3_(12345).exe")]
+        [TestCase(@"C:\Test\Demon Souls (USA)\Demon Souls (USA).iso")]
+        public void should_not_be_sample(string path)
         {
-            Mocker.GetMock<IVideoFileInfoReader>()
-                  .Setup(s => s.GetRunTime(It.IsAny<string>()))
-                  .Returns(new TimeSpan(0, 0, seconds));
+            Subject.IsSample(_game, path.AsOsAgnostic()).Should().Be(DetectSampleResult.NotSample);
         }
 
-        [Test]
-        public void should_return_false_for_flv()
+        [TestCase(@"C:\Test\Game.Name-CODEX\sample.iso")]
+        [TestCase(@"C:\Test\Game.Name-CODEX\game.name-sample.zip")]
+        [TestCase(@"C:\Test\Game Name\Game Name (Demo).nds")]
+        [TestCase(@"C:\Test\Game.Name-GROUP\Sample\game.name.iso")]
+        public void should_be_sample(string path)
         {
-            _localGame.Path = @"C:\Test\some.show.s01e01.flv";
-
-            ShouldBeNotSample();
-
-            Mocker.GetMock<IVideoFileInfoReader>().Verify(c => c.GetRunTime(It.IsAny<string>()), Times.Never());
+            Subject.IsSample(_game, path.AsOsAgnostic()).Should().Be(DetectSampleResult.Sample);
         }
 
         [Test]
-        public void should_return_false_for_strm()
+        public void should_not_be_sample_if_game_title_has_demo()
         {
-            _localGame.Path = @"C:\Test\some.show.s01e01.strm";
+            _game.Title = "Demo Game";
 
-            ShouldBeNotSample();
-
-            Mocker.GetMock<IVideoFileInfoReader>().Verify(c => c.GetRunTime(It.IsAny<string>()), Times.Never());
-        }
-
-        [Test]
-        public void should_return_false_for_iso()
-        {
-            _localGame.Path = @"C:\Test\some game (2000).iso";
-
-            ShouldBeNotSample();
-
-            Mocker.GetMock<IVideoFileInfoReader>().Verify(c => c.GetRunTime(It.IsAny<string>()), Times.Never());
-        }
-
-        [Test]
-        public void should_return_false_for_img()
-        {
-            _localGame.Path = @"C:\Test\some game (2000).img";
-
-            ShouldBeNotSample();
-
-            Mocker.GetMock<IVideoFileInfoReader>().Verify(c => c.GetRunTime(It.IsAny<string>()), Times.Never());
-        }
-
-        [Test]
-        public void should_return_false_for_m2ts()
-        {
-            _localGame.Path = @"C:\Test\some game (2000).m2ts";
-
-            ShouldBeNotSample();
-
-            Mocker.GetMock<IVideoFileInfoReader>().Verify(c => c.GetRunTime(It.IsAny<string>()), Times.Never());
-        }
-
-        [Test]
-        public void should_use_runtime()
-        {
-            GivenRuntime(120);
-
-            Subject.IsSample(_localGame.Game.GameMetadata,
-                             _localGame.Path);
-
-            Mocker.GetMock<IVideoFileInfoReader>().Verify(v => v.GetRunTime(It.IsAny<string>()), Times.Once());
-        }
-
-        [Test]
-        public void should_return_true_if_runtime_is_less_than_minimum()
-        {
-            GivenRuntime(60);
-
-            ShouldBeSample();
-        }
-
-        [Test]
-        public void should_return_false_if_runtime_greater_than_minimum()
-        {
-            GivenRuntime(600);
-
-            ShouldBeNotSample();
-        }
-
-        [Test]
-        public void should_return_indeterminate_if_mediainfo_result_is_null()
-        {
-            Mocker.GetMock<IVideoFileInfoReader>()
-                  .Setup(s => s.GetRunTime(It.IsAny<string>()))
-                  .Returns((TimeSpan?)null);
-
-            Subject.IsSample(_localGame.Game.GameMetadata,
-                             _localGame.Path).Should().Be(DetectSampleResult.Indeterminate);
-
-            ExceptionVerification.ExpectedErrors(1);
-        }
-
-        private void ShouldBeSample()
-        {
-            Subject.IsSample(_localGame.Game.GameMetadata,
-                             _localGame.Path).Should().Be(DetectSampleResult.Sample);
-        }
-
-        private void ShouldBeNotSample()
-        {
-            Subject.IsSample(_localGame.Game.GameMetadata,
-                             _localGame.Path).Should().Be(DetectSampleResult.NotSample);
+            Subject.IsSample(_game, @"C:\Test\Demo Game (USA).sfc".AsOsAgnostic()).Should().Be(DetectSampleResult.NotSample);
         }
     }
 }

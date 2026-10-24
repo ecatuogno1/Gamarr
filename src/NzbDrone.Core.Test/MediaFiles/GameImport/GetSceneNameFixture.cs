@@ -19,7 +19,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
     public class GetSceneNameFixture : CoreTest
     {
         private LocalGame _localGame;
-        private string _gameName = "game.title.2022.dvdrip.x264-ingot";
+        private string _gameName = "Game.Title.Update.v1.2-CODEX";
 
         [SetUp]
         public void Setup()
@@ -32,8 +32,8 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             _localGame = new LocalGame
             {
                 Game = game,
-                Path = Path.Combine(game.Path, "Game Title - 2022 - Episode Title.mkv"),
-                Quality = new QualityModel(Quality.Bluray720p),
+                Path = Path.Combine(game.Path, "Game Title - 2022 - Episode Title.iso"),
+                Quality = new QualityModel(Quality.Pkg),
                 ReleaseGroup = "DRONE"
             };
         }
@@ -58,25 +58,9 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
         }
 
         [Test]
-        public void should_not_use_download_client_item_title_as_scene_name_if_there_are_other_video_files()
-        {
-            _localGame.OtherVideoFiles = true;
-            _localGame.DownloadClientGameInfo = new ParsedGameInfo
-            {
-                ReleaseTitle = _gameName
-            };
-
-            _localGame.Path = Path.Combine(@"C:\Test\Unsorted Games", _gameName)
-                                     .AsOsAgnostic();
-
-            SceneNameCalculator.GetSceneName(_localGame).Should()
-                               .BeNull();
-        }
-
-        [Test]
         public void should_use_file_name_as_scenename_only_if_it_looks_like_scenename()
         {
-            _localGame.Path = Path.Combine(@"C:\Test\Unsorted Games", _gameName + ".mkv")
+            _localGame.Path = Path.Combine(@"C:\Test\Unsorted Games", _gameName + ".iso")
                                      .AsOsAgnostic();
 
             SceneNameCalculator.GetSceneName(_localGame).Should()
@@ -86,7 +70,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
         [Test]
         public void should_not_use_file_name_as_scenename_if_it_doesnt_look_like_scenename()
         {
-            _localGame.Path = Path.Combine(@"C:\Test\Unsorted Games", _gameName, "aaaaa.mkv")
+            _localGame.Path = Path.Combine(@"C:\Test\Unsorted Games", _gameName, "aaaaa.iso")
                                      .AsOsAgnostic();
 
             SceneNameCalculator.GetSceneName(_localGame).Should()
@@ -108,7 +92,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
         [Test]
         public void should_not_use_folder_name_as_scenename_if_it_doesnt_look_like_scenename()
         {
-            _localGame.Path = Path.Combine(@"C:\Test\Unsorted Games", _gameName, "aaaaa.mkv")
+            _localGame.Path = Path.Combine(@"C:\Test\Unsorted Games", _gameName, "aaaaa.iso")
                                      .AsOsAgnostic();
 
             _localGame.FolderGameInfo = new ParsedGameInfo
@@ -120,23 +104,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
                                .BeNull();
         }
 
-        [Test]
-        public void should_not_use_folder_name_as_scenename_if_there_are_other_video_files()
-        {
-            _localGame.OtherVideoFiles = true;
-            _localGame.Path = Path.Combine(@"C:\Test\Unsorted Games", _gameName, "aaaaa.mkv")
-                                     .AsOsAgnostic();
-
-            _localGame.FolderGameInfo = new ParsedGameInfo
-            {
-                ReleaseTitle = _gameName
-            };
-
-            SceneNameCalculator.GetSceneName(_localGame).Should()
-                               .BeNull();
-        }
-
-        [TestCase(".mkv")]
+        [TestCase(".iso")]
         [TestCase(".par2")]
         [TestCase(".nzb")]
         public void should_remove_extension_from_nzb_title_for_scene_name(string extension)

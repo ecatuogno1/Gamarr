@@ -9,10 +9,9 @@ namespace NzbDrone.Core.MediaFiles.GameImport
     {
         public static string GetSceneName(LocalGame localGame)
         {
-            var otherVideoFiles = localGame.OtherVideoFiles;
             var downloadClientInfo = localGame.DownloadClientGameInfo;
 
-            if (!otherVideoFiles && downloadClientInfo != null)
+            if (downloadClientInfo != null)
             {
                 return FileExtensions.RemoveFileExtension(downloadClientInfo.ReleaseTitle);
             }
@@ -26,8 +25,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport
 
             var folderTitle = localGame.FolderGameInfo?.ReleaseTitle;
 
-            if (!otherVideoFiles &&
-                folderTitle.IsNotNullOrWhiteSpace() &&
+            if (folderTitle.IsNotNullOrWhiteSpace() &&
                 SceneChecker.IsSceneTitle(folderTitle))
             {
                 return folderTitle;

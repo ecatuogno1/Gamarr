@@ -89,13 +89,17 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                     gameFile.DateAdded = DateTime.UtcNow;
                     gameFile.GameId = localGame.Game.Id;
                     gameFile.Path = localGame.Path.CleanFilePath();
-                    gameFile.Size = _diskProvider.GetFileSize(localGame.Path);
+                    gameFile.Size = localGame.Size > 0 ? localGame.Size : _diskProvider.GetFileSize(localGame.Path);
                     gameFile.Quality = localGame.Quality;
                     gameFile.Languages = localGame.Languages;
-                    gameFile.MediaInfo = localGame.MediaInfo;
                     gameFile.Game = localGame.Game;
                     gameFile.ReleaseGroup = localGame.ReleaseGroup;
                     gameFile.Edition = localGame.Edition;
+                    gameFile.Regions = localGame.Regions ?? new List<Region>();
+                    gameFile.Version = localGame.Version;
+                    gameFile.ReleaseType = localGame.ReleaseType;
+                    gameFile.DiscNumber = localGame.DiscNumber;
+                    gameFile.DiscCount = localGame.DiscCount;
 
                     if (downloadClientItem?.DownloadId.IsNotNullOrWhiteSpace() == true)
                     {

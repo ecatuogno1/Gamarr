@@ -17,6 +17,10 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
         public string DownloadId { get; set; }
         public int GameId { get; set; }
 
+        // Null when the client doesn't know them, they're looked up from the file then
+        public List<string> CompanionFiles { get; set; }
+        public string ReleaseRoot { get; set; }
+
         public bool Equals(ManualImportFile other)
         {
             if (other == null)

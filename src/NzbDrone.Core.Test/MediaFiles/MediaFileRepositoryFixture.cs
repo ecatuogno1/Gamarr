@@ -5,6 +5,7 @@ using NUnit.Framework;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 using NzbDrone.Core.Test.Framework;
 
@@ -58,7 +59,7 @@ namespace NzbDrone.Core.Test.MediaFiles
                 .With(c => c.GameId = _game1.Id)
                 .All()
                 .With(c => c.Id = 0)
-                .With(c => c.Quality = new QualityModel(Quality.Bluray1080p))
+                .With(c => c.Quality = new QualityModel(Quality.XexGod))
                 .With(c => c.Languages = new List<Language> { Language.English })
                 .BuildListOfNew();
 
@@ -71,6 +72,33 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             removedItems.Should().HaveCount(0);
             nonRemovedItems.Should().HaveCount(1);
+        }
+
+        [Test]
+        public void should_store_release_details()
+        {
+            var file = Builder<GameFile>.CreateNew()
+                .With(c => c.Id = 0)
+                .With(c => c.GameId = 12)
+                .With(c => c.Quality = new QualityModel(Quality.RomVerified))
+                .With(c => c.Languages = new List<Language> { Language.English })
+                .With(c => c.Regions = new List<Region> { Region.USA, Region.Europe })
+                .With(c => c.Version = "1.1")
+                .With(c => c.ReleaseType = ReleaseType.Update)
+                .With(c => c.DiscNumber = 1)
+                .With(c => c.DiscCount = 2)
+                .BuildNew();
+
+            Db.Insert(file);
+
+            var stored = Subject.GetFilesByGame(12).Should().ContainSingle().Subject;
+
+            stored.Regions.Should().BeEquivalentTo(new[] { Region.USA, Region.Europe });
+            stored.Version.Should().Be("1.1");
+            stored.ReleaseType.Should().Be(ReleaseType.Update);
+            stored.DiscNumber.Should().Be(1);
+            stored.DiscCount.Should().Be(2);
+            stored.Quality.Quality.Should().Be(Quality.RomVerified);
         }
     }
 }

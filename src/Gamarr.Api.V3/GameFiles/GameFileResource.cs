@@ -7,6 +7,7 @@ using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.DecisionEngine.Specifications;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.Parser.Model;
 using NzbDrone.Core.Qualities;
 
 namespace Gamarr.Api.V3.GameFiles
@@ -26,7 +27,11 @@ namespace Gamarr.Api.V3.GameFiles
         public List<CustomFormatResource> CustomFormats { get; set; }
         public int? CustomFormatScore { get; set; }
         public int? IndexerFlags { get; set; }
-        public MediaInfoResource MediaInfo { get; set; }
+        public List<Region> Regions { get; set; }
+        public string Version { get; set; }
+        public ReleaseType ReleaseType { get; set; }
+        public int DiscNumber { get; set; }
+        public int DiscCount { get; set; }
 
         public string OriginalFilePath { get; set; }
         public bool QualityCutoffNotMet { get; set; }
@@ -57,7 +62,11 @@ namespace Gamarr.Api.V3.GameFiles
                 Languages = model.Languages,
                 ReleaseGroup = model.ReleaseGroup,
                 Edition = model.Edition,
-                MediaInfo = model.MediaInfo.ToResource(model.SceneName),
+                Regions = model.Regions,
+                Version = model.Version,
+                ReleaseType = model.ReleaseType,
+                DiscNumber = model.DiscNumber,
+                DiscCount = model.DiscCount,
                 OriginalFilePath = model.OriginalFilePath
             };
         }
@@ -83,7 +92,11 @@ namespace Gamarr.Api.V3.GameFiles
                 Languages = model.Languages,
                 Edition = model.Edition,
                 ReleaseGroup = model.ReleaseGroup,
-                MediaInfo = model.MediaInfo.ToResource(model.SceneName),
+                Regions = model.Regions,
+                Version = model.Version,
+                ReleaseType = model.ReleaseType,
+                DiscNumber = model.DiscNumber,
+                DiscCount = model.DiscCount,
                 QualityCutoffNotMet = upgradableSpecification?.QualityCutoffNotMet(game.QualityProfile, model.Quality) ?? false,
                 OriginalFilePath = model.OriginalFilePath,
                 IndexerFlags = (int)model.IndexerFlags

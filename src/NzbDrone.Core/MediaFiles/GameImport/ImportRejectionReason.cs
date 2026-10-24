@@ -25,5 +25,7 @@ public enum ImportRejectionReason
     MultiPartGame,
     NotQualityUpgrade,
     NotRevisionUpgrade,
-    NotCustomFormatUpgrade
+    NotCustomFormatUpgrade,
+    PackedRelease,
+    WrongPlatformFile
 }

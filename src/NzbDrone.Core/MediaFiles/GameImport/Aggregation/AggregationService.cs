@@ -4,10 +4,8 @@ using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
-using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.MediaFiles.GameImport.Aggregation.Aggregators;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation
@@ -21,26 +19,20 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation
     {
         private readonly IEnumerable<IAggregateLocalGame> _augmenters;
         private readonly IDiskProvider _diskProvider;
-        private readonly IVideoFileInfoReader _videoFileInfoReader;
-        private readonly IConfigService _configService;
         private readonly Logger _logger;
 
         public AggregationService(IEnumerable<IAggregateLocalGame> augmenters,
                                  IDiskProvider diskProvider,
-                                 IVideoFileInfoReader videoFileInfoReader,
-                                 IConfigService configService,
                                  Logger logger)
         {
             _augmenters = augmenters.OrderBy(a => a.Order).ToList();
             _diskProvider = diskProvider;
-            _videoFileInfoReader = videoFileInfoReader;
-            _configService = configService;
             _logger = logger;
         }
 
         public LocalGame Augment(LocalGame localGame, DownloadClientItem downloadClientItem)
         {
-            var isMediaFile = MediaFileExtensions.Extensions.Contains(Path.GetExtension(localGame.Path));
+            var isMediaFile = MediaFileExtensions.IsGameFile(Path.GetExtension(localGame.Path));
 
             if (localGame.DownloadClientGameInfo == null &&
                 localGame.FolderGameInfo == null &&
@@ -52,13 +44,9 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation
                 }
             }
 
-            localGame.Size = _diskProvider.GetFileSize(localGame.Path);
+            // A multi-file release (bin/cue, multi-disc, installer folder) counts with all of its files
+            localGame.Size = _diskProvider.GetFileSize(localGame.Path) + localGame.CompanionFiles.Sum(f => _diskProvider.GetFileSize(f));
             localGame.SceneName = localGame.SceneSource ? SceneNameCalculator.GetSceneName(localGame) : null;
-
-            if (isMediaFile && (!localGame.ExistingFile || _configService.EnableMediaInfo))
-            {
-                localGame.MediaInfo = _videoFileInfoReader.GetMediaInfo(localGame.Path);
-            }
 
             foreach (var augmenter in _augmenters)
             {

@@ -61,7 +61,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
                                      .With(e => e.QualityProfile = new QualityProfile { Items = Qualities.QualityFixture.GetDefaultQualities() })
                                      .Build();
 
-            _quality = new QualityModel(Quality.DVD);
+            _quality = new QualityModel(Quality.RomVerified);
 
             _localGame = new LocalGame
             {
@@ -80,6 +80,8 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             Mocker.GetMock<IParsingService>()
                 .Setup(c => c.ParseMinimalPathGameInfo(It.IsAny<string>()))
                 .Returns(_fileInfo);
+
+            Mocker.SetConstant<IGameReleaseFileService>(Mocker.Resolve<GameReleaseFileService>());
 
             GivenVideoFiles(new List<string> { @"C:\Test\Unsorted\The.Game.2018.DVDRip.XviD-OSiTV.avi".AsOsAgnostic() });
         }
@@ -177,19 +179,62 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
 
             _videoFiles = new List<string>
                 {
-                    "The.Game.2021.DVDRip.XviD-OSiTV",
-                    "The.Game.2021.DVDRip.XviD-OSiTV",
-                    "The.Game.2021.DVDRip.XviD-OSiTV"
+                    @"C:\Test\Unsorted\The.Game-OSiTV\The.Game.Disc1.iso".AsOsAgnostic(),
+                    @"C:\Test\Unsorted\The.Game-OSiTV\The.Game.Disc2.iso".AsOsAgnostic(),
+                    @"C:\Test\Unsorted\The.Game-OSiTV\The.Game.Disc3.iso".AsOsAgnostic()
                 };
 
             GivenVideoFiles(_videoFiles);
 
             Subject.GetImportDecisions(_videoFiles, _game);
 
+            // All files of a game's folder are one release
             Mocker.GetMock<IAggregationService>()
-                  .Verify(c => c.Augment(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()), Times.Exactly(_videoFiles.Count));
+                  .Verify(c => c.Augment(It.IsAny<LocalGame>(), It.IsAny<DownloadClientItem>()), Times.Once());
 
-            ExceptionVerification.ExpectedErrors(3);
+            ExceptionVerification.ExpectedErrors(1);
+        }
+
+        [Test]
+        public void should_make_one_decision_for_a_multi_file_release()
+        {
+            GivenAugmentationSuccess();
+            GivenSpecifications(_pass1);
+
+            GivenVideoFiles(new List<string>
+            {
+                @"C:\Test\Unsorted\Game (USA)\Game (USA) (Track 1).bin".AsOsAgnostic(),
+                @"C:\Test\Unsorted\Game (USA)\Game (USA).cue".AsOsAgnostic(),
+                @"C:\Test\Unsorted\Game (USA)\Game (USA) (Track 2).bin".AsOsAgnostic()
+            });
+
+            var result = Subject.GetImportDecisions(_videoFiles, _game);
+
+            result.Should().HaveCount(1);
+            result.Single().LocalGame.Path.Should().Be(@"C:\Test\Unsorted\Game (USA)\Game (USA).cue".AsOsAgnostic());
+            result.Single().LocalGame.CompanionFiles.Should().HaveCount(2);
+            result.Single().LocalGame.ReleaseRoot.Should().Be(@"C:\Test\Unsorted\Game (USA)".AsOsAgnostic());
+        }
+
+        [Test]
+        public void should_leave_samples_out_of_the_release()
+        {
+            GivenAugmentationSuccess();
+            GivenSpecifications(_pass1);
+
+            GivenVideoFiles(new List<string>
+            {
+                @"C:\Test\Unsorted\Game.Name.NSW-VENOM\venom-game.name.nsp".AsOsAgnostic(),
+                @"C:\Test\Unsorted\Game.Name.NSW-VENOM\venom-game.name-sample.nsp".AsOsAgnostic()
+            });
+
+            Mocker.GetMock<IDetectSample>()
+                  .Setup(s => s.IsSample(It.IsAny<GameMetadata>(), It.Is<string>(p => p.Contains("sample"))))
+                  .Returns(DetectSampleResult.Sample);
+
+            var result = Subject.GetImportDecisions(_videoFiles, _game);
+
+            result.Single().LocalGame.CompanionFiles.Should().BeEmpty();
         }
 
         [Test]
@@ -221,7 +266,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
 
             _videoFiles = new List<string>
                 {
-                    "The.Game.2021.DVDRip.XviD-OSiTV"
+                    @"C:\Test\Unsorted\The.Game-OSiTV\The.Game.iso".AsOsAgnostic()
                 };
 
             GivenVideoFiles(_videoFiles);

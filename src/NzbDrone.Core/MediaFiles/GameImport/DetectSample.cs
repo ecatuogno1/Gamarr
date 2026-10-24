@@ -1,8 +1,8 @@
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using NLog;
 using NzbDrone.Core.Games;
-using NzbDrone.Core.MediaFiles.MediaInfo;
 
 namespace NzbDrone.Core.MediaFiles.GameImport
 {
@@ -11,73 +11,42 @@ namespace NzbDrone.Core.MediaFiles.GameImport
         DetectSampleResult IsSample(GameMetadata game, string path);
     }
 
+    // Games have no runtime, samples and demos are recognised by their name only
     public class DetectSample : IDetectSample
     {
-        private readonly IVideoFileInfoReader _videoFileInfoReader;
+        private static readonly Regex SampleRegex = new(@"(?:^|[-._ \[(])(?:sample|demo)(?:$|[-._ \])\d])", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex SampleFolderRegex = new(@"(?:^|[\\/])samples?(?:[\\/]|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         private readonly Logger _logger;
 
-        public DetectSample(IVideoFileInfoReader videoFileInfoReader, Logger logger)
+        public DetectSample(Logger logger)
         {
-            _videoFileInfoReader = videoFileInfoReader;
             _logger = logger;
         }
 
         public DetectSampleResult IsSample(GameMetadata game, string path)
         {
-            var extension = Path.GetExtension(path);
+            var fileName = Path.GetFileNameWithoutExtension(path);
+            var directory = Path.GetDirectoryName(path) ?? string.Empty;
 
-            if (extension != null)
+            // A game that has "demo" in its title isn't a sample of itself
+            var title = game?.Title ?? string.Empty;
+            var titleHasSampleWord = SampleRegex.IsMatch(title);
+
+            if (!titleHasSampleWord && SampleRegex.IsMatch(fileName))
             {
-                if (extension.Equals(".flv", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    _logger.Debug("Skipping sample check for .flv file");
-                    return DetectSampleResult.NotSample;
-                }
-
-                if (extension.Equals(".strm", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    _logger.Debug("Skipping sample check for .strm file");
-                    return DetectSampleResult.NotSample;
-                }
-
-                if (new string[] { ".iso", ".img", ".m2ts" }.Contains(extension, StringComparer.OrdinalIgnoreCase))
-                {
-                    _logger.Debug($"Skipping sample check for DVD/BR image file '{path}'");
-                    return DetectSampleResult.NotSample;
-                }
-            }
-
-            // TODO: Use MediaInfo from the import process, no need to re-process the file again here
-            var runTime = _videoFileInfoReader.GetRunTime(path);
-
-            if (!runTime.HasValue)
-            {
-                _logger.Error("Failed to get runtime from the file, make sure ffprobe is available");
-                return DetectSampleResult.Indeterminate;
-            }
-
-            var minimumRuntime = GetMinimumAllowedRuntime(game);
-
-            if (runTime.Value.TotalMinutes.Equals(0))
-            {
-                _logger.Error("[{0}] has a runtime of 0, is it a valid video file?", path);
+                _logger.Debug("[{0}] appears to be a sample or demo", path);
                 return DetectSampleResult.Sample;
             }
 
-            if (runTime.Value.TotalSeconds < minimumRuntime)
+            if (SampleFolderRegex.IsMatch(Path.GetFileName(directory) ?? string.Empty) &&
+                !string.Equals(Path.GetFileName(directory), title, StringComparison.OrdinalIgnoreCase))
             {
-                _logger.Debug("[{0}] appears to be a sample. Runtime: {1} seconds. Expected at least: {2} seconds", path, runTime.Value.TotalSeconds, minimumRuntime);
+                _logger.Debug("[{0}] is in a sample folder", path);
                 return DetectSampleResult.Sample;
             }
 
-            _logger.Debug("[{0}] does not appear to be a sample. Runtime {1} seconds is more than minimum of {2} seconds", path, runTime, minimumRuntime);
             return DetectSampleResult.NotSample;
-        }
-
-        // Games have no runtime, stage 3 replaces video sample detection entirely
-        private int GetMinimumAllowedRuntime(GameMetadata game)
-        {
-            return 600;
         }
     }
 }

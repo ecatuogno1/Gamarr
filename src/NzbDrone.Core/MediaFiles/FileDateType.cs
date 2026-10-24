@@ -3,7 +3,8 @@
     public enum FileDateType
     {
         None = 0,
-        Cinemas = 1,
+
+        // 1 was Radarr's "in cinemas" date
         Release = 2
     }
 }

@@ -29,6 +29,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport
         private readonly IAggregationService _aggregationService;
         private readonly IDiskProvider _diskProvider;
         private readonly IDetectSample _detectSample;
+        private readonly IGameReleaseFileService _releaseFileService;
         private readonly ITrackedDownloadService _trackedDownloadService;
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly Logger _logger;
@@ -38,6 +39,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                                    IAggregationService aggregationService,
                                    IDiskProvider diskProvider,
                                    IDetectSample detectSample,
+                                   IGameReleaseFileService releaseFileService,
                                    ITrackedDownloadService trackedDownloadService,
                                    ICustomFormatCalculationService formatCalculator,
                                    Logger logger)
@@ -47,6 +49,7 @@ namespace NzbDrone.Core.MediaFiles.GameImport
             _aggregationService = aggregationService;
             _diskProvider = diskProvider;
             _detectSample = detectSample;
+            _releaseFileService = releaseFileService;
             _trackedDownloadService = trackedDownloadService;
             _formatCalculator = formatCalculator;
             _logger = logger;
@@ -80,26 +83,38 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                 downloadClientItemInfo = Parser.Parser.ParseGameTitle(downloadClientItem.Title);
             }
 
-            var nonSampleVideoFileCount = GetNonSampleVideoFileCount(newFiles, game.GameMetadata);
+            // Samples aren't part of the release (unless it's an installer folder, which takes everything)
+            var releaseFiles = newFiles.Where(file => _detectSample.IsSample(game.GameMetadata, file) != DetectSampleResult.Sample).ToList();
 
+            if (!releaseFiles.Any())
+            {
+                releaseFiles = newFiles;
+            }
+
+            // All files of a game's download or folder are one release: the primary file becomes the game file,
+            // the others are imported alongside it
+            var release = _releaseFileService.GetRelease(releaseFiles);
             var decisions = new List<ImportDecision>();
 
-            foreach (var file in newFiles)
+            if (release == null)
             {
-                var localGame = new LocalGame
-                {
-                    Game = game,
-                    DownloadClientGameInfo = downloadClientItemInfo,
-                    DownloadItem = downloadClientItem,
-                    FolderGameInfo = folderInfo,
-                    Path = file,
-                    SceneSource = sceneSource,
-                    ExistingFile = game.Path.IsParentPath(file),
-                    OtherVideoFiles = nonSampleVideoFileCount > 1
-                };
-
-                decisions.AddIfNotNull(GetDecision(localGame, downloadClientItem, nonSampleVideoFileCount > 1));
+                return decisions;
             }
+
+            var localGame = new LocalGame
+            {
+                Game = game,
+                DownloadClientGameInfo = downloadClientItemInfo,
+                DownloadItem = downloadClientItem,
+                FolderGameInfo = folderInfo,
+                Path = release.PrimaryFile,
+                CompanionFiles = release.CompanionFiles,
+                ReleaseRoot = release.Root,
+                SceneSource = sceneSource,
+                ExistingFile = game.Path.IsParentPath(release.PrimaryFile)
+            };
+
+            decisions.AddIfNotNull(GetDecision(localGame, downloadClientItem, false));
 
             return decisions;
         }
@@ -197,21 +212,6 @@ namespace NzbDrone.Core.MediaFiles.GameImport
             }
 
             return null;
-        }
-
-        private int GetNonSampleVideoFileCount(List<string> videoFiles, GameMetadata game)
-        {
-            return videoFiles.Count(file =>
-            {
-                var sample = _detectSample.IsSample(game, file);
-
-                if (sample == DetectSampleResult.Sample)
-                {
-                    return false;
-                }
-
-                return true;
-            });
         }
     }
 }

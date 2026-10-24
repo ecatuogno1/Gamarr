@@ -32,6 +32,7 @@ namespace NzbDrone.Core.MediaFiles
         private readonly IMakeImportDecision _importDecisionMaker;
         private readonly IImportApprovedGame _importApprovedGame;
         private readonly IDetectSample _detectSample;
+        private readonly IGameReleaseFileService _releaseFileService;
         private readonly IRuntimeInfo _runtimeInfo;
         private readonly IConfigService _config;
         private readonly IHistoryService _historyService;
@@ -44,6 +45,7 @@ namespace NzbDrone.Core.MediaFiles
                                                IMakeImportDecision importDecisionMaker,
                                                IImportApprovedGame importApprovedGame,
                                                IDetectSample detectSample,
+                                               IGameReleaseFileService releaseFileService,
                                                IRuntimeInfo runtimeInfo,
                                                IConfigService config,
                                                IHistoryService historyService,
@@ -56,6 +58,7 @@ namespace NzbDrone.Core.MediaFiles
             _importDecisionMaker = importDecisionMaker;
             _importApprovedGame = importApprovedGame;
             _detectSample = detectSample;
+            _releaseFileService = releaseFileService;
             _runtimeInfo = runtimeInfo;
             _config = config;
             _historyService = historyService;
@@ -72,9 +75,12 @@ namespace NzbDrone.Core.MediaFiles
                 results.AddRange(folderResults);
             }
 
-            foreach (var videoFile in _diskScanService.GetVideoFiles(directoryInfo.FullName, false))
+            // Loose files in the root folder can be several releases (a folder of ROMs, bin/cue sets)
+            var rootFiles = _diskScanService.GetVideoFiles(directoryInfo.FullName, false).ToList();
+
+            foreach (var release in _releaseFileService.GroupReleases(rootFiles))
             {
-                var fileResults = ProcessFile(new FileInfo(videoFile), ImportMode.Auto, null);
+                var fileResults = ProcessFile(new FileInfo(release.PrimaryFile), ImportMode.Auto, null);
                 results.AddRange(fileResults);
             }
 
@@ -122,17 +128,9 @@ namespace NzbDrone.Core.MediaFiles
                     Path.GetExtension(f).Equals(".rar",
                         StringComparison.OrdinalIgnoreCase));
 
+                // Everything that belongs to the release was imported with it, only samples may be left
                 foreach (var videoFile in videoFiles)
                 {
-                    var gameParseResult =
-                        Parser.Parser.ParseGameTitle(Path.GetFileName(videoFile));
-
-                    if (gameParseResult == null)
-                    {
-                        _logger.Warn("Unable to parse file on import: [{0}]", videoFile);
-                        return false;
-                    }
-
                     if (_detectSample.IsSample(game.GameMetadata, videoFile) != DetectSampleResult.Sample)
                     {
                         _logger.Warn("Non-sample file detected: [{0}]", videoFile);
@@ -271,7 +269,7 @@ namespace NzbDrone.Core.MediaFiles
 
                 return new List<ImportResult>
                        {
-                           new ImportResult(new ImportDecision(new LocalGame { Path = fileInfo.FullName }, new ImportRejection(ImportRejectionReason.InvalidFilePath, "Invalid video file, filename starts with '._'")), "Invalid video file, filename starts with '._'")
+                           new ImportResult(new ImportDecision(new LocalGame { Path = fileInfo.FullName }, new ImportRejection(ImportRejectionReason.InvalidFilePath, "Invalid game file, filename starts with '._'")), "Invalid game file, filename starts with '._'")
                        };
             }
 
@@ -287,25 +285,15 @@ namespace NzbDrone.Core.MediaFiles
                 };
             }
 
-            if (FileExtensions.ExecutableExtensions.Contains(extension))
-            {
-                return new List<ImportResult>
-                {
-                    new ImportResult(new ImportDecision(new LocalGame { Path = fileInfo.FullName },
-                            new ImportRejection(ImportRejectionReason.ExecutableFile, $"Caution: Found executable file with extension: '{extension}'")),
-                        $"Caution: Found executable file with extension: '{extension}'")
-                };
-            }
-
-            if (extension.IsNullOrWhiteSpace() || !MediaFileExtensions.Extensions.Contains(extension))
+            if (extension.IsNullOrWhiteSpace() || !MediaFileExtensions.IsGameFile(extension))
             {
                 _logger.Debug("[{0}] has an unsupported extension: '{1}'", fileInfo.FullName, extension);
 
                 return new List<ImportResult>
                        {
                            new ImportResult(new ImportDecision(new LocalGame { Path = fileInfo.FullName },
-                               new ImportRejection(ImportRejectionReason.UnsupportedExtension, $"Invalid video file, unsupported extension: '{extension}'")),
-                               $"Invalid video file, unsupported extension: '{extension}'")
+                               new ImportRejection(ImportRejectionReason.UnsupportedExtension, $"Invalid game file, unsupported extension: '{extension}'")),
+                               $"Invalid game file, unsupported extension: '{extension}'")
                        };
             }
 
@@ -320,7 +308,11 @@ namespace NzbDrone.Core.MediaFiles
                 }
             }
 
-            var decisions = _importDecisionMaker.GetImportDecisions(new List<string>() { fileInfo.FullName }, game, downloadClientItem, null, true);
+            // A file can be the primary file of a multi-file release (a cue sheet with its tracks, an m3u with its discs)
+            var releaseFiles = new List<string> { fileInfo.FullName };
+            releaseFiles.AddRange(_releaseFileService.FindCompanions(fileInfo.FullName));
+
+            var decisions = _importDecisionMaker.GetImportDecisions(releaseFiles, game, downloadClientItem, null, true);
 
             return _importApprovedGame.Import(decisions, true, downloadClientItem, importMode);
         }
@@ -360,14 +352,9 @@ namespace NzbDrone.Core.MediaFiles
                 return RejectionResult(ImportRejectionReason.DangerousFile, "Caution: Found potentially dangerous file");
             }
 
-            if (files.Any(file => FileExtensions.ExecutableExtensions.Contains(Path.GetExtension(file))))
-            {
-                return RejectionResult(ImportRejectionReason.ExecutableFile, "Caution: Found executable file");
-            }
-
             if (files.Any(file => FileExtensions.ArchiveExtensions.Contains(Path.GetExtension(file))))
             {
-                return RejectionResult(ImportRejectionReason.ArchiveFile, "Found archive file, might need to be extracted");
+                return RejectionResult(ImportRejectionReason.ArchiveFile, "Found archive file, the release might need to be extracted");
             }
 
             return null;

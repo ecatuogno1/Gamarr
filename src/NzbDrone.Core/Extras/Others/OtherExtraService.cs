@@ -9,6 +9,7 @@ using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.Extras.Others
@@ -81,6 +82,27 @@ namespace NzbDrone.Core.Extras.Others
             return true;
         }
 
+        private static bool MatchesGame(string file, LocalGame localGame)
+        {
+            var gameTitles = (localGame.FileGameInfo?.GameTitles ?? new List<string>())
+                .Concat(new[] { localGame.Game?.Title })
+                .Where(t => t.IsNotNullOrWhiteSpace())
+                .Select(t => t.CleanGameTitle())
+                .ToHashSet();
+
+            var names = new[]
+            {
+                Path.GetFileNameWithoutExtension(file),
+                Path.GetFileName(Path.GetDirectoryName(file))
+            };
+
+            return names.Where(n => n.IsNotNullOrWhiteSpace())
+                .Select(n => Parser.Parser.ParseGameTitle(n))
+                .Where(p => p != null)
+                .SelectMany(p => p.GameTitles)
+                .Any(t => gameTitles.Contains(t.CleanGameTitle()));
+        }
+
         public override IEnumerable<ExtraFile> ImportFiles(LocalGame localGame, GameFile gameFile, List<string> files, bool isReadOnly)
         {
             var importedFiles = new List<ExtraFile>();
@@ -113,16 +135,8 @@ namespace NzbDrone.Core.Extras.Others
                         continue;
                     }
 
-                    // Game match
-                    var fileGameInfo = Parser.Parser.ParseGamePath(file) ?? new ParsedGameInfo();
-
-                    if (fileGameInfo.GameTitle == null)
-                    {
-                        continue;
-                    }
-
-                    if (fileGameInfo.GameTitle == localGame.FileGameInfo.GameTitle &&
-                        fileGameInfo.Year.Equals(localGame.FileGameInfo.Year))
+                    // Game match, by the file's name or its folder's name
+                    if (MatchesGame(file, localGame))
                     {
                         matchingFiles.Add(file);
                     }

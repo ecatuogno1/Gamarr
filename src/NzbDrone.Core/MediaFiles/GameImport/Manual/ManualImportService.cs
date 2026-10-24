@@ -9,6 +9,7 @@ using NzbDrone.Common.Instrumentation.Extensions;
 using NzbDrone.Core.CustomFormats;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Download.TrackedDownloads;
+using NzbDrone.Core.Extras.Companions;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles.GameImport.Aggregation;
@@ -39,6 +40,8 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
         private readonly ITrackedDownloadService _trackedDownloadService;
         private readonly IDownloadedGameImportService _downloadedGameImportService;
         private readonly IMediaFileService _mediaFileService;
+        private readonly IGameReleaseFileService _releaseFileService;
+        private readonly ICompanionFileService _companionFileService;
         private readonly ICustomFormatCalculationService _formatCalculator;
         private readonly IEventAggregator _eventAggregator;
         private readonly Logger _logger;
@@ -53,6 +56,8 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
                                    ITrackedDownloadService trackedDownloadService,
                                    IDownloadedGameImportService downloadedGameImportService,
                                    IMediaFileService mediaFileService,
+                                   IGameReleaseFileService releaseFileService,
+                                   ICompanionFileService companionFileService,
                                    ICustomFormatCalculationService formatCalculator,
                                    IEventAggregator eventAggregator,
                                    Logger logger)
@@ -67,6 +72,8 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             _trackedDownloadService = trackedDownloadService;
             _downloadedGameImportService = downloadedGameImportService;
             _mediaFileService = mediaFileService;
+            _releaseFileService = releaseFileService;
+            _companionFileService = companionFileService;
             _formatCalculator = formatCalculator;
             _eventAggregator = eventAggregator;
             _logger = logger;
@@ -80,8 +87,11 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
 
             var items = gameFiles.Select(gameFile => MapItem(gameFile, game, directoryInfo.Name)).ToList();
 
+            var companionFiles = (_companionFileService.GetFilesByGame(gameId) ?? new List<CompanionFile>()).Select(c => Path.Combine(game.Path, c.RelativePath)).ToList();
             var mediaFiles = _diskScanService.FilterPaths(game.Path, _diskScanService.GetVideoFiles(game.Path)).ToList();
-            var unmappedFiles = MediaFileService.FilterExistingFiles(mediaFiles, gameFiles, game);
+            var unmappedFiles = MediaFileService.FilterExistingFiles(mediaFiles, gameFiles, game)
+                .Where(f => !companionFiles.Any(c => c.PathEquals(f)))
+                .ToList();
 
             items.AddRange(unmappedFiles.Select(file =>
                 new ManualImportItem
@@ -158,6 +168,8 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             localGame.DownloadClientGameInfo = downloadClientItem == null ? null : Parser.Parser.ParseGameTitle(downloadClientItem.Title);
             localGame.DownloadItem = downloadClientItem;
             localGame.Path = path;
+            localGame.CompanionFiles = _releaseFileService.FindCompanions(path);
+            localGame.ReleaseRoot = rootFolder;
             localGame.SceneSource = SceneSource(game, rootFolder);
             localGame.ExistingFile = game.Path.IsParentPath(path);
             localGame.Size = _diskProvider.GetFileSize(path);
@@ -233,7 +245,8 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
 
                 var subfolders = _diskScanService.FilterPaths(rootFolder, _diskProvider.GetDirectories(baseFolder));
 
-                var processedFiles = files.Select(file => ProcessFile(rootFolder, baseFolder, file, downloadId));
+                // Loose files can be several releases, each is one item with its companion files
+                var processedFiles = _releaseFileService.GroupReleases(files).Select(release => ProcessFile(rootFolder, baseFolder, release.PrimaryFile, downloadId));
                 var processedFolders = subfolders.SelectMany(subfolder => ProcessFolder(rootFolder, subfolder, downloadId, null, filterExistingFiles));
 
                 return processedFiles.Concat(processedFolders).Where(i => i != null).ToList();
@@ -294,7 +307,10 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
                         null);
                 }
 
-                var importDecisions = _importDecisionMaker.GetImportDecisions(new List<string> { file }, game, trackedDownload?.DownloadItem, null, SceneSource(game, baseFolder));
+                var releaseFiles = new List<string> { file };
+                releaseFiles.AddRange(_releaseFileService.FindCompanions(file));
+
+                var importDecisions = _importDecisionMaker.GetImportDecisions(releaseFiles, game, trackedDownload?.DownloadItem, null, SceneSource(game, baseFolder));
 
                 if (importDecisions.Any())
                 {
@@ -364,11 +380,13 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
             item.DownloadId = downloadId;
 
             item.Quality = decision.LocalGame.Quality;
-            item.Size = _diskProvider.GetFileSize(decision.LocalGame.Path);
+            item.Size = decision.LocalGame.Size > 0 ? decision.LocalGame.Size : _diskProvider.GetFileSize(decision.LocalGame.Path);
             item.Languages = decision.LocalGame.Languages;
             item.ReleaseGroup = decision.LocalGame.ReleaseGroup;
             item.Rejections = decision.Rejections;
             item.IndexerFlags = (int)decision.LocalGame.IndexerFlags;
+            item.CompanionFiles = decision.LocalGame.CompanionFiles ?? new List<string>();
+            item.ReleaseRoot = decision.LocalGame.ReleaseRoot;
 
             if (decision.LocalGame.Game != null)
             {
@@ -429,7 +447,9 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
                     Languages = file.Languages,
                     IndexerFlags = (IndexerFlags)file.IndexerFlags,
                     Game = game,
-                    Size = 0
+                    Size = 0,
+                    CompanionFiles = file.CompanionFiles ?? _releaseFileService.FindCompanions(file.Path),
+                    ReleaseRoot = file.ReleaseRoot
                 };
 
                 if (file.DownloadId.IsNotNullOrWhiteSpace())

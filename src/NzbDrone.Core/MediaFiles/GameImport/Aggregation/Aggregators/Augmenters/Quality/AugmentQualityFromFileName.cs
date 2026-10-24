@@ -1,6 +1,7 @@
+using System.IO;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.Parser;
 using NzbDrone.Core.Parser.Model;
-using NzbDrone.Core.Qualities;
 
 namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation.Aggregators.Augmenters.Quality
 {
@@ -12,36 +13,16 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation.Aggregators.Augmenters
         public AugmentQualityResult AugmentQuality(LocalGame localGame, DownloadClientItem downloadClientItem)
         {
             var quality = localGame.FileGameInfo?.Quality;
+            var platform = localGame.Game?.Platform;
 
-            if (quality == null)
+            // The file name doesn't say which platform it's for, the game does. That's needed for ROMs in
+            // archives and ambiguous extensions.
+            if (platform != null && localGame.Path != null && (localGame.FileGameInfo == null || localGame.FileGameInfo.PlatformIgdbId == 0))
             {
-                return null;
+                quality = QualityParser.ParseQuality(Path.GetFileName(localGame.Path), platform.IgdbPlatformId);
             }
 
-            var sourceConfidence = quality.SourceDetectionSource == QualityDetectionSource.Name
-                ? Confidence.Tag
-                : Confidence.Fallback;
-
-            var resolutionConfidence = quality.ResolutionDetectionSource == QualityDetectionSource.Name
-                ? Confidence.Tag
-                : Confidence.Fallback;
-
-            var modifierConfidence = quality.ModifierDetectionSource == QualityDetectionSource.Name
-                ? Confidence.Tag
-                : Confidence.Fallback;
-
-            var revisionConfidence = quality.RevisionDetectionSource == QualityDetectionSource.Name
-                ? Confidence.Tag
-                : Confidence.Fallback;
-
-            return new AugmentQualityResult(quality.Quality.Source,
-                                            sourceConfidence,
-                                            quality.Quality.Resolution,
-                                            resolutionConfidence,
-                                            quality.Quality.Modifier,
-                                            modifierConfidence,
-                                            quality.Revision,
-                                            revisionConfidence);
+            return AugmentQualityResult.From(quality);
         }
     }
 }

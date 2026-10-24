@@ -23,9 +23,9 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
         [Test]
         public void should_prefer_downloadclient()
         {
-            var fileGameInfo = Parser.Parser.ParseGameTitle("Game.Title.2008.WEB-DL-Wizzy", false);
-            var folderGameInfo = Parser.Parser.ParseGameTitle("Game.Title.2008.WEB-DL-Drone", false);
-            var downloadClientGameInfo = Parser.Parser.ParseGameTitle("Game.Title.2008.WEB-DL-Viva", false);
+            var fileGameInfo = Parser.Parser.ParseGameTitle("Game.Title.NSW-WIZZY", false);
+            var folderGameInfo = Parser.Parser.ParseGameTitle("Game.Title.NSW-DRONE", false);
+            var downloadClientGameInfo = Parser.Parser.ParseGameTitle("Game.Title.NSW-VIVA", false);
             var localGame = new LocalGame
             {
                 FileGameInfo = fileGameInfo,
@@ -37,15 +37,15 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
 
             Subject.Aggregate(localGame, null);
 
-            localGame.ReleaseGroup.Should().Be("Viva");
+            localGame.ReleaseGroup.Should().Be("VIVA");
         }
 
         [Test]
         public void should_prefer_folder()
         {
-            var fileGameInfo = Parser.Parser.ParseGameTitle("Game.Title.2008.WEB-DL-Wizzy", false);
-            var folderGameInfo = Parser.Parser.ParseGameTitle("Game.Title.2008.WEB-DL-Drone", false);
-            var downloadClientGameInfo = Parser.Parser.ParseGameTitle("Game.Title.2008.WEB-DL", false);
+            var fileGameInfo = Parser.Parser.ParseGameTitle("Game.Title.NSW-WIZZY", false);
+            var folderGameInfo = Parser.Parser.ParseGameTitle("Game.Title.NSW-DRONE", false);
+            var downloadClientGameInfo = Parser.Parser.ParseGameTitle("Game.Title.NSW", false);
             var localGame = new LocalGame
             {
                 FileGameInfo = fileGameInfo,
@@ -57,15 +57,15 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
 
             Subject.Aggregate(localGame, null);
 
-            localGame.ReleaseGroup.Should().Be("Drone");
+            localGame.ReleaseGroup.Should().Be("DRONE");
         }
 
         [Test]
         public void should_fallback_to_file()
         {
-            var fileGameInfo = Parser.Parser.ParseGameTitle("Game.Title.2008.WEB-DL-Wizzy", false);
-            var folderGameInfo = Parser.Parser.ParseGameTitle("Game.Title.2008.WEB-DL", false);
-            var downloadClientGameInfo = Parser.Parser.ParseGameTitle("Game.Title.2008.WEB-DL", false);
+            var fileGameInfo = Parser.Parser.ParseGameTitle("Game.Title.NSW-WIZZY", false);
+            var folderGameInfo = Parser.Parser.ParseGameTitle("Game.Title.NSW", false);
+            var downloadClientGameInfo = Parser.Parser.ParseGameTitle("Game.Title.NSW", false);
             var localGame = new LocalGame
             {
                 FileGameInfo = fileGameInfo,
@@ -77,7 +77,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
 
             Subject.Aggregate(localGame, null);
 
-            localGame.ReleaseGroup.Should().Be("Wizzy");
+            localGame.ReleaseGroup.Should().Be("WIZZY");
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
         {
             var fileGameInfo = Parser.Parser.ParseGameTitle("Lock Stock and Two Smoking Barrels (1998) [imdb-tt0120735][Bluray-1080p][8bit][x264][DTS-HD MA 5.1]-FraMeSToR", false);
             var folderGameInfo = Parser.Parser.ParseGameTitle("Lock Stock and Two Smoking Barrels (1998) {imdb-tt0120735}", false);
-            var downloadClientGameInfo = Parser.Parser.ParseGameTitle("Game.Title.2008.WEB-DL", false);
+            var downloadClientGameInfo = Parser.Parser.ParseGameTitle("Game.Title.NSW", false);
             var localGame = new LocalGame
             {
                 FileGameInfo = fileGameInfo,
@@ -105,7 +105,7 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport.Aggregation.Aggregators
         {
             var fileGameInfo = Parser.Parser.ParseGameTitle("Lock Stock and Two Smoking Barrels (1998) [igdb-100][Bluray-1080p][8bit][x264][DTS-HD MA 5.1]-FraMeSToR", false);
             var folderGameInfo = Parser.Parser.ParseGameTitle("Lock Stock and Two Smoking Barrels (1998) {igdb-100}", false);
-            var downloadClientGameInfo = Parser.Parser.ParseGameTitle("Game.Title.2008.WEB-DL", false);
+            var downloadClientGameInfo = Parser.Parser.ParseGameTitle("Game.Title.NSW", false);
             var localGame = new LocalGame
             {
                 FileGameInfo = fileGameInfo,

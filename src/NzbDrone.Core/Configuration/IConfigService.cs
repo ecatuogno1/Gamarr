@@ -34,7 +34,6 @@ namespace NzbDrone.Core.Configuration
         bool SkipFreeSpaceCheckWhenImporting { get; set; }
         int MinimumFreeSpaceWhenImporting { get; set; }
         bool CopyUsingHardlinks { get; set; }
-        bool EnableMediaInfo { get; set; }
         bool UseScriptImport { get; set; }
         string ScriptImportPath { get; set; }
         bool ImportExtraFiles { get; set; }
@@ -56,9 +55,6 @@ namespace NzbDrone.Core.Configuration
         bool PreferIndexerFlags { get; set; }
 
         int AvailabilityDelay { get; set; }
-
-        bool AllowHardcodedSubs { get; set; }
-        string WhitelistedHardcodedSubs { get; set; }
 
         string ListSyncLevel { get; set; }
 

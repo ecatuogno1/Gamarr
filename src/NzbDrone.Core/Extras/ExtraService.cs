@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using NLog;
 using NzbDrone.Common.Disk;
+using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Extras.Companions;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.MediaCover;
@@ -49,9 +51,23 @@ namespace NzbDrone.Core.Extras
 
         public void ImportGame(LocalGame localGame, GameFile gameFile, bool isReadOnly)
         {
+            ImportCompanionFiles(localGame, gameFile, isReadOnly);
             ImportExtraFiles(localGame, gameFile, isReadOnly);
 
             CreateAfterGameImport(localGame.Game, gameFile);
+        }
+
+        // The other files of a multi-file release are always imported, they're part of the game
+        private void ImportCompanionFiles(LocalGame localGame, GameFile gameFile, bool isReadOnly)
+        {
+            if (!localGame.CompanionFiles.Any())
+            {
+                return;
+            }
+
+            var companionManager = _extraFileManagers.OfType<CompanionFileManager>().FirstOrDefault();
+
+            companionManager?.ImportFiles(localGame, gameFile, localGame.CompanionFiles.ToList(), isReadOnly);
         }
 
         public void ImportExtraFiles(LocalGame localGame, GameFile gameFile, bool isReadOnly)
@@ -72,7 +88,7 @@ namespace NzbDrone.Core.Extras
             var files = _diskProvider.GetFiles(sourceFolder, folderSearchOption);
             var managedFiles = _extraFileManagers.Select((i) => new List<string>()).ToArray();
 
-            foreach (var file in files)
+            foreach (var file in files.Where(f => !localGame.CompanionFiles.Any(c => c.PathEquals(f))))
             {
                 var extension = Path.GetExtension(file);
                 var matchingExtension = wantedExtensions.FirstOrDefault(e => e.Equals(extension));
@@ -94,6 +110,11 @@ namespace NzbDrone.Core.Extras
 
             for (var i = 0; i < _extraFileManagers.Count; i++)
             {
+                if (_extraFileManagers[i] is CompanionFileManager)
+                {
+                    continue;
+                }
+
                 _extraFileManagers[i].ImportFiles(localGame, gameFile, managedFiles[i], isReadOnly);
             }
         }

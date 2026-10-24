@@ -11,6 +11,7 @@ using NzbDrone.Common.EnvironmentInfo;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Test.Framework;
 using NzbDrone.Test.Common;
@@ -307,6 +308,51 @@ namespace NzbDrone.Core.Test.RootFolderTests
             var unmappedFolders = Subject.Get(rootFolder.Id, false).UnmappedFolders;
 
             unmappedFolders.Count.Should().Be(3);
+        }
+
+        [Test]
+        public void should_get_unmapped_folders_inside_platform_folders()
+        {
+            _namingConfig.GameFolderFormat = "{Platform Folder}\\{Game Title} ({Release Year})".AsOsAgnostic();
+
+            var rootFolderPath = @"C:\Test\Games".AsOsAgnostic();
+            var rootFolder = Builder<RootFolder>.CreateNew()
+                .With(r => r.Path = rootFolderPath)
+                .Build();
+
+            var snesFolder = Path.Combine(rootFolderPath, "snes");
+            var flatGameFolder = Path.Combine(rootFolderPath, "Half-Life 2 (2004)");
+            var mappedFolder = Path.Combine(snesFolder, "Super Metroid (1994)");
+
+            Mocker.GetMock<IRootFolderRepository>()
+                .Setup(s => s.Get(It.IsAny<int>()))
+                .Returns(rootFolder);
+
+            Mocker.GetMock<IGameRepository>()
+                .Setup(s => s.AllGamePaths())
+                .Returns(new Dictionary<int, string> { { 1, mappedFolder } });
+
+            Mocker.GetMock<IPlatformService>()
+                .Setup(s => s.FindByFolderName(It.IsAny<string>()))
+                .Returns(new List<Platform>());
+
+            Mocker.GetMock<IPlatformService>()
+                .Setup(s => s.FindByFolderName("snes"))
+                .Returns(new List<Platform> { new Platform { Id = 4, FolderName = "snes" } });
+
+            Mocker.GetMock<IDiskProvider>()
+                .Setup(s => s.GetDirectories(rootFolder.Path))
+                .Returns(new[] { snesFolder, flatGameFolder });
+
+            Mocker.GetMock<IDiskProvider>()
+                .Setup(s => s.GetDirectories(snesFolder))
+                .Returns(new[] { Path.Combine(snesFolder, "Super Mario World (1990)"), mappedFolder });
+
+            var unmappedFolders = Subject.Get(rootFolder.Id, false).UnmappedFolders;
+
+            unmappedFolders.Should().HaveCount(2);
+            unmappedFolders.Should().ContainSingle(u => u.Name == "Super Mario World (1990)" && u.PlatformId == 4);
+            unmappedFolders.Should().ContainSingle(u => u.Name == "Half-Life 2 (2004)" && u.PlatformId == 0);
         }
     }
 }

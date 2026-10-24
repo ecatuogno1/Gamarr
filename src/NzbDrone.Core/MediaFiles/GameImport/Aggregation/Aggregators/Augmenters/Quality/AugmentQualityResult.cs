@@ -5,47 +5,38 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation.Aggregators.Augmenters
     public class AugmentQualityResult
     {
         public string Name { get; set; }
-        public QualitySource Source { get; set; }
-        public Confidence SourceConfidence { get; set; }
-        public int Resolution { get; set; }
-        public Confidence ResolutionConfidence { get; set; }
-        public Modifier Modifier { get; set; }
-        public Confidence ModifierConfidence { get; set; }
+        public Qualities.Quality Quality { get; set; }
+        public Confidence QualityConfidence { get; set; }
         public Revision Revision { get; set; }
         public Confidence RevisionConfidence { get; set; }
 
-        public AugmentQualityResult(QualitySource source,
-                                    Confidence sourceConfidence,
-                                    int resolution,
-                                    Confidence resolutionConfidence,
-                                    Modifier modifier,
-                                    Confidence modifierConfidence,
+        public AugmentQualityResult(Qualities.Quality quality,
+                                    Confidence qualityConfidence,
                                     Revision revision,
                                     Confidence revisionConfidence)
         {
-            Source = source;
-            SourceConfidence = sourceConfidence;
-            Resolution = resolution;
-            ResolutionConfidence = resolutionConfidence;
-            Modifier = modifier;
-            ModifierConfidence = modifierConfidence;
+            Quality = quality;
+            QualityConfidence = qualityConfidence;
             Revision = revision;
             RevisionConfidence = revisionConfidence;
         }
 
-        public static AugmentQualityResult SourceOnly(QualitySource source, Confidence sourceConfidence)
+        public static AugmentQualityResult From(QualityModel quality)
         {
-            return new AugmentQualityResult(source, sourceConfidence, 0, Confidence.Default, Modifier.NONE, Confidence.Default, null, Confidence.Default);
-        }
+            if (quality == null)
+            {
+                return null;
+            }
 
-        public static AugmentQualityResult ResolutionOnly(int resolution, Confidence resolutionConfidence)
-        {
-            return new AugmentQualityResult(QualitySource.UNKNOWN, Confidence.Default, resolution, resolutionConfidence, Modifier.NONE, Confidence.Default, null, Confidence.Default);
-        }
+            var qualityConfidence = quality.SourceDetectionSource == QualityDetectionSource.Name
+                ? Confidence.Tag
+                : Confidence.Fallback;
 
-        public static AugmentQualityResult SourceAndResolutionOnly(QualitySource source, Confidence sourceConfidence, int resolution, Confidence resolutionConfidence, Modifier modifier, Confidence modifierConfidence)
-        {
-            return new AugmentQualityResult(source, sourceConfidence, resolution, resolutionConfidence, modifier, modifierConfidence, null, Confidence.Default);
+            var revisionConfidence = quality.RevisionDetectionSource == QualityDetectionSource.Name
+                ? Confidence.Tag
+                : Confidence.Fallback;
+
+            return new AugmentQualityResult(quality.Quality, qualityConfidence, quality.Revision, revisionConfidence);
         }
     }
 }

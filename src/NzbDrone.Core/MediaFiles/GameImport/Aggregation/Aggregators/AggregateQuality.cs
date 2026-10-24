@@ -24,44 +24,29 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation.Aggregators
 
         public LocalGame Aggregate(LocalGame localGame, DownloadClientItem downloadClientItem)
         {
-            var source = QualitySource.UNKNOWN;
-            var sourceConfidence = Confidence.Default;
-            var resolution = 0;
-            var resolutionConfidence = Confidence.Default;
-            var modifier = Modifier.NONE;
-            var modifierConfidence = Confidence.Default;
+            var quality = Quality.Unknown;
+            var qualityConfidence = Confidence.Default;
             var revision = new Revision(1);
             var revisionConfidence = Confidence.Default;
 
             foreach (var augmentQuality in _augmentQualities)
             {
                 var augmentedQuality = augmentQuality.AugmentQuality(localGame, downloadClientItem);
+
                 if (augmentedQuality == null)
                 {
                     continue;
                 }
 
-                _logger.Trace("Considering Source {0} ({1}) Resolution {2} ({3}) Modifier {4} ({5}) Revision {6} from {7}", augmentedQuality.Source, augmentedQuality.SourceConfidence, augmentedQuality.Resolution, augmentedQuality.ResolutionConfidence, augmentedQuality.Modifier, augmentedQuality.ModifierConfidence, augmentedQuality.Revision, augmentQuality.Name);
+                _logger.Trace("Considering Quality {0} ({1}) Revision {2} from {3}", augmentedQuality.Quality, augmentedQuality.QualityConfidence, augmentedQuality.Revision, augmentQuality.Name);
 
-                if (source == QualitySource.UNKNOWN ||
-                    (augmentedQuality.SourceConfidence > sourceConfidence && augmentedQuality.Source != QualitySource.UNKNOWN))
+                // The first known quality wins unless a later one was detected with more confidence (a tag in the
+                // release name beats an extension)
+                if (augmentedQuality.Quality != null && augmentedQuality.Quality != Quality.Unknown &&
+                    (quality == Quality.Unknown || augmentedQuality.QualityConfidence > qualityConfidence))
                 {
-                    source = augmentedQuality.Source;
-                    sourceConfidence = augmentedQuality.SourceConfidence;
-                }
-
-                if (resolution == 0 ||
-                    (augmentedQuality.ResolutionConfidence > resolutionConfidence && augmentedQuality.Resolution > 0))
-                {
-                    resolution = augmentedQuality.Resolution;
-                    resolutionConfidence = augmentedQuality.ResolutionConfidence;
-                }
-
-                if (augmentedQuality.Modifier > modifier ||
-                    (augmentedQuality.ModifierConfidence > modifierConfidence && augmentedQuality.Modifier != Modifier.NONE))
-                {
-                    modifier = augmentedQuality.Modifier;
-                    modifierConfidence = augmentedQuality.ModifierConfidence;
+                    quality = augmentedQuality.Quality;
+                    qualityConfidence = augmentedQuality.QualityConfidence;
                 }
 
                 if (augmentedQuality.Revision != null)
@@ -85,37 +70,17 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Aggregation.Aggregators
                 }
             }
 
-            _logger.Trace("Selected Source {0} ({1}) Resolution {2} ({3}) Modifier {4} ({5}) Revision {6}", source, sourceConfidence, resolution, resolutionConfidence, modifier, modifierConfidence, revision);
+            _logger.Trace("Selected Quality {0} ({1}) Revision {2}", quality, qualityConfidence, revision);
 
-            var quality = new QualityModel(QualityFinder.FindBySourceAndResolution(source, resolution, modifier), revision);
-
-            if (resolutionConfidence == Confidence.MediaInfo)
+            var result = new QualityModel(quality, revision)
             {
-                quality.ResolutionDetectionSource = QualityDetectionSource.MediaInfo;
-            }
-            else if (resolutionConfidence == Confidence.Fallback)
-            {
-                quality.ResolutionDetectionSource = QualityDetectionSource.Extension;
-            }
-            else
-            {
-                quality.ResolutionDetectionSource = QualityDetectionSource.Name;
-            }
+                SourceDetectionSource = qualityConfidence == Confidence.Tag ? QualityDetectionSource.Name : QualityDetectionSource.Extension,
+                RevisionDetectionSource = revisionConfidence == Confidence.Tag ? QualityDetectionSource.Name : QualityDetectionSource.Unknown
+            };
 
-            if (sourceConfidence == Confidence.Fallback)
-            {
-                quality.SourceDetectionSource = QualityDetectionSource.Extension;
-            }
-            else
-            {
-                quality.SourceDetectionSource = QualityDetectionSource.Name;
-            }
+            _logger.Debug("Using quality: {0}", result);
 
-            quality.RevisionDetectionSource = revisionConfidence == Confidence.Tag ? QualityDetectionSource.Name : QualityDetectionSource.Unknown;
-
-            _logger.Debug("Using quality: {0}", quality);
-
-            localGame.Quality = quality;
+            localGame.Quality = result;
 
             return localGame;
         }

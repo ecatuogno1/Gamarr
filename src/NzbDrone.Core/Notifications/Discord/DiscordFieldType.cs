@@ -1,3 +1,5 @@
+using System;
+
 namespace NzbDrone.Core.Notifications.Discord
 {
     public enum DiscordGrabFieldType
@@ -24,10 +26,14 @@ namespace NzbDrone.Core.Notifications.Discord
         Rating,
         Genres,
         Quality,
+
+        // Games have no media info
+        [Obsolete]
         Codecs,
         Group,
         Size,
         Languages,
+        [Obsolete]
         Subtitles,
         Links,
         Release,

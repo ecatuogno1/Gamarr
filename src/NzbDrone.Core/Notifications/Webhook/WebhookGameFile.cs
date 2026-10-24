@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaFiles;
+using NzbDrone.Core.Parser.Model;
 
 namespace NzbDrone.Core.Notifications.Webhook
 {
@@ -24,11 +26,9 @@ namespace NzbDrone.Core.Notifications.Webhook
             Size = gameFile.Size;
             DateAdded = gameFile.DateAdded;
             Languages = gameFile.Languages;
-
-            if (gameFile.MediaInfo != null)
-            {
-                MediaInfo = new WebhookGameFileMediaInfo(gameFile);
-            }
+            Regions = gameFile.Regions?.Select(r => r.GetName()).ToList();
+            Version = gameFile.Version;
+            ReleaseType = gameFile.ReleaseType.GetName();
         }
 
         public int Id { get; set; }
@@ -42,7 +42,9 @@ namespace NzbDrone.Core.Notifications.Webhook
         public long Size { get; set; }
         public DateTime DateAdded { get; set; }
         public List<Language> Languages { get; set; }
-        public WebhookGameFileMediaInfo MediaInfo { get; set; }
+        public List<string> Regions { get; set; }
+        public string Version { get; set; }
+        public string ReleaseType { get; set; }
         public string SourcePath { get; set; }
         public string RecycleBinPath { get; set; }
     }

@@ -19,11 +19,12 @@ namespace NzbDrone.Core.Test.ProviderTests.DiskScanProviderTests
         {
             _fileNames = new[]
                         {
-                            @"30 Rock1.mkv",
-                            @"30 Rock2.avi",
-                            @"30 Rock3.MP4",
-                            @"30 Rock4.wMv",
-                            @"game.exe",
+                            @"Super Mario World (USA).sfc",
+                            @"Final Fantasy VII (USA) (Disc 1).CHD",
+                            @"Game (USA).cue",
+                            @"setup.exe",
+                            @"readme.txt",
+                            @"movie.mkv",
                             @"game"
                         };
         }
@@ -75,7 +76,7 @@ namespace NzbDrone.Core.Test.ProviderTests.DiskScanProviderTests
         }
 
         [Test]
-        public void should_return_video_files_only()
+        public void should_return_game_files_only()
         {
             var path = @"C:\Test\";
             GivenFiles(GetFiles(path));
@@ -83,7 +84,7 @@ namespace NzbDrone.Core.Test.ProviderTests.DiskScanProviderTests
             Subject.GetVideoFiles(path).Should().HaveCount(4);
         }
 
-        [TestCase("Extras")]
+        [TestCase("Sample")]
         [TestCase("@eadir")]
         [TestCase("extrafanart")]
         [TestCase("Plex Versions")]

@@ -11,6 +11,7 @@ using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.Organizer;
+using NzbDrone.Core.Platforms;
 
 namespace NzbDrone.Core.RootFolders
 {
@@ -31,6 +32,7 @@ namespace NzbDrone.Core.RootFolders
         private readonly IGameRepository _gameRepository;
         private readonly IConfigService _configService;
         private readonly INamingConfigService _namingConfigService;
+        private readonly IPlatformService _platformService;
         private readonly Logger _logger;
 
         private readonly ICached<string> _cache;
@@ -53,6 +55,7 @@ namespace NzbDrone.Core.RootFolders
                                  IGameRepository gameRepository,
                                  IConfigService configService,
                                  INamingConfigService namingConfigService,
+                                 IPlatformService platformService,
                                  ICacheManager cacheManager,
                                  Logger logger)
         {
@@ -61,6 +64,7 @@ namespace NzbDrone.Core.RootFolders
             _gameRepository = gameRepository;
             _configService = configService;
             _namingConfigService = namingConfigService;
+            _platformService = platformService;
             _logger = logger;
 
             _cache = cacheManager.GetCache<string>(GetType());
@@ -157,24 +161,38 @@ namespace NzbDrone.Core.RootFolders
                 return results;
             }
 
-            var subFolderDepth = _namingConfigService.GetConfig().GameFolderFormat.Count(f => f == Path.DirectorySeparatorChar);
-            var possibleGameFolders = _diskProvider.GetDirectories(path).ToList();
+            // Games are usually kept in platform folders ("{Platform Folder}/{Game Title} ({Release Year})"). Folders
+            // named like a platform's folder are looked into and their sub folders are games on that platform, other
+            // folders are games themselves (a flat library).
+            var gameFolderFormat = _namingConfigService.GetConfig().GameFolderFormat ?? string.Empty;
+            var subFolderDepth = gameFolderFormat.Count(f => f == '/' || f == '\\');
+            var platformLevel = gameFolderFormat.TrimStart().StartsWith("{Platform", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+            var possibleGameFolders = new List<(string Path, int PlatformId)>();
 
-            if (subFolderDepth > 0)
+            foreach (var folder in _diskProvider.GetDirectories(path))
             {
-                for (var i = 0; i < subFolderDepth; i++)
+                var platform = _platformService.FindByFolderName(new DirectoryInfo(folder).Name)?.FirstOrDefault();
+
+                // A platform folder holds the games, other folders are games (or the format's other levels)
+                var depth = platform != null ? Math.Max(subFolderDepth, 1) : Math.Max(subFolderDepth - platformLevel, 0);
+                IEnumerable<string> gameFolders = new[] { folder };
+
+                for (var i = 0; i < depth; i++)
                 {
-                    possibleGameFolders = possibleGameFolders.SelectMany(_diskProvider.GetDirectories).ToList();
+                    gameFolders = gameFolders.SelectMany(_diskProvider.GetDirectories);
                 }
+
+                possibleGameFolders.AddRange(gameFolders.Select(f => (f, platform?.Id ?? 0)));
             }
 
-            var unmappedFolders = possibleGameFolders.Except(gamePaths.Select(s => s.Value), PathEqualityComparer.Instance).ToList();
+            var mappedPaths = gamePaths.Select(s => s.Value).ToHashSet(PathEqualityComparer.Instance);
+            var unmappedFolders = possibleGameFolders.Where(f => !mappedPaths.Contains(f.Path)).ToList();
 
             var recycleBinPath = _configService.RecycleBin;
 
             foreach (var unmappedFolder in unmappedFolders)
             {
-                var di = new DirectoryInfo(unmappedFolder.Normalize());
+                var di = new DirectoryInfo(unmappedFolder.Path.Normalize());
 
                 if ((!di.Attributes.HasFlag(FileAttributes.System) && !di.Attributes.HasFlag(FileAttributes.Hidden)) || di.Attributes.ToString() == "-1")
                 {
@@ -184,7 +202,8 @@ namespace NzbDrone.Core.RootFolders
                         {
                             Name = di.Name,
                             Path = di.FullName,
-                            RelativePath = path.GetRelativePath(di.FullName)
+                            RelativePath = path.GetRelativePath(di.FullName),
+                            PlatformId = unmappedFolder.PlatformId
                         });
                     }
                 }

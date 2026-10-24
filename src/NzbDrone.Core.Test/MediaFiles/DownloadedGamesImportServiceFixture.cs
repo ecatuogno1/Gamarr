@@ -24,13 +24,15 @@ namespace NzbDrone.Core.Test.MediaFiles
     {
         private string _droneFactory = "c:\\drop\\".AsOsAgnostic();
         private string[] _subFolders = new[] { "c:\\root\\foldername".AsOsAgnostic() };
-        private string[] _videoFiles = new[] { "c:\\root\\foldername\\47.ronin.2013.ext".AsOsAgnostic() };
+        private string[] _videoFiles = new[] { "c:\\root\\foldername\\47.ronin.2013.iso".AsOsAgnostic() };
 
         private TrackedDownload _trackedDownload;
 
         [SetUp]
         public void Setup()
         {
+            Mocker.SetConstant<IGameReleaseFileService>(Mocker.Resolve<GameReleaseFileService>());
+
             Mocker.GetMock<IDiskScanService>().Setup(c => c.GetVideoFiles(It.IsAny<string>(), It.IsAny<bool>()))
                   .Returns(_videoFiles);
 
@@ -292,7 +294,7 @@ namespace NzbDrone.Core.Test.MediaFiles
             Mocker.GetMock<IDiskProvider>().Setup(c => c.FileExists(It.IsAny<string>()))
                   .Returns(true);
 
-            var fileName = @"C:\folder\file.mkv".AsOsAgnostic();
+            var fileName = @"C:\folder\file.iso".AsOsAgnostic();
 
             var result = Subject.ProcessPath(fileName);
 
@@ -328,7 +330,7 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.GetFiles(It.IsAny<string>(), true))
-                  .Returns(new[] { _videoFiles.First().Replace(".ext", ".rar") });
+                  .Returns(new[] { _videoFiles.First().Replace(".iso", ".rar") });
 
             Mocker.GetMock<IDiskProvider>()
                   .Setup(s => s.GetFileSize(It.IsAny<string>()))
@@ -348,7 +350,7 @@ namespace NzbDrone.Core.Test.MediaFiles
             GivenValidGame();
 
             var folderName = @"C:\media\ba09030e-1234-1234-1234-123456789abc\[HorribleSubs] American Psycho (2000) [720p]".AsOsAgnostic();
-            var fileName = @"C:\media\ba09030e-1234-1234-1234-123456789abc\[HorribleSubs] American Psycho (2000) [720p]\[HorribleSubs] American Psycho (2000) [720p].mkv".AsOsAgnostic();
+            var fileName = @"C:\media\ba09030e-1234-1234-1234-123456789abc\[HorribleSubs] American Psycho (2000) [720p]\[HorribleSubs] American Psycho (2000) [720p].iso".AsOsAgnostic();
 
             Mocker.GetMock<IDiskProvider>().Setup(c => c.FolderExists(folderName))
                   .Returns(true);
@@ -372,7 +374,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             GivenValidGame();
 
-            var fileName = @"C:\media\ba09030e-1234-1234-1234-123456789abc\Torrents\[HorribleSubs] 47 Ronin (2013) [720p].mkv".AsOsAgnostic();
+            var fileName = @"C:\media\ba09030e-1234-1234-1234-123456789abc\Torrents\[HorribleSubs] 47 Ronin (2013) [720p].iso".AsOsAgnostic();
 
             Mocker.GetMock<IDiskProvider>().Setup(c => c.FolderExists(fileName))
                   .Returns(false);
@@ -448,7 +450,7 @@ namespace NzbDrone.Core.Test.MediaFiles
         {
             GivenValidGame();
 
-            var path = @"C:\media\ba09030e-1234-1234-1234-123456789abc\[HorribleSubs] American Psycho (2000) [720p]\[HorribleSubs] American Psycho (2000) [720p].mkv".AsOsAgnostic();
+            var path = @"C:\media\ba09030e-1234-1234-1234-123456789abc\[HorribleSubs] American Psycho (2000) [720p]\[HorribleSubs] American Psycho (2000) [720p].iso".AsOsAgnostic();
             var imported = new List<ImportDecision>();
 
             Mocker.GetMock<IMakeImportDecision>()
@@ -461,33 +463,7 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             Mocker.GetMock<IDiskProvider>()
                 .Setup(s => s.GetFiles(It.IsAny<string>(), true))
-                .Returns(new[] { _videoFiles.First().Replace(".ext", ".rar") });
-
-            var result = Subject.ProcessPath(path);
-
-            result.Count.Should().Be(1);
-            result.First().Result.Should().Be(ImportResultType.Rejected);
-        }
-
-        [Test]
-        public void should_return_rejection_if_nothing_imported_and_contains_executable_file()
-        {
-            GivenValidGame();
-
-            var path = @"C:\media\ba09030e-1234-1234-1234-123456789abc\[HorribleSubs] American Psycho (2000) [720p]\[HorribleSubs] American Psycho (2000) [720p].mkv".AsOsAgnostic();
-            var imported = new List<ImportDecision>();
-
-            Mocker.GetMock<IMakeImportDecision>()
-                .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), null, true, true))
-                .Returns(imported);
-
-            Mocker.GetMock<IImportApprovedGame>()
-                .Setup(s => s.Import(It.IsAny<List<ImportDecision>>(), true, null, ImportMode.Auto))
-                .Returns(imported.Select(i => new ImportResult(i)).ToList());
-
-            Mocker.GetMock<IDiskProvider>()
-                .Setup(s => s.GetFiles(It.IsAny<string>(), true))
-                .Returns(new[] { _videoFiles.First().Replace(".ext", ".exe") });
+                .Returns(new[] { _videoFiles.First().Replace(".iso", ".rar") });
 
             var result = Subject.ProcessPath(path);
 

@@ -47,9 +47,8 @@ namespace NzbDrone.Core.MediaFiles
 
             switch (_configService.FileDate)
             {
-                // Games only have one release date (per platform), so both options use it
+                // The game's release date on its platform
                 case FileDateType.Release:
-                case FileDateType.Cinemas:
                     {
                         var releaseDate = game.GetReleaseDate();
 
