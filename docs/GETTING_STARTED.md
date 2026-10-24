@@ -49,6 +49,11 @@ categories of each. Disable the ones you don't collect for, so they aren't offer
 A game is always on one platform. The same title on two platforms is two games in Gamarr (e.g. Hollow Knight on PC
 and on Switch), each with its own folder, file and quality profile.
 
+Changing the platform of a game (Edit, or several games at once in the game editor) moves its folder to the new
+platform's folder when it's in the recommended layout below (`/games/snes/Super Mario World (1990)` becomes
+`/games/sfc/Super Mario World (1990)`); you're asked whether Gamarr should move the files. A game can only be in the
+library once per platform, the editor lists every game that can't be changed and saves nothing in that case.
+
 Recommended layout, one root folder with a folder per platform (the default game folder format is
 `{Platform Folder}/{Game Title} ({Release Year})`):
 
@@ -77,6 +82,9 @@ A release can consist of several files (bin/cue tracks, multi-disc sets with an 
 the primary file (the .cue, .m3u, setup.exe…) as the game file and keeps the other files as companion files next to
 it; they're moved, renamed and deleted together. Turn on **Rename Games** in Media Management to rename the primary
 file with the naming tokens (`{Region}`, `{Version}`, `{Disc}`…).
+
+Import lists have a **Platform** setting for list items that don't come with a platform (a Gamarr list passes on the
+platform of each game). With **Any Platform** such games are added on the first enabled platform IGDB lists for them.
 
 ## 3. Quality profiles and custom formats
 
@@ -144,7 +152,10 @@ again on the next rescan.
 
 ## Troubleshooting
 
-- Searching for a game says IGDB credentials are missing: see step 1.
+- Searching for a game says "IGDB credentials are not configured" (or that Twitch rejected them): see step 1, the
+  message links to Settings > Metadata.
+- Platform ids: Gamarr checks its platforms' IGDB ids against IGDB (by slug) on startup and weekly once credentials are
+  set, corrections are logged at Info level.
 - A release is rejected as "wrong platform": the release names another platform, or its indexer categories do.
   Check the platform of the game and the categories of the indexer.
 - Logs are under the data folder in `logs/`, or in **System > Log Files**.

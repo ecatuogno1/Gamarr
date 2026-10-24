@@ -81,7 +81,7 @@ namespace NzbDrone.Core.Indexers.FileList
         }
     }
 
-    // FileList's own category ids (the same ones Prowlarr and Jackett map to Newznab categories)
+    // FileList's own category ids, checked against Prowlarr's FileList definition (Games PC = 9, Games Console = 10)
     public enum FileListCategories
     {
         [FieldOption(Label = "Jocuri PC (PC Games)")]

@@ -47,8 +47,8 @@ for indexers, download clients, import lists, notifications and metadata.
 ## Stage 2 implementation notes
 
 - 93 platforms are seeded (migration 243, `PlatformDefinitions`), PC (Microsoft Windows) gets Id 1 and existing
-  games were assigned to it. IGDB ids that couldn't be verified are marked in `PlatformDefinitions`. New entries in
-  `PlatformDefinitions` are added on startup.
+  games were assigned to it. New entries in `PlatformDefinitions` are added on startup (matched by IGDB slug, or IGDB id
+  for rows without one).
 - Adding a game through `POST /api/v3/game` requires `platformId`. Internal adds (import lists, collections, the
   library import) may leave it at 0, then the first enabled platform IGDB lists for the game is used.
 - Import list exclusions and list items have a PlatformId, 0 meaning "any platform". Collections have a PlatformId
@@ -253,7 +253,7 @@ Repack/Proper and revisions map onto the existing Revision model.
   (migration 246 renames the stored JSON keys).
 - The game editor (`PUT /api/v3/game/editor`) takes `platformId`; it's rejected when a selected game is already in the
   library on that platform or several selected games share an IGDB id. `PUT /api/v3/game` keeps `platform` in sync
-  with a changed `platformId`. Changing the platform doesn't move the game folder.
+  with a changed `platformId`. (Platform changes move the game folder since, see "Known gaps fixed" below.)
 - `/api/v3/extrafile` also returns companion files (`type: companion`). Manual import items of an unknown game list
   their companion files too.
 - Release dates in API resources are sent as noon UTC when stored as midnight (IGDB dates are days), so the UI shows
@@ -287,6 +287,45 @@ Repack/Proper and revisions map onto the existing Revision model.
   SVGs with Chrome (gamarr-tools/logo/generate.sh); the poster placeholder is a faint controller.
 - en.json: unused movie strings (Trakt, Plex, Kodi, IMDb, certification, cinema/physical/digital releases, runtime…)
   were removed (also from the other locales), remaining movie wording was rewritten.
+
+## Known gaps fixed
+
+- **IGDB credentials**: `IgdbCredentialsMissingException`/`IgdbAuthenticationException` become HTTP 503 with the
+  message only (no stack trace), logged as a warning; other `IgdbException`s are 503 too and `GameNotFoundException` is
+  404 (`GamarrErrorPipeline`). Add game links to Settings > Metadata on a 503. The browser still logs the failed request
+  itself ("Failed to load resource: 503") like for any non-2xx response.
+- **Mass editor**: `PUT /api/v3/game/editor` collects every failure first (platform conflicts with the title and
+  platforms, a destination folder another game uses, per game validator errors prefixed with the title) and answers
+  400 with all of them before saving anything. The edit modal stays open until the save succeeded and lists the errors.
+- **Platform changes move the folder**: `IBuildGamePaths.BuildPathForPlatform` swaps the first folder below the root
+  folder when it's the old platform's `FolderName` (`{Root}/{Platform Folder}/…`), other layouts keep their path. Single
+  edit: the UI changes the path with the platform and asks to move like a path change (`PUT /api/v3/game?moveFiles=true`
+  also follows a platform change without a new path for API clients). Mass editor: paths change and with "move files"
+  a `BulkMoveGameCommand` with per game `DestinationPath` moves them; with a new root folder the root folder move builds
+  the folder with the new platform anyway.
+- **ES-DE metadata**: `EmulationStationGamelistService` handles `GameMovedEvent`: the game's entries move (with their
+  user fields) to the gamelist of the new location and their paths are fixed. A location setting picks between the ROM
+  folder (`<platform folder>/gamelist.xml`, images in `<game folder>/media` referenced by image tags) and ES-DE's
+  directories (`<gamelists dir>/<system>/gamelist.xml`, no image tags because ES-DE ignores them, images in
+  `<media dir>/<system>/{covers,screenshots,fanart}/<game folder>/<rom name>.<ext>` following ES-DE's
+  downloaded_media layout; renames move the media, deletes remove it). The system is the platform folder's name.
+  Defaults `~/ES-DE/gamelists` and `~/ES-DE/downloaded_media`, `~` is the home of the user Gamarr runs as.
+- **Import list platform**: `ImportListDefinition.PlatformId` (migration 248, 0 = the game's first enabled IGDB
+  platform) is used for list items without a platform, in the fetched list items and when adding. Games another list
+  already mapped are reused with this list's platform. Gamarr lists match the remote platform by its IGDB slug
+  (`platform.slug` in game resources) and then by IGDB id.
+- **IGDB platform ids**: all 93 seeded ids were checked against IGDB's platform pages (archived), RomM's
+  `IGDB_PLATFORM_LIST`, Gaseous Server's `PlatformMap.json` and Gameyfin's IGDB `PlatformMapper`; none were wrong,
+  including the 7 that were marked unverified (Satellaview 306, 64DD 416, Game & Watch 307, Pico 339, Jaguar CD 410,
+  PC-FX 274, CDTV 158). `Platform.Slug` (migration 247) stores IGDB's slug. `PlatformIgdbSyncService`
+  (`SyncPlatformsWithIgdbCommand`: on startup and after saving new credentials when there are credentials, and weekly)
+  reads `/platforms` (`fields id,slug,name`), corrects `IgdbPlatformId` by slug (unless another platform has the id) and
+  updates a slug IGDB renamed through the id. `IPlatformService.FindByIgdbPlatformId` falls back to the definition's slug
+  so the parser (which uses the ids in `PlatformDefinitions`) still finds a corrected platform.
+- **Screenshots strip**: verified in Chrome (Playwright) with 5 IGDB screenshots on Hollow Knight: `t_screenshot_med`
+  thumbnails at 180 px height, scrolling horizontally, each linking to the 1080p image in a new tab.
+- **CI**: `actionlint` is clean; the workflow has read-only permissions and builds the frontend with Node 22 (the
+  version lint/build were verified with). The SDK comes from `global.json` (10.0.402), the four test projects exist.
 
 ## Integrations
 
