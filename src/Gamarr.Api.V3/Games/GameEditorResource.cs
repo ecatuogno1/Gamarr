@@ -8,6 +8,7 @@ namespace Gamarr.Api.V3.Games
         public List<int> GameIds { get; set; }
         public bool? Monitored { get; set; }
         public int? QualityProfileId { get; set; }
+        public int? PlatformId { get; set; }
         public GameStatusType? MinimumAvailability { get; set; }
         public string RootFolderPath { get; set; }
         public List<int> Tags { get; set; }

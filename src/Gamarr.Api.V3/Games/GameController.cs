@@ -22,6 +22,7 @@ using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.MediaFiles.Events;
 using NzbDrone.Core.Messaging.Commands;
 using NzbDrone.Core.Messaging.Events;
+using NzbDrone.Core.Platforms;
 using NzbDrone.Core.RootFolders;
 using NzbDrone.Core.Validation;
 using NzbDrone.Core.Validation.Paths;
@@ -47,6 +48,7 @@ namespace Gamarr.Api.V3.Games
         private readonly IRootFolderService _rootFolderService;
         private readonly IUpgradableSpecification _qualityUpgradableSpecification;
         private readonly IConfigService _configService;
+        private readonly IPlatformService _platformService;
 
         public GameController(IBroadcastSignalRMessage signalRBroadcaster,
                            IGameService gamesService,
@@ -58,6 +60,7 @@ namespace Gamarr.Api.V3.Games
                            IRootFolderService rootFolderService,
                            IUpgradableSpecification qualityUpgradableSpecification,
                            IConfigService configService,
+                           IPlatformService platformService,
                            RootFolderValidator rootFolderValidator,
                            MappedNetworkDriveValidator mappedNetworkDriveValidator,
                            GamePathValidator gamesPathValidator,
@@ -77,6 +80,7 @@ namespace Gamarr.Api.V3.Games
             _gameStatisticsService = gameStatisticsService;
             _qualityUpgradableSpecification = qualityUpgradableSpecification;
             _configService = configService;
+            _platformService = platformService;
             _coverMapper = coverMapper;
             _commandQueueManager = commandQueueManager;
             _rootFolderService = rootFolderService;
@@ -294,6 +298,12 @@ namespace Gamarr.Api.V3.Games
             }
 
             var model = gamesResource.ToModel(game);
+
+            // Changing the platform (uniqueness is validated), keep the platform details in sync for the response
+            if (model.Platform?.Id != model.PlatformId)
+            {
+                model.Platform = _platformService.Find(model.PlatformId);
+            }
 
             var updatedGame = _gamesService.UpdateGame(model);
 

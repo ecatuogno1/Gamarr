@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using FluentValidation;
+using FluentValidation.Results;
 using Gamarr.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -14,6 +15,7 @@ using NzbDrone.Core.Games.Translations;
 using NzbDrone.Core.Languages;
 using NzbDrone.Core.MediaCover;
 using NzbDrone.Core.Messaging.Commands;
+using NzbDrone.Core.Platforms;
 
 namespace Gamarr.Api.V3.Games
 {
@@ -27,6 +29,7 @@ namespace Gamarr.Api.V3.Games
         private readonly IManageCommandQueue _commandQueueManager;
         private readonly GameEditorValidator _gameEditorValidator;
         private readonly IUpgradableSpecification _upgradableSpecification;
+        private readonly IPlatformService _platformService;
 
         public GameEditorController(IGameService gameService,
             IGameTranslationService gameTranslationService,
@@ -34,8 +37,10 @@ namespace Gamarr.Api.V3.Games
             IConfigService configService,
             IManageCommandQueue commandQueueManager,
             GameEditorValidator gameEditorValidator,
-            IUpgradableSpecification upgradableSpecification)
+            IUpgradableSpecification upgradableSpecification,
+            IPlatformService platformService)
         {
+            _platformService = platformService;
             _gameService = gameService;
             _gameTranslationService = gameTranslationService;
             _coverMapper = coverMapper;
@@ -52,6 +57,12 @@ namespace Gamarr.Api.V3.Games
         {
             var gamesToUpdate = _gameService.GetGames(resource.GameIds);
             var gamesToMove = new List<BulkMoveGame>();
+            var platform = resource.PlatformId is > 0 ? _platformService.Find(resource.PlatformId.Value) : null;
+
+            if (resource.PlatformId is > 0)
+            {
+                ValidatePlatformChange(gamesToUpdate, platform, resource.PlatformId.Value);
+            }
 
             foreach (var game in gamesToUpdate)
             {
@@ -63,6 +74,12 @@ namespace Gamarr.Api.V3.Games
                 if (resource.QualityProfileId.HasValue)
                 {
                     game.QualityProfileId = resource.QualityProfileId.Value;
+                }
+
+                if (platform != null)
+                {
+                    game.PlatformId = platform.Id;
+                    game.Platform = platform;
                 }
 
                 if (resource.MinimumAvailability.HasValue)
@@ -174,6 +191,39 @@ namespace Gamarr.Api.V3.Games
         private void MapCoversToLocal(GameResource game)
         {
             _coverMapper.ConvertToLocalUrls(game.Id, game.Images, game.Added);
+        }
+
+        // A game (IGDB id) can only be in the library once per platform
+        private void ValidatePlatformChange(List<Game> games, Platform platform, int platformId)
+        {
+            if (platform == null)
+            {
+                throw new ValidationException(new[] { new ValidationFailure("PlatformId", $"Platform {platformId} doesn't exist") });
+            }
+
+            var selectedIds = games.Select(g => g.Id).ToHashSet();
+            var failures = new List<ValidationFailure>();
+
+            foreach (var group in games.GroupBy(g => g.IgdbId))
+            {
+                if (group.Count() > 1)
+                {
+                    failures.Add(new ValidationFailure("PlatformId", $"{group.First().Title} is selected on several platforms, only one of them can be moved to {platform.Name}"));
+                    continue;
+                }
+
+                var existing = _gameService.FindByIgdbIdAndPlatform(group.Key, platform.Id);
+
+                if (existing != null && !selectedIds.Contains(existing.Id))
+                {
+                    failures.Add(new ValidationFailure("PlatformId", $"{existing.Title} is already in the library on {platform.Name}"));
+                }
+            }
+
+            if (failures.Any())
+            {
+                throw new ValidationException(failures);
+            }
         }
     }
 }
