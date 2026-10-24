@@ -4735,6 +4735,14 @@
             }
           },
           {
+            "name": "platformId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
             "name": "excludeLocalCovers",
             "in": "query",
             "schema": {
@@ -5303,34 +5311,6 @@
         }
       }
     },
-    "/api/v3/game/lookup/imdb": {
-      "get": {
-        "tags": [
-          "GameLookup"
-        ],
-        "parameters": [
-          {
-            "name": "imdbId",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GameResource"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v3/game/lookup": {
       "get": {
         "tags": [
@@ -5342,6 +5322,14 @@
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "platformId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -7692,6 +7680,100 @@
           }
         }
       }
+    },
+    "/api/v3/platform": {
+      "get": {
+        "tags": [
+          "Platform"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlatformResource"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v3/platform/{id}": {
+      "put": {
+        "tags": [
+          "Platform"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformResource"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformResource"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Platform"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformResource"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -8064,7 +8146,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "imdbId": {
+          "igdbSlug": {
             "type": "string",
             "nullable": true
           },
@@ -8087,9 +8169,18 @@
             "type": "string",
             "nullable": true
           },
-          "runtime": {
-            "type": "integer",
-            "format": "int32"
+          "releaseDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "availablePlatformIgdbIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
           },
           "images": {
             "type": "array",
@@ -8166,6 +8257,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "platformId": {
+            "type": "integer",
+            "format": "int32"
+          },
           "searchOnAdd": {
             "type": "boolean"
           },
@@ -8219,6 +8314,11 @@
             "nullable": true
           },
           "qualityProfileId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "platformId": {
             "type": "integer",
             "format": "int32",
             "nullable": true
@@ -8425,7 +8525,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "personName": {
+          "companyName": {
             "type": "string",
             "nullable": true
           },
@@ -8433,7 +8533,7 @@
             "type": "string",
             "nullable": true
           },
-          "personIgdbId": {
+          "companyIgdbId": {
             "type": "integer",
             "format": "int32"
           },
@@ -8448,18 +8548,6 @@
             },
             "nullable": true
           },
-          "department": {
-            "type": "string",
-            "nullable": true
-          },
-          "job": {
-            "type": "string",
-            "nullable": true
-          },
-          "character": {
-            "type": "string",
-            "nullable": true
-          },
           "order": {
             "type": "integer",
             "format": "int32"
@@ -8472,8 +8560,10 @@
       },
       "CreditType": {
         "enum": [
-          "cast",
-          "crew"
+          "developer",
+          "publisher",
+          "porting",
+          "supporting"
         ],
         "type": "string"
       },
@@ -8870,7 +8960,8 @@
         "enum": [
           "subtitle",
           "metadata",
-          "other"
+          "other",
+          "companion"
         ],
         "type": "string"
       },
@@ -8948,7 +9039,6 @@
       "FileDateType": {
         "enum": [
           "none",
-          "cinemas",
           "release"
         ],
         "type": "string"
@@ -9482,6 +9572,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "platformId": {
+            "type": "integer",
+            "format": "int32"
+          },
           "gameTitle": {
             "type": "string",
             "nullable": true
@@ -9550,19 +9644,17 @@
             "type": "string",
             "nullable": true
           },
-          "inCinemas": {
+          "releaseDate": {
             "type": "string",
             "format": "date-time",
             "nullable": true
           },
-          "physicalRelease": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "digitalRelease": {
-            "type": "string",
-            "format": "date-time",
+          "availablePlatformIgdbIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
             "nullable": true
           },
           "images": {
@@ -9588,27 +9680,33 @@
             "type": "string",
             "nullable": true
           },
-          "studio": {
-            "type": "string",
+          "developers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
             "nullable": true
           },
-          "runtime": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "imdbId": {
-            "type": "string",
+          "publishers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
             "nullable": true
           },
           "igdbId": {
             "type": "integer",
             "format": "int32"
           },
-          "folder": {
+          "igdbSlug": {
             "type": "string",
             "nullable": true
           },
-          "certification": {
+          "platformId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "folder": {
             "type": "string",
             "nullable": true
           },
@@ -9749,10 +9847,6 @@
       "ImportListType": {
         "enum": [
           "program",
-          "igdb",
-          "trakt",
-          "plex",
-          "simkl",
           "other",
           "advanced"
         ],
@@ -9842,13 +9936,6 @@
           "availabilityDelay": {
             "type": "integer",
             "format": "int32"
-          },
-          "allowHardcodedSubs": {
-            "type": "boolean"
-          },
-          "whitelistedHardcodedSubs": {
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -10232,6 +10319,13 @@
               "$ref": "#/components/schemas/ImportRejectionResource"
             },
             "nullable": true
+          },
+          "companionFiles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -10264,76 +10358,6 @@
           "clearlogo"
         ],
         "type": "string"
-      },
-      "MediaInfoResource": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "audioBitrate": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "audioChannels": {
-            "type": "number",
-            "format": "double"
-          },
-          "audioCodec": {
-            "type": "string",
-            "nullable": true
-          },
-          "audioLanguages": {
-            "type": "string",
-            "nullable": true
-          },
-          "audioStreamCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "videoBitDepth": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "videoBitrate": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "videoCodec": {
-            "type": "string",
-            "nullable": true
-          },
-          "videoFps": {
-            "type": "number",
-            "format": "double"
-          },
-          "videoDynamicRange": {
-            "type": "string",
-            "nullable": true
-          },
-          "videoDynamicRangeType": {
-            "type": "string",
-            "nullable": true
-          },
-          "resolution": {
-            "type": "string",
-            "nullable": true
-          },
-          "runTime": {
-            "type": "string",
-            "nullable": true
-          },
-          "scanType": {
-            "type": "string",
-            "nullable": true
-          },
-          "subtitles": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
       },
       "MediaManagementConfigResource": {
         "type": "object",
@@ -10408,9 +10432,6 @@
           "extraFileExtensions": {
             "type": "string",
             "nullable": true
-          },
-          "enableMediaInfo": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -10422,8 +10443,13 @@
             "type": "integer",
             "format": "int32"
           },
-          "certificationCountry": {
-            "$ref": "#/components/schemas/IGDBCountryCode"
+          "igdbClientId": {
+            "type": "string",
+            "nullable": true
+          },
+          "igdbClientSecret": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -10487,17 +10513,6 @@
         },
         "additionalProperties": false
       },
-      "Modifier": {
-        "enum": [
-          "none",
-          "regional",
-          "screener",
-          "rawhd",
-          "brdisk",
-          "remux"
-        ],
-        "type": "string"
-      },
       "MonitorTypes": {
         "enum": [
           "gameOnly",
@@ -10537,6 +10552,10 @@
             "type": "boolean"
           },
           "qualityProfileId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "platformId": {
             "type": "integer",
             "format": "int32"
           },
@@ -10615,6 +10634,11 @@
             "nullable": true
           },
           "qualityProfileId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "platformId": {
             "type": "integer",
             "format": "int32",
             "nullable": true
@@ -10756,8 +10780,27 @@
             "format": "int32",
             "nullable": true
           },
-          "mediaInfo": {
-            "$ref": "#/components/schemas/MediaInfoResource"
+          "regions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Region"
+            },
+            "nullable": true
+          },
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "releaseType": {
+            "$ref": "#/components/schemas/ReleaseType"
+          },
+          "discNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "discCount": {
+            "type": "integer",
+            "format": "int32"
           },
           "originalFilePath": {
             "type": "string",
@@ -10803,6 +10846,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "igdbSlug": {
+            "type": "string",
+            "nullable": true
+          },
           "images": {
             "type": "array",
             "items": {
@@ -10817,6 +10864,20 @@
             },
             "nullable": true
           },
+          "themes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "gameModes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
           "keywords": {
             "type": "array",
             "items": {
@@ -10824,23 +10885,52 @@
             },
             "nullable": true
           },
-          "inCinemas": {
+          "developers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "ageRatings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgeRating"
+            },
+            "nullable": true
+          },
+          "websites": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameWebsite"
+            },
+            "nullable": true
+          },
+          "releaseDate": {
             "type": "string",
             "format": "date-time",
             "nullable": true
           },
-          "physicalRelease": {
-            "type": "string",
-            "format": "date-time",
+          "platformReleaseDates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformReleaseDate"
+            },
             "nullable": true
           },
-          "digitalRelease": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "certification": {
-            "type": "string",
+          "availablePlatformIgdbIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
             "nullable": true
           },
           "year": {
@@ -10863,15 +10953,7 @@
             "format": "date-time",
             "nullable": true
           },
-          "runtime": {
-            "type": "integer",
-            "format": "int32"
-          },
           "website": {
-            "type": "string",
-            "nullable": true
-          },
-          "imdbId": {
             "type": "string",
             "nullable": true
           },
@@ -10891,6 +10973,10 @@
             "$ref": "#/components/schemas/GameStatusType"
           },
           "overview": {
+            "type": "string",
+            "nullable": true
+          },
+          "storyline": {
             "type": "string",
             "nullable": true
           },
@@ -10914,10 +11000,6 @@
             "nullable": true
           },
           "youTubeTrailerId": {
-            "type": "string",
-            "nullable": true
-          },
-          "studio": {
             "type": "string",
             "nullable": true
           },
@@ -10946,6 +11028,11 @@
           },
           "isRecentGame": {
             "type": "boolean",
+            "readOnly": true
+          },
+          "igdbUrl": {
+            "type": "string",
+            "nullable": true,
             "readOnly": true
           }
         },
@@ -11001,19 +11088,8 @@
             "type": "string",
             "nullable": true
           },
-          "inCinemas": {
+          "storyline": {
             "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "physicalRelease": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "digitalRelease": {
-            "type": "string",
-            "format": "date-time",
             "nullable": true
           },
           "releaseDate": {
@@ -11021,8 +11097,24 @@
             "format": "date-time",
             "nullable": true
           },
-          "physicalReleaseNote": {
+          "firstReleaseDate": {
             "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "platformReleaseDates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformReleaseDate"
+            },
+            "nullable": true
+          },
+          "availablePlatformIgdbIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
             "nullable": true
           },
           "images": {
@@ -11034,6 +11126,13 @@
           },
           "website": {
             "type": "string",
+            "nullable": true
+          },
+          "websites": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameWebsite"
+            },
             "nullable": true
           },
           "remotePoster": {
@@ -11048,8 +11147,18 @@
             "type": "string",
             "nullable": true
           },
-          "studio": {
-            "type": "string",
+          "developers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
             "nullable": true
           },
           "path": {
@@ -11059,6 +11168,21 @@
           "qualityProfileId": {
             "type": "integer",
             "format": "int32"
+          },
+          "platformId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "platform": {
+            "$ref": "#/components/schemas/GamePlatformResource"
+          },
+          "availablePlatforms": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
           },
           "hasFile": {
             "type": "boolean",
@@ -11081,21 +11205,21 @@
             "type": "string",
             "nullable": true
           },
-          "runtime": {
-            "type": "integer",
-            "format": "int32"
-          },
           "cleanTitle": {
-            "type": "string",
-            "nullable": true
-          },
-          "imdbId": {
             "type": "string",
             "nullable": true
           },
           "igdbId": {
             "type": "integer",
             "format": "int32"
+          },
+          "igdbSlug": {
+            "type": "string",
+            "nullable": true
+          },
+          "igdbUrl": {
+            "type": "string",
+            "nullable": true
           },
           "titleSlug": {
             "type": "string",
@@ -11109,11 +11233,21 @@
             "type": "string",
             "nullable": true
           },
-          "certification": {
-            "type": "string",
+          "genres": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
             "nullable": true
           },
-          "genres": {
+          "themes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "gameModes": {
             "type": "array",
             "items": {
               "type": "string"
@@ -11124,6 +11258,13 @@
             "type": "array",
             "items": {
               "type": "string"
+            },
+            "nullable": true
+          },
+          "ageRatings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgeRating"
             },
             "nullable": true
           },
@@ -11199,13 +11340,6 @@
         },
         "additionalProperties": false
       },
-      "GameRuntimeFormatType": {
-        "enum": [
-          "hoursMinutes",
-          "minutes"
-        ],
-        "type": "string"
-      },
       "GameStatisticsResource": {
         "type": "object",
         "properties": {
@@ -11238,7 +11372,6 @@
         "enum": [
           "tba",
           "announced",
-          "inCinemas",
           "released",
           "deleted"
         ],
@@ -11539,15 +11672,41 @@
             "type": "integer",
             "format": "int32"
           },
-          "imdbId": {
-            "type": "string",
-            "nullable": true
-          },
           "igdbId": {
             "type": "integer",
             "format": "int32"
           },
-          "hardcodedSubs": {
+          "platformIgdbId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "platformId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "regions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Region"
+            },
+            "nullable": true
+          },
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "releaseType": {
+            "$ref": "#/components/schemas/ReleaseType"
+          },
+          "discNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "discCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "titleId": {
             "type": "string",
             "nullable": true
           },
@@ -11703,13 +11862,6 @@
           },
           "source": {
             "$ref": "#/components/schemas/QualitySource"
-          },
-          "resolution": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "modifier": {
-            "$ref": "#/components/schemas/Modifier"
           }
         },
         "additionalProperties": false
@@ -11856,15 +12008,10 @@
       "QualitySource": {
         "enum": [
           "unknown",
-          "cam",
-          "telesync",
-          "telecine",
-          "workprint",
-          "dvd",
-          "tv",
-          "webdl",
-          "webrip",
-          "bluray"
+          "cartridge",
+          "disc",
+          "digital",
+          "pc"
         ],
         "type": "string"
       },
@@ -12100,19 +12247,10 @@
       "Ratings": {
         "type": "object",
         "properties": {
-          "imdb": {
-            "$ref": "#/components/schemas/RatingChild"
-          },
           "igdb": {
             "$ref": "#/components/schemas/RatingChild"
           },
-          "metacritic": {
-            "$ref": "#/components/schemas/RatingChild"
-          },
-          "rottenTomatoes": {
-            "$ref": "#/components/schemas/RatingChild"
-          },
-          "trakt": {
+          "critic": {
             "$ref": "#/components/schemas/RatingChild"
           }
         },
@@ -12280,9 +12418,13 @@
             "type": "integer",
             "format": "int32"
           },
-          "imdbId": {
-            "type": "integer",
-            "format": "int32"
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
           },
           "rejections": {
             "type": "array",
@@ -12662,24 +12804,6 @@
         },
         "additionalProperties": false
       },
-      "IGDBCountryCode": {
-        "enum": [
-          "au",
-          "br",
-          "ca",
-          "fr",
-          "de",
-          "gb",
-          "in",
-          "ie",
-          "it",
-          "nz",
-          "ro",
-          "es",
-          "us"
-        ],
-        "type": "string"
-      },
       "TagDetailsResource": {
         "type": "object",
         "properties": {
@@ -12864,9 +12988,6 @@
             "type": "string",
             "nullable": true
           },
-          "gameRuntimeFormat": {
-            "$ref": "#/components/schemas/GameRuntimeFormatType"
-          },
           "shortDateFormat": {
             "type": "string",
             "nullable": true
@@ -12914,6 +13035,10 @@
           "relativePath": {
             "type": "string",
             "nullable": true
+          },
+          "platformId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -13032,6 +13157,196 @@
           }
         },
         "additionalProperties": false
+      },
+      "AgeRating": {
+        "type": "object",
+        "properties": {
+          "organization": {
+            "type": "string",
+            "nullable": true
+          },
+          "rating": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GamePlatformResource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "shortName": {
+            "type": "string",
+            "nullable": true
+          },
+          "folderName": {
+            "type": "string",
+            "nullable": true
+          },
+          "igdbPlatformId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GameWebsite": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PlatformFamily": {
+        "enum": [
+          "other",
+          "nintendo",
+          "sony",
+          "microsoft",
+          "sega",
+          "pc",
+          "arcade",
+          "atari",
+          "nec",
+          "snk"
+        ],
+        "type": "string"
+      },
+      "PlatformReleaseDate": {
+        "type": "object",
+        "properties": {
+          "igdbPlatformId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PlatformResource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "shortName": {
+            "type": "string",
+            "nullable": true
+          },
+          "igdbPlatformId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "family": {
+            "$ref": "#/components/schemas/PlatformFamily"
+          },
+          "generation": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "folderName": {
+            "type": "string",
+            "nullable": true
+          },
+          "fileExtensions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "newznabCategories": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Region": {
+        "enum": [
+          "unknown",
+          "world",
+          "usa",
+          "europe",
+          "japan",
+          "asia",
+          "australia",
+          "brazil",
+          "canada",
+          "china",
+          "france",
+          "germany",
+          "hongKong",
+          "italy",
+          "korea",
+          "netherlands",
+          "russia",
+          "spain",
+          "sweden",
+          "taiwan",
+          "unitedKingdom",
+          "scandinavia",
+          "latinAmerica",
+          "mexico",
+          "poland",
+          "portugal",
+          "denmark",
+          "finland",
+          "norway",
+          "greece",
+          "india",
+          "belgium",
+          "switzerland",
+          "austria",
+          "newZealand",
+          "southAfrica"
+        ],
+        "type": "string"
+      },
+      "ReleaseType": {
+        "enum": [
+          "base",
+          "update",
+          "dlc",
+          "bundle",
+          "hack",
+          "translation",
+          "homebrew",
+          "demo",
+          "prototype"
+        ],
+        "type": "string"
       }
     },
     "securitySchemes": {
@@ -13122,6 +13437,24 @@
       "name": "FileSystem"
     },
     {
+      "name": "Game"
+    },
+    {
+      "name": "GameEditor"
+    },
+    {
+      "name": "GameFile"
+    },
+    {
+      "name": "GameFolder"
+    },
+    {
+      "name": "GameImport"
+    },
+    {
+      "name": "GameLookup"
+    },
+    {
       "name": "Health"
     },
     {
@@ -13182,24 +13515,6 @@
       "name": "Missing"
     },
     {
-      "name": "Game"
-    },
-    {
-      "name": "GameEditor"
-    },
-    {
-      "name": "GameFile"
-    },
-    {
-      "name": "GameFolder"
-    },
-    {
-      "name": "GameImport"
-    },
-    {
-      "name": "GameLookup"
-    },
-    {
       "name": "NamingConfig"
     },
     {
@@ -13210,6 +13525,9 @@
     },
     {
       "name": "Ping"
+    },
+    {
+      "name": "Platform"
     },
     {
       "name": "QualityDefinition"
