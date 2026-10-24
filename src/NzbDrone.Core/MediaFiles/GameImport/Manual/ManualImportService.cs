@@ -300,6 +300,9 @@ namespace NzbDrone.Core.MediaFiles.GameImport.Manual
                     localGame.Languages = LanguageParser.ParseLanguages(file);
                     localGame.Size = _diskProvider.GetFileSize(file);
 
+                    // The release's other files are shown (and imported) with it once a game is picked
+                    localGame.CompanionFiles = _releaseFileService.FindCompanions(file);
+
                     return MapItem(new ImportDecision(localGame,
                         new ImportRejection(ImportRejectionReason.UnknownGame, "Unknown Game")),
                         rootFolder,

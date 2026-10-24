@@ -22,6 +22,7 @@ namespace NzbDrone.Core.Extras.Files
     {
         Subtitle = 0,
         Metadata = 1,
-        Other = 2
+        Other = 2,
+        Companion = 3
     }
 }

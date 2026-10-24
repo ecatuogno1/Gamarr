@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Gamarr.Http.REST;
+using NzbDrone.Core.Extras.Companions;
 using NzbDrone.Core.Extras.Files;
 using NzbDrone.Core.Extras.Metadata.Files;
 using NzbDrone.Core.Extras.Others;
@@ -54,6 +55,29 @@ namespace Gamarr.Api.V3.ExtraFiles
                 Extension = model.Extension,
                 Type = ExtraFileType.Other
             };
+        }
+
+        public static ExtraFileResource ToResource(this CompanionFile model)
+        {
+            if (model == null)
+            {
+                return null;
+            }
+
+            return new ExtraFileResource
+            {
+                Id = model.Id,
+                GameId = model.GameId,
+                GameFileId = model.GameFileId,
+                RelativePath = model.RelativePath,
+                Extension = model.Extension,
+                Type = ExtraFileType.Companion
+            };
+        }
+
+        public static List<ExtraFileResource> ToResource(this IEnumerable<CompanionFile> games)
+        {
+            return games.Select(ToResource).ToList();
         }
 
         public static List<ExtraFileResource> ToResource(this IEnumerable<MetadataFile> games)
