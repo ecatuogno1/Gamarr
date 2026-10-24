@@ -11,6 +11,7 @@ namespace Gamarr.Api.V3.ImportLists
         public MonitorTypes Monitor { get; set; }
         public string RootFolderPath { get; set; }
         public int QualityProfileId { get; set; }
+        public int PlatformId { get; set; }
         public bool SearchOnAdd { get; set; }
         public GameStatusType MinimumAvailability { get; set; }
         public ImportListType ListType { get; set; }
@@ -35,6 +36,7 @@ namespace Gamarr.Api.V3.ImportLists
             resource.SearchOnAdd = definition.SearchOnAdd;
             resource.RootFolderPath = definition.RootFolderPath;
             resource.QualityProfileId = definition.QualityProfileId;
+            resource.PlatformId = definition.PlatformId;
             resource.MinimumAvailability = definition.MinimumAvailability;
             resource.ListType = definition.ListType;
             resource.ListOrder = (int)definition.ListType;
@@ -58,6 +60,7 @@ namespace Gamarr.Api.V3.ImportLists
             definition.SearchOnAdd = resource.SearchOnAdd;
             definition.RootFolderPath = resource.RootFolderPath;
             definition.QualityProfileId = resource.QualityProfileId;
+            definition.PlatformId = resource.PlatformId;
             definition.MinimumAvailability = resource.MinimumAvailability;
             definition.ListType = resource.ListType;
             definition.MinRefreshInterval = resource.MinRefreshInterval;

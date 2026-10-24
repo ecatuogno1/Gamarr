@@ -6,6 +6,7 @@ interface ImportList extends Provider {
   enabled: boolean;
   enableAuto: boolean;
   qualityProfileId: number;
+  platformId: number;
   minimumAvailability: string;
   rootFolderPath: string;
   monitor: GameMonitor;

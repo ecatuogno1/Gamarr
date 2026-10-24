@@ -17,6 +17,7 @@ namespace NzbDrone.Core.Platforms
         Platform Get(int id);
         Platform Find(int id);
         Platform FindByIgdbPlatformId(int igdbPlatformId);
+        Platform FindBySlug(string slug);
         List<Platform> FindByIgdbPlatformIds(IEnumerable<int> igdbPlatformIds);
         List<Platform> FindByFolderName(string folderName);
         Platform Update(Platform platform);
@@ -75,6 +76,11 @@ namespace NzbDrone.Core.Platforms
             // The parser knows platforms by the ids in PlatformDefinitions, an id corrected from IGDB is found by slug
             return all.FirstOrDefault(p => p.IgdbPlatformId == igdbPlatformId) ??
                    FindBySlug(all, PlatformDefinitions.Get(igdbPlatformId)?.Slug);
+        }
+
+        public Platform FindBySlug(string slug)
+        {
+            return FindBySlug(GetAll().Values, slug);
         }
 
         public List<Platform> FindByIgdbPlatformIds(IEnumerable<int> igdbPlatformIds)

@@ -14,6 +14,9 @@ namespace NzbDrone.Core.ImportLists
         public MonitorTypes Monitor { get; set; }
         public GameStatusType MinimumAvailability { get; set; }
         public int QualityProfileId { get; set; }
+
+        // Platform for list items that don't name one, 0 = the game's first enabled IGDB platform
+        public int PlatformId { get; set; }
         public string RootFolderPath { get; set; }
         public bool SearchOnAdd { get; set; }
 

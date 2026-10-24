@@ -940,6 +940,7 @@
   "ListEnabledHelpText": "Enable this list for use in {appName}",
   "ListMonitorGameHelpText": "Should Games or Collections added by this list be added as monitored",
   "ListOptionsLoadError": "Unable to load list options",
+  "ListPlatformHelpText": "Platform for games the list doesn't give a platform for (a Gamarr list passes on the platform of each game). Any Platform adds them on the first enabled platform IGDB lists for the game.",
   "ListQualityProfileHelpText": "Quality Profile list items will be added with",
   "ListRefreshInterval": "List Refresh Interval",
   "ListRootFolderHelpText": "Root Folder list items will be added to",

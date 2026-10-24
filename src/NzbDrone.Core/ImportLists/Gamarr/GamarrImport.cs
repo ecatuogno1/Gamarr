@@ -61,8 +61,11 @@ namespace NzbDrone.Core.ImportLists.Gamarr
                         continue;
                     }
 
-                    // Platform ids are local to each instance, so match the remote platform by its IGDB platform id
-                    var platform = remoteGame.Platform != null ? _platformService.FindByIgdbPlatformId(remoteGame.Platform.IgdbPlatformId) : null;
+                    // Platform ids are local to each instance, so match the remote platform by its IGDB slug (newer
+                    // instances) or IGDB platform id. Games without a match get the list's platform.
+                    var platform = remoteGame.Platform == null
+                        ? null
+                        : _platformService.FindBySlug(remoteGame.Platform.Slug) ?? _platformService.FindByIgdbPlatformId(remoteGame.Platform.IgdbPlatformId);
 
                     games.Add(new ImportListGame
                     {

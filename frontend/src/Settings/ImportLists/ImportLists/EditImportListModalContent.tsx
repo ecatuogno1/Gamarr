@@ -76,6 +76,7 @@ function EditImportListModalContent({
     minimumAvailability,
     rootFolderPath,
     qualityProfileId,
+    platformId,
     searchOnAdd,
     tags,
     fields,
@@ -227,6 +228,19 @@ function EditImportListModalContent({
                 name="qualityProfileId"
                 helpText={translate('ListQualityProfileHelpText')}
                 {...qualityProfileId}
+                onChange={handleInputChange}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <FormLabel>{translate('Platform')}</FormLabel>
+
+              <FormInputGroup
+                type={inputTypes.PLATFORM_SELECT}
+                name="platformId"
+                includeAny={true}
+                helpText={translate('ListPlatformHelpText')}
+                {...platformId}
                 onChange={handleInputChange}
               />
             </FormGroup>
