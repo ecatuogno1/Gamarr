@@ -129,7 +129,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         }
 
         [Test]
-        public async Task Download_without_TvDirectory_and_Category_should_use_default()
+        public async Task Download_without_GameDirectory_and_Category_should_use_default()
         {
             GivenSuccessfulDownload();
 
@@ -237,7 +237,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.TransmissionTests
         }
 
         [Test]
-        public void should_exclude_items_not_in_TvDirectory()
+        public void should_exclude_items_not_in_GameDirectory()
         {
             GivenGameDirectory();
 

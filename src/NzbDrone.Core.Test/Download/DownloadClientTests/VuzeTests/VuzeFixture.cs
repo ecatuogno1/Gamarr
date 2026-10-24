@@ -237,7 +237,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.VuzeTests
         }
 
         [Test]
-        public void should_exclude_items_not_in_TvDirectory()
+        public void should_exclude_items_not_in_GameDirectory()
         {
             GivenGameDirectory();
 

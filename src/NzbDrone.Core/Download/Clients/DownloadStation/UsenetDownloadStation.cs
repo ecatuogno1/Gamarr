@@ -80,17 +80,17 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
                     totalRemainingSize += taskRemainingSize;
                 }
 
-                if (Settings.TvDirectory.IsNotNullOrWhiteSpace())
+                if (Settings.GameDirectory.IsNotNullOrWhiteSpace())
                 {
-                    if (!new OsPath($"/{Settings.TvDirectory}").Contains(outputPath))
+                    if (!new OsPath($"/{Settings.GameDirectory}").Contains(outputPath))
                     {
                         continue;
                     }
                 }
-                else if (Settings.TvCategory.IsNotNullOrWhiteSpace())
+                else if (Settings.GameCategory.IsNotNullOrWhiteSpace())
                 {
                     var directories = outputPath.FullPath.Split('\\', '/');
-                    if (!directories.Contains(Settings.TvCategory))
+                    if (!directories.Contains(Settings.GameCategory))
                     {
                         continue;
                     }
@@ -98,7 +98,7 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
 
                 var item = new DownloadClientItem()
                 {
-                    Category = Settings.TvCategory,
+                    Category = Settings.GameCategory,
                     DownloadClientInfo = DownloadClientItemClientInfo.FromDownloadClient(this, false),
                     DownloadId = CreateDownloadId(nzb.Id, serialNumber),
                     Title = nzb.Title,
@@ -215,14 +215,14 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
 
                 if (downloadDir == null)
                 {
-                    return new NzbDroneValidationFailure(nameof(Settings.TvDirectory), _localizationService.GetLocalizedString("DownloadClientDownloadStationValidationNoDefaultDestination"))
+                    return new NzbDroneValidationFailure(nameof(Settings.GameDirectory), _localizationService.GetLocalizedString("DownloadClientDownloadStationValidationNoDefaultDestination"))
                     {
                         DetailedDescription = _localizationService.GetLocalizedString("DownloadClientDownloadStationValidationNoDefaultDestinationDetail", new Dictionary<string, object> { { "username", Settings.Username } })
                     };
                 }
 
                 var sharedFolder = downloadDir.Split('\\', '/')[0];
-                var fieldName = Settings.TvDirectory.IsNotNullOrWhiteSpace() ? nameof(Settings.TvDirectory) : nameof(Settings.TvCategory);
+                var fieldName = Settings.GameDirectory.IsNotNullOrWhiteSpace() ? nameof(Settings.GameDirectory) : nameof(Settings.GameCategory);
 
                 var folderInfo = _fileStationProxy.GetInfoFileOrDirectory($"/{downloadDir}", Settings);
 
@@ -428,16 +428,16 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
 
         protected string GetDownloadDirectory()
         {
-            if (Settings.TvDirectory.IsNotNullOrWhiteSpace())
+            if (Settings.GameDirectory.IsNotNullOrWhiteSpace())
             {
-                return Settings.TvDirectory.TrimStart('/');
+                return Settings.GameDirectory.TrimStart('/');
             }
 
             var destDir = GetDefaultDir();
 
-            if (destDir.IsNotNullOrWhiteSpace() && Settings.TvCategory.IsNotNullOrWhiteSpace())
+            if (destDir.IsNotNullOrWhiteSpace() && Settings.GameCategory.IsNotNullOrWhiteSpace())
             {
-                return $"{destDir.TrimEnd('/')}/{Settings.TvCategory}";
+                return $"{destDir.TrimEnd('/')}/{Settings.GameCategory}";
             }
 
             return destDir.TrimEnd('/');

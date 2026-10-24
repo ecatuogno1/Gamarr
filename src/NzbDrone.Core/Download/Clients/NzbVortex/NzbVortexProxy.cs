@@ -43,9 +43,9 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
                                                        .Post()
                                                        .AddQueryParam("priority", priority.ToString());
 
-            if (settings.TvCategory.IsNotNullOrWhiteSpace())
+            if (settings.GameCategory.IsNotNullOrWhiteSpace())
             {
-                requestBuilder.AddQueryParam("groupname", settings.TvCategory);
+                requestBuilder.AddQueryParam("groupname", settings.GameCategory);
             }
 
             requestBuilder.AddFormUpload("name", filename, nzbData, "application/x-nzb");
@@ -92,9 +92,9 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
         {
             var requestBuilder = BuildRequest(settings).Resource("nzb");
 
-            if (settings.TvCategory.IsNotNullOrWhiteSpace())
+            if (settings.GameCategory.IsNotNullOrWhiteSpace())
             {
-                requestBuilder.AddQueryParam("groupName", settings.TvCategory);
+                requestBuilder.AddQueryParam("groupName", settings.GameCategory);
             }
 
             requestBuilder.AddQueryParam("limitDone", doneLimit.ToString());

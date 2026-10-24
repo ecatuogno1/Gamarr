@@ -35,7 +35,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
 
         protected string _serialNumber = "SERIALNUMBER";
         protected string _category = "sonarr";
-        protected string _tvDirectory = @"video/Series";
+        protected string _gameDirectory = @"video/Games";
         protected string _defaultDestination = "somepath";
         protected OsPath _physicalPath = new OsPath("/mnt/sdb1/mydata");
 
@@ -320,14 +320,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
                 .Returns(_serialNumber);
         }
 
-        protected void GivenTvCategory()
+        protected void GivenGameCategory()
         {
-            _settings.TvCategory = _category;
+            _settings.GameCategory = _category;
         }
 
-        protected void GivenTvDirectory()
+        protected void GivenGameDirectory()
         {
-            _settings.TvDirectory = _tvDirectory;
+            _settings.GameDirectory = _gameDirectory;
         }
 
         protected virtual void GivenTasks(List<DownloadStationTask> torrents)
@@ -386,10 +386,10 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         }
 
         [Test]
-        public async Task Download_with_TvDirectory_should_force_directory()
+        public async Task Download_with_GameDirectory_should_force_directory()
         {
             GivenSerialNumber();
-            GivenTvDirectory();
+            GivenGameDirectory();
             GivenSuccessfulDownload();
 
             var remoteEpisode = CreateRemoteGame();
@@ -399,14 +399,14 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
             id.Should().NotBeNullOrEmpty();
 
             Mocker.GetMock<IDownloadStationTaskProxy>()
-                  .Verify(v => v.AddTaskFromUrl(It.IsAny<string>(), _tvDirectory, It.IsAny<DownloadStationSettings>()), Times.Once());
+                  .Verify(v => v.AddTaskFromUrl(It.IsAny<string>(), _gameDirectory, It.IsAny<DownloadStationSettings>()), Times.Once());
         }
 
         [Test]
         public async Task Download_with_category_should_force_directory()
         {
             GivenSerialNumber();
-            GivenTvCategory();
+            GivenGameCategory();
             GivenSuccessfulDownload();
 
             var remoteEpisode = CreateRemoteGame();
@@ -420,7 +420,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         }
 
         [Test]
-        public async Task Download_without_TvDirectory_and_Category_should_use_default()
+        public async Task Download_without_GameDirectory_and_Category_should_use_default()
         {
             GivenSerialNumber();
             GivenSuccessfulDownload();
@@ -460,7 +460,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         [Test]
         public void GetItems_should_ignore_downloads_in_wrong_folder()
         {
-            _settings.TvDirectory = @"/shared/folder/sub";
+            _settings.GameDirectory = @"/shared/folder/sub";
 
             GivenSerialNumber();
             GivenSharedFolder();
@@ -527,8 +527,8 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         public void GetStatus_should_map_outputpath_when_using_destination()
         {
             GivenSerialNumber();
-            GivenTvDirectory();
-            GivenSharedFolder($"/{_tvDirectory}");
+            GivenGameDirectory();
+            GivenSharedFolder($"/{_gameDirectory}");
 
             var status = Subject.GetStatus();
 
@@ -539,7 +539,7 @@ namespace NzbDrone.Core.Test.Download.DownloadClientTests.DownloadStationTests
         public void GetStatus_should_map_outputpath_when_using_category()
         {
             GivenSerialNumber();
-            GivenTvCategory();
+            GivenGameCategory();
             GivenSharedFolder($"/somepath/{_category}");
 
             var status = Subject.GetStatus();

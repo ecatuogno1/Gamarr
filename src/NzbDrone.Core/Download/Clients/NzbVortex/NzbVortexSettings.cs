@@ -16,7 +16,7 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
             RuleFor(c => c.ApiKey).NotEmpty()
                                   .WithMessage("API Key is required");
 
-            RuleFor(c => c.TvCategory).NotEmpty()
+            RuleFor(c => c.GameCategory).NotEmpty()
                                       .WithMessage("A category is recommended")
                                       .AsWarning();
         }
@@ -30,7 +30,7 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
         {
             Host = "localhost";
             Port = 4321;
-            TvCategory = "gamarr";
+            GameCategory = "gamarr";
             RecentGamePriority = (int)NzbVortexPriority.Normal;
             OlderGamePriority = (int)NzbVortexPriority.Normal;
         }
@@ -50,7 +50,7 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
         public string ApiKey { get; set; }
 
         [FieldDefinition(4, Label = "Group", Type = FieldType.Textbox, HelpText = "DownloadClientSettingsCategoryHelpText")]
-        public string TvCategory { get; set; }
+        public string GameCategory { get; set; }
 
         [FieldDefinition(5, Label = "DownloadClientSettingsRecentPriority", Type = FieldType.Select, SelectOptions = typeof(NzbVortexPriority), HelpText = "DownloadClientSettingsRecentPriorityGameHelpText")]
         public int RecentGamePriority { get; set; }

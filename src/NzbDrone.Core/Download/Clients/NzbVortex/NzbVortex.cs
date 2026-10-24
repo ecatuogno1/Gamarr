@@ -223,13 +223,13 @@ namespace NzbDrone.Core.Download.Clients.NzbVortex
 
         private ValidationFailure TestCategory()
         {
-            var group = GetGroups().FirstOrDefault(c => c.GroupName == Settings.TvCategory);
+            var group = GetGroups().FirstOrDefault(c => c.GroupName == Settings.GameCategory);
 
             if (group == null)
             {
-                if (Settings.TvCategory.IsNotNullOrWhiteSpace())
+                if (Settings.GameCategory.IsNotNullOrWhiteSpace())
                 {
-                    return new NzbDroneValidationFailure("TvCategory", _localizationService.GetLocalizedString("DownloadClientValidationGroupMissing"))
+                    return new NzbDroneValidationFailure("GameCategory", _localizationService.GetLocalizedString("DownloadClientValidationGroupMissing"))
                     {
                         DetailedDescription = _localizationService.GetLocalizedString("DownloadClientValidationGroupMissingDetail", new Dictionary<string, object> { { "clientName", Name } })
                     };

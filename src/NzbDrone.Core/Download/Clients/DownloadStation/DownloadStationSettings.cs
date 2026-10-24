@@ -13,14 +13,14 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
             RuleFor(c => c.Host).ValidHost();
             RuleFor(c => c.Port).InclusiveBetween(1, 65535);
 
-            RuleFor(c => c.TvDirectory).Matches(@"^(?!/).+")
-                                       .When(c => c.TvDirectory.IsNotNullOrWhiteSpace())
+            RuleFor(c => c.GameDirectory).Matches(@"^(?!/).+")
+                                       .When(c => c.GameDirectory.IsNotNullOrWhiteSpace())
                                        .WithMessage("Cannot start with /");
 
-            RuleFor(c => c.TvCategory).Matches(@"^\.?[-a-z]*$", RegexOptions.IgnoreCase).WithMessage("Allowed characters a-z and -");
+            RuleFor(c => c.GameCategory).Matches(@"^\.?[-a-z]*$", RegexOptions.IgnoreCase).WithMessage("Allowed characters a-z and -");
 
-            RuleFor(c => c.TvCategory).Empty()
-                                      .When(c => c.TvDirectory.IsNotNullOrWhiteSpace())
+            RuleFor(c => c.GameCategory).Empty()
+                                      .When(c => c.GameDirectory.IsNotNullOrWhiteSpace())
                                       .WithMessage("Cannot use Category and Directory");
         }
     }
@@ -46,10 +46,10 @@ namespace NzbDrone.Core.Download.Clients.DownloadStation
         public string Password { get; set; }
 
         [FieldDefinition(5, Label = "Category", Type = FieldType.Textbox, HelpText = "DownloadClientSettingsCategorySubFolderHelpText")]
-        public string TvCategory { get; set; }
+        public string GameCategory { get; set; }
 
         [FieldDefinition(6, Label = "Directory", Type = FieldType.Textbox, HelpText = "DownloadClientDownloadStationSettingsDirectoryHelpText")]
-        public string TvDirectory { get; set; }
+        public string GameDirectory { get; set; }
 
         public DownloadStationSettings()
         {
