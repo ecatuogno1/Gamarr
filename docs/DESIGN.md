@@ -241,6 +241,53 @@ Repack/Proper and revisions map onto the existing Revision model.
   list them, 4000/4050 to PC (Windows), the generic 1000 to nothing. `IsCompatible(platform, categories)` is meant for
   a decision engine check.
 
+## Stage 5 implementation notes
+
+### Backend
+
+- `PlatformMatchSpecification` uses `IPlatformCategoryMapper` for releases without a parsed platform: categories that
+  map to the game's platform (or a compatible one; PC/Games 4050 counts for every PC family platform) accept the
+  release, also from RSS; categories that map to another platform reject it as WrongPlatform. Categories that don't
+  name a platform (generic 1000, custom tracker categories) keep the old rule (searches only).
+- Download Station and NZBVortex settings `TvCategory`/`TvDirectory` are now `GameCategory`/`GameDirectory`
+  (migration 246 renames the stored JSON keys).
+- The game editor (`PUT /api/v3/game/editor`) takes `platformId`; it's rejected when a selected game is already in the
+  library on that platform or several selected games share an IGDB id. `PUT /api/v3/game` keeps `platform` in sync
+  with a changed `platformId`. Changing the platform doesn't move the game folder.
+- `/api/v3/extrafile` also returns companion files (`type: companion`). Manual import items of an unknown game list
+  their companion files too.
+- Release dates in API resources are sent as noon UTC when stored as midnight (IGDB dates are days), so the UI shows
+  the same day in every time zone from UTC-12 to UTC+11.
+- The UI runtime format setting is removed.
+- `EmulationStationMetadata` (`Extras/Metadata/Consumers/EmulationStation`): `gamelist.xml` in the parent folder of
+  the game folder, written by `EmulationStationGamelistService` (not tracked as a metadata file of the game, it's
+  shared). Entries are matched by `id`+`source="IGDB"` or a path inside the game folder; managed fields are path,
+  name, desc, rating, releasedate, developer, publisher, genre, players, image (cover), thumbnail (screenshot) and
+  fanart, other fields of an entry and other entries are kept. Invalid XML isn't overwritten. Images go to
+  `<game folder>/media/{cover,screenshot,fanart}.jpg`. Entries are removed when games are deleted with their files.
+- CI: `.github/workflows/build.yml` (backend build and unit tests, frontend lint, stylelint and build). `tsc` isn't
+  run in CI because of type errors inside node_modules.
+
+### Frontend
+
+- Game index: platform badge on posters (poster option), table columns Publishers, Region and Version (of the file),
+  Developers/Release Date/Size visible by default, filters for Publishers and Region, sorting by platform/publisher/
+  region/version.
+- Game details: a Details section (also in library on other platforms, release dates per platform, themes, game modes,
+  age ratings, store links), a screenshots strip (IGDB `t_screenshot_med`), the series shown from the game's IGDB
+  collection when there's no collection entry, companion files in the extra files table.
+- Platform pickers (`platformSelect` input): game edit modal (platforms the game is already on are disabled), mass
+  editor, collection edit and collection footer (Any Platform = per game), import list exclusions.
+- Settings > Platforms: platforms grouped by family with an Enabled toggle (saved immediately), folder, extensions and
+  categories read-only.
+- Add game search results show the platforms IGDB lists (checked when already in the library) and "already in your
+  library on …".
+- Manual import shows "+ N companion file(s)" with a popover listing them.
+- Branding: an original controller mark (`Logo/Gamarr.svg`), the full logo, favicons and app icons are generated from
+  SVGs with Chrome (gamarr-tools/logo/generate.sh); the poster placeholder is a faint controller.
+- en.json: unused movie strings (Trakt, Plex, Kodi, IMDb, certification, cinema/physical/digital releases, runtime…)
+  were removed (also from the other locales), remaining movie wording was rewritten.
+
 ## Integrations
 
 - Metadata consumers write frontend files: an ES-DE / EmulationStation `gamelist.xml` (per platform folder)
