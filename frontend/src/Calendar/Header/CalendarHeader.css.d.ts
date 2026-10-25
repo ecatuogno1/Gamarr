@@ -2,7 +2,6 @@
 // Please do not change this file!
 interface CssExports {
   'header': string;
-  'isDisabled': string;
   'loading': string;
   'navButton': string;
   'navigationButtons': string;

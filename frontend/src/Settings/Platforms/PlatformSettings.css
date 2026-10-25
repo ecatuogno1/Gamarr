@@ -29,3 +29,11 @@
 
   color: var(--inkFaint);
 }
+
+.summary {
+  margin: 0 0 8px;
+  max-width: 80ch;
+  color: var(--inkMuted);
+  font-size: 14px;
+  line-height: 1.55;
+}

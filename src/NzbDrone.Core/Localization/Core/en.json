@@ -1515,7 +1515,7 @@
   "PlatformFamilyPc": "PC",
   "PlatformFilterPlaceholder": "Filter by name, short name or folder",
   "Platforms": "Platforms",
-  "PlatformSettingsSummary": "{enabledCount} of {count} platforms are enabled. Disabled platforms can't be picked when adding games. The folder name is used for the {Platform Folder} naming token and to recognize platform folders in root folders, the categories are the Newznab/Torznab categories searched for the platform.",
+  "PlatformSettingsHelpText": "Disabled platforms can't be picked when adding games. The folder name is used for the {Platform Folder} naming token and to recognize platform folders in root folders, the categories are the Newznab/Torznab categories searched for the platform.",
   "PlatformsFilledOfTotal": "{filled} of {total} platforms",
   "PlatformsEnabledOfCount": "{enabledCount} of {count} enabled",
   "PlatformsLoadError": "Unable to load platforms",

@@ -3,11 +3,11 @@
 }
 
 .noPlatforms {
-  color: var(--helpTextColor);
+  color: var(--inkMuted);
 }
 
 .modalFooter {
-  composes: modalFooter from '~Components/Modal/ModalFooter.css';
+  composes: modalFooter from 'Components/Modal/ModalFooter.css';
 }
 
 .searchLabelContainer {
@@ -22,7 +22,7 @@
 }
 
 .searchInputContainer {
-  composes: container from '~Components/Form/CheckInput.css';
+  composes: container from 'Components/Form/CheckInput.css';
 
   flex: 0 0 auto;
 }

@@ -35,8 +35,11 @@
 }
 
 .logo {
-  width: 24px;
-  height: 24px;
+  padding: 2px;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background-color: var(--pageHeaderLogoPlate);
 }
 
 .brandName {

@@ -1,9 +1,8 @@
 .screenshots {
   display: flex;
   overflow-x: auto;
-  gap: 10px;
-
   padding-bottom: 10px;
+  gap: 12px;
 }
 
 .screenshot {
@@ -13,6 +12,7 @@
 .image {
   display: block;
   height: 180px;
-  border-radius: 4px;
-  background-color: var(--inputBackgroundColor);
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  background-color: var(--paperWarm);
 }

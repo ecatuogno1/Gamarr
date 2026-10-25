@@ -66,6 +66,12 @@ function buildSections(): SectionEntry[] {
       summary: translate('ConnectSettingsSummary'),
     },
     {
+      to: '/settings/platforms',
+      iconName: icons.GAMEPAD,
+      title: translate('Platforms'),
+      summary: translate('PlatformsSettingsSummary'),
+    },
+    {
       to: '/settings/metadata',
       iconName: icons.CLIPBOARD,
       title: translate('Metadata'),

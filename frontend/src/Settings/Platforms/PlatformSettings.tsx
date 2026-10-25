@@ -190,7 +190,7 @@ function PlatformSettings() {
           <PageHeading
             scope={translate('Settings')}
             title={translate('Platforms')}
-            subtitle={translate('PlatformSettingsSummary', {
+            meta={translate('PlatformsEnabledOfCount', {
               enabledCount,
               count: items.length,
             })}
@@ -205,6 +205,10 @@ function PlatformSettings() {
               </div>
             }
           />
+
+          <p className={styles.summary}>
+            {translate('PlatformSettingsHelpText')}
+          </p>
 
           {isFetching && !isPopulated ? <LoadingIndicator /> : null}
 

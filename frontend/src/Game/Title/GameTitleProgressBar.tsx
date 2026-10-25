@@ -48,15 +48,21 @@ function GameTitleProgressBar({
     );
   }
 
-  const attachedClassName = bottomRadius
+  let attachedClassName = bottomRadius
     ? styles.progressRadius
     : styles.progress;
+
+  if (detailedProgressBar) {
+    attachedClassName = styles.progressDetailed;
+  }
 
   const text = getPlatformsPresentText(summary);
 
   return (
     <ProgressBar
-      className={styles.progressBar}
+      className={
+        detailedProgressBar ? styles.progressBarDetailed : styles.progressBar
+      }
       containerClassName={isStandAlone ? undefined : attachedClassName}
       progress={100}
       kind={summary.kind as 'primary'}

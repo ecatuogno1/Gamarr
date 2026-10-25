@@ -6,7 +6,6 @@ interface CssExports {
   'downloaded': string;
   'event': string;
   'eventType': string;
-  'fullColor': string;
   'gameInfo': string;
   'gameTitle': string;
   'genres': string;

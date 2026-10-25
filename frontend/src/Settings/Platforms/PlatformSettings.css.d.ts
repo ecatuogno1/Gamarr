@@ -6,6 +6,7 @@ interface CssExports {
   'enabled': string;
   'extensions': string;
   'filter': string;
+  'summary': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

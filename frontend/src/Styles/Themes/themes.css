@@ -70,6 +70,8 @@
   --pageHeaderBackgroundColor: var(--pageHeaderAccentColor);
   --pageHeaderBackgroundImage: none;
   --pageHeaderBrandColor: oklch(22% 0.020 70);
+  /* Gamarr: the yellow logo mark sits on its dark app icon plate on the yellow header */
+  --pageHeaderLogoPlate: #272b33;
   --pageHeaderBorderColor: oklch(77% 0.150 80);
   --pageHeaderColor: oklch(22% 0.020 70);
   --pageHeaderMutedColor: oklch(22% 0.020 70 / 0.8);
@@ -302,6 +304,7 @@
   --pageHeaderBackgroundColor: var(--pageHeaderAccentColor);
   --pageHeaderBackgroundImage: none;
   --pageHeaderBrandColor: oklch(97% 0.010 85);
+  --pageHeaderLogoPlate: transparent;
   --pageHeaderBorderColor: oklch(34% 0.060 75);
   --pageHeaderColor: oklch(97% 0.010 85);
   --pageHeaderMutedColor: oklch(97% 0.010 85 / 0.85);

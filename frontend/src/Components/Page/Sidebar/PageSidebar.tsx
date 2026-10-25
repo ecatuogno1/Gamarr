@@ -56,7 +56,7 @@ const GROUPS: SidebarGroup[] = [
     label: () => translate('Media'),
     items: [
       {
-        iconName: icons.GAME_CONTINUING,
+        iconName: icons.GAMEPAD,
         title: () => translate('Games'),
         to: '/',
         alias: '/game',

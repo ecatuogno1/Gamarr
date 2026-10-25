@@ -4,7 +4,6 @@ interface CssExports {
   'actions': string;
   'addRow': string;
   'deleteRow': string;
-  'isDisabled': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

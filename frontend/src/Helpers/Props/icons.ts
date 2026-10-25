@@ -31,7 +31,6 @@ import {
   CircleHelp,
   CircleStop,
   CircleX,
-  Clapperboard,
   Clock,
   Cloud,
   CloudDownload,
@@ -49,7 +48,6 @@ import {
   FileQuestion,
   FileText,
   FileVideo,
-  Film,
   Flag,
   Flame,
   FlaskConical,
@@ -58,6 +56,7 @@ import {
   FolderOpen,
   FolderPen,
   FolderTree,
+  Gamepad2,
   Globe,
   GripVertical,
   Group,
@@ -102,7 +101,6 @@ import {
   Table,
   Tags,
   ThumbsUp,
-  Ticket,
   Trash,
   TrendingUp,
   TriangleAlert,
@@ -250,13 +248,11 @@ export const WARNING = TriangleAlert;
 export const WIKI = BookOpen;
 
 // Gamarr
+export const GAMEPAD = Gamepad2;
 export const ANNOUNCED = Megaphone;
 export const CIRCLE_OUTLINE = Circle;
 export const DISC = Disc3;
-export const FILM = Film;
 export const HEART_OUTLINE = Heart;
-export const IMDB = Clapperboard;
-export const IN_CINEMAS = Ticket;
 export const GAME_CONTINUING = Play;
 export const GAME_DELETED = TriangleAlert;
 export const GAME_FILE = FileVideo;

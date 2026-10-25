@@ -4,7 +4,6 @@ interface CssExports {
   'button': string;
   'dateInput': string;
   'input': string;
-  'isDisabled': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

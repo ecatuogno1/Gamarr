@@ -5,6 +5,7 @@ interface CssExports {
   'default': string;
   'disabled': string;
   'icon': string;
+  'iconSpin': string;
   'info': string;
   'pink': string;
   'primary': string;
