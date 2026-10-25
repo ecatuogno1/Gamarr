@@ -20,7 +20,7 @@
 }
 
 .checkContainer {
-  composes: container from '~Components/Form/CheckInput.css';
+  composes: container from 'Components/Form/CheckInput.css';
 
   flex: 0 0 auto;
   margin-right: 8px;
@@ -32,6 +32,6 @@
 
 .hint {
   margin-left: 6px;
-  color: var(--helpTextColor);
-  font-size: $smallFontSize;
+  color: var(--inkMuted);
+  font-size: 12px;
 }

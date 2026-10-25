@@ -5,12 +5,14 @@ import Alert from 'Components/Alert';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
+import PageHeading from 'Components/Page/PageHeading';
 import { kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import selectAll from 'Utilities/Table/selectAll';
 import toggleSelected from 'Utilities/Table/toggleSelected';
 import ImportGameFooterConnector from './ImportGameFooterConnector';
-import ImportGameTableConnector from './ImportGameTableConnector';
+import ImportGameList from './ImportGameList';
+import styles from './ImportGame.css';
 
 class ImportGame extends Component {
 
@@ -35,10 +37,14 @@ class ImportGame extends Component {
   // Listeners
 
   getSelectedIds = () => {
+    const { items = [] } = this.props;
+
     return reduce(
       this.state.selectedState,
       (result, value, id) => {
-        if (value) {
+        // Imported items are removed from the store while the list is
+        // remounting (root folders refetch), so ignore ids that are gone.
+        if (value && items.some((item) => item.id === id)) {
           result.push(id);
         }
 
@@ -84,7 +90,6 @@ class ImportGame extends Component {
 
   render() {
     const {
-      rootFolderId,
       path,
       rootFoldersFetching,
       rootFoldersError,
@@ -101,48 +106,51 @@ class ImportGame extends Component {
     return (
       <PageContent title={translate('ImportGames')}>
         <PageContentBody ref={this.scrollerRef} >
-          {
-            rootFoldersFetching ? <LoadingIndicator /> : null
-          }
+          <div className={styles.content}>
+            <PageHeading
+              scope={translate('Media')}
+              title={translate('ImportGames')}
+            />
 
-          {
-            !rootFoldersFetching && !!rootFoldersError ?
-              <Alert kind={kinds.DANGER}>
-                {translate('RootFoldersLoadError')}
-              </Alert> :
-              null
-          }
+            {
+              rootFoldersFetching ? <LoadingIndicator /> : null
+            }
 
-          {
-            !rootFoldersError &&
-            !rootFoldersFetching &&
-            rootFoldersPopulated &&
-            !unmappedFolders.length ?
-              <Alert kind={kinds.INFO}>
-                {translate('AllGamesInPathHaveBeenImported', { path })}
-              </Alert> :
-              null
-          }
+            {
+              !rootFoldersFetching && !!rootFoldersError ?
+                <Alert kind={kinds.DANGER}>
+                  {translate('RootFoldersLoadError')}
+                </Alert> :
+                null
+            }
 
-          {
-            !rootFoldersError &&
-            !rootFoldersFetching &&
-            rootFoldersPopulated &&
-            !!unmappedFolders.length &&
-            this.scrollerRef.current ?
-              <ImportGameTableConnector
-                rootFolderId={rootFolderId}
-                unmappedFolders={unmappedFolders}
-                allSelected={allSelected}
-                allUnselected={allUnselected}
-                selectedState={selectedState}
-                scroller={this.scrollerRef.current}
-                onSelectAllChange={this.onSelectAllChange}
-                onSelectedChange={this.onSelectedChange}
-                onRemoveSelectedStateItem={this.onRemoveSelectedStateItem}
-              /> :
-              null
-          }
+            {
+              !rootFoldersError &&
+              !rootFoldersFetching &&
+              rootFoldersPopulated &&
+              !unmappedFolders.length ?
+                <Alert kind={kinds.INFO}>
+                  {translate('AllGamesInPathHaveBeenImported', { path })}
+                </Alert> :
+                null
+            }
+
+            {
+              !rootFoldersError &&
+              !rootFoldersFetching &&
+              rootFoldersPopulated &&
+              !!unmappedFolders.length &&
+              this.scrollerRef.current ?
+                <ImportGameList
+                  unmappedFolders={unmappedFolders}
+                  selectedState={selectedState}
+                  scrollerRef={this.scrollerRef}
+                  onSelectedChange={this.onSelectedChange}
+                  onRemoveSelectedStateItem={this.onRemoveSelectedStateItem}
+                /> :
+                null
+            }
+          </div>
         </PageContentBody>
 
         {
@@ -151,6 +159,9 @@ class ImportGame extends Component {
           !!unmappedFolders.length ?
             <ImportGameFooterConnector
               selectedIds={this.getSelectedIds()}
+              allSelected={allSelected}
+              allUnselected={allUnselected}
+              onSelectAllChange={this.onSelectAllChange}
               onInputChange={this.onInputChange}
               onImportPress={this.onImportPress}
             /> :

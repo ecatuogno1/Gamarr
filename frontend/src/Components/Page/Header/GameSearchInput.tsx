@@ -4,13 +4,16 @@ import React, {
   FormEvent,
   KeyboardEvent,
   SyntheticEvent,
+  TouchEvent,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import Autosuggest from 'react-autosuggest';
+import Autosuggest, {
+  RenderSuggestionsContainerParams,
+} from 'react-autosuggest';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { useDebouncedCallback } from 'use-debounce';
@@ -180,7 +183,6 @@ function GameSearchInput() {
         requestValue.current = null;
         setRequestLoading(false);
         isLoading.current = false;
-        // setLoading(false);
       } else {
         setSuggestions(suggestions);
         setRequestLoading(true);
@@ -217,7 +219,6 @@ function GameSearchInput() {
   const reset = useCallback(() => {
     setValue('');
     setSuggestions([]);
-    // setLoading(false);
     isLoading.current = false;
   }, []);
 
@@ -245,6 +246,21 @@ function GameSearchInput() {
       </div>
     );
   }, []);
+
+  const renderSuggestionsContainer = useCallback(
+    ({ containerProps, children }: RenderSuggestionsContainerParams) => {
+      const { key, ...otherContainerProps } = containerProps;
+
+      return (
+        <div className={children ? styles.dropdown : undefined}>
+          <div key={key} {...otherContainerProps}>
+            {children}
+          </div>
+        </div>
+      );
+    },
+    []
+  );
 
   const getSuggestionValue = useCallback(({ title }: { title: string }) => {
     return title;
@@ -347,6 +363,17 @@ function GameSearchInput() {
     reset();
   }, [reset]);
 
+  const handleTouchEnd = useCallback((event: TouchEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+
+    if (!event.cancelable || document.activeElement === input) {
+      return;
+    }
+
+    event.preventDefault();
+    input.focus({ preventScroll: true });
+  }, []);
+
   const handleSuggestionsFetchRequested = useCallback(
     ({ value }: { value: string }) => {
       isLoading.current = true;
@@ -393,11 +420,11 @@ function GameSearchInput() {
     onChange: handleChange,
     onKeyDown: handleKeyDown,
     onBlur: handleBlur,
+    onTouchEnd: handleTouchEnd,
   };
 
   const theme = {
     container: styles.container,
-    containerOpen: styles.containerOpen,
     suggestionsContainer: styles.gameContainer,
     suggestionsList: styles.list,
     suggestion: styles.listItem,
@@ -443,23 +470,26 @@ function GameSearchInput() {
 
   return (
     <div className={styles.wrapper}>
-      <Icon name={icons.SEARCH} />
+      <div className={styles.inputWrapper}>
+        <Icon className={styles.searchIcon} name={icons.SEARCH} />
 
-      <Autosuggest
-        ref={autosuggestRef}
-        inputProps={inputProps}
-        theme={theme}
-        focusInputOnSuggestionClick={false}
-        multiSection={true}
-        suggestions={suggestionGroups}
-        getSectionSuggestions={getSectionSuggestions}
-        renderSectionTitle={renderSectionTitle}
-        getSuggestionValue={getSuggestionValue}
-        renderSuggestion={renderSuggestion}
-        onSuggestionSelected={handleSuggestionSelected}
-        onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
-        onSuggestionsClearRequested={handleSuggestionsClearRequested}
-      />
+        <Autosuggest
+          ref={autosuggestRef}
+          inputProps={inputProps}
+          theme={theme}
+          focusInputOnSuggestionClick={false}
+          multiSection={true}
+          suggestions={suggestionGroups}
+          getSectionSuggestions={getSectionSuggestions}
+          renderSectionTitle={renderSectionTitle}
+          renderSuggestionsContainer={renderSuggestionsContainer}
+          getSuggestionValue={getSuggestionValue}
+          renderSuggestion={renderSuggestion}
+          onSuggestionSelected={handleSuggestionSelected}
+          onSuggestionsFetchRequested={handleSuggestionsFetchRequested}
+          onSuggestionsClearRequested={handleSuggestionsClearRequested}
+        />
+      </div>
     </div>
   );
 }

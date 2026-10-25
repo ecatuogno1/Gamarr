@@ -1,13 +1,17 @@
+import classNames from 'classnames';
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { useSelector } from 'react-redux';
+import CriticRating from 'Components/CriticRating';
+import Icon from 'Components/Icon';
+import IgdbRating from 'Components/IgdbRating';
 import { icons } from 'Helpers/Props';
-import dimensions from 'Styles/Variables/dimensions';
 import translate from 'Utilities/String/translate';
-import DiscoverGameOverviewInfoRow from './DiscoverGameOverviewInfoRow';
 import styles from './DiscoverGameOverviewInfo.css';
 
-const infoRowHeight = parseInt(dimensions.gameIndexOverviewInfoRowHeight);
+// v5 chip strip (Game/Index/Overview/GameIndexOverviewInfo): list sources,
+// library status, then the optional info fields as muted chips.
 
 const rows = [
   {
@@ -44,92 +48,159 @@ function isVisible(row, props) {
     valueProp
   } = row;
 
-  return _.has(props, valueProp) && _.get(props, valueProp) !== null && (props[showProp] || props.sortKey === name);
+  return _.has(props, valueProp) &&
+    _.get(props, valueProp) !== null &&
+    (props[showProp] || props.sortKey === name);
 }
 
-function getInfoRowProps(row, props) {
+function renderChip(row, props) {
   const { name } = row;
 
-  if (name === 'year') {
-    return {
-      title: translate('Year'),
-      iconName: icons.CALENDAR,
-      label: props.year
-    };
+  switch (name) {
+    case 'year':
+      return (
+        <span key={name} className={styles.chip}
+          title={translate('Year')}
+        >
+          {props.year}
+        </span>
+      );
+    case 'developers':
+      return props.developers && props.developers.length ?
+        <span key={name} className={styles.chip}
+          title={translate('Developers')}
+        >
+          {props.developers.join(', ')}
+        </span> :
+        null;
+    case 'genres':
+      return props.genres.length ?
+        <span key={name} className={styles.chip}
+          title={translate('Genres')}
+        >
+          {props.genres.slice(0, 2).join(', ')}
+        </span> :
+        null;
+    case 'igdbRating':
+      return (
+        <span key={name} className={styles.chip}>
+          <IgdbRating ratings={props.ratings} iconSize={11} />
+        </span>
+      );
+    case 'criticRating':
+      return (
+        <span key={name} className={styles.chip}>
+          <CriticRating ratings={props.ratings} iconSize={11} />
+        </span>
+      );
+    default:
+      return null;
   }
-
-  if (name === 'developers') {
-    return {
-      title: translate('Developers'),
-      iconName: icons.STUDIO,
-      label: (props.developers || []).join(', ')
-    };
-  }
-
-  if (name === 'genres') {
-    return {
-      title: translate('Genres'),
-      iconName: icons.GENRE,
-      label: props.genres.slice(0, 2).join(', ')
-    };
-  }
-
-  if (name === 'igdbRating' && !!props.ratings.igdb) {
-    return {
-      title: translate('IgdbRating'),
-      iconName: icons.HEART,
-      label: `${props.ratings.igdb.value.toFixed()}%`
-    };
-  }
-
-  if (name === 'criticRating' && !!props.ratings.critic) {
-    return {
-      title: translate('CriticRating'),
-      iconName: icons.HEART_OUTLINE,
-      label: `${props.ratings.critic.value.toFixed()}%`
-    };
-  }
-
 }
 
 function DiscoverGameOverviewInfo(props) {
   const {
-    height
+    lists,
+    isExisting,
+    isExcluded,
+    isRecommendation,
+    isPopular,
+    isTrending
   } = props;
 
-  let shownRows = 1;
-  const maxRows = Math.floor(height / (infoRowHeight + 4));
+  const allImportLists = useSelector((state) => state.settings.importLists.items);
+
+  const chips = [];
+
+  if (isExisting) {
+    chips.push(
+      <span
+        key="existing"
+        className={classNames(styles.chip, styles.chipStatus, styles.existing)}
+        title={translate('AlreadyInYourLibrary')}
+      >
+        {translate('Existing')}
+      </span>
+    );
+  }
+
+  if (isExcluded) {
+    chips.push(
+      <span
+        key="excluded"
+        className={classNames(styles.chip, styles.chipStatus, styles.excluded)}
+        title={translate('GameAlreadyExcluded')}
+      >
+        {translate('Excluded')}
+      </span>
+    );
+  }
+
+  if (isRecommendation) {
+    chips.push(
+      <span
+        key="recommended"
+        className={classNames(styles.chip, styles.chipSource)}
+        title={translate('GameIsRecommend')}
+      >
+        <Icon name={icons.RECOMMENDED} size={11} />
+      </span>
+    );
+  }
+
+  if (isPopular) {
+    chips.push(
+      <span key="popular" className={classNames(styles.chip, styles.chipSource)}>
+        {translate('Popular')}
+      </span>
+    );
+  }
+
+  if (isTrending) {
+    chips.push(
+      <span key="trending" className={classNames(styles.chip, styles.chipSource)}>
+        {translate('Trending')}
+      </span>
+    );
+  }
+
+  lists.forEach((id) => {
+    const importList = allImportLists.find((list) => list.id === id);
+
+    if (importList) {
+      chips.push(
+        <span
+          key={`list-${id}`}
+          className={classNames(styles.chip, styles.chipSource)}
+        >
+          {importList.name}
+        </span>
+      );
+    }
+  });
+
+  rows.forEach((row) => {
+    if (isVisible(row, props)) {
+      const chip = renderChip(row, props);
+
+      if (chip) {
+        chips.push(chip);
+      }
+    }
+  });
+
+  if (!chips.length) {
+    return null;
+  }
 
   return (
-    <div className={styles.infos}>
-      {
-        rows.map((row) => {
-          if (!isVisible(row, props)) {
-            return null;
-          }
-
-          if (shownRows >= maxRows) {
-            return null;
-          }
-
-          shownRows++;
-
-          const infoRowProps = getInfoRowProps(row, props);
-
-          return (
-            <DiscoverGameOverviewInfoRow
-              key={row.name}
-              {...infoRowProps}
-            />
-          );
-        })
-      }
+    <div className={styles.chipStrip}>
+      {chips}
     </div>
   );
 }
 
 DiscoverGameOverviewInfo.propTypes = {
-  height: PropTypes.number.isRequired,
   showYear: PropTypes.bool.isRequired,
   showPlatform: PropTypes.bool.isRequired,
   showGenres: PropTypes.bool.isRequired,
@@ -139,7 +210,18 @@ DiscoverGameOverviewInfo.propTypes = {
   year: PropTypes.number,
   ratings: PropTypes.object,
   genres: PropTypes.arrayOf(PropTypes.string).isRequired,
+  lists: PropTypes.arrayOf(PropTypes.number).isRequired,
+  isExisting: PropTypes.bool.isRequired,
+  isExcluded: PropTypes.bool.isRequired,
+  isRecommendation: PropTypes.bool.isRequired,
+  isPopular: PropTypes.bool.isRequired,
+  isTrending: PropTypes.bool.isRequired,
   sortKey: PropTypes.string.isRequired
+};
+
+DiscoverGameOverviewInfo.defaultProps = {
+  genres: [],
+  lists: []
 };
 
 export default DiscoverGameOverviewInfo;

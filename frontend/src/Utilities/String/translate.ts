@@ -46,3 +46,4 @@ export default function translate(
     String(tokens[tokenMatch] ?? match)
   );
 }
+export { translate };

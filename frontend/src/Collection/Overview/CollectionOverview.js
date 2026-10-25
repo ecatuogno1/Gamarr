@@ -1,19 +1,15 @@
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import TextTruncate from 'react-text-truncate';
 import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import EditGameCollectionModal from 'Collection/Edit/EditGameCollectionModal';
-import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';
-import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';
+import Link from 'Components/Link/Link';
 import MonitorToggleButton from 'Components/MonitorToggleButton';
-import GameGenres from 'Game/GameGenres';
-import { icons, sizes } from 'Helpers/Props';
+import { icons } from 'Helpers/Props';
 import QualityProfileName from 'Settings/Profiles/Quality/QualityProfileName';
-import dimensions from 'Styles/Variables/dimensions';
-import fonts from 'Styles/Variables/fonts';
 import translate from 'Utilities/String/translate';
 import CollectionGameConnector from './CollectionGameConnector';
 import CollectionGameLabelConnector from './CollectionGameLabelConnector';
@@ -23,20 +19,15 @@ import styles from './CollectionOverview.css';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
-const columnPadding = parseInt(dimensions.gameIndexColumnPadding);
-const columnPaddingSmallScreen = parseInt(dimensions.gameIndexColumnPaddingSmallScreen);
-const defaultFontSize = parseInt(fonts.defaultFontSize);
-const lineHeight = parseFloat(fonts.lineHeight);
-
-// Hardcoded height beased on line-height of 32 + bottom margin of 10. 19 + 5 for List Row
-// Less side-effecty than using react-measure.
-const titleRowHeight = 100;
-
-function getContentHeight(rowHeight, isSmallScreen) {
-  const padding = isSmallScreen ? columnPaddingSmallScreen : columnPadding;
-
-  return rowHeight - padding;
-}
+// Vertical layout of a v5 collection row; must match CollectionOverview.css.
+export const ROW_VERTICAL_PADDING = 16;
+export const ROW_BORDER = 1;
+export const ROW_GAP = 10;
+export const HEADER_HEIGHT = 32;
+export const CHIP_STRIP_HEIGHT = 22;
+export const OVERVIEW_LINES = 2;
+export const OVERVIEW_HEIGHT = 44;
+export const LABELS_HEIGHT = 64;
 
 class CollectionOverview extends Component {
 
@@ -82,13 +73,18 @@ class CollectionOverview extends Component {
     this.setState({ isNewAddGameModalOpen: false });
   };
 
-  onChange = ({ value, shiftKey }) => {
+  onSelectPress = (event) => {
     const {
       id,
+      isSelected,
       onSelectedChange
     } = this.props;
 
-    onSelectedChange({ id, value, shiftKey });
+    onSelectedChange({
+      id,
+      value: !isSelected,
+      shiftKey: !!event?.nativeEvent?.shiftKey
+    });
   };
 
   //
@@ -107,7 +103,6 @@ class CollectionOverview extends Component {
       missingGames,
       posterHeight,
       posterWidth,
-      rowHeight,
       isSmallScreen,
       isSelected,
       onMonitorTogglePress
@@ -124,190 +119,157 @@ class CollectionOverview extends Component {
       isEditCollectionModalOpen
     } = this.state;
 
-    const contentHeight = getContentHeight(rowHeight, isSmallScreen);
-    const overviewHeight = contentHeight - titleRowHeight - posterHeight;
-
     return (
-      <div className={styles.container}>
+      <div>
         <div className={styles.content}>
-          <div className={styles.editorSelect}>
-            <CheckInput
-              className={styles.checkInput}
-              name={id.toString()}
-              value={isSelected}
-              onChange={this.onChange}
+          <div className={styles.titleRow}>
+            <Link
+              className={styles.selectButton}
+              aria-label={translate('Select')}
+              onPress={this.onSelectPress}
+            >
+              <Icon
+                className={isSelected ? styles.selected : styles.unselected}
+                name={isSelected ? icons.CHECK_CIRCLE : icons.CIRCLE}
+                size={18}
+              />
+            </Link>
+
+            <MonitorToggleButton
+              className={styles.monitorToggleButton}
+              monitored={monitored}
+              size={isSmallScreen ? 16 : 18}
+              onPress={onMonitorTogglePress}
             />
-          </div>
-          <div className={styles.info} style={{ maxHeight: contentHeight }}>
 
-            <div className={styles.titleRow}>
-              <div className={styles.titleContainer}>
-                <div className={styles.toggleMonitoredContainer}>
-                  <MonitorToggleButton
-                    className={styles.monitorToggleButton}
-                    monitored={monitored}
-                    size={isSmallScreen ? 20 : 25}
-                    onPress={onMonitorTogglePress}
-                  />
-                </div>
-                <div className={styles.title}>
-                  {title}
-                </div>
-
-                <IconButton
-                  name={icons.EDIT}
-                  title={translate('EditCollection')}
-                  onPress={this.onEditCollectionPress}
-                />
-              </div>
-
-              {
-                showPosters &&
-                  <div className={styles.navigationButtons}>
-                    <span ref={this.setSliderPrevRef}>
-                      <IconButton
-                        name={icons.ARROW_LEFT}
-                        title={translate('ScrollGames')}
-                        size={20}
-                      />
-                    </span>
-
-                    <span ref={this.setSliderNextRef}>
-                      <IconButton
-                        name={icons.ARROW_RIGHT}
-                        title={translate('ScrollGames')}
-                        size={20}
-                      />
-                    </span>
-                  </div>
-              }
-
+            <div className={styles.title} title={title}>
+              {title}
             </div>
 
-            {
-              showDetails &&
-                <div className={styles.defaults}>
-                  <Label
-                    className={styles.detailsLabel}
-                    size={sizes.MEDIUM}
-                  >
-                    <Icon
-                      name={icons.DRIVE}
-                      size={13}
-                    />
-                    <span className={styles.status}>
-                      {translate('CountMissingGamesFromLibrary', { count: missingGames })}
+            <div className={styles.actions}>
+              <IconButton
+                className={styles.action}
+                name={icons.EDIT}
+                title={translate('EditCollection')}
+                onPress={this.onEditCollectionPress}
+              />
+
+              {
+                showPosters ?
+                  <>
+                    <span ref={this.setSliderPrevRef} className={styles.navigationButton}>
+                      <IconButton
+                        className={styles.action}
+                        name={icons.ARROW_LEFT}
+                        title={translate('ScrollGames')}
+                      />
                     </span>
-                  </Label>
 
-                  {
-                    !isSmallScreen &&
-                      <Label
-                        className={styles.detailsLabel}
-                        size={sizes.MEDIUM}
-                      >
-                        <Icon
-                          name={icons.PROFILE}
-                          size={13}
-                        />
-                        <span className={styles.qualityProfileName}>
-                          {
-                            <QualityProfileName
-                              qualityProfileId={qualityProfileId}
-                            />
-                          }
-                        </span>
-                      </Label>
-                  }
-
-                  {
-                    !isSmallScreen &&
-                      <Label
-                        className={styles.detailsLabel}
-                        size={sizes.MEDIUM}
-                      >
-                        <Icon
-                          name={icons.FOLDER}
-                          size={13}
-                        />
-                        <span className={styles.path}>
-                          {rootFolderPath}
-                        </span>
-                      </Label>
-                  }
-
-                  {
-                    !isSmallScreen &&
-                      <Label
-                        className={styles.detailsLabel}
-                        size={sizes.MEDIUM}
-                      >
-                        <Icon
-                          name={icons.GENRE}
-                          size={13}
-                        />
-                        <GameGenres className={styles.genres} genres={genres} />
-                      </Label>
-                  }
-
-                </div>
-            }
-
-            {
-              showOverview &&
-                <div className={styles.details}>
-                  <div className={styles.overview}>
-                    <TextTruncate
-                      line={Math.floor(overviewHeight / (defaultFontSize * lineHeight))}
-                      text={overview}
-                    />
-                  </div>
-                </div>
-            }
-
-            {
-              showPosters ?
-                <div className={styles.sliderContainer}>
-                  <Swiper
-                    slidesPerView='auto'
-                    spaceBetween={10}
-                    slidesPerGroup={3}
-                    loop={false}
-                    className="mySwiper"
-                    modules={[Navigation]}
-                    onInit={(swiper) => {
-                      swiper.params.navigation.prevEl = this._swiperPrevRef;
-                      swiper.params.navigation.nextEl = this._swiperNextRef;
-                      swiper.navigation.init();
-                      swiper.navigation.update();
-                    }}
-                  >
-                    {games.map((game) => (
-                      <SwiperSlide key={game.igdbId} style={{ width: posterWidth }}>
-                        <CollectionGameConnector
-                          key={game.igdbId}
-                          posterWidth={posterWidth}
-                          posterHeight={posterHeight}
-                          detailedProgressBar={detailedProgressBar}
-                          collectionId={id}
-                          {...game}
-                        />
-                      </SwiperSlide>
-                    ))}
-                  </Swiper>
-                </div> :
-                <div className={styles.labelsContainer}>
-                  {games.map((game) => (
-                    <CollectionGameLabelConnector
-                      key={game.igdbId}
-                      collectionId={id}
-                      {...game}
-                    />
-                  ))}
-                </div>
-            }
-
+                    <span ref={this.setSliderNextRef} className={styles.navigationButton}>
+                      <IconButton
+                        className={styles.action}
+                        name={icons.ARROW_RIGHT}
+                        title={translate('ScrollGames')}
+                      />
+                    </span>
+                  </> :
+                  null
+              }
+            </div>
           </div>
+
+          {
+            showDetails ?
+              <div className={styles.chipStrip}>
+                <span
+                  className={classNames(
+                    styles.chip,
+                    styles.chipStatus,
+                    missingGames > 0 ? styles.missing : styles.complete
+                  )}
+                >
+                  {translate('CountMissingGamesFromLibrary', { count: missingGames })}
+                </span>
+
+                {
+                  isSmallScreen ?
+                    null :
+                    <span className={styles.chip}>
+                      <QualityProfileName qualityProfileId={qualityProfileId} />
+                    </span>
+                }
+
+                {
+                  !isSmallScreen && genres.length ?
+                    <span className={styles.chip}>
+                      {genres.slice(0, 3).join(', ')}
+                    </span> :
+                    null
+                }
+
+                {
+                  isSmallScreen ?
+                    null :
+                    <span className={styles.chipPath} title={rootFolderPath}>
+                      {rootFolderPath}
+                    </span>
+                }
+              </div> :
+              null
+          }
+
+          {
+            showOverview ?
+              <div
+                className={styles.synopsis}
+                style={{ WebkitLineClamp: OVERVIEW_LINES }}
+              >
+                {overview}
+              </div> :
+              null
+          }
+
+          {
+            showPosters ?
+              <div className={styles.sliderContainer}>
+                <Swiper
+                  slidesPerView='auto'
+                  spaceBetween={12}
+                  slidesPerGroup={3}
+                  loop={false}
+                  className="mySwiper"
+                  modules={[Navigation]}
+                  onInit={(swiper) => {
+                    swiper.params.navigation.prevEl = this._swiperPrevRef;
+                    swiper.params.navigation.nextEl = this._swiperNextRef;
+                    swiper.navigation.init();
+                    swiper.navigation.update();
+                  }}
+                >
+                  {games.map((game) => (
+                    <SwiperSlide key={game.igdbId} style={{ width: posterWidth }}>
+                      <CollectionGameConnector
+                        key={game.igdbId}
+                        posterWidth={posterWidth}
+                        posterHeight={posterHeight}
+                        detailedProgressBar={detailedProgressBar}
+                        collectionId={id}
+                        {...game}
+                      />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div> :
+              <div className={styles.labelsContainer}>
+                {games.map((game) => (
+                  <CollectionGameLabelConnector
+                    key={game.igdbId}
+                    collectionId={id}
+                    {...game}
+                  />
+                ))}
+              </div>
+          }
         </div>
 
         <EditGameCollectionModal

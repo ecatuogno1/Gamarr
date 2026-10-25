@@ -16,13 +16,14 @@
 }
 
 .optionCheck {
-  composes: container from '~Components/Form/CheckInput.css';
+  composes: container from 'Components/Form/CheckInput.css';
 
   flex: 0 0 0;
+  margin-right: 8px;
 }
 
 .optionCheckInput {
-  composes: input from '~Components/Form/CheckInput.css';
+  composes: input from 'Components/Form/CheckInput.css';
 
   margin-top: 0;
 }
@@ -43,8 +44,12 @@
   }
 }
 
+.isFocused {
+  background-color: var(--inputHoverBackgroundColor);
+}
+
 .isDisabled {
-  background-color: #aaa;
+  background-color: var(--inkFaint);
 }
 
 .isHidden {
@@ -52,7 +57,7 @@
 }
 
 .isMobile {
-  height: 50px;
+  min-height: 50px;
   border-bottom: 1px solid var(--borderColor);
 
   &:last-child {

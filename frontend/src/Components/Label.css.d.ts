@@ -4,16 +4,20 @@ interface CssExports {
   'danger': string;
   'default': string;
   'disabled': string;
+  'hasIcon': string;
   'info': string;
+  'interactive': string;
   'inverse': string;
   'label': string;
   'large': string;
   'medium': string;
+  'noDot': string;
   'outline': string;
   'primary': string;
-  'queue': string;
+  'purple': string;
   'small': string;
   'success': string;
+  'tinted': string;
   'warning': string;
 }
 export const cssExports: CssExports;

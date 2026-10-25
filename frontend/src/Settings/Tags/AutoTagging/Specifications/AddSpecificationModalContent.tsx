@@ -21,7 +21,7 @@ interface AddSpecificationModalContentProps {
   onModalClose: (options?: { specificationSelected: boolean }) => void;
 }
 
-export default function AddSpecificationModalContent({
+function AddSpecificationModalContent({
   onModalClose,
 }: AddSpecificationModalContentProps) {
   const { isSchemaFetching, isSchemaPopulated, schemaError, schema } =
@@ -30,11 +30,17 @@ export default function AddSpecificationModalContent({
   const dispatch = useDispatch();
 
   const onSpecificationSelect = useCallback(
-    ({ implementation }: { implementation: string }) => {
+    ({
+      implementation,
+      presetName,
+    }: {
+      implementation: string;
+      presetName?: string;
+    }) => {
       dispatch(
         selectAutoTaggingSpecificationSchema({
           implementation,
-          presetName: name,
+          presetName,
         })
       );
       onModalClose({ specificationSelected: true });
@@ -62,22 +68,14 @@ export default function AddSpecificationModalContent({
         ) : null}
 
         {isSchemaPopulated && !schemaError ? (
-          <div>
-            <Alert kind={kinds.INFO}>
-              <div>{translate('SupportedAutoTaggingProperties')}</div>
-            </Alert>
-
-            <div className={styles.specifications}>
-              {schema.map((specification) => {
-                return (
-                  <AddSpecificationItem
-                    key={specification.implementation}
-                    {...specification}
-                    onSpecificationSelect={onSpecificationSelect}
-                  />
-                );
-              })}
-            </div>
+          <div className={styles.specifications}>
+            {schema.map((specification) => (
+              <AddSpecificationItem
+                key={specification.implementation}
+                {...specification}
+                onSpecificationSelect={onSpecificationSelect}
+              />
+            ))}
           </div>
         ) : null}
       </ModalBody>
@@ -88,3 +86,5 @@ export default function AddSpecificationModalContent({
     </ModalContent>
   );
 }
+
+export default AddSpecificationModalContent;

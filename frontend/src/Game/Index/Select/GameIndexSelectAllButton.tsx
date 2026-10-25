@@ -8,11 +8,12 @@ import translate from 'Utilities/String/translate';
 
 interface GameIndexSelectAllButtonProps
   extends Omit<PageToolbarButtonProps, 'iconName'> {
+  overflowComponent?: React.ElementType;
   isSelectMode: boolean;
 }
 
 function GameIndexSelectAllButton(props: GameIndexSelectAllButtonProps) {
-  const { isSelectMode, overflowComponent } = props;
+  const { isSelectMode } = props;
   const [selectState, selectDispatch] = useSelect();
   const { allSelected, allUnselected } = selectState;
 
@@ -34,7 +35,6 @@ function GameIndexSelectAllButton(props: GameIndexSelectAllButtonProps) {
     <PageToolbarButton
       label={allSelected ? translate('UnselectAll') : translate('SelectAll')}
       iconName={icon}
-      overflowComponent={overflowComponent}
       onPress={onPress}
     />
   ) : null;

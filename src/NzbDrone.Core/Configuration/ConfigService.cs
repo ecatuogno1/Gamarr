@@ -362,6 +362,13 @@ namespace NzbDrone.Core.Configuration
             set { SetValue("EnableColorImpairedMode", value); }
         }
 
+        public string HeaderColor
+        {
+            get { return GetValue("HeaderColor", "fullColor"); }
+
+            set { SetValue("HeaderColor", value); }
+        }
+
         public int GameInfoLanguage
         {
             get { return GetValueInt("GameInfoLanguage", (int)Language.English); }

@@ -3,11 +3,13 @@ import React, { Component } from 'react';
 import GameMinimumAvailabilityPopoverContent from 'AddGame/GameMinimumAvailabilityPopoverContent';
 import CheckInput from 'Components/Form/CheckInput';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import Icon from 'Components/Icon';
-import SpinnerButton from 'Components/Link/SpinnerButton';
+import Button from 'Components/Link/Button';
+import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
 import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
@@ -44,6 +46,9 @@ class AddNewGameModalContent extends Component {
       selectedPlatformIds,
       platformOptions,
       isAdding,
+      addError,
+      validationErrors,
+      validationWarnings,
       rootFolderPath,
       monitor,
       qualityProfileId,
@@ -77,41 +82,49 @@ class AddNewGameModalContent extends Component {
           <div className={styles.container}>
             {
               !isSmallScreen &&
-                <div className={styles.poster}>
-                  <GamePoster
-                    className={styles.poster}
-                    images={images}
-                    size={250}
-                  />
-                </div>
+                <GamePoster
+                  className={styles.poster}
+                  images={images}
+                  size={250}
+                  lazy={false}
+                />
             }
 
             <div className={styles.info}>
               {overview ? (
-                <div className={styles.overview}>{overview}</div>
+                <p className={styles.intro}>{overview}</p>
               ) : null}
 
-              <Form>
-                <FormGroup>
+              <Form
+                validationErrors={validationErrors}
+                validationWarnings={validationWarnings}
+              >
+                <FormRow>
                   <FormLabel>{translate('Platforms')}</FormLabel>
 
-                  <div>
-                    <PlatformCheckList
-                      options={platformOptions}
-                      selectedIds={selectedPlatformIds}
-                      onChange={onPlatformsChange}
-                    />
+                  <FormInputHelpText
+                    text={translate('AddNewGamePlatformsHelpText')}
+                  />
 
-                    <div className={styles.platformsHelpText}>
-                      {translate('AddNewGamePlatformsHelpText')}
-                    </div>
-                  </div>
-                </FormGroup>
+                  <PlatformCheckList
+                    options={platformOptions}
+                    selectedIds={selectedPlatformIds}
+                    onChange={onPlatformsChange}
+                  />
+                </FormRow>
 
-                <FormGroup>
+                <FormRow>
                   <FormLabel>{translate('RootFolder')}</FormLabel>
 
-                  <FormInputGroup
+                  <FormInputHelpText
+                    text={platformFolders.length > 1 ?
+                      translate('AddNewGameRootFolderPlatformsHelpText', {
+                        folders: platformFolders.map((f) => `'${f}'`).join(', ')
+                      }) :
+                      translate('AddNewGameRootFolderHelpText', { folder: gameFolder })}
+                  />
+
+                  <FormInput
                     type={inputTypes.ROOT_FOLDER_SELECT}
                     name="rootFolderPath"
                     valueOptions={{
@@ -122,30 +135,25 @@ class AddNewGameModalContent extends Component {
                       gameFolder,
                       isWindows
                     }}
-                    helpText={platformFolders.length > 1 ?
-                      translate('AddNewGameRootFolderPlatformsHelpText', {
-                        folders: platformFolders.map((f) => `'${f}'`).join(', ')
-                      }) :
-                      translate('AddNewGameRootFolderHelpText', { folder: gameFolder })}
                     onChange={onInputChange}
                     {...rootFolderPath}
                   />
-                </FormGroup>
+                </FormRow>
 
-                <FormGroup>
+                <FormRow>
                   <FormLabel>
                     {translate('Monitor')}
                   </FormLabel>
 
-                  <FormInputGroup
+                  <FormInput
                     type={inputTypes.MONITOR_GAMES_SELECT}
                     name="monitor"
                     onChange={onInputChange}
                     {...monitor}
                   />
-                </FormGroup>
+                </FormRow>
 
-                <FormGroup>
+                <FormRow>
                   <FormLabel>
                     {translate('MinimumAvailability')}
 
@@ -162,69 +170,76 @@ class AddNewGameModalContent extends Component {
                     />
                   </FormLabel>
 
-                  <FormInputGroup
+                  <FormInputHelpText
+                    text={translate('MoreInfo')}
+                    link="https://github.com/ecatuogno1/Gamarr/wiki/faq#what-is-minimum-availability"
+                  />
+
+                  <FormInput
                     type={inputTypes.AVAILABILITY_SELECT}
                     name="minimumAvailability"
                     onChange={onInputChange}
                     {...minimumAvailability}
-                    helpLink="https://github.com/ecatuogno1/Gamarr/wiki/faq#what-is-minimum-availability"
                   />
-                </FormGroup>
+                </FormRow>
 
-                <FormGroup>
+                <FormRow>
                   <FormLabel>{translate('QualityProfile')}</FormLabel>
 
-                  <FormInputGroup
+                  <FormInput
                     type={inputTypes.QUALITY_PROFILE_SELECT}
                     name="qualityProfileId"
                     onChange={this.onQualityProfileIdChange}
                     {...qualityProfileId}
                   />
-                </FormGroup>
+                </FormRow>
 
-                <FormGroup>
+                <FormRow>
                   <FormLabel>{translate('Tags')}</FormLabel>
 
-                  <FormInputGroup
+                  <FormInput
                     type={inputTypes.TAG}
                     name="tags"
                     onChange={onInputChange}
                     {...tags}
                   />
-                </FormGroup>
+                </FormRow>
               </Form>
             </div>
           </div>
         </ModalBody>
 
         <ModalFooter className={styles.modalFooter}>
-          <label className={styles.searchForMissingGameLabelContainer}>
-            <span className={styles.searchForMissingGameLabel}>
-              {translate('StartSearchForMissingGame')}
-            </span>
+          <div className={styles.searchOptions}>
+            <span className={styles.searchLabel}>{translate('Search')}</span>
 
             <CheckInput
-              containerClassName={styles.searchForMissingGameContainer}
-              className={styles.searchForMissingGameInput}
+              containerClassName={styles.searchOption}
               name="searchForGame"
+              helpText={translate('StartSearchForMissingGame')}
               onChange={onInputChange}
               {...searchForGame}
             />
-          </label>
+          </div>
 
-          <SpinnerButton
-            className={styles.addButton}
-            kind={kinds.SUCCESS}
-            isSpinning={isAdding}
-            isDisabled={!selectedPlatformIds.length}
-            onPress={this.onAddGamePress}
-          >
-            {
-              selectedPlatformIds.length > 1 ?
-                translate('AddGameOnCountPlatforms', { count: selectedPlatformIds.length }) :
-                translate('AddGame')
-            }
-          </SpinnerButton>
+          <div className={styles.actions}>
+            <Button onPress={onModalClose}>{translate('Cancel')}</Button>
+
+            <SpinnerErrorButton
+              className={styles.addButton}
+              kind={kinds.PRIMARY}
+              isSpinning={isAdding}
+              isDisabled={!selectedPlatformIds.length}
+              error={addError}
+              onPress={this.onAddGamePress}
+            >
+              {
+                selectedPlatformIds.length > 1 ?
+                  translate('AddGameOnCountPlatforms', { count: selectedPlatformIds.length }) :
+                  translate('AddGame')
+              }
+            </SpinnerErrorButton>
+          </div>
         </ModalFooter>
       </ModalContent>
     );
@@ -241,6 +256,8 @@ AddNewGameModalContent.propTypes = {
   images: PropTypes.arrayOf(PropTypes.object).isRequired,
   isAdding: PropTypes.bool.isRequired,
   addError: PropTypes.object,
+  validationErrors: PropTypes.arrayOf(PropTypes.object),
+  validationWarnings: PropTypes.arrayOf(PropTypes.object),
   rootFolderPath: PropTypes.object,
   monitor: PropTypes.object.isRequired,
   qualityProfileId: PropTypes.object,

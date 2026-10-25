@@ -4,9 +4,10 @@ import GameMinimumAvailabilityPopoverContent from 'AddGame/GameMinimumAvailabili
 import { ImportListAppState } from 'App/State/SettingsAppState';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import ProviderFieldFormGroup from 'Components/Form/ProviderFieldFormGroup';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
@@ -16,6 +17,7 @@ import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
+import ModalSection from 'Components/ModalSection';
 import Popover from 'Components/Tooltip/Popover';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import useShowAdvancedSettings from 'Helpers/Hooks/useShowAdvancedSettings';
@@ -114,7 +116,7 @@ function EditImportListModalContent({
 
   return (
     <ModalContent onModalClose={onModalClose}>
-      <ModalHeader>
+      <ModalHeader subtitle={id ? name.previousValue ?? name.value : undefined}>
         {id
           ? translate('EditImportListImplementation', { implementationName })
           : translate('AddImportListImplementation', { implementationName })}
@@ -138,157 +140,158 @@ function EditImportListModalContent({
               })}
             </Alert>
 
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('Name')}</FormLabel>
 
-              <FormInputGroup
+              <FormInput
                 type={inputTypes.TEXT}
                 name="name"
                 {...name}
                 onChange={handleInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('Enable')}</FormLabel>
-
-              <FormInputGroup
+              <FormInputHelpText text={translate('ListEnabledHelpText')} />
+              <FormInput
                 type={inputTypes.CHECK}
                 name="enabled"
-                helpText={translate('ListEnabledHelpText')}
                 {...enabled}
                 onChange={handleInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('EnableAutomaticAdd')}</FormLabel>
-
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('EnableAutomaticAddGameHelpText')}
+              />
+              <FormInput
                 type={inputTypes.CHECK}
                 name="enableAuto"
-                helpText={translate('EnableAutomaticAddGameHelpText')}
                 {...enableAuto}
                 onChange={handleInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
-              <FormLabel>{translate('Monitor')}</FormLabel>
-
-              <FormInputGroup
-                type={inputTypes.MONITOR_GAMES_SELECT}
-                name="monitor"
-                helpText={translate('ListMonitorGameHelpText')}
-                {...monitor}
-                onChange={handleInputChange}
-              />
-            </FormGroup>
-
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('SearchOnAdd')}</FormLabel>
-
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('ListSearchOnAddGameHelpText')}
+              />
+              <FormInput
                 type={inputTypes.CHECK}
                 name="searchOnAdd"
-                helpText={translate('ListSearchOnAddGameHelpText')}
                 {...searchOnAdd}
                 onChange={handleInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
-              <FormLabel>
-                {translate('MinimumAvailability')}
-
-                <Popover
-                  anchor={
-                    <Icon className={styles.labelIcon} name={icons.INFO} />
-                  }
-                  title={translate('MinimumAvailability')}
-                  body={<GameMinimumAvailabilityPopoverContent />}
-                  position={tooltipPositions.RIGHT}
+            <ModalSection title={translate('Game')}>
+              <FormRow>
+                <FormLabel>{translate('Monitor')}</FormLabel>
+                <FormInputHelpText
+                  text={translate('ListMonitorGameHelpText')}
                 />
-              </FormLabel>
+                <FormInput
+                  type={inputTypes.MONITOR_GAMES_SELECT}
+                  name="monitor"
+                  {...monitor}
+                  onChange={handleInputChange}
+                />
+              </FormRow>
 
-              <FormInputGroup
-                type={inputTypes.AVAILABILITY_SELECT}
-                name="minimumAvailability"
-                {...minimumAvailability}
-                helpLink="https://github.com/ecatuogno1/Gamarr/wiki/faq#what-is-minimum-availability"
-                onChange={handleInputChange}
-              />
-            </FormGroup>
+              <FormRow>
+                <FormLabel>
+                  {translate('MinimumAvailability')}
 
-            <FormGroup>
-              <FormLabel>{translate('QualityProfile')}</FormLabel>
+                  <Popover
+                    anchor={
+                      <Icon className={styles.labelIcon} name={icons.INFO} />
+                    }
+                    title={translate('MinimumAvailability')}
+                    body={<GameMinimumAvailabilityPopoverContent />}
+                    position={tooltipPositions.RIGHT}
+                  />
+                </FormLabel>
+                <FormInputHelpText
+                  text={translate('MoreInfo')}
+                  link="https://github.com/ecatuogno1/Gamarr/wiki/faq#what-is-minimum-availability"
+                />
+                <FormInput
+                  type={inputTypes.AVAILABILITY_SELECT}
+                  name="minimumAvailability"
+                  {...minimumAvailability}
+                  onChange={handleInputChange}
+                />
+              </FormRow>
 
-              <FormInputGroup
-                type={inputTypes.QUALITY_PROFILE_SELECT}
-                name="qualityProfileId"
-                helpText={translate('ListQualityProfileHelpText')}
-                {...qualityProfileId}
-                onChange={handleInputChange}
-              />
-            </FormGroup>
+              <FormRow>
+                <FormLabel>{translate('RootFolder')}</FormLabel>
+                <FormInputHelpText text={translate('ListRootFolderHelpText')} />
+                <FormInput
+                  type={inputTypes.ROOT_FOLDER_SELECT}
+                  name="rootFolderPath"
+                  {...rootFolderPath}
+                  includeMissingValue={true}
+                  onChange={handleInputChange}
+                />
+              </FormRow>
 
-            <FormGroup>
-              <FormLabel>{translate('Platform')}</FormLabel>
+              <FormRow>
+                <FormLabel>{translate('Platform')}</FormLabel>
+                <FormInputHelpText text={translate('ListPlatformHelpText')} />
+                <FormInput
+                  type={inputTypes.PLATFORM_SELECT}
+                  name="platformId"
+                  includeAny={true}
+                  {...platformId}
+                  onChange={handleInputChange}
+                />
+              </FormRow>
 
-              <FormInputGroup
-                type={inputTypes.PLATFORM_SELECT}
-                name="platformId"
-                includeAny={true}
-                helpText={translate('ListPlatformHelpText')}
-                {...platformId}
-                onChange={handleInputChange}
-              />
-            </FormGroup>
+              <FormRow>
+                <FormLabel>{translate('QualityProfile')}</FormLabel>
+                <FormInputHelpText
+                  text={translate('ListQualityProfileHelpText')}
+                />
+                <FormInput
+                  type={inputTypes.QUALITY_PROFILE_SELECT}
+                  name="qualityProfileId"
+                  {...qualityProfileId}
+                  onChange={handleInputChange}
+                />
+              </FormRow>
+            </ModalSection>
 
-            <FormGroup>
-              <FormLabel>{translate('RootFolder')}</FormLabel>
+            {fields?.map((field) => {
+              return (
+                <ProviderFieldFormGroup
+                  key={field.name}
+                  {...field}
+                  advancedSettings={showAdvancedSettings}
+                  provider="importList"
+                  providerData={item}
+                  onChange={handleFieldChange}
+                />
+              );
+            })}
 
-              <FormInputGroup
-                type={inputTypes.ROOT_FOLDER_SELECT}
-                name="rootFolderPath"
-                helpText={translate('ListRootFolderHelpText')}
-                {...rootFolderPath}
-                includeMissingValue={true}
-                onChange={handleInputChange}
-              />
-            </FormGroup>
-
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('GamarrTags')}</FormLabel>
-
-              <FormInputGroup
+              <FormInputHelpText text={translate('ListTagsHelpText')} />
+              <FormInput
                 type={inputTypes.TAG}
                 name="tags"
-                helpText={translate('ListTagsHelpText')}
                 {...tags}
                 onChange={handleInputChange}
               />
-            </FormGroup>
-
-            {fields?.length ? (
-              <div>
-                {fields.map((field) => {
-                  return (
-                    <ProviderFieldFormGroup
-                      key={field.name}
-                      {...field}
-                      advancedSettings={showAdvancedSettings}
-                      provider="importList"
-                      providerData={item}
-                      onChange={handleFieldChange}
-                    />
-                  );
-                })}
-              </div>
-            ) : null}
+            </FormRow>
           </Form>
         ) : null}
       </ModalBody>
+
       <ModalFooter>
         {id ? (
           <Button

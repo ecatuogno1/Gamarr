@@ -40,7 +40,7 @@ class EditCustomFormatModal extends Component {
       <Modal
         style={{ height: `${this.state.height}px` }}
         isOpen={isOpen}
-        size={sizes.LARGE}
+        size={sizes.MEDIUM}
         onModalClose={onModalClose}
       >
         <EditCustomFormatModalContentConnector

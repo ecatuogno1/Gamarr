@@ -17,6 +17,7 @@ import TextInput from './TextInput';
 import styles from './CaptchaInput.css';
 
 export interface CaptchaInputProps {
+  id?: string;
   className?: string;
   name: string;
   value?: string;
@@ -31,6 +32,7 @@ export interface CaptchaInputProps {
 }
 
 function CaptchaInput({
+  id,
   className = styles.input,
   name,
   value = '',
@@ -86,6 +88,7 @@ function CaptchaInput({
     <div>
       <div className={styles.captchaInputWrapper}>
         <TextInput
+          id={id}
           className={classNames(
             className,
             styles.hasButton,

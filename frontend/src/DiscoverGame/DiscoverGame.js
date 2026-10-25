@@ -6,13 +6,15 @@ import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
 import PageJumpBar from 'Components/Page/PageJumpBar';
+import { OverflowDivider } from 'Components/Page/Toolbar/Overflow';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
 import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
-import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
+import PageToolbarSpacer from 'Components/Page/Toolbar/PageToolbarSpacer';
+import ToolbarItem from 'Components/Page/Toolbar/ToolbarItem';
 import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
 import styles from 'Game/Index/GameIndex.css';
-import { align, icons, kinds, sortDirections } from 'Helpers/Props';
+import { icons, kinds, sortDirections } from 'Helpers/Props';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
 import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';
@@ -285,28 +287,34 @@ class DiscoverGame extends Component {
     return (
       <PageContent title={translate('Discover')}>
         <PageToolbar>
-          <PageToolbarSection>
-            <PageToolbarButton
-              label={translate('RefreshLists')}
-              iconName={icons.REFRESH}
-              isSpinning={isSyncingLists}
-              isDisabled={hasNoGame}
-              onPress={this.onImportListSyncPress}
-            />
-            <PageToolbarButton
-              label={allSelected ? translate('UnselectAll') : translate('SelectAll')}
-              iconName={icons.CHECK_SQUARE}
-              isDisabled={hasNoGame}
-              onPress={this.onSelectAllPress}
-            />
-          </PageToolbarSection>
+          <ToolbarItem
+            id="refreshLists"
+            priority={1}
+            groupId="left"
+            label={translate('RefreshLists')}
+            iconName={icons.REFRESH}
+            isSpinning={isSyncingLists}
+            isDisabled={hasNoGame}
+            onPress={this.onImportListSyncPress}
+          />
 
-          <PageToolbarSection
-            alignContent={align.RIGHT}
-            collapseButtons={false}
-          >
-            {
-              view === 'table' ?
+          <ToolbarItem
+            id="selectAll"
+            priority={1}
+            groupId="left"
+            label={allSelected ? translate('UnselectAll') : translate('SelectAll')}
+            iconName={icons.CHECK_SQUARE}
+            isDisabled={hasNoGame}
+            onPress={this.onSelectAllPress}
+          />
+
+          <PageToolbarSpacer />
+
+          {
+            view === 'table' ?
+              <ToolbarItem id="options" priority={2}
+                groupId="right"
+              >
                 <TableOptionsModalWrapper
                   {...otherProps}
                   columns={columns}
@@ -316,45 +324,41 @@ class DiscoverGame extends Component {
                     label={translate('Options')}
                     iconName={icons.TABLE}
                   />
-                </TableOptionsModalWrapper> :
-                null
-            }
+                </TableOptionsModalWrapper>
+              </ToolbarItem> :
+              <ToolbarItem
+                id="options"
+                priority={2}
+                groupId="right"
+                label={translate('Options')}
+                iconName={view === 'posters' ? icons.POSTER : icons.OVERVIEW}
+                isDisabled={hasNoGame}
+                onPress={view === 'posters' ? this.onPosterOptionsPress : this.onOverviewOptionsPress}
+              />
+          }
 
-            {
-              view === 'posters' ?
-                <PageToolbarButton
-                  label={translate('Options')}
-                  iconName={icons.POSTER}
-                  onPress={this.onPosterOptionsPress}
-                /> :
-                null
-            }
-
-            {
-              view === 'overview' ?
-                <PageToolbarButton
-                  label={translate('Options')}
-                  iconName={icons.OVERVIEW}
-                  onPress={this.onOverviewOptionsPress}
-                /> :
-                null
-            }
-
+          <OverflowDivider groupId="right">
             <PageToolbarSeparator />
+          </OverflowDivider>
 
+          <ToolbarItem id="view" pinned={true}>
             <DiscoverGameViewMenu
               view={view}
               isDisabled={hasNoGame}
               onViewSelect={onViewSelect}
             />
+          </ToolbarItem>
 
+          <ToolbarItem id="sort" pinned={true}>
             <DiscoverGameSortMenu
               sortKey={sortKey}
               sortDirection={sortDirection}
               isDisabled={hasNoGame}
               onSortSelect={onSortSelect}
             />
+          </ToolbarItem>
 
+          <ToolbarItem id="filter" pinned={true}>
             <DiscoverGameFilterMenu
               selectedFilterKey={selectedFilterKey}
               filters={filters}
@@ -362,7 +366,7 @@ class DiscoverGame extends Component {
               isDisabled={hasNoGame}
               onFilterSelect={onFilterSelect}
             />
-          </PageToolbarSection>
+          </ToolbarItem>
         </PageToolbar>
 
         <div className={styles.pageContentBodyWrapper}>

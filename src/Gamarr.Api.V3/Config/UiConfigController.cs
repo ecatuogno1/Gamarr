@@ -35,6 +35,11 @@ namespace Gamarr.Api.V3.Config
             SharedValidator.RuleFor(c => c.UILanguage)
                 .Must(value => Language.All.Any(o => o.Id == value))
                 .WithMessage("Invalid UI Language ID");
+
+            SharedValidator.RuleFor(c => c.HeaderColor)
+                .Must(value => value is "gradient" or "fullColor")
+                .WithMessage("Header Color must be 'gradient' or 'fullColor'")
+                .When(c => c.HeaderColor != null);
         }
 
         [RestPutById]

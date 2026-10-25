@@ -6,12 +6,13 @@ import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
 import PageJumpBar from 'Components/Page/PageJumpBar';
+import { OverflowDivider } from 'Components/Page/Toolbar/Overflow';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
-import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
-import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
+import PageToolbarSpacer from 'Components/Page/Toolbar/PageToolbarSpacer';
+import ToolbarItem from 'Components/Page/Toolbar/ToolbarItem';
 import styles from 'Game/Index/GameIndex.css';
-import { align, icons, kinds, sortDirections } from 'Helpers/Props';
+import { icons, kinds, sortDirections } from 'Helpers/Props';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
 import translate from 'Utilities/String/translate';
 import getSelectedIds from 'Utilities/Table/getSelectedIds';
@@ -250,48 +251,60 @@ class Collection extends Component {
     return (
       <PageContent title={translate('Collections')}>
         <PageToolbar>
-          <PageToolbarSection>
-            <PageToolbarButton
-              label={translate('RefreshCollections')}
-              iconName={icons.REFRESH}
-              isSpinning={isRefreshingCollections}
-              isDisabled={hasNoCollection}
-              onPress={this.onRefreshGameCollectionsPress}
-            />
-            <PageToolbarButton
-              label={allSelected ? translate('UnselectAll') : translate('SelectAll')}
-              iconName={icons.CHECK_SQUARE}
-              isDisabled={hasNoCollection}
-              onPress={this.onSelectAllPress}
-            />
-          </PageToolbarSection>
+          <ToolbarItem
+            id="refreshCollections"
+            priority={1}
+            groupId="left"
+            label={translate('RefreshCollections')}
+            iconName={icons.REFRESH}
+            isSpinning={isRefreshingCollections}
+            isDisabled={hasNoCollection}
+            onPress={this.onRefreshGameCollectionsPress}
+          />
 
-          <PageToolbarSection
-            alignContent={align.RIGHT}
-            collapseButtons={false}
-          >
-            {
-              view === 'overview' ?
-                <PageToolbarButton
-                  label={translate('Options')}
-                  iconName={icons.OVERVIEW}
-                  onPress={this.onOverviewOptionsPress}
-                /> :
-                null
-            }
+          <ToolbarItem
+            id="selectAll"
+            priority={1}
+            groupId="left"
+            label={allSelected ? translate('UnselectAll') : translate('SelectAll')}
+            iconName={icons.CHECK_SQUARE}
+            isDisabled={hasNoCollection}
+            onPress={this.onSelectAllPress}
+          />
 
-            {
-              (view === 'posters' || view === 'overview') &&
+          <PageToolbarSpacer />
+
+          {
+            view === 'overview' ?
+              <ToolbarItem
+                id="options"
+                priority={2}
+                groupId="right"
+                label={translate('Options')}
+                iconName={icons.OVERVIEW}
+                onPress={this.onOverviewOptionsPress}
+              /> :
+              null
+          }
+
+          {
+            view === 'overview' ?
+              <OverflowDivider groupId="right">
                 <PageToolbarSeparator />
-            }
+              </OverflowDivider> :
+              null
+          }
 
+          <ToolbarItem id="sort" pinned={true}>
             <GameCollectionSortMenu
               sortKey={sortKey}
               sortDirection={sortDirection}
               isDisabled={hasNoCollection}
               onSortSelect={onSortSelect}
             />
+          </ToolbarItem>
 
+          <ToolbarItem id="filter" pinned={true}>
             <GameCollectionFilterMenu
               selectedFilterKey={selectedFilterKey}
               filters={filters}
@@ -299,7 +312,7 @@ class Collection extends Component {
               isDisabled={hasNoCollection}
               onFilterSelect={onFilterSelect}
             />
-          </PageToolbarSection>
+          </ToolbarItem>
         </PageToolbar>
 
         <div className={styles.pageContentBodyWrapper}>

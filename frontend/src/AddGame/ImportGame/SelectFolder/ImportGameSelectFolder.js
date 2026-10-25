@@ -1,41 +1,18 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Alert from 'Components/Alert';
-import FieldSet from 'Components/FieldSet';
 import FileBrowserModal from 'Components/FileBrowser/FileBrowserModal';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
-import Table from 'Components/Table/Table';
-import TableBody from 'Components/Table/TableBody';
-import { icons, kinds, sizes } from 'Helpers/Props';
+import PageHeading from 'Components/Page/PageHeading';
+import SectionHeading from 'Components/SectionHeading';
+import { icons, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import ImportGameRootFolderRowConnector from './ImportGameRootFolderRowConnector';
 import styles from './ImportGameSelectFolder.css';
-
-const rootFolderColumns = [
-  {
-    name: 'path',
-    label: () => translate('Path'),
-    isVisible: true
-  },
-  {
-    name: 'freeSpace',
-    label: () => translate('FreeSpace'),
-    isVisible: true
-  },
-  {
-    name: 'unmappedFolders',
-    label: () => translate('UnmappedFolders'),
-    isVisible: true
-  },
-  {
-    name: 'actions',
-    isVisible: true
-  }
-];
 
 class ImportGameSelectFolder extends Component {
 
@@ -84,6 +61,11 @@ class ImportGameSelectFolder extends Component {
     return (
       <PageContent title={translate('ImportGames')}>
         <PageContentBody>
+          <PageHeading
+            scope={translate('Media')}
+            title={translate('ImportGames')}
+          />
+
           {
             isFetching && !isPopulated ?
               <LoadingIndicator /> :
@@ -101,43 +83,45 @@ class ImportGameSelectFolder extends Component {
           {
             !error && isPopulated &&
               <div>
-                <div className={styles.header}>
-                  {translate('ImportHeader')}
-                </div>
+                <SectionHeading
+                  title={translate('LibraryImportGamesHeader')}
+                  description={translate('ImportHeader')}
+                />
 
-                <div className={styles.tips}>
-                  {translate('ImportTipsMessage')}
-                  <ul>
-                    <li className={styles.tip} dangerouslySetInnerHTML={{ __html: translate('ImportIncludeQuality', ['<code>Super Mario World (USA) (Rev 1).sfc</code>']) }} />
-                    <li className={styles.tip} dangerouslySetInnerHTML={{ __html: translate('ImportRootPath', [`<code>${isWindows ? 'C:\\games' : '/games'}</code>`, `<code>${isWindows ? 'C:\\games\\snes\\Super Mario World (1990)' : '/games/snes/Super Mario World (1990)'}</code>`]) }} />
-                    <li className={styles.tip}>{translate('ImportNotForDownloads')}</li>
+                <details className={styles.tips}>
+                  <summary className={styles.tipsSummary}>
+                    <Icon
+                      className={styles.tipsChevron}
+                      name={icons.EXPAND_INDETERMINATE}
+                      size={12}
+                    />
+                    {translate('ImportTipsMessage')}
+                  </summary>
+
+                  <ul className={styles.tipsList}>
+                    <li dangerouslySetInnerHTML={{ __html: translate('ImportIncludeQuality', ['<code>Super Mario World (USA) (Rev 1).sfc</code>']) }} />
+                    <li dangerouslySetInnerHTML={{ __html: translate('ImportRootPath', [`<code>${isWindows ? 'C:\\games' : '/games'}</code>`, `<code>${isWindows ? 'C:\\games\\snes\\Super Mario World (1990)' : '/games/snes/Super Mario World (1990)'}</code>`]) }} />
+                    <li>{translate('ImportNotForDownloads')}</li>
                   </ul>
-                </div>
+                </details>
 
                 {
                   hasRootFolders ?
-                    <div className={styles.recentFolders}>
-                      <FieldSet legend={translate('RecentFolders')}>
-                        <Table
-                          columns={rootFolderColumns}
-                        >
-                          <TableBody>
-                            {
-                              items.map((rootFolder) => {
-                                return (
-                                  <ImportGameRootFolderRowConnector
-                                    key={rootFolder.id}
-                                    id={rootFolder.id}
-                                    path={rootFolder.path}
-                                    freeSpace={rootFolder.freeSpace}
-                                    unmappedFolders={rootFolder.unmappedFolders}
-                                  />
-                                );
-                              })
-                            }
-                          </TableBody>
-                        </Table>
-                      </FieldSet>
+                    <div className={styles.rootFolders}>
+                      {
+                        items.map((rootFolder) => {
+                          return (
+                            <ImportGameRootFolderRowConnector
+                              key={rootFolder.id}
+                              id={rootFolder.id}
+                              path={rootFolder.path}
+                              accessible={rootFolder.accessible}
+                              freeSpace={rootFolder.freeSpace}
+                              unmappedFolders={rootFolder.unmappedFolders}
+                            />
+                          );
+                        })
+                      }
                     </div> :
                     null
                 }
@@ -171,10 +155,9 @@ class ImportGameSelectFolder extends Component {
                     null
                 }
 
-                <div className={hasRootFolders ? undefined : styles.startImport}>
+                <div className={styles.chooseFolderButtonContainer}>
                   <Button
-                    kind={kinds.PRIMARY}
-                    size={sizes.LARGE}
+                    kind={hasRootFolders ? kinds.DEFAULT : kinds.PRIMARY}
                     onPress={this.onAddNewRootFolderPress}
                   >
                     <Icon

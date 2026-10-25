@@ -1,10 +1,9 @@
 .status {
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+  composes: cell from 'Components/Table/Cells/TableRowCell.css';
 
   width: 60px;
 }
 
 .statusIcon {
-  width: 20px !important;
-  text-align: center;
+  margin: 0 3px;
 }

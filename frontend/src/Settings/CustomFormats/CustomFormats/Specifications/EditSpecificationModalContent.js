@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import ProviderFieldFormGroup from 'Components/Form/ProviderFieldFormGroup';
 import Button from 'Components/Link/Button';
 import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
@@ -40,7 +40,7 @@ function EditSpecificationModalContent(props) {
 
   return (
     <ModalContent onModalClose={onCancelPress}>
-      <ModalHeader>
+      <ModalHeader subtitle={id ? name.value : undefined}>
         {id ? translate('EditConditionImplementation', { implementationName }) : translate('AddConditionImplementation', { implementationName })}
       </ModalHeader>
 
@@ -49,32 +49,27 @@ function EditSpecificationModalContent(props) {
           {...otherProps}
         >
           {
-            fields && fields.some((x) => x.label === translate('CustomFormatsSpecificationRegularExpression')) &&
-              <Alert kind={kinds.INFO}>
-                <div>
-                  <InlineMarkdown data={translate('ConditionUsingRegularExpressions')} />
-                </div>
-                <div>
-                  <InlineMarkdown data={translate('RegularExpressionsTutorialLink', { url: 'https://www.regular-expressions.info/tutorial.html' })} />
-                </div>
-                <div>
-                  <InlineMarkdown data={translate('RegularExpressionsCanBeTested', { url: 'http://regexstorm.net/tester' })} />
-                </div>
-              </Alert>
+            fields && fields.some((x) => x.label === translate('CustomFormatsSpecificationRegularExpression')) ?
+              <p className={styles.intro}>
+                <InlineMarkdown data={translate('ConditionUsingRegularExpressions')} />{' '}
+                <InlineMarkdown data={translate('RegularExpressionsTutorialLink', { url: 'https://www.regular-expressions.info/tutorial.html' })} />{' '}
+                <InlineMarkdown data={translate('RegularExpressionsCanBeTested', { url: 'http://regexstorm.net/tester' })} />
+              </p> :
+              null
           }
 
-          <FormGroup>
+          <FormRow>
             <FormLabel>
               {translate('Name')}
             </FormLabel>
 
-            <FormInputGroup
+            <FormInput
               type={inputTypes.TEXT}
               name="name"
               {...name}
               onChange={onInputChange}
             />
-          </FormGroup>
+          </FormRow>
 
           {
             fields && fields.map((field) => {
@@ -91,33 +86,35 @@ function EditSpecificationModalContent(props) {
             })
           }
 
-          <FormGroup>
+          <FormRow>
             <FormLabel>
               {translate('Negate')}
             </FormLabel>
-
-            <FormInputGroup
+            <FormInputHelpText
+              text={translate('NegateHelpText', { implementationName })}
+            />
+            <FormInput
               type={inputTypes.CHECK}
               name="negate"
               {...negate}
-              helpText={translate('NegateHelpText', { implementationName })}
               onChange={onInputChange}
             />
-          </FormGroup>
+          </FormRow>
 
-          <FormGroup>
+          <FormRow>
             <FormLabel>
               {translate('Required')}
             </FormLabel>
-
-            <FormInputGroup
+            <FormInputHelpText
+              text={translate('RequiredHelpText', { implementationName })}
+            />
+            <FormInput
               type={inputTypes.CHECK}
               name="required"
               {...required}
-              helpText={translate('RequiredHelpText', { implementationName })}
               onChange={onInputChange}
             />
-          </FormGroup>
+          </FormRow>
         </Form>
       </ModalBody>
       <ModalFooter>

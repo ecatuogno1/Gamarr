@@ -1,81 +1,98 @@
 .badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 4px;
 }
 
+/* v5 label pill: neutral fill, the status of the platform version is the dot */
 .badge {
-  composes: link from '~Components/Link/Link.css';
+  --badgeKindColor: var(--inkMuted);
 
-  display: inline-block;
-  padding: 1px 6px;
+  composes: link from 'Components/Link/Link.css';
+
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
   border: 1px solid transparent;
-  border-radius: 3px;
-  color: var(--white);
+  border-radius: 999px;
+  background-color: color-mix(in oklch, var(--ink) 9%, transparent);
+  color: var(--inkSoft);
   white-space: nowrap;
-  font-weight: bold;
-  font-size: $smallFontSize;
-  line-height: 16px;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  font-size: 11px;
+  line-height: 14px;
+  gap: 5px;
+
+  &::before {
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background-color: var(--badgeKindColor);
+    content: "";
+  }
 
   &:hover,
-  &:focus {
-    color: var(--white);
+  &:focus-visible {
+    background-color: color-mix(in oklch, var(--ink) 15%, transparent);
+    color: var(--ink);
     text-decoration: none;
-    filter: brightness(1.15);
   }
 }
 
+/* Over artwork (details hero): same pill on the overlay backdrop */
 .large {
-  padding: 3px 10px;
-  border-width: 2px;
-  font-size: $defaultFontSize;
-  line-height: 20px;
-  opacity: 0.6;
+  padding: 5px 12px;
+  background-color: var(--gameOverlayBackdrop);
+  color: color-mix(in oklch, var(--gameOverlayInk) 80%, transparent);
+  font-size: 13px;
+  line-height: 18px;
 
   &:hover,
-  &:focus {
-    opacity: 1;
+  &:focus-visible {
+    background-color: var(--gameOverlayBackdrop);
+    color: var(--gameOverlayInk);
   }
 }
 
 .selected {
-  border-color: var(--white);
-  opacity: 1;
+  border-color: color-mix(in oklch, var(--gameOverlayInk) 70%, transparent);
+  color: var(--gameOverlayInk);
 }
 
 .default {
-  background-color: var(--darkGray);
+  --badgeKindColor: var(--inkMuted);
 }
 
 .inverse {
-  background-color: var(--inverseLabelColor);
-  color: var(--inverseLabelTextColor);
+  --badgeKindColor: var(--inkFaint);
 }
 
 .primary {
-  background-color: var(--primaryColor);
+  --badgeKindColor: var(--primaryColor);
 }
 
 .danger {
-  background-color: var(--dangerColor);
+  --badgeKindColor: var(--dangerColor);
 }
 
 .success {
-  background-color: var(--successColor);
+  --badgeKindColor: var(--successColor);
 }
 
 .purple {
-  background-color: var(--purple);
+  --badgeKindColor: var(--purple);
 }
 
 .warning {
-  background-color: var(--warningColor);
+  --badgeKindColor: var(--warningColor);
 }
 
 .info {
-  background-color: var(--infoColor);
+  --badgeKindColor: var(--infoColor);
 }
 
 .queue {
-  background-color: var(--queueColor);
+  --badgeKindColor: var(--queueColor);
 }

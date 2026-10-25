@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import Label from 'Components/Label';
 import { GameStatus } from 'Game/Game';
-import { kinds, sizes } from 'Helpers/Props';
+import { icons, kinds, sizes } from 'Helpers/Props';
 import { Kind } from 'Helpers/Props/kinds';
 import { createQueueItemSelectorForHook } from 'Store/Selectors/createQueueItemSelector';
 import Queue from 'typings/Queue';
@@ -52,6 +52,7 @@ function getGameStatus(
 }
 
 interface GameStatusLabelProps {
+  className?: string;
   gameId: number;
   monitored: boolean;
   isAvailable: boolean;
@@ -61,6 +62,7 @@ interface GameStatusLabelProps {
 }
 
 function GameStatusLabel({
+  className,
   gameId,
   monitored,
   isAvailable,
@@ -100,7 +102,7 @@ function GameStatusLabel({
 
     switch (statusClass) {
       case 'queue':
-        kind = kinds.QUEUE;
+        kind = kinds.PURPLE;
         break;
       case 'missingMonitored':
         kind = kinds.DANGER;
@@ -121,7 +123,12 @@ function GameStatusLabel({
     }
 
     return (
-      <Label kind={kind} size={sizes.LARGE}>
+      <Label
+        className={className}
+        kind={kind}
+        size={sizes.LARGE}
+        icon={kind === kinds.SUCCESS ? icons.CHECK_CIRCLE : icons.GAME_FILE}
+      >
         {translate(firstCharToUpper(gameStatus))}
       </Label>
     );

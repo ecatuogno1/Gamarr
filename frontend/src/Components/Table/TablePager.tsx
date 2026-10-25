@@ -1,6 +1,6 @@
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useState } from 'react';
-import SelectInput from 'Components/Form/SelectInput';
+import React, { ReactNode, useCallback, useMemo, useState } from 'react';
+import SelectInput, { SelectInputOption } from 'Components/Form/SelectInput';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -10,26 +10,24 @@ import translate from 'Utilities/String/translate';
 import styles from './TablePager.css';
 
 interface TablePagerProps {
+  leftActions?: ReactNode;
   page?: number;
   totalPages?: number;
   totalRecords?: number;
   isFetching?: boolean;
-  onFirstPagePress: () => void;
-  onPreviousPagePress: () => void;
-  onNextPagePress: () => void;
-  onLastPagePress: () => void;
+  onFirstPagePress?: () => void;
+  onPreviousPagePress?: () => void;
+  onNextPagePress?: () => void;
+  onLastPagePress?: () => void;
   onPageSelect: (page: number) => void;
 }
 
 function TablePager({
+  leftActions,
   page,
   totalPages,
   totalRecords = 0,
   isFetching,
-  onFirstPagePress,
-  onPreviousPagePress,
-  onNextPagePress,
-  onLastPagePress,
   onPageSelect,
 }: TablePagerProps) {
   const [isShowingPageSelect, setIsShowingPageSelect] = useState(false);
@@ -38,7 +36,7 @@ function TablePager({
   const isLastPage = page === totalPages;
 
   const pages = useMemo(() => {
-    return Array.from(new Array(totalPages), (_x, i) => {
+    return Array.from(new Array(totalPages), (_x, i): SelectInputOption => {
       const pageNumber = i + 1;
 
       return {
@@ -64,6 +62,34 @@ function TablePager({
     setIsShowingPageSelect(false);
   }, []);
 
+  const handleFirstPagePress = useCallback(() => {
+    onPageSelect(1);
+  }, [onPageSelect]);
+
+  const onPreviousPagePress = useCallback(() => {
+    if (!page) {
+      return;
+    }
+
+    onPageSelect(page - 1);
+  }, [onPageSelect, page]);
+
+  const onNextPagePress = useCallback(() => {
+    if (!page) {
+      return;
+    }
+
+    onPageSelect(page + 1);
+  }, [onPageSelect, page]);
+
+  const onLastPagePress = useCallback(() => {
+    if (!totalPages) {
+      return;
+    }
+
+    onPageSelect(totalPages);
+  }, [onPageSelect, totalPages]);
+
   if (!page) {
     return null;
   }
@@ -71,6 +97,7 @@ function TablePager({
   return (
     <div className={styles.pager}>
       <div className={styles.loadingContainer}>
+        {leftActions}
         {isFetching ? (
           <LoadingIndicator className={styles.loading} size={20} />
         ) : null}
@@ -84,9 +111,10 @@ function TablePager({
               isFirstPage && styles.disabledPageButton
             )}
             isDisabled={isFirstPage}
-            onPress={onFirstPagePress}
+            aria-label={translate('PagerGoToFirstPage')}
+            onPress={handleFirstPagePress}
           >
-            <Icon name={icons.PAGE_FIRST} />
+            <Icon name={icons.PAGE_FIRST} aria-hidden={true} />
           </Link>
 
           <Link
@@ -95,15 +123,20 @@ function TablePager({
               isFirstPage && styles.disabledPageButton
             )}
             isDisabled={isFirstPage}
+            aria-label={translate('PagerGoToPreviousPage')}
             onPress={onPreviousPagePress}
           >
-            <Icon name={icons.PAGE_PREVIOUS} />
+            <Icon name={icons.PAGE_PREVIOUS} aria-hidden={true} />
           </Link>
 
           <div className={styles.pageNumber}>
             {isShowingPageSelect ? null : (
               <Link
                 isDisabled={totalPages === 1}
+                aria-label={translate('PagerGoToPage', {
+                  page,
+                  totalPages: totalPages ?? 0,
+                })}
                 onPress={handleOpenPageSelectClick}
               >
                 {page} / {totalPages}
@@ -129,9 +162,10 @@ function TablePager({
               isLastPage && styles.disabledPageButton
             )}
             isDisabled={isLastPage}
+            aria-label={translate('PagerGoToNextPage')}
             onPress={onNextPagePress}
           >
-            <Icon name={icons.PAGE_NEXT} />
+            <Icon name={icons.PAGE_NEXT} aria-hidden={true} />
           </Link>
 
           <Link
@@ -140,9 +174,10 @@ function TablePager({
               isLastPage && styles.disabledPageButton
             )}
             isDisabled={isLastPage}
+            aria-label={translate('PagerGoToLastPage')}
             onPress={onLastPagePress}
           >
-            <Icon name={icons.PAGE_LAST} />
+            <Icon name={icons.PAGE_LAST} aria-hidden={true} />
           </Link>
         </div>
       </div>

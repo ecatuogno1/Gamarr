@@ -1,14 +1,14 @@
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Card from 'Components/Card';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
+import SettingsCard from 'Components/SettingsCard/SettingsCard';
+import settingsCardStyles from 'Components/SettingsCard/SettingsCard.css';
 import { kinds } from 'Helpers/Props';
 import { deleteTag } from 'Store/Actions/tagActions';
 import createTagDetailsSelector from 'Store/Selectors/createTagDetailsSelector';
 import translate from 'Utilities/String/translate';
 import TagDetailsModal from './Details/TagDetailsModal';
 import TagInUse from './TagInUse';
-import styles from './Tag.css';
 
 interface TagProps {
   id: number;
@@ -63,15 +63,13 @@ function Tag({ id, label }: TagProps) {
   }, [id, dispatch]);
 
   return (
-    <Card
-      className={styles.tag}
-      overlayContent={true}
+    <SettingsCard
+      name={label}
+      aria-label={translate('TagDetails', { label })}
       onPress={handleShowDetailsPress}
     >
-      <div className={styles.label}>{label}</div>
-
       {isTagUsed ? (
-        <div>
+        <div className={settingsCardStyles.labels}>
           <TagInUse
             label={translate('Game')}
             labelPlural={translate('Games')}
@@ -119,9 +117,9 @@ function Tag({ id, label }: TagProps) {
             count={autoTagIds.length}
           />
         </div>
-      ) : null}
-
-      {!isTagUsed && <div>{translate('NoLinks')}</div>}
+      ) : (
+        <div>{translate('NoLinks')}</div>
+      )}
 
       <TagDetailsModal
         label={label}
@@ -148,7 +146,7 @@ function Tag({ id, label }: TagProps) {
         onConfirm={handleConfirmDeleteTag}
         onCancel={handleDeleteTagModalClose}
       />
-    </Card>
+    </SettingsCard>
   );
 }
 

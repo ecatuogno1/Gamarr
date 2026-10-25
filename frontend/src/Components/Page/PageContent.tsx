@@ -1,12 +1,11 @@
-import React from 'react';
-import DocumentTitle from 'react-document-title';
+import React, { useEffect } from 'react';
 import ErrorBoundary from 'Components/Error/ErrorBoundary';
 import PageContentError from './PageContentError';
 import styles from './PageContent.css';
 
 interface PageContentProps {
   className?: string;
-  title?: string;
+  title: string;
   children: React.ReactNode;
 }
 
@@ -15,17 +14,21 @@ function PageContent({
   title,
   children,
 }: PageContentProps) {
+  useEffect(() => {
+    document.title = title
+      ? `${title} - ${window.Gamarr.instanceName}`
+      : window.Gamarr.instanceName;
+
+    return () => {
+      document.title = window.Gamarr.instanceName;
+    };
+  }, [title]);
+
   return (
     <ErrorBoundary errorComponent={PageContentError}>
-      <DocumentTitle
-        title={
-          title
-            ? `${title} - ${window.Gamarr.instanceName}`
-            : window.Gamarr.instanceName
-        }
-      >
-        <div className={className}>{children}</div>
-      </DocumentTitle>
+      <main className={className} aria-label={title}>
+        {children}
+      </main>
     </ErrorBoundary>
   );
 }

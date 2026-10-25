@@ -4,6 +4,8 @@ interface CssExports {
   'contentBody': string;
   'contentBodyContainer': string;
   'errorMessage': string;
+  'hasJumpBar': string;
+  'overviewInnerContentBody': string;
   'pageContentBodyWrapper': string;
   'postersInnerContentBody': string;
   'tableInnerContentBody': string;

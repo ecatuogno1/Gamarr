@@ -3,6 +3,7 @@
 interface CssExports {
   'checkButton': string;
   'checkContainer': string;
+  'icon': string;
   'selected': string;
   'unselected': string;
 }

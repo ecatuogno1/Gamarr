@@ -1,13 +1,14 @@
+import classNames from 'classnames';
 import React, {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router';
-import TextTruncate from 'react-text-truncate';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import * as commandNames from 'Commands/commandNames';
@@ -16,17 +17,18 @@ import CriticRating from 'Components/CriticRating';
 import FieldSet from 'Components/FieldSet';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import InfoLabel from 'Components/InfoLabel';
+import Label from 'Components/Label';
 import Button from 'Components/Link/Button';
 import IconButton from 'Components/Link/IconButton';
-import Marquee from 'Components/Marquee';
-import MonitorToggleButton from 'Components/MonitorToggleButton';
+import Link from 'Components/Link/Link';
+import MetadataAttribution from 'Components/MetadataAttribution';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
+import { OverflowDivider } from 'Components/Page/Toolbar/Overflow';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
-import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
-import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
+import PageToolbarSpacer from 'Components/Page/Toolbar/PageToolbarSpacer';
+import ToolbarItem from 'Components/Page/Toolbar/ToolbarItem';
 import Popover from 'Components/Tooltip/Popover';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import AddGamePlatformModal from 'Game/AddPlatform/AddGamePlatformModal';
@@ -46,7 +48,6 @@ import useGameTitle from 'Game/Title/useGameTitle';
 import useGame from 'Game/useGame';
 import GameFileEditorTable from 'GameFile/Editor/GameFileEditorTable';
 import ExtraFileTable from 'GameFile/Extras/ExtraFileTable';
-import useMeasure from 'Helpers/Hooks/useMeasure';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import {
   icons,
@@ -80,8 +81,6 @@ import {
 import { fetchImportListSchema } from 'Store/Actions/Settings/importLists';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import createCommandsSelector from 'Store/Selectors/createCommandsSelector';
-import createDimensionsSelector from 'Store/Selectors/createDimensionsSelector';
-import fonts from 'Styles/Variables/fonts';
 import sortByProp from 'Utilities/Array/sortByProp';
 import { findCommand, isCommandExecuting } from 'Utilities/Command';
 import getPathWithUrlBase from 'Utilities/getPathWithUrlBase';
@@ -94,15 +93,13 @@ import translate from 'Utilities/String/translate';
 import GameCompanyCredits from './Credits/GameCompanyCredits';
 import GameDetailsInfo from './GameDetailsInfo';
 import GameDetailsLinks from './GameDetailsLinks';
+import GameDetailsPath from './GameDetailsPath';
 import GameReleaseDates from './GameReleaseDates';
 import GameScreenshots from './GameScreenshots';
 import GameStatusLabel from './GameStatusLabel';
 import GameTags from './GameTags';
 import GameTitlesTable from './Titles/GameTitlesTable';
 import styles from './GameDetails.css';
-
-const defaultFontSize = parseInt(fonts.defaultFontSize);
-const lineHeight = parseFloat(fonts.lineHeight);
 
 function getFanartUrl(images: Image[]) {
   const image = images.find((image) => image.coverType === 'fanart');
@@ -186,7 +183,6 @@ function GameDetails({
   const isSidebarVisible = useSelector(
     (state: AppState) => state.app.isSidebarVisible
   );
-  const { isSmallScreen } = useSelector(createDimensionsSelector());
 
   const commands = useSelector(createCommandsSelector());
 
@@ -278,8 +274,33 @@ function GameDetails({
   const [isGameHistoryModalOpen, setIsGameHistoryModalOpen] = useState(false);
   const [isAddPlatformModalOpen, setIsAddPlatformModalOpen] = useState(false);
   const [showAllPlatformFiles, setShowAllPlatformFiles] = useState(false);
-  const [titleRef, { width: titleWidth }] = useMeasure();
-  const [overviewRef, { height: overviewHeight }] = useMeasure();
+  const overviewTextRef = useRef<HTMLParagraphElement>(null);
+  const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
+  const [isOverviewClamped, setIsOverviewClamped] = useState(false);
+
+  const handleToggleOverview = useCallback(() => {
+    setIsOverviewExpanded((value) => !value);
+  }, []);
+
+  useLayoutEffect(() => {
+    const element = overviewTextRef.current;
+
+    if (!element) {
+      return;
+    }
+
+    const compute = () =>
+      setIsOverviewClamped(
+        !isOverviewExpanded && element.scrollHeight > element.clientHeight
+      );
+
+    compute();
+
+    const observer = new ResizeObserver(compute);
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [game?.overview, isOverviewExpanded]);
   const wasRefreshing = usePrevious(isRefreshing);
   const wasRenaming = usePrevious(isRenaming);
 
@@ -359,6 +380,10 @@ function GameDetails({
     },
     [gameId, dispatch]
   );
+
+  const handleMonitorToggle = useCallback(() => {
+    handleMonitorTogglePress(!game?.monitored);
+  }, [handleMonitorTogglePress, game?.monitored]);
 
   const handleRefreshPress = useCallback(() => {
     dispatch(
@@ -597,74 +622,98 @@ function GameDetails({
   const isFetching =
     isGameFilesFetching || isExtraFilesFetching || isGameCreditsFetching;
 
-  const marqueeWidth = isSmallScreen ? titleWidth : titleWidth - 150;
-
   const titleWithYear = `${title}${year > 0 ? ` (${year})` : ''}`;
 
   return (
     <PageContent title={titleWithYear}>
       <PageToolbar>
-        <PageToolbarSection>
-          <PageToolbarButton
-            label={translate('RefreshAndScan')}
-            iconName={icons.REFRESH}
-            spinningName={icons.REFRESH}
-            title={translate('RefreshInformationAndScanDisk')}
-            isSpinning={isRefreshing}
-            onPress={handleRefreshPress}
-          />
+        <ToolbarItem
+          id="refresh"
+          priority={1}
+          groupId="left-a"
+          label={translate('RefreshAndScan')}
+          iconName={icons.REFRESH}
+          spinningName={icons.REFRESH}
+          title={translate('RefreshInformationAndScanDisk')}
+          isSpinning={isRefreshing}
+          onPress={handleRefreshPress}
+        />
 
-          <PageToolbarButton
-            label={translate('SearchGame')}
-            iconName={icons.SEARCH}
-            isSpinning={isSearching}
-            title={undefined}
-            onPress={handleSearchPress}
-          />
+        <ToolbarItem
+          id="search"
+          priority={1}
+          groupId="left-a"
+          label={translate('SearchGame')}
+          iconName={icons.SEARCH}
+          isSpinning={isSearching}
+          onPress={handleSearchPress}
+        />
 
-          <PageToolbarButton
-            label={translate('InteractiveSearch')}
-            iconName={icons.INTERACTIVE}
-            isSpinning={isSearching}
-            title={undefined}
-            onPress={handleInteractiveSearchPress}
-          />
+        <ToolbarItem
+          id="interactive-search"
+          priority={1}
+          groupId="left-a"
+          label={translate('InteractiveSearch')}
+          iconName={icons.INTERACTIVE}
+          isSpinning={isSearching}
+          onPress={handleInteractiveSearchPress}
+        />
 
+        <OverflowDivider groupId="left-a">
           <PageToolbarSeparator />
+        </OverflowDivider>
 
-          <PageToolbarButton
-            label={translate('PreviewRename')}
-            iconName={icons.ORGANIZE}
-            isDisabled={!hasGameFiles}
-            onPress={handleOrganizePress}
-          />
+        <ToolbarItem
+          id="preview-rename"
+          priority={1}
+          groupId="left-b"
+          label={translate('PreviewRename')}
+          iconName={icons.ORGANIZE}
+          isDisabled={!hasGameFiles}
+          onPress={handleOrganizePress}
+        />
 
-          <PageToolbarButton
-            label={translate('ManageFiles')}
-            iconName={icons.GAME_FILE}
-            onPress={handleManageGamesPress}
-          />
+        <ToolbarItem
+          id="manage-files"
+          priority={1}
+          groupId="left-b"
+          label={translate('ManageFiles')}
+          iconName={icons.GAME_FILE}
+          onPress={handleManageGamesPress}
+        />
 
-          <PageToolbarButton
-            label={translate('History')}
-            iconName={icons.HISTORY}
-            onPress={handleGameHistoryPress}
-          />
+        <ToolbarItem
+          id="history"
+          priority={1}
+          groupId="left-b"
+          label={translate('History')}
+          iconName={icons.HISTORY}
+          onPress={handleGameHistoryPress}
+        />
 
+        <OverflowDivider groupId="left-b">
           <PageToolbarSeparator />
+        </OverflowDivider>
 
-          <PageToolbarButton
-            label={translate('Edit')}
-            iconName={icons.EDIT}
-            onPress={handleEditGamePress}
-          />
+        <ToolbarItem
+          id="edit"
+          priority={1}
+          groupId="left-c"
+          label={translate('Edit')}
+          iconName={icons.EDIT}
+          onPress={handleEditGamePress}
+        />
 
-          <PageToolbarButton
-            label={translate('Delete')}
-            iconName={icons.DELETE}
-            onPress={handleDeleteGamePress}
-          />
-        </PageToolbarSection>
+        <ToolbarItem
+          id="delete"
+          priority={1}
+          groupId="left-c"
+          label={translate('Delete')}
+          iconName={icons.DELETE}
+          onPress={handleDeleteGamePress}
+        />
+
+        <PageToolbarSpacer />
       </PageToolbar>
 
       <PageContentBody innerClassName={styles.innerContentBody}>
@@ -687,20 +736,10 @@ function GameDetails({
             />
 
             <div className={styles.info}>
-              <div ref={titleRef} className={styles.titleRow}>
+              <div className={styles.titleRow}>
                 <div className={styles.titleContainer}>
-                  <div className={styles.toggleMonitoredContainer}>
-                    <MonitorToggleButton
-                      className={styles.monitorToggleButton}
-                      monitored={monitored}
-                      isSaving={isSaving}
-                      size={40}
-                      onPress={handleMonitorTogglePress}
-                    />
-                  </div>
-
-                  <div className={styles.title} style={{ width: marqueeWidth }}>
-                    <Marquee text={title} title={originalTitle} />
+                  <div className={styles.title} title={originalTitle}>
+                    {title}
                   </div>
                 </div>
 
@@ -709,8 +748,11 @@ function GameDetails({
                     <IconButton
                       className={styles.gameNavigationButton}
                       name={icons.ARROW_LEFT}
-                      size={30}
+                      size={24}
                       title={translate('GameDetailsGoTo', {
+                        title: previousGame.title,
+                      })}
+                      aria-label={translate('GameDetailsGoTo', {
                         title: previousGame.title,
                       })}
                       to={`/game/${previousGame.titleSlug}`}
@@ -721,8 +763,11 @@ function GameDetails({
                     <IconButton
                       className={styles.gameNavigationButton}
                       name={icons.ARROW_RIGHT}
-                      size={30}
+                      size={24}
                       title={translate('GameDetailsGoTo', {
+                        title: nextGame.title,
+                      })}
+                      aria-label={translate('GameDetailsGoTo', {
                         title: nextGame.title,
                       })}
                       to={`/game/${nextGame.titleSlug}`}
@@ -755,206 +800,252 @@ function GameDetails({
               </div>
 
               <div className={styles.details}>
-                <div>
-                  <span className={styles.year}>
-                    <Popover
-                      anchor={
-                        year > 0 ? (
-                          year
-                        ) : (
-                          <Icon
-                            name={icons.WARNING}
-                            kind={kinds.WARNING}
-                            size={20}
-                          />
-                        )
-                      }
-                      title={translate('ReleaseDates')}
-                      body={
-                        <GameReleaseDates
-                          igdbId={igdbId}
-                          igdbSlug={igdbSlug}
-                          releaseDate={releaseDate}
+                <span className={styles.year}>
+                  <Popover
+                    anchor={
+                      year > 0 ? (
+                        year
+                      ) : (
+                        <Icon
+                          name={icons.WARNING}
+                          kind={kinds.WARNING}
+                          size={16}
                         />
-                      }
-                      position={tooltipPositions.BOTTOM}
-                    />
-                  </span>
-
-                  <span className={styles.links}>
-                    <Tooltip
-                      anchor={<Icon name={icons.EXTERNAL_LINK} size={20} />}
-                      tooltip={
-                        <GameDetailsLinks
-                          igdbId={igdbId}
-                          igdbSlug={igdbSlug}
-                          youTubeTrailerId={youTubeTrailerId}
-                          websites={websites}
-                        />
-                      }
-                      position={tooltipPositions.BOTTOM}
-                    />
-                  </span>
-
-                  {!!tags.length && (
-                    <span>
-                      <Tooltip
-                        anchor={<Icon name={icons.TAGS} size={20} />}
-                        tooltip={<GameTags gameId={id} />}
-                        position={tooltipPositions.BOTTOM}
+                      )
+                    }
+                    title={translate('ReleaseDates')}
+                    body={
+                      <GameReleaseDates
+                        igdbId={igdbId}
+                        igdbSlug={igdbSlug}
+                        releaseDate={releaseDate}
                       />
-                    </span>
-                  )}
-                </div>
-              </div>
+                    }
+                    position={tooltipPositions.BOTTOM}
+                  />
+                </span>
 
-              <div className={styles.details}>
+                {genres.length ? (
+                  <GameGenres className={styles.genres} genres={genres} />
+                ) : null}
+
                 {ratings.igdb ? (
                   <span className={styles.rating}>
-                    <IgdbRating ratings={ratings} iconSize={20} />
+                    <IgdbRating ratings={ratings} iconSize={14} />
                   </span>
                 ) : null}
+
                 {ratings.critic ? (
                   <span className={styles.rating}>
-                    <CriticRating ratings={ratings} iconSize={20} />
+                    <CriticRating ratings={ratings} iconSize={14} />
                   </span>
                 ) : null}
               </div>
 
-              <div>
-                <InfoLabel
-                  className={styles.detailsInfoLabel}
-                  name={translate('Path')}
-                  size={sizes.LARGE}
-                >
-                  <span className={styles.path}>{path}</span>
-                </InfoLabel>
+              <div className={styles.detailsChips}>
+                <div className={styles.chipsRow}>
+                  <Link
+                    className={styles.monitoredToggle}
+                    isDisabled={isSaving}
+                    aria-pressed={monitored}
+                    onPress={handleMonitorToggle}
+                  >
+                    <Label
+                      className={styles.detailsLabel}
+                      size={sizes.LARGE}
+                      icon={icons.MONITORED}
+                      iconFilled={monitored}
+                      interactive={true}
+                    >
+                      <span className={styles.monitoredText}>
+                        {monitored
+                          ? translate('Monitored')
+                          : translate('Unmonitored')}
+                      </span>
+                    </Label>
+                  </Link>
 
-                <InfoLabel
-                  className={styles.detailsInfoLabel}
-                  name={translate('Status')}
-                  title={statusDetails.message}
-                  size={sizes.LARGE}
-                >
-                  <span className={styles.statusName}>
+                  <Tooltip
+                    anchor={
+                      <Label
+                        className={styles.detailsLabel}
+                        size={sizes.LARGE}
+                        icon={icons.EXTERNAL_LINK}
+                        interactive={true}
+                      >
+                        <span className={styles.links}>
+                          {translate('Links')}
+                        </span>
+                      </Label>
+                    }
+                    contentRole="dialog"
+                    tooltip={
+                      <GameDetailsLinks
+                        igdbId={igdbId}
+                        igdbSlug={igdbSlug}
+                        youTubeTrailerId={youTubeTrailerId}
+                        websites={websites}
+                      />
+                    }
+                    kind={kinds.DEFAULT}
+                    position={tooltipPositions.BOTTOM}
+                  />
+
+                  {tags.length ? (
+                    <Tooltip
+                      anchor={
+                        <Label
+                          className={styles.detailsLabel}
+                          size={sizes.LARGE}
+                          icon={icons.TAGS}
+                          interactive={true}
+                        >
+                          <span className={styles.tags}>
+                            {translate('Tags')}
+                          </span>
+                        </Label>
+                      }
+                      tooltip={<GameTags gameId={id} />}
+                      kind={kinds.DEFAULT}
+                      position={tooltipPositions.BOTTOM}
+                    />
+                  ) : null}
+                </div>
+
+                <div className={styles.chipsRow}>
+                  <span title={statusDetails.message}>
                     <GameStatusLabel
+                      className={styles.detailsLabel}
                       gameId={id}
                       monitored={monitored}
                       isAvailable={isAvailable}
                       hasGameFiles={hasGameFiles}
                       status={status}
+                      useLabel={true}
                     />
                   </span>
-                </InfoLabel>
 
-                <InfoLabel
-                  className={styles.detailsInfoLabel}
-                  name={translate('QualityProfile')}
-                  size={sizes.LARGE}
-                >
-                  <span className={styles.qualityProfileName}>
-                    <QualityProfileName qualityProfileId={qualityProfileId} />
-                  </span>
-                </InfoLabel>
-
-                <InfoLabel
-                  className={styles.detailsInfoLabel}
-                  name={translate('Size')}
-                  size={sizes.LARGE}
-                >
-                  <span className={styles.sizeOnDisk}>
-                    {formatBytes(sizeOnDisk)}
-                  </span>
-                </InfoLabel>
-
-                {isMultiPlatform && titleSummary ? (
-                  <InfoLabel
-                    className={styles.detailsInfoLabel}
-                    name={translate('Platforms')}
-                    title={titleSummary.versions
-                      .map((v) => v.tooltip)
-                      .join('\n')}
+                  <Label
+                    className={styles.detailsLabel}
+                    title={translate('SizeOnDisk')}
                     size={sizes.LARGE}
+                    icon={icons.DRIVE}
                   >
-                    <span className={styles.statusName}>
-                      {getPlatformsPresentText(titleSummary)}
+                    <span className={styles.sizeOnDisk}>
+                      {formatBytes(sizeOnDisk)}
                     </span>
-                  </InfoLabel>
-                ) : null}
+                  </Label>
 
-                {collection ? (
-                  <InfoLabel
-                    className={styles.detailsInfoLabel}
-                    name={translate('Series')}
+                  <Label
+                    className={styles.detailsLabel}
+                    title={translate('QualityProfile')}
                     size={sizes.LARGE}
+                    icon={icons.PROFILE}
                   >
-                    <div className={styles.collection}>
-                      <GameCollectionLabel
-                        igdbId={collection.igdbId}
-                        title={collection.title}
-                      />
-                    </div>
-                  </InfoLabel>
-                ) : null}
-
-                {platform ? (
-                  <InfoLabel
-                    className={styles.detailsInfoLabel}
-                    name={translate('Platform')}
-                    size={sizes.LARGE}
-                  >
-                    <span className={styles.studio}>{platform.name}</span>
-                  </InfoLabel>
-                ) : null}
-
-                {developers.length && !isSmallScreen ? (
-                  <InfoLabel
-                    className={styles.detailsInfoLabel}
-                    name={translate('Developers')}
-                    size={sizes.LARGE}
-                  >
-                    <span className={styles.studio}>
-                      {developers.join(', ')}
+                    <span className={styles.qualityProfileName}>
+                      <QualityProfileName qualityProfileId={qualityProfileId} />
                     </span>
-                  </InfoLabel>
-                ) : null}
+                  </Label>
 
-                {publishers.length && !isSmallScreen ? (
-                  <InfoLabel
-                    className={styles.detailsInfoLabel}
-                    name={translate('Publishers')}
-                    size={sizes.LARGE}
-                  >
-                    <span className={styles.studio}>
-                      {publishers.join(', ')}
-                    </span>
-                  </InfoLabel>
-                ) : null}
+                  {isMultiPlatform && titleSummary ? (
+                    <Label
+                      className={styles.detailsLabel}
+                      title={titleSummary.versions
+                        .map((v) => v.tooltip)
+                        .join('\n')}
+                      size={sizes.LARGE}
+                      icon={icons.DISC}
+                    >
+                      <span className={styles.platformsPresent}>
+                        {getPlatformsPresentText(titleSummary)}
+                      </span>
+                    </Label>
+                  ) : null}
 
-                {genres.length && !isSmallScreen ? (
-                  <InfoLabel
-                    className={styles.detailsInfoLabel}
-                    name={translate('Genres')}
-                    size={sizes.LARGE}
-                  >
-                    <GameGenres className={styles.genres} genres={genres} />
-                  </InfoLabel>
-                ) : null}
+                  {collection ? (
+                    <Label
+                      className={styles.detailsLabel}
+                      title={translate('Series')}
+                      size={sizes.LARGE}
+                      dot={false}
+                    >
+                      <span className={styles.collection}>
+                        <GameCollectionLabel
+                          igdbId={collection.igdbId}
+                          title={collection.title}
+                        />
+                      </span>
+                    </Label>
+                  ) : null}
+
+                  {developers.length ? (
+                    <Label
+                      className={styles.detailsLabel}
+                      title={translate('Developers')}
+                      size={sizes.LARGE}
+                      icon={icons.STUDIO}
+                    >
+                      <span className={styles.network}>
+                        {developers.join(', ')}
+                      </span>
+                    </Label>
+                  ) : null}
+
+                  {publishers.length &&
+                  publishers.join() !== developers.join() ? (
+                    <Label
+                      className={styles.detailsLabel}
+                      title={translate('Publishers')}
+                      size={sizes.LARGE}
+                      icon={icons.STUDIO}
+                    >
+                      <span className={styles.network}>
+                        {publishers.join(', ')}
+                      </span>
+                    </Label>
+                  ) : null}
+                </div>
               </div>
 
-              <div ref={overviewRef} className={styles.overview}>
-                <TextTruncate
-                  line={Math.floor(
-                    overviewHeight / (defaultFontSize * lineHeight)
-                  )}
-                  text={overview}
-                />
+              <div className={styles.heroFooter}>
+                <GameDetailsPath path={path} />
+
+                <MetadataAttribution />
               </div>
             </div>
           </div>
         </div>
 
         <div className={styles.contentContainer}>
+          {overview ? (
+            <section className={styles.overviewSection}>
+              <div className={styles.overviewFrame} aria-hidden="true">
+                <span className={styles.overviewLabel}>
+                  {translate('Overview')}
+                </span>
+              </div>
+
+              <p
+                ref={overviewTextRef}
+                className={classNames(
+                  styles.overview,
+                  !isOverviewExpanded && styles.overviewClamped
+                )}
+              >
+                {overview}
+              </p>
+
+              {isOverviewClamped || isOverviewExpanded ? (
+                <Link
+                  className={styles.overviewToggle}
+                  onPress={handleToggleOverview}
+                >
+                  {isOverviewExpanded ? translate('Less') : translate('More')}
+                </Link>
+              ) : null}
+            </section>
+          ) : null}
+
           {!isFetching && gameFilesError ? (
             <Alert kind={kinds.DANGER}>
               {translate('LoadingGameFilesFailed')}

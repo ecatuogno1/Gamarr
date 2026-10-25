@@ -1,10 +1,9 @@
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import CriticRating from 'Components/CriticRating';
-import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import Popover from 'Components/Tooltip/Popover';
@@ -64,13 +63,18 @@ class DiscoverGamePoster extends Component {
     }
   };
 
-  onChange = ({ value, shiftKey }) => {
+  onSelectPress = (event) => {
     const {
       igdbId,
+      isSelected,
       onSelectedChange
     } = this.props;
 
-    onSelectedChange({ id: igdbId, value, shiftKey });
+    onSelectedChange({
+      id: igdbId,
+      value: !isSelected,
+      shiftKey: !!event?.nativeEvent?.shiftKey
+    });
   };
 
   //
@@ -117,59 +121,55 @@ class DiscoverGamePoster extends Component {
     return (
       <div className={styles.content}>
         <div className={styles.posterContainer} title={title}>
-          {
-            <div className={styles.editorSelect}>
-              <CheckInput
-                className={styles.checkInput}
-                name={igdbId.toString()}
-                value={isSelected}
-                onChange={this.onChange}
-              />
-            </div>
-          }
+          <Link
+            className={styles.selectButton}
+            aria-label={translate('Select')}
+            onPress={this.onSelectPress}
+          >
+            <Icon
+              className={isSelected ? styles.selected : styles.unselected}
+              name={isSelected ? icons.CHECK_CIRCLE : icons.CIRCLE}
+              size={20}
+            />
+          </Link>
 
-          <Label className={styles.controls}>
+          <div className={styles.controls}>
             <IconButton
               className={styles.action}
               name={icons.REMOVE}
               title={isExcluded ? translate('GameAlreadyExcluded') : translate('ExcludeGame')}
-              onPress={this.onExcludeGamePress}
+              tabIndex={-1}
               isDisabled={isExcluded}
+              onPress={this.onExcludeGamePress}
             />
-            <span className={styles.externalLinks}>
-              <Popover
-                anchor={
-                  <Icon
-                    name={icons.EXTERNAL_LINK}
-                    size={12}
-                  />
-                }
-                title={translate('Links')}
-                body={
-                  <GameDetailsLinks
-                    igdbId={igdbId}
-                    igdbSlug={igdbSlug}
-                    youTubeTrailerId={youTubeTrailerId}
-                  />
-                }
-              />
-            </span>
-          </Label>
+
+            <Popover
+              className={styles.action}
+              anchor={<Icon name={icons.EXTERNAL_LINK} />}
+              title={translate('Links')}
+              body={
+                <GameDetailsLinks
+                  igdbId={igdbId}
+                  igdbSlug={igdbSlug}
+                  youTubeTrailerId={youTubeTrailerId}
+                />
+              }
+            />
+          </div>
 
           {
-            isExcluded &&
+            isExisting || isExcluded ?
               <div
-                className={styles.excluded}
-                title={translate('Excluded')}
-              />
-          }
-
-          {
-            isExisting &&
-              <div
-                className={styles.existing}
-                title={translate('Existing')}
-              />
+                className={classNames(
+                  styles.status,
+                  isExisting ? styles.existing : styles.excluded
+                )}
+              >
+                <span className={styles.statusLabel}>
+                  {isExisting ? translate('Existing') : translate('Excluded')}
+                </span>
+              </div> :
+              null
           }
 
           {
@@ -186,7 +186,6 @@ class DiscoverGamePoster extends Component {
             {...linkProps}
           >
             <GamePoster
-              className={styles.poster}
               style={elementStyle}
               images={images}
               size={250}
@@ -212,13 +211,13 @@ class DiscoverGamePoster extends Component {
           null}
 
         {showIgdbRating && !!ratings.igdb ? (
-          <div className={styles.title}>
+          <div className={styles.meta}>
             <IgdbRating ratings={ratings} iconSize={12} />
           </div>
         ) : null}
 
         {showCriticRating && !!ratings.critic ? (
-          <div className={styles.title}>
+          <div className={styles.meta}>
             <CriticRating ratings={ratings} iconSize={12} />
           </div>
         ) : null}

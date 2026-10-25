@@ -2,11 +2,12 @@ import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
-import { kinds } from 'Helpers/Props';
 import { resetOAuth, startOAuth } from 'Store/Actions/oAuthActions';
 import { InputOnChange } from 'typings/inputs';
+import { useFormInputGroup } from './FormInputGroupContext';
 
 export interface OAuthInputProps {
+  id?: string;
   label?: string;
   name: string;
   provider: string;
@@ -16,6 +17,7 @@ export interface OAuthInputProps {
 }
 
 function OAuthInput({
+  id,
   label = 'Start OAuth',
   name,
   provider,
@@ -24,6 +26,7 @@ function OAuthInput({
   onChange,
 }: OAuthInputProps) {
   const dispatch = useDispatch();
+  const formInputActions = useFormInputGroup();
   const { authorizing, error, result } = useSelector(
     (state: AppState) => state.oAuth
   );
@@ -58,7 +61,9 @@ function OAuthInput({
   return (
     <div>
       <SpinnerErrorButton
-        kind={kinds.PRIMARY}
+        id={id}
+        aria-describedby={formInputActions?.describedBy}
+        aria-invalid={formInputActions?.hasError || undefined}
         isSpinning={authorizing}
         error={error}
         onPress={handlePress}

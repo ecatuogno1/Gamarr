@@ -1,15 +1,16 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-// import CheckInput from 'Components/Form/CheckInput';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import CheckInput from 'Components/Form/CheckInput';
+import AvailabilitySelectInput from 'Components/Form/Select/AvailabilitySelectInput';
+import MonitorGamesSelectInput from 'Components/Form/Select/MonitorGamesSelectInput';
+import QualityProfileSelectInput from 'Components/Form/Select/QualityProfileSelectInput';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
 import SpinnerButton from 'Components/Link/SpinnerButton';
-import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContentFooter from 'Components/Page/PageContentFooter';
 import Popover from 'Components/Tooltip/Popover';
-import { icons, inputTypes, kinds, tooltipPositions } from 'Helpers/Props';
+import { icons, kinds, tooltipPositions } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import styles from './ImportGameFooter.css';
 
@@ -91,6 +92,12 @@ class ImportGameFooter extends Component {
   render() {
     const {
       selectedCount,
+      totalCount,
+      readyCount,
+      existingCount,
+      unsearchedCount,
+      allSelected,
+      allUnselected,
       isImporting,
       isLookingUpGame,
       isMonitorMixed,
@@ -98,6 +105,7 @@ class ImportGameFooter extends Component {
       isMinimumAvailabilityMixed,
       hasUnsearchedItems,
       importError,
+      onSelectAllChange,
       onImportPress,
       onLookupPress,
       onCancelLookupPress
@@ -109,142 +117,204 @@ class ImportGameFooter extends Component {
       minimumAvailability
     } = this.state;
 
+    const needsAttentionCount = totalCount - readyCount - existingCount;
+
+    let selectAllValue = null;
+
+    if (allUnselected || !selectedCount) {
+      selectAllValue = false;
+    } else if (allSelected) {
+      selectAllValue = true;
+    }
+
     return (
-      <PageContentFooter>
-        <div className={styles.inputContainer}>
-          <div className={styles.label}>
-            {translate('Monitor')}
-          </div>
+      <PageContentFooter className={styles.footerShell}>
+        <div className={styles.defaultsBar}>
+          <div className={styles.defaultsContent}>
+            <div className={styles.defaultsIdentity}>
+              <div className={styles.defaultsTitle}>
+                {translate('Defaults')}
+              </div>
+            </div>
 
-          <FormInputGroup
-            type={inputTypes.MONITOR_GAMES_SELECT}
-            name="monitor"
-            value={monitor}
-            isDisabled={!selectedCount}
-            includeMixed={isMonitorMixed}
-            onChange={this.onInputChange}
-          />
+            <div className={styles.setting}>
+              <div className={styles.label}>
+                {translate('Monitor')}
+              </div>
+
+              <MonitorGamesSelectInput
+                name="monitor"
+                value={monitor}
+                modalTitle={translate('Monitor')}
+                isDisabled={!selectedCount}
+                includeMixed={isMonitorMixed}
+                onChange={this.onInputChange}
+              />
+            </div>
+
+            <div className={styles.setting}>
+              <div className={styles.label}>
+                {translate('MinimumAvailability')}
+              </div>
+
+              <AvailabilitySelectInput
+                name="minimumAvailability"
+                value={minimumAvailability}
+                modalTitle={translate('MinimumAvailability')}
+                isDisabled={!selectedCount}
+                includeMixed={isMinimumAvailabilityMixed}
+                onChange={this.onInputChange}
+              />
+            </div>
+
+            <div className={styles.setting}>
+              <div className={styles.label}>
+                {translate('QualityProfile')}
+              </div>
+
+              <QualityProfileSelectInput
+                name="qualityProfileId"
+                value={qualityProfileId}
+                modalTitle={translate('QualityProfile')}
+                isDisabled={!selectedCount}
+                includeMixed={isQualityProfileIdMixed}
+                onChange={this.onInputChange}
+              />
+            </div>
+          </div>
         </div>
 
-        <div className={styles.inputContainer}>
-          <div className={styles.label}>
-            {translate('MinimumAvailability')}
-          </div>
+        <div className={styles.footerContent}>
+          <div className={styles.footerRow}>
+            <div className={styles.selectionGroup}>
+              <CheckInput
+                className={styles.selectAllInput}
+                containerClassName={styles.selectAllContainer}
+                name="selectAllRows"
+                ariaLabel={translate('SelectAll')}
+                value={selectAllValue}
+                onChange={onSelectAllChange}
+              />
 
-          <FormInputGroup
-            type={inputTypes.AVAILABILITY_SELECT}
-            name="minimumAvailability"
-            value={minimumAvailability}
-            isDisabled={!selectedCount}
-            includeMixed={isMinimumAvailabilityMixed}
-            onChange={this.onInputChange}
-          />
-        </div>
+              <span className={styles.selectionLabel}>
+                {translate('CountOfTotalSelected', {
+                  selectedCount,
+                  totalCount
+                })}
+              </span>
+            </div>
 
-        <div className={styles.inputContainer}>
-          <div className={styles.label}>
-            {translate('QualityProfile')}
-          </div>
+            <div className={styles.queueStatus}>
+              <span className={styles.statusItem}>
+                <span className={styles.readyDot} />
+                <strong>{translate('CountReady', { count: readyCount })}</strong>
+              </span>
 
-          <FormInputGroup
-            type={inputTypes.QUALITY_PROFILE_SELECT}
-            name="qualityProfileId"
-            value={qualityProfileId}
-            isDisabled={!selectedCount}
-            includeMixed={isQualityProfileIdMixed}
-            onChange={this.onInputChange}
-          />
-        </div>
+              {
+                needsAttentionCount > 0 ?
+                  <span className={styles.statusItem}>
+                    <span className={styles.attentionDot} />
+                    {translate('CountPending', { count: needsAttentionCount })}
+                  </span> :
+                  null
+              }
 
-        <div>
-          <div className={styles.label}>
-            &nbsp;
-          </div>
+              {
+                existingCount ?
+                  <span className={styles.statusItem}>
+                    <span className={styles.existingDot} />
+                    {translate('CountAlreadyInLibrary', { count: existingCount })}
+                  </span> :
+                  null
+              }
+            </div>
 
-          <div className={styles.importButtonContainer}>
-            <SpinnerButton
-              className={styles.importButton}
-              kind={kinds.PRIMARY}
-              isSpinning={isImporting}
-              isDisabled={!selectedCount || isLookingUpGame}
-              onPress={onImportPress}
-            >
-              {translate('Import')} {selectedCount} {selectedCount > 1 ? translate('Games') : translate('Game')}
-            </SpinnerButton>
-
-            {
-              isLookingUpGame ?
-                <Button
-                  className={styles.loadingButton}
-                  kind={kinds.WARNING}
-                  onPress={onCancelLookupPress}
+            <div className={styles.buttonGroup}>
+              <div className={styles.importButtonContainer}>
+                <SpinnerButton
+                  className={styles.importButton}
+                  kind={kinds.DEFAULT}
+                  isSpinning={isImporting}
+                  isDisabled={!selectedCount || isLookingUpGame}
+                  onPress={onImportPress}
                 >
-                  {translate('CancelProcessing')}
-                </Button> :
-                null
-            }
-
-            {
-              hasUnsearchedItems ?
-                <Button
-                  className={styles.loadingButton}
-                  kind={kinds.SUCCESS}
-                  onPress={onLookupPress}
-                >
-                  {translate('StartProcessing')}
-                </Button> :
-                null
-            }
-
-            {
-              isLookingUpGame ?
-                <LoadingIndicator
-                  className={styles.loading}
-                  size={24}
-                /> :
-                null
-            }
-
-            {
-              isLookingUpGame ?
-                translate('ProcessingFolders') :
-                null
-            }
-
-            {
-              importError ?
-                <Popover
-                  anchor={
-                    <Icon
-                      className={styles.importError}
-                      name={icons.WARNING}
-                      kind={kinds.WARNING}
-                    />
+                  {
+                    selectedCount === 1 ?
+                      translate('ImportCountGame', { selectedCount }) :
+                      translate('ImportCountGames', { selectedCount })
                   }
-                  title={translate('ImportErrors')}
-                  body={
-                    <ul>
+                </SpinnerButton>
+
+                {
+                  isLookingUpGame ?
+                    <Button
+                      className={styles.stopButton}
+                      kind={kinds.PRIMARY}
+                      onPress={onCancelLookupPress}
+                    >
+                      <Icon
+                        name={icons.SPINNER}
+                        isSpinning={true}
+                        size={14}
+                      />
+
+                      {translate('Stop')}
+                    </Button> :
+                    null
+                }
+
+                {
+                  hasUnsearchedItems ?
+                    <Button
+                      className={styles.loadingButton}
+                      kind={kinds.PRIMARY}
+                      onPress={onLookupPress}
+                    >
                       {
-                        Array.isArray(importError.responseJSON) ?
-                          importError.responseJSON.map((error, index) => {
-                            return (
-                              <li key={index}>
-                                {error.errorMessage}
-                              </li>
-                            );
-                          }) :
-                          <li>
-                            {
-                              JSON.stringify(importError.responseJSON)
-                            }
-                          </li>
+                        unsearchedCount === 1 ?
+                          translate('SearchCountFolder', { count: unsearchedCount }) :
+                          translate('SearchCountFolders', { count: unsearchedCount })
                       }
-                    </ul>
-                  }
-                  position={tooltipPositions.RIGHT}
-                /> :
-                null
-            }
+                    </Button> :
+                    null
+                }
+
+                {
+                  importError ?
+                    <Popover
+                      anchor={
+                        <Icon
+                          className={styles.importError}
+                          name={icons.WARNING}
+                          kind={kinds.WARNING}
+                        />
+                      }
+                      title={translate('ImportErrors')}
+                      body={
+                        <ul>
+                          {
+                            Array.isArray(importError.responseJSON) ?
+                              importError.responseJSON.map((error, index) => {
+                                return (
+                                  <li key={index}>
+                                    {error.errorMessage}
+                                  </li>
+                                );
+                              }) :
+                              <li>
+                                {
+                                  JSON.stringify(importError.responseJSON)
+                                }
+                              </li>
+                          }
+                        </ul>
+                      }
+                      position={tooltipPositions.RIGHT}
+                    /> :
+                    null
+                }
+              </div>
+            </div>
           </div>
         </div>
       </PageContentFooter>
@@ -254,6 +324,12 @@ class ImportGameFooter extends Component {
 
 ImportGameFooter.propTypes = {
   selectedCount: PropTypes.number.isRequired,
+  totalCount: PropTypes.number.isRequired,
+  readyCount: PropTypes.number.isRequired,
+  existingCount: PropTypes.number.isRequired,
+  unsearchedCount: PropTypes.number.isRequired,
+  allSelected: PropTypes.bool.isRequired,
+  allUnselected: PropTypes.bool.isRequired,
   isImporting: PropTypes.bool.isRequired,
   isLookingUpGame: PropTypes.bool.isRequired,
   defaultMonitor: PropTypes.string.isRequired,
@@ -265,6 +341,7 @@ ImportGameFooter.propTypes = {
   hasUnsearchedItems: PropTypes.bool.isRequired,
   importError: PropTypes.object,
   onInputChange: PropTypes.func.isRequired,
+  onSelectAllChange: PropTypes.func.isRequired,
   onImportPress: PropTypes.func.isRequired,
   onLookupPress: PropTypes.func.isRequired,
   onCancelLookupPress: PropTypes.func.isRequired

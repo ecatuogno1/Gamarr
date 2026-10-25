@@ -25,8 +25,6 @@ function MonitorToggleButton(props: MonitorToggleButtonProps) {
     ...otherProps
   } = props;
 
-  const iconName = monitored ? icons.MONITORED : icons.UNMONITORED;
-
   const title = useMemo(() => {
     if (isDisabled) {
       return 'Cannot toggle monitored state when game is unmonitored';
@@ -51,7 +49,8 @@ function MonitorToggleButton(props: MonitorToggleButtonProps) {
   return (
     <SpinnerIconButton
       className={classNames(className, isDisabled && styles.isDisabled)}
-      name={iconName}
+      name={icons.MONITORED}
+      filled={monitored}
       size={size}
       title={title}
       isDisabled={isDisabled}

@@ -1,22 +1,29 @@
 .qualityDefinition {
   display: flex;
-  align-content: stretch;
-  margin: 5px 0;
-  padding-top: 5px;
-  height: 45px;
-  border-top: 1px solid var(--borderColor);
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hairline);
+  gap: 24px;
 }
 
-.quality,
+.quality {
+  flex: 0 0 200px;
+  overflow: hidden;
+  min-width: 0;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
 .title {
-  flex: 0 1 250px;
-  padding-right: 20px;
-  line-height: 40px;
+  flex: 0 1 240px;
+  min-width: 0;
 }
 
 .sizeLimit {
-  flex: 0 1 500px;
-  padding-right: 30px;
+  flex: 1 1 360px;
+  min-width: 0;
 }
 
 .slider {
@@ -28,66 +35,83 @@
   top: 9px;
   margin: 0 5px;
   height: 3px;
+  border-radius: 2px;
   background-color: var(--sliderAccentColor);
-  box-shadow: 0 0 0 #000;
 
   &:nth-child(3n + 1) {
-    background-color: #ddd;
+    background-color: var(--hairline);
   }
 }
 
 .thumb {
-  top: 1px;
+  top: 2px;
   z-index: 0 !important;
-  width: 18px;
-  height: 18px;
-  border: 3px solid var(--sliderAccentColor);
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--hairlineStrong);
   border-radius: 50%;
-  background-color: var(--white);
-  text-align: center;
+  background-color: var(--paperCard);
   cursor: pointer;
+
+  &:hover,
+  &:focus-visible,
+  &:active {
+    outline: none;
+    border-color: var(--accent);
+  }
 }
 
 .sizes {
   display: flex;
   justify-content: space-between;
+  margin-top: 6px;
 }
 
 .megabytesPerMinute {
+  display: grid;
+  flex: 0 0 360px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.column {
   display: flex;
-  justify-content: space-between;
-  flex: 0 0 400px;
+  flex-direction: column;
+  min-width: 0;
+  gap: 5px;
+}
+
+.caption {
+  color: var(--inkMuted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  font-size: 11px;
 }
 
 .sizeInput {
-  composes: input from '~Components/Form/TextInput.css';
+  composes: input from 'Components/Form/Input.css';
 
-  display: inline-block;
-  margin-left: 5px;
-  padding: 6px;
-  width: 75px;
+  padding: 0 10px;
+  width: 100%;
+  height: 32px;
+  font-variant-numeric: tabular-nums;
 }
 
-@media only screen and (max-width: $breakpointSmall) {
+@media (--breakpointSmall) {
   .qualityDefinition {
     flex-wrap: wrap;
-    height: auto;
-
-    &:first-child {
-      border-top: none;
-    }
-  }
-
-  .qualityDefinition:first-child {
-    border-top: none;
+    gap: 8px;
   }
 
   .quality {
-    font-weight: bold;
-    line-height: inherit;
+    flex-basis: 100%;
+    font-weight: 500;
   }
 
-  .sizeLimit {
-    margin-top: 10px;
+  .title,
+  .sizeLimit,
+  .megabytesPerMinute {
+    flex-basis: 100%;
   }
 }

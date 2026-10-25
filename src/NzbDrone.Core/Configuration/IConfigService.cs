@@ -71,6 +71,7 @@ namespace NzbDrone.Core.Configuration
         string TimeFormat { get; set; }
         bool ShowRelativeDates { get; set; }
         bool EnableColorImpairedMode { get; set; }
+        string HeaderColor { get; set; }
         int GameInfoLanguage { get; set; }
         int UILanguage { get; set; }
 

@@ -1,98 +1,129 @@
 .header {
-  z-index: 3;
   display: flex;
   align-items: center;
   flex: 0 0 auto;
-  height: $headerHeight;
+  padding: 0 20px 0 0;
+  height: var(--headerHeight);
+  border-bottom: 1px solid var(--pageHeaderBorderColor);
   background-color: var(--pageHeaderBackgroundColor);
-  color: var(--white);
+  background-image: var(--pageHeaderBackgroundImage);
+  color: var(--pageHeaderColor);
 }
 
 .logoContainer {
   display: flex;
   align-items: center;
-  flex: 0 0 $sidebarWidth;
+  flex: 0 0 var(--sidebarWidth);
   padding-left: 20px;
 }
 
 .logoLink {
+  display: inline-flex;
+  align-items: center;
+  color: var(--pageHeaderBrandColor);
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  font-size: 15px;
+  font-family: var(--defaultFontFamily);
   line-height: 0;
-}
+  gap: 10px;
 
-.logoFull,
-.logo {
-  vertical-align: middle;
-}
-
-.logoFull {
-  margin-left: 15px;
-  width: 120px;
-  height: 40px;
+  &:hover {
+    color: var(--pageHeaderBrandColor);
+    text-decoration: none;
+  }
 }
 
 .logo {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
+}
+
+.brandName {
+  color: var(--pageHeaderBrandColor);
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1;
 }
 
 .sidebarToggleContainer {
   display: none;
   justify-content: center;
   flex: 0 0 45px;
-  margin-right: 14px;
+  margin-right: 8px;
+}
+
+.sidebarToggle {
+  composes: button from 'Components/Link/IconButton.css';
+
+  &:hover {
+    color: var(--pageHeaderColor);
+  }
 }
 
 .right {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 4px;
+
   flex-grow: 1;
 }
 
-.translate {
-  composes: link from '~Components/Link/Link.css';
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 35px;
-  color: #fff;
-  text-align: center;
-  line-height: 60px;
-
-  &:hover {
-    color: var(--toobarButtonHoverColor);
-  }
-}
-
 .donate {
-  composes: link from '~Components/Link/Link.css';
+  composes: link from 'Components/Link/Link.css';
 
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  color: var(--themeRed);
+  width: var(--chipSize);
+  height: var(--chipSize);
+  border-radius: 6px;
+  color: var(--pageHeaderDonateColor);
   text-align: center;
-  line-height: 60px;
+  transition:
+    color var(--transitionSmooth),
+    background-color var(--transitionSmooth);
 
   &:hover {
-    color: #9c1f30;
+    background-color: var(--pageHeaderHoverBackgroundColor);
   }
 }
 
-@media only screen and (max-width: $breakpointSmall) {
+.donateIcon {
+  transition: fill var(--transitionSmooth);
+}
+
+.donate:hover .donateIcon {
+  fill: currentColor;
+}
+
+@media (--breakpointSmall) {
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: var(--pageHeaderZIndex);
+  }
+
   .logoContainer {
-    flex: 0 0 60px;
+    flex: 0 0 auto;
+    padding-left: 16px;
+  }
+
+  .brandName {
+    display: none;
   }
 
   .sidebarToggleContainer {
     display: flex;
   }
-}
 
-@media only screen and (max-width: $breakpointExtraSmall) {
-  .donate,
-  .translate {
+  .donate {
     display: none;
+  }
+
+  .right {
+    flex-grow: 0;
   }
 }

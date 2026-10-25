@@ -3,15 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import Button from 'Components/Link/Button';
 import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
 import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
+import ModalSection from 'Components/ModalSection';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import { inputTypes, kinds } from 'Helpers/Props';
 import {
@@ -111,97 +113,100 @@ function EditReleaseProfileModalContent({
 
   return (
     <ModalContent onModalClose={onModalClose}>
-      <ModalHeader>
+      <ModalHeader subtitle={id ? name.previousValue ?? name.value : undefined}>
         {id ? translate('EditReleaseProfile') : translate('AddReleaseProfile')}
       </ModalHeader>
-
       <ModalBody>
         <Form {...otherProps}>
-          <FormGroup>
+          <FormRow>
             <FormLabel>{translate('Name')}</FormLabel>
 
-            <FormInputGroup
+            <FormInput
               type={inputTypes.TEXT}
               name="name"
               {...name}
               placeholder={translate('OptionalName')}
               onChange={handleInputChange}
             />
-          </FormGroup>
+          </FormRow>
 
-          <FormGroup>
+          <FormRow>
             <FormLabel>{translate('EnableProfile')}</FormLabel>
-
-            <FormInputGroup
+            <FormInputHelpText text={translate('EnableProfileHelpText')} />
+            <FormInput
               type={inputTypes.CHECK}
               name="enabled"
-              helpText={translate('EnableProfileHelpText')}
               {...enabled}
               onChange={handleInputChange}
             />
-          </FormGroup>
+          </FormRow>
 
-          <FormGroup>
-            <FormLabel>{translate('MustContain')}</FormLabel>
+          <ModalSection title={translate('ProfileSectionPatterns')}>
+            <FormRow>
+              <FormLabel>{translate('MustContain')}</FormLabel>
+              <FormInputHelpText text={translate('MustContainHelpText')} />
+              <FormInput
+                {...required}
+                inputClassName={styles.tagInternalInput}
+                type={inputTypes.TEXT_TAG}
+                name="required"
+                kind={kinds.SUCCESS}
+                placeholder={translate('AddNewRestriction')}
+                delimiters={tagInputDelimiters}
+                canEdit={true}
+                onChange={handleInputChange}
+              />
+            </FormRow>
 
-            <FormInputGroup
-              {...required}
-              inputClassName={styles.tagInternalInput}
-              type={inputTypes.TEXT_TAG}
-              name="required"
-              helpText={translate('MustContainHelpText')}
-              kind={kinds.SUCCESS}
-              placeholder={translate('AddNewRestriction')}
-              delimiters={tagInputDelimiters}
-              canEdit={true}
-              onChange={handleInputChange}
-            />
-          </FormGroup>
+            <FormRow>
+              <FormLabel>{translate('MustNotContain')}</FormLabel>
+              <FormInputHelpText text={translate('MustNotContainHelpText')} />
+              <FormInput
+                {...ignored}
+                inputClassName={styles.tagInternalInput}
+                type={inputTypes.TEXT_TAG}
+                name="ignored"
+                kind={kinds.DANGER}
+                placeholder={translate('AddNewRestriction')}
+                delimiters={tagInputDelimiters}
+                canEdit={true}
+                onChange={handleInputChange}
+              />
+            </FormRow>
+          </ModalSection>
 
-          <FormGroup>
-            <FormLabel>{translate('MustNotContain')}</FormLabel>
+          <ModalSection title={translate('ProfileSectionScope')}>
+            <FormRow>
+              <FormLabel>{translate('Indexer')}</FormLabel>
+              <FormInputHelpText
+                text={translate('ReleaseProfileIndexerHelpText')}
+              />
+              <FormInputHelpText
+                text={translate('ReleaseProfileIndexerHelpTextWarning')}
+                isWarning={true}
+              />
+              <FormInput
+                type={inputTypes.INDEXER_SELECT}
+                name="indexerId"
+                {...indexerId}
+                includeAny={true}
+                onChange={handleInputChange}
+              />
+            </FormRow>
 
-            <FormInputGroup
-              {...ignored}
-              inputClassName={styles.tagInternalInput}
-              type={inputTypes.TEXT_TAG}
-              name="ignored"
-              helpText={translate('MustNotContainHelpText')}
-              kind={kinds.DANGER}
-              placeholder={translate('AddNewRestriction')}
-              delimiters={tagInputDelimiters}
-              canEdit={true}
-              onChange={handleInputChange}
-            />
-          </FormGroup>
-
-          <FormGroup>
-            <FormLabel>{translate('Indexer')}</FormLabel>
-
-            <FormInputGroup
-              type={inputTypes.INDEXER_SELECT}
-              name="indexerId"
-              helpText={translate('ReleaseProfileIndexerHelpText')}
-              helpTextWarning={translate(
-                'ReleaseProfileIndexerHelpTextWarning'
-              )}
-              {...indexerId}
-              includeAny={true}
-              onChange={handleInputChange}
-            />
-          </FormGroup>
-
-          <FormGroup>
-            <FormLabel>{translate('Tags')}</FormLabel>
-
-            <FormInputGroup
-              type={inputTypes.TAG}
-              name="tags"
-              helpText={translate('ReleaseProfileTagGameHelpText')}
-              {...tags}
-              onChange={handleInputChange}
-            />
-          </FormGroup>
+            <FormRow>
+              <FormLabel>{translate('Tags')}</FormLabel>
+              <FormInputHelpText
+                text={translate('ReleaseProfileTagGameHelpText')}
+              />
+              <FormInput
+                type={inputTypes.TAG}
+                name="tags"
+                {...tags}
+                onChange={handleInputChange}
+              />
+            </FormRow>
+          </ModalSection>
         </Form>
       </ModalBody>
       <ModalFooter>

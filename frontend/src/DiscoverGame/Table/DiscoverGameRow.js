@@ -94,7 +94,6 @@ class DiscoverGameRow extends Component {
     return (
       <>
         <VirtualTableSelectCell
-          inputClassName={styles.checkInput}
           id={igdbId}
           key={name}
           isSelected={isSelected}

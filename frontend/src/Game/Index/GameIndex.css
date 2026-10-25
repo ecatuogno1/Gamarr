@@ -11,7 +11,7 @@
 }
 
 .contentBody {
-  composes: contentBody from '~Components/Page/PageContentBody.css';
+  composes: contentBody from 'Components/Page/PageContentBody.css';
 
   position: relative;
   display: flex;
@@ -19,22 +19,36 @@
 }
 
 .postersInnerContentBody {
-  composes: innerContentBody from '~Components/Page/PageContentBody.css';
+  composes: innerContentBody from 'Components/Page/PageContentBody.css';
 
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-
-  /* 5px less padding than normal to handle poster's 5px margin */
-  padding: calc($pageContentBodyPadding - 5px);
+  padding: calc(var(--pageContentBodyPadding) - 5px);
+  padding-top: 12px;
 }
 
 .tableInnerContentBody {
-  composes: innerContentBody from '~Components/Page/PageContentBody.css';
+  composes: innerContentBody from 'Components/Page/PageContentBody.css';
 
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+}
+
+.overviewInnerContentBody {
+  composes: innerContentBody from 'Components/Page/PageContentBody.css';
+
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  padding: calc(var(--pageContentBodyPadding) - 5px);
+  padding-top: unset;
+}
+
+.hasJumpBar {
+  padding-right: 12px;
 }
 
 .contentBodyContainer {
@@ -43,7 +57,7 @@
   flex-grow: 1;
 }
 
-@media only screen and (max-width: $breakpointSmall) {
+@media (--breakpointSmall) {
   .pageContentBodyWrapper {
     flex-basis: auto;
   }
@@ -53,6 +67,6 @@
   }
 
   .postersInnerContentBody {
-    padding: calc($pageContentBodyPaddingSmallScreen - 5px);
+    padding: calc(var(--pageContentBodyPaddingSmallScreen) - 5px);
   }
 }

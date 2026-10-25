@@ -11,9 +11,9 @@ import { getTitleWithPlatform } from 'Game/Title/gameTitle';
 import useGameFile from 'GameFile/useGameFile';
 import { icons, kinds } from 'Helpers/Props';
 import { createQueueItemSelectorForHook } from 'Store/Selectors/createQueueItemSelector';
-import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
 import translate from 'Utilities/String/translate';
 import CalendarEventQueueDetails from './CalendarEventQueueDetails';
+import getCalendarStatusLabel from './getCalendarStatusLabel';
 import styles from './CalendarEvent.css';
 
 interface CalendarEventProps {
@@ -47,8 +47,6 @@ function CalendarEvent({
 }: CalendarEventProps) {
   const gameFile = useGameFile(gameFileId);
   const queueItem = useSelector(createQueueItemSelectorForHook(id));
-
-  const { enableColorImpairedMode } = useSelector(createUISettingsSelector());
 
   const {
     showGameInformation,
@@ -88,11 +86,18 @@ function CalendarEvent({
       className={classNames(
         styles.event,
         styles[statusStyle],
-        enableColorImpairedMode && 'colorImpaired',
         fullColorEvents && 'fullColor'
       )}
     >
-      <Link className={styles.underlay} to={link} />
+      <Link
+        className={styles.underlay}
+        aria-label={translate('CalendarOpenGame', {
+          title,
+          releaseTypes: eventTypes.join(', '),
+          status: getCalendarStatusLabel(statusStyle),
+        })}
+        to={link}
+      />
 
       <div className={styles.overlay}>
         <div className={styles.info}>
@@ -125,7 +130,7 @@ function CalendarEvent({
             gameFile.qualityCutoffNotMet ? (
               <Icon
                 className={styles.statusIcon}
-                name={icons.GAME_FILE}
+                name={icons.CUTOFF_NOT_MET}
                 kind={kinds.WARNING}
                 title={translate('QualityCutoffNotMet')}
               />
@@ -135,9 +140,11 @@ function CalendarEvent({
 
         {showGameInformation ? (
           <>
-            <div className={styles.gameInfo}>
-              <div className={styles.genres}>{joinedGenres}</div>
-            </div>
+            {joinedGenres ? (
+              <div className={styles.gameInfo}>
+                <div className={styles.genres}>{joinedGenres}</div>
+              </div>
+            ) : null}
 
             <div className={styles.gameInfo}>
               <div className={styles.eventType}>{eventTypes.join(', ')}</div>

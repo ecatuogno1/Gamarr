@@ -1,17 +1,19 @@
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Card from 'Components/Card';
+import ProtocolLabel from 'Activity/Queue/ProtocolLabel';
 import Label from 'Components/Label';
-import IconButton from 'Components/Link/IconButton';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
+import SettingsCard from 'Components/SettingsCard/SettingsCard';
+import settingsCardStyles from 'Components/SettingsCard/SettingsCard.css';
+import SettingsCardAction from 'Components/SettingsCard/SettingsCardAction';
+import SettingsCardStatus from 'Components/SettingsCard/SettingsCardStatus';
 import TagList from 'Components/TagList';
-import { icons, kinds } from 'Helpers/Props';
+import { icons, kinds, sizes } from 'Helpers/Props';
 import { deleteIndexer } from 'Store/Actions/settingsActions';
 import createTagsSelector from 'Store/Selectors/createTagsSelector';
 import IndexerModel from 'typings/Indexer';
 import translate from 'Utilities/String/translate';
 import EditIndexerModal from './EditIndexerModal';
-import styles from './Indexer.css';
 
 interface IndexerProps extends IndexerModel {
   showPriority: boolean;
@@ -28,6 +30,7 @@ function Indexer({
   supportsRss,
   supportsSearch,
   priority,
+  protocol,
   showPriority,
   onCloneIndexerPress,
 }: IndexerProps) {
@@ -63,50 +66,56 @@ function Indexer({
     onCloneIndexerPress(id);
   }, [id, onCloneIndexerPress]);
 
-  return (
-    <Card
-      className={styles.indexer}
-      overlayContent={true}
-      onPress={handleEditIndexerPress}
-    >
-      <div className={styles.nameContainer}>
-        <div className={styles.name}>{name}</div>
+  const enabled = enableRss || enableAutomaticSearch || enableInteractiveSearch;
 
-        <IconButton
-          className={styles.cloneButton}
+  return (
+    <SettingsCard
+      name={name}
+      aria-label={translate('EditIndexerName', { name })}
+      actions={
+        <SettingsCardAction
           title={translate('CloneIndexer')}
           name={icons.CLONE}
           onPress={handleCloneIndexerPress}
         />
-      </div>
+      }
+      onPress={handleEditIndexerPress}
+    >
+      <SettingsCardStatus
+        dot={enabled ? 'active' : 'muted'}
+        segments={[
+          translate(enabled ? 'Enabled' : 'Disabled'),
+          showPriority ? (
+            <>
+              {translate('Priority')} {priority}
+            </>
+          ) : null,
+        ]}
+      />
 
-      <div className={styles.enabled}>
+      <div className={settingsCardStyles.labels}>
+        <ProtocolLabel protocol={protocol} />
+
         {supportsRss && enableRss ? (
-          <Label kind={kinds.SUCCESS}>{translate('Rss')}</Label>
+          <Label dot={false} kind={kinds.DEFAULT} size={sizes.MEDIUM}>
+            {translate('Rss')}
+          </Label>
         ) : null}
 
         {supportsSearch && enableAutomaticSearch ? (
-          <Label kind={kinds.SUCCESS}>{translate('AutomaticSearch')}</Label>
-        ) : null}
-
-        {supportsSearch && enableInteractiveSearch ? (
-          <Label kind={kinds.SUCCESS}>{translate('InteractiveSearch')}</Label>
-        ) : null}
-
-        {showPriority ? (
-          <Label kind={kinds.DEFAULT}>
-            {translate('Priority')}: {priority}
+          <Label dot={false} kind={kinds.DEFAULT} size={sizes.MEDIUM}>
+            {translate('AutomaticSearch')}
           </Label>
         ) : null}
 
-        {!enableRss && !enableAutomaticSearch && !enableInteractiveSearch ? (
-          <Label kind={kinds.DISABLED} outline={true}>
-            {translate('Disabled')}
+        {supportsSearch && enableInteractiveSearch ? (
+          <Label dot={false} kind={kinds.DEFAULT} size={sizes.MEDIUM}>
+            {translate('InteractiveSearch')}
           </Label>
         ) : null}
       </div>
 
-      <TagList tags={tags} tagList={tagList} />
+      {tags.length > 0 ? <TagList tags={tags} tagList={tagList} /> : null}
 
       <EditIndexerModal
         id={id}
@@ -124,7 +133,7 @@ function Indexer({
         onConfirm={handleConfirmDeleteIndexer}
         onCancel={handleDeleteIndexerModalClose}
       />
-    </Card>
+    </SettingsCard>
   );
 }
 

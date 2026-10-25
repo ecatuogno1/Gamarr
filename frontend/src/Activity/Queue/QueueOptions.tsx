@@ -1,9 +1,10 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import { inputTypes } from 'Helpers/Props';
 import { gotoQueuePage, setQueueOption } from 'Store/Actions/queueActions';
 import { InputChanged } from 'typings/inputs';
@@ -31,17 +32,18 @@ function QueueOptions() {
   );
 
   return (
-    <FormGroup>
+    <FormRow>
       <FormLabel>{translate('ShowUnknownGameItems')}</FormLabel>
 
-      <FormInputGroup
+      <FormInputHelpText text={translate('ShowUnknownGameItemsHelpText')} />
+
+      <FormInput
         type={inputTypes.CHECK}
         name="includeUnknownGameItems"
         value={includeUnknownGameItems}
-        helpText={translate('ShowUnknownGameItemsHelpText')}
         onChange={handleOptionChange}
       />
-    </FormGroup>
+    </FormRow>
   );
 }
 

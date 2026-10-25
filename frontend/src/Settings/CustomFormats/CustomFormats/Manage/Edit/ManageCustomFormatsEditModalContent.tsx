@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import Button from 'Components/Link/Button';
 import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
@@ -92,17 +92,17 @@ function ManageCustomFormatsEditModalContent(
       <ModalHeader>{translate('EditSelectedCustomFormats')}</ModalHeader>
 
       <ModalBody>
-        <FormGroup>
+        <FormRow>
           <FormLabel>{translate('IncludeCustomFormatWhenRenaming')}</FormLabel>
 
-          <FormInputGroup
+          <FormInput
             type={inputTypes.SELECT}
             name="includeCustomFormatWhenRenaming"
             value={includeCustomFormatWhenRenaming}
             values={enableOptions}
             onChange={onInputChange}
           />
-        </FormGroup>
+        </FormRow>
       </ModalBody>
 
       <ModalFooter className={styles.modalFooter}>
@@ -112,7 +112,7 @@ function ManageCustomFormatsEditModalContent(
           })}
         </div>
 
-        <div>
+        <div className={styles.buttons}>
           <Button onPress={onModalClose}>{translate('Cancel')}</Button>
 
           <Button onPress={save}>{translate('ApplyChanges')}</Button>

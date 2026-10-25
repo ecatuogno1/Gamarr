@@ -1,6 +1,13 @@
 .label {
-  margin-bottom: 3px;
-  font-weight: bold;
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  color: var(--inkMuted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  font-size: 0.6875rem;
+  line-height: 1;
 }
 
 .savingIcon {

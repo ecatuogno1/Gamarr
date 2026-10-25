@@ -215,7 +215,7 @@ function InteractiveSearchRow(props: InteractiveSearchRowProps) {
 
         {isBlocklisted ? (
           <Icon
-            containerClassName={
+            titleWrapperClassName={
               history ? styles.blocklistIconContainer : undefined
             }
             name={icons.BLOCKLIST}

@@ -12,8 +12,8 @@ interface CssExports {
   'loading': string;
   'mobileCloseButton': string;
   'mobileCloseButtonContainer': string;
+  'mobileTitle': string;
   'options': string;
-  'optionsContainer': string;
   'optionsInnerModalBody': string;
   'optionsModal': string;
   'optionsModalBody': string;

@@ -2,21 +2,24 @@
 // Please do not change this file!
 interface CssExports {
   'action': string;
-  'container': string;
   'content': string;
+  'continuing': string;
   'controls': string;
   'deleted': string;
-  'editorSelect': string;
-  'externalLinks': string;
+  'ended': string;
+  'lineIcon': string;
   'link': string;
+  'meta': string;
+  'metaSep': string;
   'nextAiring': string;
   'overlayTitle': string;
   'platforms': string;
-  'poster': string;
   'posterContainer': string;
+  'status': string;
+  'statusLabel': string;
   'tags': string;
-  'tagsList': string;
   'title': string;
+  'upcoming': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

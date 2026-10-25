@@ -4,7 +4,7 @@ import Alert from 'Components/Alert';
 import FileBrowserModal from 'Components/FileBrowser/FileBrowserModal';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
-import { icons, kinds, sizes } from 'Helpers/Props';
+import { icons, kinds } from 'Helpers/Props';
 import { addRootFolder } from 'Store/Actions/rootFolderActions';
 import createRootFoldersSelector from 'Store/Selectors/createRootFoldersSelector';
 import translate from 'Utilities/String/translate';
@@ -52,11 +52,7 @@ function AddRootFolder() {
       ) : null}
 
       <div className={styles.addRootFolderButtonContainer}>
-        <Button
-          kind={kinds.PRIMARY}
-          size={sizes.LARGE}
-          onPress={onAddNewRootFolderPress}
-        >
+        <Button kind={kinds.PRIMARY} onPress={onAddNewRootFolderPress}>
           <Icon className={styles.importButtonIcon} name={icons.DRIVE} />
           {translate('AddRootFolder')}
         </Button>

@@ -6,8 +6,8 @@ interface CssExports {
   'deleteGroupButton': string;
   'dragHandle': string;
   'dragIcon': string;
-  'editGroups': string;
   'groupQualities': string;
+  'isDragActive': string;
   'isDragging': string;
   'items': string;
   'name': string;

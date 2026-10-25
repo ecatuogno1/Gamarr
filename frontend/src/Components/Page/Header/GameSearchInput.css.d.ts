@@ -3,14 +3,16 @@
 interface CssExports {
   'addNewGameSuggestion': string;
   'container': string;
-  'containerOpen': string;
+  'dropdown': string;
   'gameContainer': string;
   'highlighted': string;
   'input': string;
+  'inputWrapper': string;
   'list': string;
   'listItem': string;
   'loading': string;
   'ripple': string;
+  'searchIcon': string;
   'sectionTitle': string;
   'wrapper': string;
 }

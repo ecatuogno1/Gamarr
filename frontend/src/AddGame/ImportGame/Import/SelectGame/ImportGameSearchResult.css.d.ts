@@ -3,7 +3,10 @@
 interface CssExports {
   'container': string;
   'game': string;
+  'gameCell': string;
+  'highlighted': string;
   'igdbLink': string;
+  'igdbLinkCell': string;
   'igdbLinkIcon': string;
 }
 export const cssExports: CssExports;

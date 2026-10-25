@@ -2,7 +2,6 @@ import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useSelect } from 'App/SelectContext';
 import CriticRating from 'Components/CriticRating';
-import GameTagList from 'Components/GameTagList';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
 import IconButton from 'Components/Link/IconButton';
@@ -27,6 +26,7 @@ import firstCharToUpper from 'Utilities/String/firstCharToUpper';
 import translate from 'Utilities/String/translate';
 import GameStatusCell from './GameStatusCell';
 import selectTableOptions from './selectTableOptions';
+import TagsCell from './TagsCell';
 import styles from './GameIndexRow.css';
 
 interface GameIndexRowProps {
@@ -236,7 +236,9 @@ function GameIndexRow(props: GameIndexRowProps) {
         if (name === 'qualityProfileId') {
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              {qualityProfileNames.join(', ')}
+              <span className={styles.qualityChip}>
+                {qualityProfileNames.join(', ')}
+              </span>
             </VirtualTableRowCell>
           );
         }
@@ -396,11 +398,7 @@ function GameIndexRow(props: GameIndexRowProps) {
         }
 
         if (name === 'tags') {
-          return (
-            <VirtualTableRowCell key={name} className={styles[name]}>
-              <GameTagList tags={tags} />
-            </VirtualTableRowCell>
-          );
+          return <TagsCell key={name} className={styles[name]} tags={tags} />;
         }
 
         if (name === 'actions') {

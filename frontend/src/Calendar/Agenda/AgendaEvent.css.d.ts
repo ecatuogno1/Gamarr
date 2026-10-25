@@ -2,7 +2,7 @@
 // Please do not change this file!
 interface CssExports {
   'continuing': string;
-  'date': string;
+  'cover': string;
   'downloaded': string;
   'event': string;
   'eventWrapper': string;
@@ -14,7 +14,6 @@ interface CssExports {
   'queue': string;
   'releaseIcon': string;
   'statusIcon': string;
-  'time': string;
   'underlay': string;
   'unmonitored': string;
 }

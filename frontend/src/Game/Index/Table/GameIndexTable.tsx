@@ -15,10 +15,8 @@ import GameIndexRow from './GameIndexRow';
 import GameIndexTableHeader from './GameIndexTableHeader';
 import styles from './GameIndexTable.css';
 
-const bodyPadding = parseInt(dimensions.pageContentBodyPadding);
-const bodyPaddingSmallScreen = parseInt(
-  dimensions.pageContentBodyPaddingSmallScreen
-);
+const bodyPadding = dimensions.pageContentBodyPadding;
+const bodyPaddingSmallScreen = dimensions.pageContentBodyPaddingSmallScreen;
 
 interface RowItemData {
   items: GameTitleItem[];

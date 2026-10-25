@@ -2,19 +2,20 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import Alert from 'Components/Alert';
-import FieldSet from 'Components/FieldSet';
 import CheckInput from 'Components/Form/CheckInput';
 import TextInput from 'Components/Form/TextInput';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
-import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
+import PageHeading from 'Components/Page/PageHeading';
+import SectionHeading from 'Components/SectionHeading';
 import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import Column from 'Components/Table/Column';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
 import TableRow from 'Components/Table/TableRow';
 import { kinds } from 'Helpers/Props';
-import SettingsToolbar from 'Settings/SettingsToolbar';
+import settingsStyles from 'Settings/Settings.css';
+import SettingsPage from 'Settings/SettingsPage';
 import { savePlatformEnabled } from 'Store/Actions/settingsActions';
 import { CheckInputChanged, InputChanged } from 'typings/inputs';
 import Platform, { PlatformFamily } from 'typings/Platform';
@@ -183,51 +184,62 @@ function PlatformSettings() {
   const enabledCount = items.filter((p) => p.enabled).length;
 
   return (
-    <PageContent title={translate('Platforms')}>
-      <SettingsToolbar showSave={false} />
-
+    <SettingsPage title={translate('Platforms')} showSave={false}>
       <PageContentBody>
-        <Alert kind={kinds.INFO}>
-          {translate('PlatformSettingsSummary', {
-            enabledCount,
-            count: items.length,
-          })}
-        </Alert>
-
-        <div className={styles.filter}>
-          <TextInput
-            name="platformFilter"
-            value={filter}
-            placeholder={translate('PlatformFilterPlaceholder')}
-            onChange={handleFilterChange}
+        <div className={settingsStyles.section}>
+          <PageHeading
+            scope={translate('Settings')}
+            title={translate('Platforms')}
+            subtitle={translate('PlatformSettingsSummary', {
+              enabledCount,
+              count: items.length,
+            })}
+            actions={
+              <div className={styles.filter}>
+                <TextInput
+                  name="platformFilter"
+                  value={filter}
+                  placeholder={translate('PlatformFilterPlaceholder')}
+                  onChange={handleFilterChange}
+                />
+              </div>
+            }
           />
+
+          {isFetching && !isPopulated ? <LoadingIndicator /> : null}
+
+          {!isFetching && error ? (
+            <Alert kind={kinds.DANGER}>{translate('PlatformsLoadError')}</Alert>
+          ) : null}
+
+          {isPopulated
+            ? groups.map(({ family, platforms }) => (
+                <div key={family} className={settingsStyles.pageSection}>
+                  <SectionHeading
+                    title={getFamilyName(family)}
+                    description={translate('PlatformsEnabledOfCount', {
+                      enabledCount: platforms.filter((p) => p.enabled).length,
+                      count: platforms.length,
+                    })}
+                  />
+
+                  <Table columns={columns}>
+                    <TableBody>
+                      {platforms.map((platform) => (
+                        <PlatformRow
+                          key={platform.id}
+                          platform={platform}
+                          onEnabledChange={handleEnabledChange}
+                        />
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ))
+            : null}
         </div>
-
-        {isFetching && !isPopulated ? <LoadingIndicator /> : null}
-
-        {!isFetching && error ? (
-          <Alert kind={kinds.DANGER}>{translate('PlatformsLoadError')}</Alert>
-        ) : null}
-
-        {isPopulated
-          ? groups.map(({ family, platforms }) => (
-              <FieldSet key={family} legend={getFamilyName(family)}>
-                <Table columns={columns}>
-                  <TableBody>
-                    {platforms.map((platform) => (
-                      <PlatformRow
-                        key={platform.id}
-                        platform={platform}
-                        onEnabledChange={handleEnabledChange}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              </FieldSet>
-            ))
-          : null}
       </PageContentBody>
-    </PageContent>
+    </SettingsPage>
   );
 }
 

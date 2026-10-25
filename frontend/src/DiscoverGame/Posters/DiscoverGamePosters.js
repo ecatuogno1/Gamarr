@@ -10,10 +10,8 @@ import DiscoverGamePosterConnector from './DiscoverGamePosterConnector';
 import styles from './DiscoverGamePosters.css';
 
 // Poster container dimensions
-const columnPadding = parseInt(dimensions.gameIndexColumnPadding);
-const columnPaddingSmallScreen = parseInt(dimensions.gameIndexColumnPaddingSmallScreen);
-const progressBarHeight = parseInt(dimensions.progressBarSmallHeight);
-const detailedProgressBarHeight = parseInt(dimensions.progressBarMediumHeight);
+const columnPadding = dimensions.gameIndexColumnPadding;
+const columnPaddingSmallScreen = dimensions.gameIndexColumnPaddingSmallScreen;
 
 const additionalColumnCount = {
   small: 3,
@@ -33,44 +31,49 @@ function calculateColumnWidth(width, posterSize, isSmallScreen) {
   return Math.floor(width / (columns + additionalColumnCount[posterSize]));
 }
 
+// v5 poster cell: rounded artwork, then a title line and muted meta lines
+// separated by a 6px gap (same maths as Game/Index/Posters/GameIndexPosters).
 function calculateRowHeight(posterHeight, sortKey, isSmallScreen, posterOptions) {
   const {
-    detailedProgressBar,
     showTitle,
     showIgdbRating,
     showCriticRating
   } = posterOptions;
 
+  const gap = 6;
+  const lineHeight = 18 + gap;
+  const cellPadding = isSmallScreen ? columnPaddingSmallScreen : columnPadding;
+
   const heights = [
     posterHeight,
-    detailedProgressBar ? detailedProgressBarHeight : progressBarHeight,
-    isSmallScreen ? columnPaddingSmallScreen : columnPadding
+    // Top + bottom cell padding, plus 8px of slack.
+    cellPadding * 2 + 8
   ];
 
   if (showTitle) {
-    heights.push(19);
+    heights.push(6 + 20 + gap);
   }
 
-  if (showIgdbRating) {
-    heights.push(19);
-  }
-
-  if (showCriticRating) {
-    heights.push(19);
-  }
+  [showIgdbRating, showCriticRating].forEach((show) => {
+    if (show) {
+      heights.push(lineHeight);
+    }
+  });
 
   switch (sortKey) {
+    case 'status':
+    case 'releaseDate':
     case 'developers':
-      heights.push(19);
+      heights.push(lineHeight);
       break;
     case 'igdbRating':
       if (!showIgdbRating) {
-        heights.push(19);
+        heights.push(lineHeight);
       }
       break;
     case 'criticRating':
       if (!showCriticRating) {
-        heights.push(19);
+        heights.push(lineHeight);
       }
       break;
     default:

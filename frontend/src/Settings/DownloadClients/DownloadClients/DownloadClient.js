@@ -1,13 +1,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Card from 'Components/Card';
-import Label from 'Components/Label';
+import ProtocolLabel from 'Activity/Queue/ProtocolLabel';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
+import SettingsCard from 'Components/SettingsCard/SettingsCard';
+import settingsCardStyles from 'Components/SettingsCard/SettingsCard.css';
+import SettingsCardStatus from 'Components/SettingsCard/SettingsCardStatus';
 import TagList from 'Components/TagList';
 import { kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import EditDownloadClientModalConnector from './EditDownloadClientModalConnector';
-import styles from './DownloadClient.css';
 
 class DownloadClient extends Component {
 
@@ -58,49 +59,41 @@ class DownloadClient extends Component {
       name,
       enable,
       priority,
+      protocol,
       tags,
       tagList
     } = this.props;
 
     return (
-      <Card
-        className={styles.downloadClient}
-        overlayContent={true}
+      <SettingsCard
+        name={name}
+        aria-label={translate('EditDownloadClientName', { name })}
         onPress={this.onEditDownloadClientPress}
       >
-        <div className={styles.name}>
-          {name}
-        </div>
-
-        <div className={styles.enabled}>
-          {
-            enable ?
-              <Label kind={kinds.SUCCESS}>
-                {translate('Enabled')}
-              </Label> :
-              <Label
-                kind={kinds.DISABLED}
-                outline={true}
-              >
-                {translate('Disabled')}
-              </Label>
-          }
-
-          {
-            priority > 1 &&
-              <Label
-                kind={kinds.DISABLED}
-                outline={true}
-              >
-                {translate('PrioritySettings', { priority })}
-              </Label>
-          }
-        </div>
-
-        <TagList
-          tags={tags}
-          tagList={tagList}
+        <SettingsCardStatus
+          dot={enable ? 'active' : 'muted'}
+          segments={[
+            translate(enable ? 'Enabled' : 'Disabled'),
+            priority > 1 ? translate('PrioritySettings', { priority }) : null
+          ]}
         />
+
+        {
+          protocol ?
+            <div className={settingsCardStyles.labels}>
+              <ProtocolLabel protocol={protocol} />
+            </div> :
+            null
+        }
+
+        {
+          tags.length > 0 ?
+            <TagList
+              tags={tags}
+              tagList={tagList}
+            /> :
+            null
+        }
 
         <EditDownloadClientModalConnector
           id={id}
@@ -118,7 +111,7 @@ class DownloadClient extends Component {
           onConfirm={this.onConfirmDeleteDownloadClient}
           onCancel={this.onDeleteDownloadClientModalClose}
         />
-      </Card>
+      </SettingsCard>
     );
   }
 }
@@ -128,6 +121,7 @@ DownloadClient.propTypes = {
   name: PropTypes.string.isRequired,
   enable: PropTypes.bool.isRequired,
   priority: PropTypes.number.isRequired,
+  protocol: PropTypes.string,
   tags: PropTypes.arrayOf(PropTypes.number).isRequired,
   tagList: PropTypes.arrayOf(PropTypes.object).isRequired,
   onConfirmDeleteDownloadClient: PropTypes.func.isRequired

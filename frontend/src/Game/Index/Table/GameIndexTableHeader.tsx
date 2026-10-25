@@ -2,13 +2,12 @@ import classNames from 'classnames';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSelect } from 'App/SelectContext';
-import IconButton from 'Components/Link/IconButton';
 import Column from 'Components/Table/Column';
+import TableOptionsButton from 'Components/Table/TableOptions/TableOptionsButton';
 import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
 import VirtualTableHeader from 'Components/Table/VirtualTableHeader';
 import VirtualTableHeaderCell from 'Components/Table/VirtualTableHeaderCell';
 import VirtualTableSelectAllHeaderCell from 'Components/Table/VirtualTableSelectAllHeaderCell';
-import { icons } from 'Helpers/Props';
 import { SortDirection } from 'Helpers/Props/sortDirections';
 import {
   setGameSort,
@@ -83,7 +82,7 @@ function GameIndexTableHeader(props: GameIndexTableHeaderProps) {
                 optionsComponent={GameIndexTableOptions}
                 onTableOptionChange={onTableOptionChange}
               >
-                <IconButton name={icons.ADVANCED_SETTINGS} />
+                <TableOptionsButton />
               </TableOptionsModalWrapper>
             </VirtualTableHeaderCell>
           );

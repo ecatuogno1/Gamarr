@@ -7,19 +7,15 @@ import useMeasure from 'Helpers/Hooks/useMeasure';
 import dimensions from 'Styles/Variables/dimensions';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
 import GameIndexOverview from './GameIndexOverview';
+import { ROW_BORDER, ROW_VERTICAL_PADDING } from './overviewLayout';
 import selectOverviewOptions from './selectOverviewOptions';
 
-// Poster container dimensions
-const columnPadding = parseInt(dimensions.gameIndexColumnPadding);
-const columnPaddingSmallScreen = parseInt(
-  dimensions.gameIndexColumnPaddingSmallScreen
-);
-const progressBarHeight = parseInt(dimensions.progressBarSmallHeight);
-const detailedProgressBarHeight = parseInt(dimensions.progressBarMediumHeight);
-const bodyPadding = parseInt(dimensions.pageContentBodyPadding);
-const bodyPaddingSmallScreen = parseInt(
-  dimensions.pageContentBodyPaddingSmallScreen
-);
+const progressBarHeight = dimensions.progressBarSmallHeight;
+const detailedProgressBarHeight = dimensions.progressBarMediumHeight;
+const bodyPadding = dimensions.pageContentBodyPadding;
+const bodyPaddingSmallScreen = dimensions.pageContentBodyPaddingSmallScreen;
+
+const POSTER_PROGRESS_GAP = 6;
 
 interface RowItemData {
   items: GameTitleItem[];
@@ -28,7 +24,6 @@ interface RowItemData {
   posterHeight: number;
   rowHeight: number;
   isSelectMode: boolean;
-  isSmallScreen: boolean;
 }
 
 interface GameIndexOverviewsProps {
@@ -98,14 +93,19 @@ function GameIndexOverviews(props: GameIndexOverviewsProps) {
   }, [posterWidth]);
 
   const rowHeight = useMemo(() => {
-    const heights = [
-      posterHeight,
-      detailedProgressBar ? detailedProgressBarHeight : progressBarHeight,
-      isSmallScreen ? columnPaddingSmallScreen : columnPadding,
-    ];
+    const progress = detailedProgressBar
+      ? detailedProgressBarHeight
+      : progressBarHeight;
 
-    return heights.reduce((acc, height) => acc + height, 0);
-  }, [detailedProgressBar, posterHeight, isSmallScreen]);
+    // Used as the virtual list's itemSize, so it has to match the real row height.
+    return (
+      posterHeight +
+      POSTER_PROGRESS_GAP +
+      progress +
+      ROW_VERTICAL_PADDING * 2 +
+      ROW_BORDER
+    );
+  }, [detailedProgressBar, posterHeight]);
 
   useEffect(() => {
     const current = scrollerRef.current as HTMLElement;
@@ -197,7 +197,6 @@ function GameIndexOverviews(props: GameIndexOverviewsProps) {
           posterHeight,
           rowHeight,
           isSelectMode,
-          isSmallScreen,
         }}
       >
         {Row}

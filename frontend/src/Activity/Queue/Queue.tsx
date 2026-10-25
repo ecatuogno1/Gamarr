@@ -14,13 +14,16 @@ import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import FilterMenu from 'Components/Menu/FilterMenu';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
+import PageHeading from 'Components/Page/PageHeading';
+import PageMessage from 'Components/Page/PageMessage';
+import { OverflowDivider } from 'Components/Page/Toolbar/Overflow';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
-import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
-import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
+import PageToolbarSpacer from 'Components/Page/Toolbar/PageToolbarSpacer';
+import ToolbarItem from 'Components/Page/Toolbar/ToolbarItem';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
-import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
+import TableOptionsModal from 'Components/Table/TableOptions/TableOptionsModal';
 import TablePager from 'Components/Table/TablePager';
 import usePaging from 'Components/Table/usePaging';
 import createGamesFetchingSelector from 'Game/createGamesFetchingSelector';
@@ -207,6 +210,16 @@ function Queue() {
     [dispatch]
   );
 
+  const [isTableOptionsModalOpen, setIsTableOptionsModalOpen] = useState(false);
+
+  const handleTableOptionsPress = useCallback(() => {
+    setIsTableOptionsModalOpen(true);
+  }, []);
+
+  const handleTableOptionsModalClose = useCallback(() => {
+    setIsTableOptionsModalOpen(false);
+  }, []);
+
   useEffect(() => {
     if (requestCurrentPage) {
       dispatch(fetchQueue());
@@ -234,6 +247,8 @@ function Queue() {
   if (!shouldBlockRefresh.current) {
     currentQueue.current = (
       <PageContentBody>
+        <PageHeading scope={translate('Activity')} title={translate('Queue')} />
+
         {isRefreshing && !isAllPopulated ? <LoadingIndicator /> : null}
 
         {!isRefreshing && hasError ? (
@@ -241,11 +256,11 @@ function Queue() {
         ) : null}
 
         {isAllPopulated && !hasError && !items.length ? (
-          <Alert kind={kinds.INFO}>
+          <PageMessage>
             {selectedFilterKey !== 'all' && count > 0
               ? translate('QueueFilterHasNoItems')
               : translate('QueueIsEmpty')}
-          </Alert>
+          </PageMessage>
         ) : null}
 
         {isAllPopulated && !hasError && !!items.length ? (
@@ -302,47 +317,54 @@ function Queue() {
   return (
     <PageContent title={translate('Queue')}>
       <PageToolbar>
-        <PageToolbarSection>
-          <PageToolbarButton
-            label={translate('Refresh')}
-            iconName={icons.REFRESH}
-            isSpinning={isRefreshing}
-            onPress={handleRefreshPress}
-          />
+        <ToolbarItem
+          id="refresh"
+          priority={1}
+          groupId="left-a"
+          label={translate('Refresh')}
+          iconName={icons.REFRESH}
+          isSpinning={isRefreshing}
+          onPress={handleRefreshPress}
+        />
 
+        <OverflowDivider groupId="left-a">
           <PageToolbarSeparator />
+        </OverflowDivider>
 
-          <PageToolbarButton
-            label={translate('GrabSelected')}
-            iconName={icons.DOWNLOAD}
-            isDisabled={disableSelectedActions || !isPendingSelected}
-            isSpinning={isGrabbing}
-            onPress={handleGrabSelectedPress}
-          />
+        <ToolbarItem
+          id="grab-selected"
+          priority={1}
+          groupId="left-b"
+          label={translate('GrabSelected')}
+          iconName={icons.DOWNLOAD}
+          isDisabled={disableSelectedActions || !isPendingSelected}
+          isSpinning={isGrabbing}
+          onPress={handleGrabSelectedPress}
+        />
 
-          <PageToolbarButton
-            label={translate('RemoveSelected')}
-            iconName={icons.REMOVE}
-            isDisabled={disableSelectedActions}
-            isSpinning={isRemoving}
-            onPress={handleRemoveSelectedPress}
-          />
-        </PageToolbarSection>
+        <ToolbarItem
+          id="remove-selected"
+          priority={1}
+          groupId="left-b"
+          label={translate('RemoveSelected')}
+          iconName={icons.REMOVE}
+          isDisabled={disableSelectedActions}
+          isSpinning={isRemoving}
+          onPress={handleRemoveSelectedPress}
+        />
 
-        <PageToolbarSection alignContent={align.RIGHT}>
-          <TableOptionsModalWrapper
-            columns={columns}
-            pageSize={pageSize}
-            maxPageSize={200}
-            optionsComponent={QueueOptions}
-            onTableOptionChange={handleTableOptionChange}
-          >
-            <PageToolbarButton
-              label={translate('Options')}
-              iconName={icons.TABLE}
-            />
-          </TableOptionsModalWrapper>
+        <PageToolbarSpacer />
 
+        <ToolbarItem
+          id="options"
+          priority={2}
+          groupId="right"
+          label={translate('Options')}
+          iconName={icons.TABLE}
+          onPress={handleTableOptionsPress}
+        />
+
+        <ToolbarItem id="filter" pinned={true}>
           <FilterMenu
             alignMenu={align.RIGHT}
             selectedFilterKey={selectedFilterKey}
@@ -351,7 +373,7 @@ function Queue() {
             filterModalConnectorComponent={QueueFilterModal}
             onFilterSelect={handleFilterSelect}
           />
-        </PageToolbarSection>
+        </ToolbarItem>
       </PageToolbar>
 
       {currentQueue.current}
@@ -392,6 +414,16 @@ function Queue() {
         }
         onRemovePress={handleRemoveSelectedConfirmed}
         onModalClose={handleConfirmRemoveModalClose}
+      />
+
+      <TableOptionsModal
+        isOpen={isTableOptionsModalOpen}
+        columns={columns}
+        pageSize={pageSize}
+        maxPageSize={200}
+        optionsComponent={QueueOptions}
+        onTableOptionChange={handleTableOptionChange}
+        onModalClose={handleTableOptionsModalClose}
       />
     </PageContent>
   );

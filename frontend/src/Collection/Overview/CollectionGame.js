@@ -87,20 +87,19 @@ class CollectionGame extends Component {
 
     const elementStyle = {
       width: `${posterWidth}px`,
-      height: `${posterHeight}px`,
-      borderRadius: '5px'
+      height: `${posterHeight}px`
     };
 
     return (
       <div className={styles.content}>
-        <div className={styles.posterContainer}>
+        <div className={styles.posterContainer} title={title}>
           {
             isExistingGame &&
-              <div className={styles.editorSelect}>
+              <div className={styles.monitorToggle}>
                 <MonitorToggleButton
                   className={styles.monitorToggleButton}
                   monitored={monitored}
-                  size={20}
+                  size={16}
                   onPress={onMonitorTogglePress}
                 />
               </div>
@@ -116,10 +115,11 @@ class CollectionGame extends Component {
 
           {
             isExcluded ?
-              <div
-                className={styles.excluded}
-                title={translate('Excluded')}
-              /> :
+              <div className={styles.status}>
+                <span className={styles.statusLabel}>
+                  {translate('Excluded')}
+                </span>
+              </div> :
               null
           }
 
@@ -155,7 +155,7 @@ class CollectionGame extends Component {
                 id ?
                   <LibraryTitleProgressBar
                     igdbId={igdbId}
-                    bottomRadius={true}
+                    bottomRadius={false}
                     width={posterWidth}
                     detailedProgressBar={detailedProgressBar}
                   /> :

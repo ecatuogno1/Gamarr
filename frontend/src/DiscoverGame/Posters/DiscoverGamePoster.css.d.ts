@@ -2,18 +2,22 @@
 // Please do not change this file!
 interface CssExports {
   'action': string;
-  'container': string;
   'content': string;
   'controls': string;
-  'editorSelect': string;
   'excluded': string;
   'existing': string;
-  'externalLinks': string;
   'link': string;
+  'meta': string;
+  'metaSep': string;
   'overlayTitle': string;
   'platforms': string;
   'posterContainer': string;
+  'selectButton': string;
+  'selected': string;
+  'status': string;
+  'statusLabel': string;
   'title': string;
+  'unselected': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

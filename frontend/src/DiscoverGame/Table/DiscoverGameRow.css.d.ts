@@ -4,7 +4,6 @@ interface CssExports {
   'actions': string;
   'alreadyExistsIcon': string;
   'cell': string;
-  'checkInput': string;
   'collection': string;
   'criticRating': string;
   'developers': string;

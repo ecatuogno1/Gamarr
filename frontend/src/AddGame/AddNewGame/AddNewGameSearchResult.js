@@ -1,20 +1,36 @@
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import CriticRating from 'Components/CriticRating';
 import Icon from 'Components/Icon';
 import IgdbRating from 'Components/IgdbRating';
-import Label from 'Components/Label';
 import Link from 'Components/Link/Link';
+import MetadataAttribution from 'Components/MetadataAttribution';
 import Tooltip from 'Components/Tooltip/Tooltip';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
 import GameStatusLabel from 'Game/Details/GameStatusLabel';
 import GameGenres from 'Game/GameGenres';
 import GamePoster from 'Game/GamePoster';
 import GameIndexProgressBar from 'Game/Index/ProgressBar/GameIndexProgressBar';
-import { icons, kinds, sizes, tooltipPositions } from 'Helpers/Props';
+import { icons, kinds, tooltipPositions } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import AddNewGameModal from './AddNewGameModal';
 import styles from './AddNewGameSearchResult.css';
+
+function getStatusChip(status) {
+  switch (status) {
+    case 'announced':
+      return { dot: styles.chipDotUpcoming, label: translate('Announced') };
+    case 'tba':
+      return { dot: styles.chipDotUpcoming, label: translate('Tba') };
+    case 'released':
+      return { dot: styles.chipDotFinished, label: translate('Released') };
+    case 'deleted':
+      return { dot: styles.chipDotEnded, label: translate('Deleted') };
+    default:
+      return null;
+  }
+}
 
 class AddNewGameSearchResult extends Component {
 
@@ -85,20 +101,19 @@ class AddNewGameSearchResult extends Component {
     const {
       isNewAddGameModalOpen
     } = this.state;
-
     const hasGameFile = !!gameFile;
 
     const linkProps = isExistingGame ? { to: `/game/${igdbId}` } : { onPress: this.onPress };
-    const posterWidth = 167;
-    const posterHeight = 250;
-
-    const elementStyle = {
-      width: `${posterWidth}px`,
-      height: `${posterHeight}px`
-    };
+    const posterWidth = 114;
+    const statusChip = getStatusChip(status);
 
     return (
-      <div className={styles.searchResult}>
+      <div
+        className={classNames(
+          styles.searchResult,
+          isExcluded && styles.searchResultExcluded
+        )}
+      >
         <Link
           className={styles.underlay}
           {...linkProps}
@@ -108,17 +123,14 @@ class AddNewGameSearchResult extends Component {
           {
             isSmallScreen ?
               null :
-              <div>
-                <div className={styles.posterContainer}>
-                  <GamePoster
-                    className={styles.poster}
-                    style={elementStyle}
-                    images={images}
-                    size={250}
-                    overflow={true}
-                    lazy={false}
-                  />
-                </div>
+              <div className={styles.posterContainer}>
+                <GamePoster
+                  className={styles.poster}
+                  images={images}
+                  size={250}
+                  overflow={true}
+                  lazy={false}
+                />
 
                 {
                   isExistingGame &&
@@ -153,50 +165,73 @@ class AddNewGameSearchResult extends Component {
               </div>
 
               <div className={styles.icons}>
-                <div>
-                  {
-                    isExistingGame &&
-                      <Icon
-                        className={styles.alreadyExistsIcon}
-                        name={icons.CHECK_CIRCLE}
-                        size={36}
-                        title={translate('AlreadyInYourLibrary')}
-                      />
-                  }
+                {
+                  isExistingGame &&
+                    <Icon
+                      className={styles.alreadyExistsIcon}
+                      name={icons.CHECK_CIRCLE}
+                      size={24}
+                      title={translate('AlreadyInYourLibrary')}
+                    />
+                }
 
-                  {
-                    isExcluded &&
+                {
+                  isExcluded &&
+                    <Icon
+                      className={styles.excludedIcon}
+                      name={icons.DANGER}
+                      size={24}
+                      title={translate('GameIsOnImportExclusionList')}
+                    />
+                }
+
+                <Tooltip
+                  anchor={
+                    <span
+                      className={styles.externalLink}
+                      aria-label={translate('Links')}
+                    >
                       <Icon
-                        className={styles.exclusionIcon}
-                        name={icons.DANGER}
-                        size={36}
-                        title={translate('GameIsOnImportExclusionList')}
+                        name={icons.EXTERNAL_LINK}
+                        size={16}
                       />
+                    </span>
                   }
-                </div>
+                  tooltip={
+                    <GameDetailsLinks
+                      igdbId={igdbId}
+                      igdbSlug={igdbSlug}
+                      youTubeTrailerId={youTubeTrailerId}
+                    />
+                  }
+                  canFlip={true}
+                  kind={kinds.INVERSE}
+                  position={tooltipPositions.TOP}
+                />
               </div>
             </div>
 
-            <div className={styles.platforms}>
-              {
-                platformBadges.length ?
-                  platformBadges.map((badge) => (
-                    <span
-                      key={badge.id}
-                      className={badge.isAdded ? styles.addedPlatform : styles.platform}
-                      title={badge.isAdded ? translate('GameIsInLibraryOnPlatform', { platform: badge.name }) : badge.name}
-                    >
-                      {badge.isAdded ? <Icon name={icons.CHECK} size={12} /> : null} {badge.shortName}
-                    </span>
-                  )) :
-                  (
-                    !!platform &&
+            {
+              platformBadges.length || platform ?
+                <div className={styles.platforms}>
+                  {
+                    platformBadges.length ?
+                      platformBadges.map((badge) => (
+                        <span
+                          key={badge.id}
+                          className={badge.isAdded ? styles.addedPlatform : styles.platform}
+                          title={badge.isAdded ? translate('GameIsInLibraryOnPlatform', { platform: badge.name }) : badge.name}
+                        >
+                          {badge.isAdded ? <Icon name={icons.CHECK} size={11} /> : null} {badge.shortName}
+                        </span>
+                      )) :
                       <span className={styles.platform}>
                         {platform.shortName}
                       </span>
-                  )
-              }
-            </div>
+                  }
+                </div> :
+                null
+            }
 
             {
               libraryPlatformNames.length && !isExistingGame ?
@@ -206,91 +241,61 @@ class AddNewGameSearchResult extends Component {
                 null
             }
 
-            <div>
-              <Label size={sizes.LARGE}>
-                <IgdbRating
-                  ratings={ratings}
-                  iconSize={13}
-                />
-              </Label>
-
+            <div className={styles.chips}>
               {
-                ratings.critic ?
-                  <Label size={sizes.LARGE}>
-                    <CriticRating
-                      ratings={ratings}
-                      iconSize={13}
-                    />
-                  </Label> :
+                statusChip ?
+                  <span className={styles.chip}>
+                    <span className={classNames(styles.chipDot, statusChip.dot)} />
+                    {statusChip.label}
+                  </span> :
                   null
               }
 
               {
-                originalLanguage?.name ?
-                  <Label size={sizes.LARGE}>
-                    <Icon
-                      name={icons.LANGUAGE}
-                      size={13}
+                ratings.igdb ?
+                  <span className={styles.chip}>
+                    <IgdbRating
+                      ratings={ratings}
+                      iconSize={11}
                     />
-                    <span className={styles.originalLanguage}>
-                      {originalLanguage.name}
-                    </span>
-                  </Label> :
+                  </span> :
+                  null
+              }
+
+              {
+                ratings.critic ?
+                  <span className={styles.chip}>
+                    <CriticRating
+                      ratings={ratings}
+                      iconSize={11}
+                    />
+                  </span> :
                   null
               }
 
               {
                 developers.length ?
-                  <Label size={sizes.LARGE}>
-                    <Icon
-                      name={icons.STUDIO}
-                      size={13}
-                    />
-                    <span className={styles.studio}>
-                      {developers.join(', ')}
-                    </span>
-                  </Label> :
+                  <span className={styles.chip} title={translate('Developers')}>
+                    {developers.join(', ')}
+                  </span> :
+                  null
+              }
+
+              {
+                originalLanguage?.name ?
+                  <span className={styles.chip}>
+                    {originalLanguage.name}
+                  </span> :
                   null
               }
 
               {
                 genres.length > 0 ?
-                  <Label size={sizes.LARGE}>
-                    <Icon
-                      name={icons.GENRE}
-                      size={13}
-                    />
+                  <span className={styles.chip}>
                     <GameGenres className={styles.genres} genres={genres} />
-                  </Label> :
+                  </span> :
                   null
               }
-
-              <Tooltip
-                anchor={
-                  <Label
-                    size={sizes.LARGE}
-                  >
-                    <Icon
-                      name={icons.EXTERNAL_LINK}
-                      size={13}
-                    />
-
-                    <span className={styles.links}>
-                      {translate('Links')}
-                    </span>
-                  </Label>
-                }
-                tooltip={
-                  <GameDetailsLinks
-                    igdbId={igdbId}
-                    igdbSlug={igdbSlug}
-                    youTubeTrailerId={youTubeTrailerId}
-                  />
-                }
-                canFlip={true}
-                kind={kinds.INVERSE}
-                position={tooltipPositions.TOP}
-              />
 
               {
                 isExistingGame && isSmallScreen &&
@@ -308,6 +313,8 @@ class AddNewGameSearchResult extends Component {
             <div className={styles.overview}>
               {overview}
             </div>
+
+            <MetadataAttribution />
           </div>
         </div>
 

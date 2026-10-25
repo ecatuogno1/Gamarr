@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
-import themes from 'Styles/Themes';
 
 const useTheme = (): 'dark' | 'light' => {
   const { theme } = useSelector((state: AppState) => state.settings.ui.item);
@@ -48,10 +47,18 @@ const useTheme = (): 'dark' | 'light' => {
 
 export default useTheme;
 
+const readThemeVar = (color: string) =>
+  getComputedStyle(document.documentElement)
+    .getPropertyValue(`--${color}`)
+    .trim();
+
 export const useThemeColor = (color: string) => {
   const theme = useTheme();
-  const themeVariables = themes[theme];
+  const [value, setValue] = useState(() => readThemeVar(color));
 
-  // @ts-expect-error - themeVariables is a string indexable type
-  return themeVariables[color];
+  useLayoutEffect(() => {
+    setValue(readThemeVar(color));
+  }, [color, theme]);
+
+  return value;
 };

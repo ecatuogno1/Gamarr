@@ -16,6 +16,7 @@ namespace Gamarr.Api.V3.Config
         public bool ShowRelativeDates { get; set; }
 
         public bool EnableColorImpairedMode { get; set; }
+        public string HeaderColor { get; set; }
         public int GameInfoLanguage { get; set; }
         public int UILanguage { get; set; }
         public string Theme { get; set; }
@@ -36,6 +37,7 @@ namespace Gamarr.Api.V3.Config
                 ShowRelativeDates = model.ShowRelativeDates,
 
                 EnableColorImpairedMode = model.EnableColorImpairedMode,
+                HeaderColor = model.HeaderColor,
                 GameInfoLanguage = model.GameInfoLanguage,
                 UILanguage = model.UILanguage,
                 Theme = config.Theme

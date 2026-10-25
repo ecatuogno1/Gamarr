@@ -2,8 +2,9 @@ import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
+import DateInput from 'Components/DateInput';
 import Icon from 'Components/Icon';
-import Button from 'Components/Link/Button';
+import Link from 'Components/Link/Link';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import Menu from 'Components/Menu/Menu';
 import MenuButton from 'Components/Menu/MenuButton';
@@ -11,6 +12,7 @@ import MenuContent from 'Components/Menu/MenuContent';
 import ViewMenuItem from 'Components/Menu/ViewMenuItem';
 import { align, icons } from 'Helpers/Props';
 import {
+  gotoCalendarDate,
   gotoCalendarNextRange,
   gotoCalendarPreviousRange,
   gotoCalendarToday,
@@ -54,6 +56,25 @@ function CalendarHeader() {
     dispatch(gotoCalendarNextRange());
   }, [dispatch]);
 
+  const handleDateChange = useCallback(
+    (date: string) => {
+      dispatch(gotoCalendarDate({ date }));
+    },
+    [dispatch]
+  );
+
+  const datePickerValue = useMemo(() => {
+    if (view === 'month') {
+      return moment(time).locale('en').startOf('month').format('YYYY-MM-DD');
+    }
+
+    if (start) {
+      return moment(start).locale('en').format('YYYY-MM-DD');
+    }
+
+    return '';
+  }, [view, time, start]);
+
   const title = useMemo(() => {
     const timeMoment = moment(time);
     const startMoment = moment(start);
@@ -63,6 +84,8 @@ function CalendarHeader() {
       return timeMoment.format(longDateFormat);
     } else if (view === 'month') {
       return timeMoment.format('MMMM YYYY');
+    } else if (view === 'agenda') {
+      return translate('Agenda');
     }
 
     let startFormat = 'MMM D YYYY';
@@ -87,29 +110,36 @@ function CalendarHeader() {
 
       <div className={styles.header}>
         <div className={styles.navigationButtons}>
-          <Button
-            buttonGroupPosition="left"
+          <Link
+            className={styles.navButton}
             isDisabled={view === 'agenda'}
             onPress={handlePreviousPress}
           >
             <Icon name={icons.PAGE_PREVIOUS} />
-          </Button>
+          </Link>
 
-          <Button
-            buttonGroupPosition="right"
+          <Link
+            className={styles.navButton}
             isDisabled={view === 'agenda'}
             onPress={handleNextPress}
           >
             <Icon name={icons.PAGE_NEXT} />
-          </Button>
+          </Link>
 
-          <Button
+          <Link
             className={styles.todayButton}
             isDisabled={view === 'agenda'}
             onPress={handleTodayPress}
           >
             {translate('Today')}
-          </Button>
+          </Link>
+
+          <DateInput
+            value={datePickerValue}
+            label={translate('GoToDate')}
+            isDisabled={view === 'agenda'}
+            onChange={handleDateChange}
+          />
         </div>
 
         {isSmallScreen ? null : (
@@ -174,37 +204,37 @@ function CalendarHeader() {
           ) : (
             <>
               <CalendarHeaderViewButton
+                className={styles.viewButton}
                 view="month"
                 selectedView={view}
-                buttonGroupPosition="left"
                 onPress={handleViewChange}
               />
 
               <CalendarHeaderViewButton
+                className={styles.viewButton}
                 view="week"
                 selectedView={view}
-                buttonGroupPosition="center"
                 onPress={handleViewChange}
               />
 
               <CalendarHeaderViewButton
+                className={styles.viewButton}
                 view="forecast"
                 selectedView={view}
-                buttonGroupPosition="center"
                 onPress={handleViewChange}
               />
 
               <CalendarHeaderViewButton
+                className={styles.viewButton}
                 view="day"
                 selectedView={view}
-                buttonGroupPosition="center"
                 onPress={handleViewChange}
               />
 
               <CalendarHeaderViewButton
+                className={styles.viewButton}
                 view="agenda"
                 selectedView={view}
-                buttonGroupPosition="right"
                 onPress={handleViewChange}
               />
             </>

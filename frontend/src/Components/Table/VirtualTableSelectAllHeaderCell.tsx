@@ -32,6 +32,7 @@ function VirtualTableSelectAllHeaderCell({
     >
       <CheckInput
         className={styles.input}
+        containerClassName={styles.container}
         name="selectAll"
         value={value}
         onChange={onSelectAllChange}

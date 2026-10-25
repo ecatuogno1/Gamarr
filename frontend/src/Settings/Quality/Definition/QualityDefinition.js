@@ -269,8 +269,8 @@ class QualityDefinition extends Component {
         {
           advancedSettings &&
             <div className={styles.megabytesPerMinute}>
-              <div>
-                {translate('Min')}
+              <div className={styles.column}>
+                <span className={styles.caption}>{translate('Min')}</span>
 
                 <NumberInput
                   className={styles.sizeInput}
@@ -284,8 +284,8 @@ class QualityDefinition extends Component {
                 />
               </div>
 
-              <div>
-                {translate('Preferred')}
+              <div className={styles.column}>
+                <span className={styles.caption}>{translate('Preferred')}</span>
 
                 <NumberInput
                   className={styles.sizeInput}
@@ -299,8 +299,8 @@ class QualityDefinition extends Component {
                 />
               </div>
 
-              <div>
-                {translate('Max')}
+              <div className={styles.column}>
+                <span className={styles.caption}>{translate('Max')}</span>
 
                 <NumberInput
                   className={styles.sizeInput}

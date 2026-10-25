@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Error } from 'App/State/AppSectionState';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
 import { EnhancedSelectInputValue } from 'Components/Form/Select/EnhancedSelectInput';
 import SpinnerButton from 'Components/Link/SpinnerButton';
 import PageContentFooter from 'Components/Page/PageContentFooter';
@@ -197,146 +197,147 @@ function CollectionFooter({
   const selectedCount = selectedIds.length;
 
   return (
-    <PageContentFooter>
-      <div className={styles.inputContainer}>
-        <CollectionFooterLabel
-          label={translate('MonitorCollection')}
-          isSaving={isSaving && monitored !== NO_CHANGE}
-        />
+    <PageContentFooter className={styles.footerShell}>
+      <div className={styles.settingsBar}>
+        <div className={styles.settingsContent}>
+          <div className={styles.setting}>
+            <CollectionFooterLabel
+              label={translate('MonitorCollection')}
+              isSaving={isSaving && monitored !== NO_CHANGE}
+            />
 
-        <FormInputGroup
-          type={inputTypes.SELECT}
-          name="monitored"
-          value={monitored}
-          values={monitoredOptions}
-          isDisabled={!selectedCount}
-          onChange={handleInputChange}
-        />
+            <FormInput
+              type={inputTypes.SELECT}
+              name="monitored"
+              value={monitored}
+              values={monitoredOptions}
+              isDisabled={!selectedCount}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className={styles.setting}>
+            <CollectionFooterLabel
+              label={translate('MonitorGames')}
+              isSaving={isSaving && monitor !== NO_CHANGE}
+            />
+
+            <FormInput
+              type={inputTypes.SELECT}
+              name="monitor"
+              value={monitor}
+              values={monitoredOptions}
+              isDisabled={!selectedCount}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className={styles.setting}>
+            <CollectionFooterLabel
+              label={translate('QualityProfile')}
+              isSaving={isSaving && qualityProfileId !== NO_CHANGE}
+            />
+
+            <FormInput
+              type={inputTypes.QUALITY_PROFILE_SELECT}
+              name="qualityProfileId"
+              value={qualityProfileId}
+              includeNoChange={true}
+              includeNoChangeDisabled={false}
+              isDisabled={!selectedCount}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className={styles.setting}>
+            <CollectionFooterLabel
+              label={translate('Platform')}
+              isSaving={isSaving && platformId !== NO_CHANGE}
+            />
+
+            <FormInput
+              type={inputTypes.PLATFORM_SELECT}
+              name="platformId"
+              value={platformId}
+              includeAny={true}
+              includeNoChange={true}
+              includeNoChangeDisabled={false}
+              isDisabled={!selectedCount}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className={styles.setting}>
+            <CollectionFooterLabel
+              label={translate('MinimumAvailability')}
+              isSaving={isSaving && minimumAvailability !== NO_CHANGE}
+            />
+
+            <FormInput
+              type={inputTypes.AVAILABILITY_SELECT}
+              name="minimumAvailability"
+              value={minimumAvailability}
+              includeNoChange={true}
+              includeNoChangeDisabled={false}
+              isDisabled={!selectedCount}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className={styles.setting}>
+            <CollectionFooterLabel
+              label={translate('RootFolder')}
+              isSaving={isSaving && rootFolderPath !== NO_CHANGE}
+            />
+
+            <FormInput
+              type={inputTypes.ROOT_FOLDER_SELECT}
+              name="rootFolderPath"
+              value={rootFolderPath}
+              includeNoChange={true}
+              includeNoChangeDisabled={false}
+              selectedValueOptions={{ includeFreeSpace: false }}
+              isDisabled={!selectedCount}
+              onChange={handleInputChange}
+            />
+          </div>
+
+          <div className={styles.setting}>
+            <CollectionFooterLabel
+              label={translate('SearchGamesOnAdd')}
+              isSaving={isSaving && searchOnAdd !== NO_CHANGE}
+            />
+
+            <FormInput
+              type={inputTypes.SELECT}
+              name="searchOnAdd"
+              value={searchOnAdd}
+              values={searchOnAddOptions}
+              isDisabled={!selectedCount}
+              onChange={handleInputChange}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className={styles.inputContainer}>
-        <CollectionFooterLabel
-          label={translate('MonitorGames')}
-          isSaving={isSaving && monitor !== NO_CHANGE}
-        />
-
-        <FormInputGroup
-          type={inputTypes.SELECT}
-          name="monitor"
-          value={monitor}
-          values={monitoredOptions}
-          isDisabled={!selectedCount}
-          onChange={handleInputChange}
-        />
-      </div>
-
-      <div className={styles.inputContainer}>
-        <CollectionFooterLabel
-          label={translate('QualityProfile')}
-          isSaving={isSaving && qualityProfileId !== NO_CHANGE}
-        />
-
-        <FormInputGroup
-          type={inputTypes.QUALITY_PROFILE_SELECT}
-          name="qualityProfileId"
-          value={qualityProfileId}
-          includeNoChange={true}
-          includeNoChangeDisabled={false}
-          isDisabled={!selectedCount}
-          onChange={handleInputChange}
-        />
-      </div>
-
-      <div className={styles.inputContainer}>
-        <CollectionFooterLabel
-          label={translate('Platform')}
-          isSaving={isSaving && platformId !== NO_CHANGE}
-        />
-
-        <FormInputGroup
-          type={inputTypes.PLATFORM_SELECT}
-          name="platformId"
-          value={platformId}
-          includeAny={true}
-          includeNoChange={true}
-          includeNoChangeDisabled={false}
-          isDisabled={!selectedCount}
-          onChange={handleInputChange}
-        />
-      </div>
-
-      <div className={styles.inputContainer}>
-        <CollectionFooterLabel
-          label={translate('MinimumAvailability')}
-          isSaving={isSaving && minimumAvailability !== NO_CHANGE}
-        />
-
-        <FormInputGroup
-          type={inputTypes.AVAILABILITY_SELECT}
-          name="minimumAvailability"
-          value={minimumAvailability}
-          includeNoChange={true}
-          includeNoChangeDisabled={false}
-          isDisabled={!selectedCount}
-          onChange={handleInputChange}
-        />
-      </div>
-
-      <div className={styles.inputContainer}>
-        <CollectionFooterLabel
-          label={translate('RootFolder')}
-          isSaving={isSaving && rootFolderPath !== NO_CHANGE}
-        />
-
-        <FormInputGroup
-          type={inputTypes.ROOT_FOLDER_SELECT}
-          name="rootFolderPath"
-          value={rootFolderPath}
-          includeNoChange={true}
-          includeNoChangeDisabled={false}
-          selectedValueOptions={{ includeFreeSpace: false }}
-          isDisabled={!selectedCount}
-          onChange={handleInputChange}
-        />
-      </div>
-
-      <div className={styles.inputContainer}>
-        <CollectionFooterLabel
-          label={translate('SearchGamesOnAdd')}
-          isSaving={isSaving && searchOnAdd !== NO_CHANGE}
-        />
-
-        <FormInputGroup
-          type={inputTypes.SELECT}
-          name="searchOnAdd"
-          value={searchOnAdd}
-          values={searchOnAddOptions}
-          isDisabled={!selectedCount}
-          onChange={handleInputChange}
-        />
-      </div>
-
-      <div className={styles.buttonContainer}>
-        <div className={styles.buttonContainerContent}>
-          <CollectionFooterLabel
-            label={translate('CountCollectionsSelected', {
+      <div className={styles.footerContent}>
+        <div className={styles.footerRow}>
+          <span className={styles.selectionLabel}>
+            {translate('CountCollectionsSelected', {
               count: selectedCount,
             })}
-            isSaving={false}
-          />
+          </span>
 
           <div className={styles.buttons}>
-            <div>
-              <SpinnerButton
-                className={styles.addSelectedButton}
-                kind={kinds.PRIMARY}
-                isSpinning={isSaving}
-                isDisabled={!selectedCount || isSaving}
-                onPress={handleSavePress}
-              >
-                {translate('UpdateSelected')}
-              </SpinnerButton>
-            </div>
+            <SpinnerButton
+              className={styles.addSelectedButton}
+              kind={kinds.PRIMARY}
+              isSpinning={isSaving}
+              isDisabled={!selectedCount || isSaving}
+              onPress={handleSavePress}
+            >
+              {translate('UpdateSelected')}
+            </SpinnerButton>
           </div>
         </div>
       </div>

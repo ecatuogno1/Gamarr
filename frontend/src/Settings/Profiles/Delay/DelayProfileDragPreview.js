@@ -3,11 +3,12 @@ import React, { Component } from 'react';
 import { DragLayer } from 'react-dnd';
 import DragPreviewLayer from 'Components/DragPreviewLayer';
 import { DELAY_PROFILE } from 'Helpers/dragTypes';
-import dimensions from 'Styles/Variables/dimensions.js';
 import DelayProfile from './DelayProfile';
 import styles from './DelayProfileDragPreview.css';
 
-const dragHandleWidth = parseInt(dimensions.dragHandleWidth);
+// The drag handle sits at the left edge of the card, inside its padding
+// (DelayProfile.css .delayProfile).
+const HANDLE_OFFSET = 19;
 
 function collectDragLayer(monitor) {
   return {
@@ -34,11 +35,8 @@ class DelayProfileDragPreview extends Component {
       return null;
     }
 
-    // The offset is shifted because the drag handle is on the right edge of the
-    // list item and the preview is wider than the drag handle.
-
     const { x, y } = currentOffset;
-    const handleOffset = width - dragHandleWidth;
+    const handleOffset = HANDLE_OFFSET;
     const transform = `translate3d(${x - handleOffset}px, ${y}px, 0)`;
 
     const style = {

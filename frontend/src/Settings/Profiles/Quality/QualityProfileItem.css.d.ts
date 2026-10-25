@@ -7,7 +7,6 @@ interface CssExports {
   'dragHandle': string;
   'dragIcon': string;
   'isDragging': string;
-  'isInGroup': string;
   'isPreview': string;
   'notAllowed': string;
   'qualityName': string;

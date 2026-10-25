@@ -1,5 +1,5 @@
 .cell {
-  composes: cell from '~Components/Table/Cells/VirtualTableRowCell.css';
+  composes: cell from 'Components/Table/Cells/VirtualTableRowCell.css';
 
   display: flex;
   align-items: center;
@@ -36,6 +36,7 @@
   composes: cell;
 
   flex: 2 0 90px;
+  color: var(--inkMuted);
 }
 
 .originalLanguage,
@@ -88,6 +89,10 @@
   flex: 1 0 150px;
 }
 
+.movePendingIcon {
+  margin-left: 8px;
+}
+
 .sizeOnDisk {
   composes: cell;
 
@@ -104,7 +109,7 @@
 .tags {
   composes: cell;
 
-  flex: 1 0 60px;
+  flex: 1 0 200px;
 }
 
 .actions {
@@ -115,7 +120,7 @@
 }
 
 .checkInput {
-  composes: input from '~Components/Form/CheckInput.css';
+  composes: input from 'Components/Form/CheckInput.css';
 
   margin-top: 0;
 }
@@ -141,4 +146,19 @@
 .platformBadges {
   flex-wrap: nowrap;
   overflow: hidden;
+}
+
+.qualityChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background-color: var(--paperWarm);
+  color: var(--inkSoft);
+  text-transform: uppercase;
+  white-space: nowrap;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 1;
 }

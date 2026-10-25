@@ -1,16 +1,17 @@
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import Alert from 'Components/Alert';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import FilterMenu from 'Components/Menu/FilterMenu';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
+import PageHeading from 'Components/Page/PageHeading';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
-import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
-import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
+import PageToolbarSpacer from 'Components/Page/Toolbar/PageToolbarSpacer';
+import ToolbarItem from 'Components/Page/Toolbar/ToolbarItem';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
-import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
+import TableOptionsModal from 'Components/Table/TableOptions/TableOptionsModal';
 import TablePager from 'Components/Table/TablePager';
 import { align, icons, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
@@ -33,38 +34,52 @@ function LogsTable(props) {
     ...otherProps
   } = props;
 
+  const [isTableOptionsModalOpen, setIsTableOptionsModalOpen] = useState(false);
+
+  const handleTableOptionsPress = useCallback(() => {
+    setIsTableOptionsModalOpen(true);
+  }, []);
+
+  const handleTableOptionsModalClose = useCallback(() => {
+    setIsTableOptionsModalOpen(false);
+  }, []);
+
   return (
     <PageContent title={translate('Logs')}>
       <PageToolbar>
-        <PageToolbarSection>
-          <PageToolbarButton
-            label={translate('Refresh')}
-            iconName={icons.REFRESH}
-            spinningName={icons.REFRESH}
-            isSpinning={isFetching}
-            onPress={onRefreshPress}
-          />
+        <ToolbarItem
+          id="refresh"
+          priority={1}
+          groupId="left"
+          label={translate('Refresh')}
+          iconName={icons.REFRESH}
+          spinningName={icons.REFRESH}
+          isSpinning={isFetching}
+          onPress={onRefreshPress}
+        />
 
-          <PageToolbarButton
-            label={translate('Clear')}
-            iconName={icons.CLEAR}
-            isSpinning={clearLogExecuting}
-            onPress={onClearLogsPress}
-          />
-        </PageToolbarSection>
+        <ToolbarItem
+          id="clear"
+          priority={1}
+          groupId="left"
+          label={translate('Clear')}
+          iconName={icons.CLEAR}
+          isSpinning={clearLogExecuting}
+          onPress={onClearLogsPress}
+        />
 
-        <PageToolbarSection alignContent={align.RIGHT}>
-          <TableOptionsModalWrapper
-            {...otherProps}
-            columns={columns}
-            canModifyColumns={false}
-          >
-            <PageToolbarButton
-              label={translate('Options')}
-              iconName={icons.TABLE}
-            />
-          </TableOptionsModalWrapper>
+        <PageToolbarSpacer />
 
+        <ToolbarItem
+          id="options"
+          priority={2}
+          groupId="right"
+          label={translate('Options')}
+          iconName={icons.TABLE}
+          onPress={handleTableOptionsPress}
+        />
+
+        <ToolbarItem id="filter" pinned={true}>
           <FilterMenu
             alignMenu={align.RIGHT}
             selectedFilterKey={selectedFilterKey}
@@ -72,10 +87,12 @@ function LogsTable(props) {
             customFilters={[]}
             onFilterSelect={onFilterSelect}
           />
-        </PageToolbarSection>
+        </ToolbarItem>
       </PageToolbar>
 
       <PageContentBody>
+        <PageHeading scope={translate('System')} title={translate('Events')} />
+
         {
           isFetching && !isPopulated &&
             <LoadingIndicator />
@@ -119,6 +136,14 @@ function LogsTable(props) {
             </div>
         }
       </PageContentBody>
+
+      <TableOptionsModal
+        {...otherProps}
+        isOpen={isTableOptionsModalOpen}
+        columns={columns}
+        canModifyColumns={false}
+        onModalClose={handleTableOptionsModalClose}
+      />
     </PageContent>
   );
 }

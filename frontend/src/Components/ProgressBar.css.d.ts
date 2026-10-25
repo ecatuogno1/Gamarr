@@ -15,7 +15,6 @@ interface CssExports {
   'primary': string;
   'progressBar': string;
   'purple': string;
-  'queue': string;
   'small': string;
   'success': string;
   'warning': string;

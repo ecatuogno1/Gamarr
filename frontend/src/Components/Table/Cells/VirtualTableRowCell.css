@@ -1,13 +1,13 @@
 .cell {
   @add-mixin truncate;
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+  composes: cell from 'Components/Table/Cells/TableRowCell.css';
 
   flex-grow: 0;
   flex-shrink: 1;
   white-space: nowrap;
 }
 
-@media only screen and (max-width: $breakpointMedium) {
+@media (--breakpointMedium) {
   .cell {
     white-space: nowrap;
   }

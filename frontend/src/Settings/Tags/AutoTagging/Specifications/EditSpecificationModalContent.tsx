@@ -4,9 +4,10 @@ import AppState from 'App/State/AppState';
 import { AutoTaggingSpecificationAppState } from 'App/State/SettingsAppState';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import ProviderFieldFormGroup from 'Components/Form/ProviderFieldFormGroup';
 import Button from 'Components/Link/Button';
 import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
@@ -82,7 +83,7 @@ function EditSpecificationModalContent({
 
   return (
     <ModalContent onModalClose={onCancelPress}>
-      <ModalHeader>
+      <ModalHeader subtitle={id ? name.value : undefined}>
         {id
           ? translate('EditConditionImplementation', { implementationName })
           : translate('AddConditionImplementation', { implementationName })}
@@ -114,16 +115,16 @@ function EditSpecificationModalContent({
             </Alert>
           )}
 
-          <FormGroup>
+          <FormRow>
             <FormLabel>{translate('Name')}</FormLabel>
 
-            <FormInputGroup
+            <FormInput
               type={inputTypes.TEXT}
               name="name"
               {...name}
               onChange={onInputChange}
             />
-          </FormGroup>
+          </FormRow>
 
           {fields &&
             fields.map((field) => {
@@ -139,33 +140,39 @@ function EditSpecificationModalContent({
               );
             })}
 
-          <FormGroup>
+          <FormRow>
             <FormLabel>{translate('Negate')}</FormLabel>
 
-            <FormInputGroup
+            <FormInputHelpText
+              text={translate('AutoTaggingNegateHelpText', {
+                implementationName,
+              })}
+            />
+
+            <FormInput
               type={inputTypes.CHECK}
               name="negate"
               {...negate}
-              helpText={translate('AutoTaggingNegateHelpText', {
-                implementationName,
-              })}
               onChange={onInputChange}
             />
-          </FormGroup>
+          </FormRow>
 
-          <FormGroup>
+          <FormRow>
             <FormLabel>{translate('Required')}</FormLabel>
 
-            <FormInputGroup
+            <FormInputHelpText
+              text={translate('AutoTaggingRequiredHelpText', {
+                implementationName,
+              })}
+            />
+
+            <FormInput
               type={inputTypes.CHECK}
               name="required"
               {...required}
-              helpText={translate('AutoTaggingRequiredHelpText', {
-                implementationName,
-              })}
               onChange={onInputChange}
             />
-          </FormGroup>
+          </FormRow>
         </Form>
       </ModalBody>
       <ModalFooter>

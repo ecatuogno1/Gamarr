@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 import { cancelLookupGame, lookupUnsearchedGames } from 'Store/Actions/importGameActions';
+import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import ImportGameFooter from './ImportGameFooter';
 
 function isMixed(items, selectedIds, defaultValue, key) {
@@ -15,7 +16,8 @@ function createMapStateToProps() {
     (state) => state.addGame,
     (state) => state.importGame,
     (state, { selectedIds }) => selectedIds,
-    (addGame, importGame, selectedIds) => {
+    createAllGamesSelector(),
+    (addGame, importGame, selectedIds, allGames) => {
       const {
         monitor: defaultMonitor,
         qualityProfileId: defaultQualityProfileId,
@@ -32,10 +34,31 @@ function createMapStateToProps() {
       const isMonitorMixed = isMixed(items, selectedIds, defaultMonitor, 'monitor');
       const isQualityProfileIdMixed = isMixed(items, selectedIds, defaultQualityProfileId, 'qualityProfileId');
       const isMinimumAvailabilityMixed = isMixed(items, selectedIds, defaultMinimumAvailability, 'minimumAvailability');
-      const hasUnsearchedItems = !isLookingUpGame && items.some((item) => !item.isPopulated);
+      const unsearchedCount = items.filter((item) => !item.isPopulated).length;
+      const hasUnsearchedItems = !isLookingUpGame && unsearchedCount > 0;
+      const existingIgdbIds = new Set(allGames.map((game) => game.igdbId));
+
+      let readyCount = 0;
+      let existingCount = 0;
+
+      items.forEach((item) => {
+        if (!item.selectedGame) {
+          return;
+        }
+
+        if (existingIgdbIds.has(item.selectedGame.igdbId)) {
+          existingCount++;
+        } else {
+          readyCount++;
+        }
+      });
 
       return {
         selectedCount: selectedIds.length,
+        totalCount: items.length,
+        readyCount,
+        existingCount,
+        unsearchedCount,
         isLookingUpGame,
         isImporting,
         defaultMonitor,

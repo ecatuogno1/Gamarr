@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import VirtualTable from 'Components/Table/VirtualTable';
 import VirtualTableRow from 'Components/Table/VirtualTableRow';
 import DiscoverGameItemConnector from 'DiscoverGame/DiscoverGameItemConnector';
@@ -7,113 +7,116 @@ import { sortDirections } from 'Helpers/Props';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
 import DiscoverGameHeaderConnector from './DiscoverGameHeaderConnector';
 import DiscoverGameRowConnector from './DiscoverGameRowConnector';
-import styles from './DiscoverGameTable.css';
 
-class DiscoverGameTable extends Component {
+const ROW_HEIGHT = 38;
 
-  //
-  // Lifecycle
+// Ported to the react-window VirtualTable the v5 shared layer ships (the
+// react-virtualized `items` / `scroller` / `rowRenderer` API is gone).
+function Row({ index, style, data }) {
+  const {
+    items,
+    columns,
+    selectedState,
+    onSelectedChange
+  } = data;
 
-  constructor(props, context) {
-    super(props, context);
+  const game = items[index];
 
-    this.state = {
-      scrollIndex: null
-    };
+  if (!game) {
+    return null;
   }
 
-  componentDidUpdate(prevProps) {
-    const {
-      items,
-      jumpToCharacter
-    } = this.props;
+  return (
+    <VirtualTableRow style={style}>
+      <DiscoverGameItemConnector
+        key={game.igdbId}
+        component={DiscoverGameRowConnector}
+        columns={columns}
+        gameId={game.igdbId}
+        isSelected={selectedState[game.igdbId]}
+        onSelectedChange={onSelectedChange}
+      />
+    </VirtualTableRow>
+  );
+}
 
-    if (jumpToCharacter != null && jumpToCharacter !== prevProps.jumpToCharacter) {
+Row.propTypes = {
+  index: PropTypes.number.isRequired,
+  style: PropTypes.object.isRequired,
+  data: PropTypes.object.isRequired
+};
 
-      const scrollIndex = getIndexOfFirstCharacter(items, jumpToCharacter);
+function DiscoverGameTable(props) {
+  const {
+    items,
+    columns,
+    sortKey,
+    sortDirection,
+    jumpToCharacter,
+    isSmallScreen,
+    onSortPress,
+    scroller,
+    allSelected,
+    allUnselected,
+    onSelectAllChange,
+    selectedState,
+    onSelectedChange
+  } = props;
 
-      if (scrollIndex != null) {
-        this.setState({ scrollIndex });
-      }
-    } else if (jumpToCharacter == null && prevProps.jumpToCharacter != null) {
-      this.setState({ scrollIndex: null });
+  const listRef = useRef(null);
+  const scrollerRef = useMemo(() => ({ current: scroller }), [scroller]);
+
+  useEffect(() => {
+    if (jumpToCharacter == null) {
+      return;
     }
-  }
 
-  //
-  // Control
+    const index = getIndexOfFirstCharacter(items, jumpToCharacter);
 
-  rowRenderer = ({ key, rowIndex, style }) => {
-    const {
+    if (index != null) {
+      let scrollTop = index * ROW_HEIGHT;
+
+      // Offset by the approximate size of the header + padding.
+      if (scrollTop > 0) {
+        scrollTop += 57;
+      }
+
+      listRef.current?.scrollTo(scrollTop);
+      scroller?.scrollTo(0, scrollTop);
+    }
+  }, [jumpToCharacter, items, scroller]);
+
+  const itemData = useMemo(() => {
+    return {
       items,
       columns,
       selectedState,
       onSelectedChange
-    } = this.props;
+    };
+  }, [items, columns, selectedState, onSelectedChange]);
 
-    const game = items[rowIndex];
-
-    return (
-      <VirtualTableRow
-        key={key}
-        style={style}
-      >
-        <DiscoverGameItemConnector
-          key={game.igdbId}
-          component={DiscoverGameRowConnector}
+  return (
+    <VirtualTable
+      Header={
+        <DiscoverGameHeaderConnector
           columns={columns}
-          gameId={game.igdbId}
-          isSelected={selectedState[game.igdbId]}
-          onSelectedChange={onSelectedChange}
+          sortKey={sortKey}
+          sortDirection={sortDirection}
+          onSortPress={onSortPress}
+          allSelected={allSelected}
+          allUnselected={allUnselected}
+          onSelectAllChange={onSelectAllChange}
         />
-      </VirtualTableRow>
-    );
-  };
-
-  //
-  // Render
-
-  render() {
-    const {
-      items,
-      columns,
-      sortKey,
-      sortDirection,
-      isSmallScreen,
-      onSortPress,
-      scroller,
-      allSelected,
-      allUnselected,
-      onSelectAllChange,
-      selectedState
-    } = this.props;
-
-    return (
-      <VirtualTable
-        className={styles.tableContainer}
-        items={items}
-        scrollIndex={this.state.scrollIndex}
-        isSmallScreen={isSmallScreen}
-        scroller={scroller}
-        rowHeight={38}
-        overscanRowCount={2}
-        rowRenderer={this.rowRenderer}
-        header={
-          <DiscoverGameHeaderConnector
-            columns={columns}
-            sortKey={sortKey}
-            sortDirection={sortDirection}
-            onSortPress={onSortPress}
-            allSelected={allSelected}
-            allUnselected={allUnselected}
-            onSelectAllChange={onSelectAllChange}
-          />
-        }
-        selectedState={selectedState}
-        columns={columns}
-      />
-    );
-  }
+      }
+      itemCount={items.length}
+      itemData={itemData}
+      isSmallScreen={isSmallScreen}
+      listRef={listRef}
+      rowHeight={ROW_HEIGHT}
+      Row={Row}
+      scrollerRef={scrollerRef}
+    />
+  );
 }
 
 DiscoverGameTable.propTypes = {

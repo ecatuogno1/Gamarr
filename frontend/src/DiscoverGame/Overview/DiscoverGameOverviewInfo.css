@@ -1,12 +1,43 @@
-.infos {
+.chipStrip {
   display: flex;
-  flex: 0 0 250px;
-  flex-direction: column;
-  margin-left: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
-@media only screen and (max-width: $breakpointSmall) {
-  .infos {
-    margin-left: 0;
-  }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--ink) 7%, transparent);
+  color: var(--inkMuted);
+  white-space: nowrap;
+  font-weight: 400;
+  font-size: 11px;
+  font-family: var(--defaultFontFamily);
+  line-height: 1;
+  gap: 5px;
+}
+
+/* Where the game comes from (recommendation, popular, trending, import lists) */
+.chipSource {
+  background: color-mix(in oklch, var(--accent) 14%, transparent);
+  color: var(--inkSoft);
+}
+
+.chipStatus::before {
+  flex-shrink: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  content: "";
+}
+
+.existing::before {
+  background: var(--statusFinished);
+}
+
+.excluded::before {
+  background: var(--statusMissing);
 }

@@ -1,12 +1,13 @@
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Alert from 'Components/Alert';
 import Card from 'Components/Card';
-import FieldSet from 'Components/FieldSet';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import Icon from 'Components/Icon';
 import Button from 'Components/Link/Button';
 import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
@@ -99,8 +100,7 @@ class EditCustomFormatModalContent extends Component {
 
     return (
       <ModalContent onModalClose={onModalClose}>
-
-        <ModalHeader>
+        <ModalHeader subtitle={id ? name.previousValue ?? name.value : undefined}>
           {id ? translate('EditCustomFormat') : translate('AddCustomFormat')}
         </ModalHeader>
 
@@ -124,38 +124,44 @@ class EditCustomFormatModalContent extends Component {
                   <Form
                     {...otherProps}
                   >
-                    <FormGroup>
+                    <FormRow>
                       <FormLabel>
                         {translate('Name')}
                       </FormLabel>
 
-                      <FormInputGroup
+                      <FormInput
                         type={inputTypes.TEXT}
                         name="name"
                         {...name}
                         onChange={onInputChange}
                       />
-                    </FormGroup>
+                    </FormRow>
 
-                    <FormGroup>
-                      <FormLabel>{translate('IncludeCustomFormatWhenRenaming')}</FormLabel>
-
-                      <FormInputGroup
+                    <FormRow>
+                      <FormLabel>
+                        {translate('IncludeCustomFormatWhenRenaming')}
+                      </FormLabel>
+                      <FormInputHelpText
+                        text={translate('IncludeCustomFormatWhenRenamingHelpText')}
+                      />
+                      <FormInput
                         type={inputTypes.CHECK}
                         name="includeCustomFormatWhenRenaming"
-                        helpText={translate('IncludeCustomFormatWhenRenamingHelpText')}
                         {...includeCustomFormatWhenRenaming}
                         onChange={onInputChange}
                       />
-                    </FormGroup>
+                    </FormRow>
                   </Form>
 
-                  <FieldSet legend={translate('Conditions')}>
-                    <Alert kind={kinds.INFO}>
-                      <div>
-                        {translate('CustomFormatsSettingsTriggerInfo')}
-                      </div>
-                    </Alert>
+                  <div className={styles.conditions}>
+                    <h3 className={styles.conditionsTitle}>
+                      {translate('Conditions')}
+                    </h3>
+
+                    <p className={styles.intro}>
+                      {translate('CustomFormatsSettingsTriggerInfo')}
+                    </p>
+
                     <div className={styles.customFormats}>
                       {
                         specifications.map((tag) => {
@@ -171,18 +177,26 @@ class EditCustomFormatModalContent extends Component {
                       }
 
                       <Card
-                        className={styles.addSpecification}
+                        className={classNames(
+                          styles.addSpecification,
+                          !specifications.length && styles.fullWidth
+                        )}
+                        aria-label={translate('AddCondition')}
                         onPress={this.onAddSpecificationPress}
                       >
                         <div className={styles.center}>
                           <Icon
                             name={icons.ADD}
-                            size={45}
+                            size={20}
                           />
+                        </div>
+
+                        <div className={styles.addLabel}>
+                          {translate('AddCondition')}
                         </div>
                       </Card>
                     </div>
-                  </FieldSet>
+                  </div>
 
                   <AddSpecificationModal
                     isOpen={isAddSpecificationModalOpen}
@@ -198,28 +212,25 @@ class EditCustomFormatModalContent extends Component {
                     isOpen={isImportCustomFormatModalOpen}
                     onModalClose={this.onImportCustomFormatModalClose}
                   />
-
                 </div>
             }
           </div>
         </ModalBody>
+
         <ModalFooter>
           <div className={styles.rightButtons}>
             {
-              id &&
+              id ?
                 <Button
-                  className={styles.deleteButton}
                   kind={kinds.DANGER}
                   onPress={onDeleteCustomFormatPress}
                 >
                   {translate('Delete')}
-                </Button>
+                </Button> :
+                null
             }
 
-            <Button
-              className={styles.deleteButton}
-              onPress={this.onImportPress}
-            >
+            <Button onPress={this.onImportPress}>
               {translate('Import')}
             </Button>
           </div>

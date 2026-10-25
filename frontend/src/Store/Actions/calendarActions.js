@@ -44,6 +44,7 @@ export const defaultState = {
   options: {
     showGameInformation: true,
     showReleaseDate: true,
+    showCoverArt: true,
     showCutoffUnmetIcon: false,
     fullColorEvents: false
   },
@@ -107,6 +108,7 @@ export const SET_CALENDAR_FILTER = 'calendar/setCalendarFilter';
 export const SET_CALENDAR_VIEW = 'calendar/setCalendarView';
 export const GOTO_CALENDAR_TODAY = 'calendar/gotoCalendarToday';
 export const GOTO_CALENDAR_NEXT_RANGE = 'calendar/gotoCalendarNextRange';
+export const GOTO_CALENDAR_DATE = 'calendar/gotoCalendarDate';
 export const CLEAR_CALENDAR = 'calendar/clearCalendar';
 export const SET_CALENDAR_OPTION = 'calendar/setCalendarOption';
 export const SEARCH_MISSING = 'calendar/searchMissing';
@@ -221,6 +223,7 @@ export const setCalendarView = createThunk(SET_CALENDAR_VIEW);
 export const gotoCalendarToday = createThunk(GOTO_CALENDAR_TODAY);
 export const gotoCalendarPreviousRange = createThunk(GOTO_CALENDAR_PREVIOUS_RANGE);
 export const gotoCalendarNextRange = createThunk(GOTO_CALENDAR_NEXT_RANGE);
+export const gotoCalendarDate = createThunk(GOTO_CALENDAR_DATE);
 export const clearCalendar = createAction(CLEAR_CALENDAR);
 export const setCalendarOption = createAction(SET_CALENDAR_OPTION);
 export const searchMissing = createThunk(SEARCH_MISSING);
@@ -379,6 +382,23 @@ export const actionHandlers = handleThunks({
     const time = moment(state.calendar.time).add(amount, viewRanges[view]);
 
     dispatch(fetchCalendar({ time, view }));
+  },
+
+  [GOTO_CALENDAR_DATE]: function(getState, payload, dispatch) {
+    const state = getState();
+    const view = state.calendar.view;
+    const selected = moment(payload.date).startOf('day');
+
+    if (view === calendarViews.FORECAST) {
+      // Keep the forecast's start weekday so the picked date stays in view
+      const currentStartWeekday = moment(state.calendar.time).subtract(1, 'day').day();
+      const diff = (selected.day() - currentStartWeekday + 7) % 7;
+
+      dispatch(fetchCalendar({ time: selected.subtract(diff, 'days').add(1, 'day'), view }));
+      return;
+    }
+
+    dispatch(fetchCalendar({ time: selected, view }));
   },
 
   [SEARCH_MISSING]: function(getState, payload, dispatch) {

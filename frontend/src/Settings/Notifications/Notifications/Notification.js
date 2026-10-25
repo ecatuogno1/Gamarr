@@ -1,13 +1,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Card from 'Components/Card';
 import Label from 'Components/Label';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
+import SettingsCard from 'Components/SettingsCard/SettingsCard';
+import settingsCardStyles from 'Components/SettingsCard/SettingsCard.css';
+import SettingsCardStatus from 'Components/SettingsCard/SettingsCardStatus';
 import TagList from 'Components/TagList';
-import { kinds } from 'Helpers/Props';
+import { kinds, sizes } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import EditNotificationModalConnector from './EditNotificationModalConnector';
-import styles from './Notification.css';
 
 class Notification extends Component {
 
@@ -84,128 +85,149 @@ class Notification extends Component {
       tagList
     } = this.props;
 
+    const enabled = onGrab || onDownload || onRename || onHealthIssue || onHealthRestored || onApplicationUpdate || onGameAdded || onGameDelete || onGameFileDelete || onManualInteractionRequired;
+
     return (
-      <Card
-        className={styles.notification}
-        overlayContent={true}
+      <SettingsCard
+        name={name}
+        aria-label={translate('EditConnectionName', { name })}
         onPress={this.onEditNotificationPress}
       >
-        <div className={styles.name}>
-          {name}
+        <SettingsCardStatus
+          dot={enabled ? 'active' : 'muted'}
+          segments={[translate(enabled ? 'Enabled' : 'Disabled')]}
+        />
+
+        <div className={settingsCardStyles.labels}>
+          {
+            supportsOnGrab && onGrab ?
+              <Label dot={false} kind={kinds.DEFAULT}
+                size={sizes.MEDIUM}
+              >
+                {translate('OnGrab')}
+              </Label> :
+              null
+          }
+
+          {
+            supportsOnDownload && onDownload ?
+              <Label dot={false} kind={kinds.DEFAULT}
+                size={sizes.MEDIUM}
+              >
+                {translate('OnFileImport')}
+              </Label> :
+              null
+          }
+
+          {
+            supportsOnUpgrade && onDownload && onUpgrade ?
+              <Label dot={false} kind={kinds.DEFAULT}
+                size={sizes.MEDIUM}
+              >
+                {translate('OnFileUpgrade')}
+              </Label> :
+              null
+          }
+
+          {
+            supportsOnRename && onRename ?
+              <Label dot={false} kind={kinds.DEFAULT}
+                size={sizes.MEDIUM}
+              >
+                {translate('OnRename')}
+              </Label> :
+              null
+          }
+
+          {
+            supportsOnGameAdded && onGameAdded ?
+              <Label dot={false} kind={kinds.DEFAULT}
+                size={sizes.MEDIUM}
+              >
+                {translate('OnGameAdded')}
+              </Label> :
+              null
+          }
+
+          {
+            supportsOnHealthIssue && onHealthIssue ?
+              <Label dot={false} kind={kinds.DEFAULT}
+                size={sizes.MEDIUM}
+              >
+                {translate('OnHealthIssue')}
+              </Label> :
+              null
+          }
+
+          {
+            supportsOnHealthRestored && onHealthRestored ?
+              <Label dot={false} kind={kinds.DEFAULT}
+                size={sizes.MEDIUM}
+              >
+                {translate('OnHealthRestored')}
+              </Label> :
+              null
+          }
+
+          {
+            supportsOnApplicationUpdate && onApplicationUpdate ?
+              <Label dot={false} kind={kinds.DEFAULT}
+                size={sizes.MEDIUM}
+              >
+                {translate('OnApplicationUpdate')}
+              </Label> :
+              null
+          }
+
+          {
+            supportsOnGameDelete && onGameDelete ?
+              <Label dot={false} kind={kinds.DEFAULT}
+                size={sizes.MEDIUM}
+              >
+                {translate('OnGameDelete')}
+              </Label> :
+              null
+          }
+
+          {
+            supportsOnGameFileDelete && onGameFileDelete ?
+              <Label dot={false} kind={kinds.DEFAULT}
+                size={sizes.MEDIUM}
+              >
+                {translate('OnGameFileDelete')}
+              </Label> :
+              null
+          }
+
+          {
+            supportsOnGameFileDeleteForUpgrade && onGameFileDelete && onGameFileDeleteForUpgrade ?
+              <Label dot={false} kind={kinds.DEFAULT}
+                size={sizes.MEDIUM}
+              >
+                {translate('OnGameFileDeleteForUpgrade')}
+              </Label> :
+              null
+          }
+
+          {
+            supportsOnManualInteractionRequired && onManualInteractionRequired ?
+              <Label dot={false} kind={kinds.DEFAULT}
+                size={sizes.MEDIUM}
+              >
+                {translate('OnManualInteractionRequired')}
+              </Label> :
+              null
+          }
         </div>
 
         {
-          supportsOnGrab && onGrab ?
-            <Label kind={kinds.SUCCESS}>
-              {translate('OnGrab')}
-            </Label> :
+          tags.length > 0 ?
+            <TagList
+              tags={tags}
+              tagList={tagList}
+            /> :
             null
         }
-
-        {
-          supportsOnDownload && onDownload ?
-            <Label kind={kinds.SUCCESS}>
-              {translate('OnFileImport')}
-            </Label> :
-            null
-        }
-
-        {
-          supportsOnUpgrade && onDownload && onUpgrade ?
-            <Label kind={kinds.SUCCESS}>
-              {translate('OnFileUpgrade')}
-            </Label> :
-            null
-        }
-
-        {
-          supportsOnRename && onRename ?
-            <Label kind={kinds.SUCCESS}>
-              {translate('OnRename')}
-            </Label> :
-            null
-        }
-
-        {
-          supportsOnGameAdded && onGameAdded ?
-            <Label kind={kinds.SUCCESS}>
-              {translate('OnGameAdded')}
-            </Label> :
-            null
-        }
-
-        {
-          supportsOnHealthIssue && onHealthIssue ?
-            <Label kind={kinds.SUCCESS}>
-              {translate('OnHealthIssue')}
-            </Label> :
-            null
-        }
-
-        {
-          supportsOnHealthRestored && onHealthRestored ?
-            <Label kind={kinds.SUCCESS}>
-              {translate('OnHealthRestored')}
-            </Label> :
-            null
-        }
-
-        {
-          supportsOnApplicationUpdate && onApplicationUpdate ?
-            <Label kind={kinds.SUCCESS}>
-              {translate('OnApplicationUpdate')}
-            </Label> :
-            null
-        }
-
-        {
-          supportsOnGameDelete && onGameDelete ?
-            <Label kind={kinds.SUCCESS}>
-              {translate('OnGameDelete')}
-            </Label> :
-            null
-        }
-
-        {
-          supportsOnGameFileDelete && onGameFileDelete ?
-            <Label kind={kinds.SUCCESS}>
-              {translate('OnGameFileDelete')}
-            </Label> :
-            null
-        }
-
-        {
-          supportsOnGameFileDeleteForUpgrade && onGameFileDelete && onGameFileDeleteForUpgrade ?
-            <Label kind={kinds.SUCCESS}>
-              {translate('OnGameFileDeleteForUpgrade')}
-            </Label> :
-            null
-        }
-
-        {
-          supportsOnManualInteractionRequired && onManualInteractionRequired ?
-            <Label kind={kinds.SUCCESS}>
-              {translate('OnManualInteractionRequired')}
-            </Label> :
-            null
-        }
-
-        {
-          !onGrab && !onDownload && !onRename && !onHealthIssue && !onHealthRestored && !onApplicationUpdate && !onGameAdded && !onGameDelete && !onGameFileDelete && !onManualInteractionRequired ?
-            <Label
-              kind={kinds.DISABLED}
-              outline={true}
-            >
-              {translate('Disabled')}
-            </Label> :
-            null
-        }
-
-        <TagList
-          tags={tags}
-          tagList={tagList}
-        />
-
         <EditNotificationModalConnector
           id={id}
           isOpen={this.state.isEditNotificationModalOpen}
@@ -222,7 +244,7 @@ class Notification extends Component {
           onConfirm={this.onConfirmDeleteNotification}
           onCancel={this.onDeleteNotificationModalClose}
         />
-      </Card>
+      </SettingsCard>
     );
   }
 }

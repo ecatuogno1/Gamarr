@@ -9,12 +9,14 @@ import FilterMenu from 'Components/Menu/FilterMenu';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
+import PageHeading from 'Components/Page/PageHeading';
+import PageMessage from 'Components/Page/PageMessage';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
-import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
-import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
+import PageToolbarSpacer from 'Components/Page/Toolbar/PageToolbarSpacer';
+import ToolbarItem from 'Components/Page/Toolbar/ToolbarItem';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
-import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
+import TableOptionsModal from 'Components/Table/TableOptions/TableOptionsModal';
 import TablePager from 'Components/Table/TablePager';
 import usePaging from 'Components/Table/usePaging';
 import useCurrentPage from 'Helpers/Hooks/useCurrentPage';
@@ -169,6 +171,16 @@ function Blocklist() {
     [dispatch]
   );
 
+  const [isTableOptionsModalOpen, setIsTableOptionsModalOpen] = useState(false);
+
+  const handleTableOptionsPress = useCallback(() => {
+    setIsTableOptionsModalOpen(true);
+  }, []);
+
+  const handleTableOptionsModalClose = useCallback(() => {
+    setIsTableOptionsModalOpen(false);
+  }, []);
+
   useEffect(() => {
     if (requestCurrentPage) {
       dispatch(fetchBlocklist());
@@ -203,36 +215,40 @@ function Blocklist() {
     <SelectProvider items={items}>
       <PageContent title={translate('Blocklist')}>
         <PageToolbar>
-          <PageToolbarSection>
-            <PageToolbarButton
-              label={translate('RemoveSelected')}
-              iconName={icons.REMOVE}
-              isDisabled={!selectedIds.length}
-              isSpinning={isRemoving}
-              onPress={handleRemoveSelectedPress}
-            />
+          <ToolbarItem
+            id="remove-selected"
+            priority={1}
+            groupId="left"
+            label={translate('RemoveSelected')}
+            iconName={icons.REMOVE}
+            isDisabled={!selectedIds.length}
+            isSpinning={isRemoving}
+            onPress={handleRemoveSelectedPress}
+          />
 
-            <PageToolbarButton
-              label={translate('Clear')}
-              iconName={icons.CLEAR}
-              isDisabled={!items.length}
-              isSpinning={isClearingBlocklistExecuting}
-              onPress={handleClearBlocklistPress}
-            />
-          </PageToolbarSection>
+          <ToolbarItem
+            id="clear"
+            priority={1}
+            groupId="left"
+            label={translate('Clear')}
+            iconName={icons.CLEAR}
+            isDisabled={!items.length}
+            isSpinning={isClearingBlocklistExecuting}
+            onPress={handleClearBlocklistPress}
+          />
 
-          <PageToolbarSection alignContent={align.RIGHT}>
-            <TableOptionsModalWrapper
-              columns={columns}
-              pageSize={pageSize}
-              onTableOptionChange={handleTableOptionChange}
-            >
-              <PageToolbarButton
-                label={translate('Options')}
-                iconName={icons.TABLE}
-              />
-            </TableOptionsModalWrapper>
+          <PageToolbarSpacer />
 
+          <ToolbarItem
+            id="options"
+            priority={2}
+            groupId="right"
+            label={translate('Options')}
+            iconName={icons.TABLE}
+            onPress={handleTableOptionsPress}
+          />
+
+          <ToolbarItem id="filter" pinned={true}>
             <FilterMenu
               alignMenu={align.RIGHT}
               selectedFilterKey={selectedFilterKey}
@@ -241,10 +257,15 @@ function Blocklist() {
               filterModalConnectorComponent={BlocklistFilterModal}
               onFilterSelect={handleFilterSelect}
             />
-          </PageToolbarSection>
+          </ToolbarItem>
         </PageToolbar>
 
         <PageContentBody>
+          <PageHeading
+            scope={translate('Activity')}
+            title={translate('Blocklist')}
+          />
+
           {isFetching && !isPopulated ? <LoadingIndicator /> : null}
 
           {!isFetching && !!error ? (
@@ -252,11 +273,11 @@ function Blocklist() {
           ) : null}
 
           {isPopulated && !error && !items.length ? (
-            <Alert kind={kinds.INFO}>
+            <PageMessage>
               {selectedFilterKey === 'all'
                 ? translate('NoBlocklistItems')
                 : translate('BlocklistFilterHasNoItems')}
-            </Alert>
+            </PageMessage>
           ) : null}
 
           {isPopulated && !error && !!items.length ? (
@@ -320,6 +341,14 @@ function Blocklist() {
           confirmLabel={translate('Clear')}
           onConfirm={handleClearBlocklistConfirmed}
           onCancel={handleConfirmClearModalClose}
+        />
+
+        <TableOptionsModal
+          isOpen={isTableOptionsModalOpen}
+          columns={columns}
+          pageSize={pageSize}
+          onTableOptionChange={handleTableOptionChange}
+          onModalClose={handleTableOptionsModalClose}
         />
       </PageContent>
     </SelectProvider>

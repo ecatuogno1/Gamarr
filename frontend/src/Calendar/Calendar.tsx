@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import * as commandNames from 'Commands/commandNames';
@@ -50,6 +50,9 @@ function Calendar() {
   const firstDayOfWeek = useSelector(
     (state: AppState) => state.settings.ui.item.firstDayOfWeek
   );
+
+  const contentRef = useRef<HTMLDivElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
 
   const wasRefreshingGame = usePrevious(isRefreshingGame);
   const previousFirstDayOfWeek = usePrevious(firstDayOfWeek);
@@ -111,6 +114,28 @@ function Calendar() {
     }
   }, [time, view, firstDayOfWeek, previousFirstDayOfWeek, dispatch]);
 
+  useLayoutEffect(() => {
+    const content = contentRef.current;
+    const sticky = stickyRef.current;
+
+    if (!content || !sticky) {
+      return;
+    }
+
+    const updateHeight = () =>
+      content.style.setProperty(
+        '--calendarStickyHeight',
+        `${sticky.offsetHeight}px`
+      );
+
+    updateHeight();
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(sticky);
+
+    return () => observer.disconnect();
+  }, [isPopulated, error, view]);
+
   useEffect(() => {
     if (wasRefreshingGame && !isRefreshingGame) {
       dispatch(fetchCalendar({ time, view }));
@@ -142,15 +167,19 @@ function Calendar() {
 
       {!error && isPopulated && view === 'agenda' ? (
         <div className={styles.calendarContent}>
-          <CalendarHeader />
+          <div className={styles.sticky}>
+            <CalendarHeader />
+          </div>
           <Agenda />
         </div>
       ) : null}
 
       {!error && isPopulated && view !== 'agenda' ? (
-        <div className={styles.calendarContent}>
-          <CalendarHeader />
-          <DaysOfWeek />
+        <div ref={contentRef} className={styles.calendarContent}>
+          <div ref={stickyRef} className={styles.sticky}>
+            <CalendarHeader />
+            <DaysOfWeek />
+          </div>
           <CalendarDays />
         </div>
       ) : null}

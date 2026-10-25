@@ -3,9 +3,10 @@ import React from 'react';
 import Alert from 'Components/Alert';
 import FieldSet from 'Components/FieldSet';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import { inputTypes, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
@@ -20,7 +21,10 @@ function MetadataOptions(props) {
   } = props;
 
   return (
-    <FieldSet legend={translate('Options')}>
+    <FieldSet
+      legend={translate('Options')}
+      caption={translate('MetadataOptionsCaption')}
+    >
       {
         isFetching &&
           <LoadingIndicator />
@@ -29,37 +33,39 @@ function MetadataOptions(props) {
       {
         !isFetching && error &&
           <Alert kind={kinds.DANGER}>
-            {translate('UnableToLoadIndexerOptions')}
+            {translate('MetadataOptionsLoadError')}
           </Alert>
       }
 
       {
         hasSettings && !isFetching && !error &&
           <Form>
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('IgdbClientId')}</FormLabel>
-
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('IgdbClientIdHelpText')}
+                link="https://dev.twitch.tv/console/apps"
+              />
+              <FormInput
                 type={inputTypes.TEXT}
                 name="igdbClientId"
                 onChange={onInputChange}
-                helpText={translate('IgdbClientIdHelpText')}
-                helpLink="https://dev.twitch.tv/console/apps"
                 {...settings.igdbClientId}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('IgdbClientSecret')}</FormLabel>
-
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('IgdbClientSecretHelpText')}
+              />
+              <FormInput
                 type={inputTypes.PASSWORD}
                 name="igdbClientSecret"
                 onChange={onInputChange}
-                helpText={translate('IgdbClientSecretHelpText')}
                 {...settings.igdbClientSecret}
               />
-            </FormGroup>
+            </FormRow>
           </Form>
       }
     </FieldSet>

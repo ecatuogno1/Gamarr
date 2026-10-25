@@ -1,50 +1,70 @@
+/* v5 chip for a collection game when posters are hidden */
+
 .game {
-  display: flex;
-  align-items: stretch;
+  display: inline-flex;
+  align-items: center;
   overflow: hidden;
-  margin: 2px 4px;
-  border: 1px solid var(--borderColor);
-  border-radius: 4px;
-  background-color: var(--inputBackgroundColor);
+  padding: 3px 4px 3px 9px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--ink) 7%, transparent);
+  color: var(--inkSoft);
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 1.4;
   cursor: default;
+  gap: 6px;
 }
 
 .gameTitle {
-  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .gameStatus {
-  padding: 0 4px;
-  border-left: 4px;
-  border-left-style: solid;
-  background-color: var(--themeLightColor);
-  color: var(--defaultColor);
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--paperCard);
+  color: var(--inkMuted);
+  font-size: 11px;
+  gap: 5px;
+
+  &::before {
+    flex-shrink: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: var(--inkFaint);
+    content: "";
+  }
 }
 
-.primary {
-  border-color: var(--primaryColor);
+.primary::before {
+  background: var(--primaryColor);
 }
 
-.danger {
-  border-color: var(--dangerColor);
+.danger::before {
+  background: var(--dangerColor);
 }
 
-.success {
-  border-color: var(--successColor);
+.success::before {
+  background: var(--successColor);
 }
 
-.purple {
-  border-color: var(--purple);
+.purple::before {
+  background: var(--purple);
 }
 
-.warning {
-  border-color: var(--warningColor);
+.warning::before {
+  background: var(--warningColor);
 }
 
-.info {
-  border-color: var(--infoColor);
+.info::before {
+  background: var(--infoColor);
 }
 
-.queue {
-  border-color: var(--queueColor);
+.queue::before {
+  background: var(--queueColor);
 }

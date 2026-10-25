@@ -1,9 +1,11 @@
+import { CalendarStatus } from 'typings/Calendar';
+
 function getStatusStyle(
   hasFile: boolean,
   downloading: boolean,
   isMonitored: boolean,
   isAvailable: boolean
-) {
+): CalendarStatus {
   if (downloading) {
     return 'queue';
   }

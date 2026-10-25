@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { ImportListAppState } from 'App/State/SettingsAppState';
-import Card from 'Components/Card';
-import FieldSet from 'Components/FieldSet';
-import Icon from 'Components/Icon';
 import PageSectionContent from 'Components/Page/PageSectionContent';
-import { icons } from 'Helpers/Props';
+import SectionHeading from 'Components/SectionHeading';
+import AddCard from 'Components/SettingsCard/AddCard';
+import settingsCardStyles from 'Components/SettingsCard/SettingsCard.css';
+import settingsStyles from 'Settings/Settings.css';
 import { fetchRootFolders } from 'Store/Actions/rootFolderActions';
 import {
   cloneImportList,
@@ -18,7 +18,6 @@ import translate from 'Utilities/String/translate';
 import AddImportListModal from './AddImportListModal';
 import EditImportListModal from './EditImportListModal';
 import ImportList from './ImportList';
-import styles from './ImportLists.css';
 
 function ImportLists() {
   const dispatch = useDispatch();
@@ -66,14 +65,19 @@ function ImportLists() {
   }, [dispatch]);
 
   return (
-    <FieldSet legend={translate('ImportLists')}>
+    <div className={settingsStyles.pageSection}>
+      <SectionHeading
+        title={translate('ImportLists')}
+        description={translate('ImportListsSectionDescription')}
+      />
+
       <PageSectionContent
         errorMessage={translate('ImportListsLoadError')}
         error={error}
         isFetching={isFetching}
         isPopulated={isPopulated}
       >
-        <div className={styles.lists}>
+        <div className={settingsCardStyles.grid}>
           {items.map((item) => {
             return (
               <ImportList
@@ -84,11 +88,10 @@ function ImportLists() {
             );
           })}
 
-          <Card className={styles.addList} onPress={handleAddImportListPress}>
-            <div className={styles.center}>
-              <Icon name={icons.ADD} size={45} />
-            </div>
-          </Card>
+          <AddCard
+            label={translate('AddImportList')}
+            onPress={handleAddImportListPress}
+          />
         </div>
 
         <AddImportListModal
@@ -102,7 +105,7 @@ function ImportLists() {
           onModalClose={handleEditImportListModalClose}
         />
       </PageSectionContent>
-    </FieldSet>
+    </div>
   );
 }
 

@@ -3,9 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import FieldSet from 'Components/FieldSet';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import Button from 'Components/Link/Button';
 import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
@@ -36,6 +37,7 @@ function CalendarOptionsModalContent({
   const {
     showGameInformation,
     showReleaseDate,
+    showCoverArt,
     showCutoffUnmetIcon,
     fullColorEvents,
   } = useSelector((state: AppState) => state.calendar.options);
@@ -88,106 +90,126 @@ function CalendarOptionsModalContent({
       <ModalBody>
         <FieldSet legend={translate('Local')}>
           <Form>
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('ShowGameInformation')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('ShowGameInformationHelpText')}
+              />
+              <FormInput
                 type={inputTypes.CHECK}
                 name="showGameInformation"
                 value={showGameInformation}
-                helpText={translate('ShowGameInformationHelpText')}
                 onChange={handleOptionInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
+            <FormRow>
+              <FormLabel>{translate('ShowCoverArt')}</FormLabel>
+
+              <FormInputHelpText text={translate('ShowCoverArtHelpText')} />
+              <FormInput
+                type={inputTypes.CHECK}
+                name="showCoverArt"
+                value={showCoverArt}
+                onChange={handleOptionInputChange}
+              />
+            </FormRow>
+
+            <FormRow>
               <FormLabel>{translate('ShowReleaseDate')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('ShowReleaseDateCalendarHelpText')}
+              />
+              <FormInput
                 type={inputTypes.CHECK}
                 name="showReleaseDate"
                 value={showReleaseDate}
-                helpText={translate('ShowReleaseDateCalendarHelpText')}
                 onChange={handleOptionInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('IconForCutoffUnmet')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('IconForCutoffUnmetHelpText')}
+              />
+              <FormInput
                 type={inputTypes.CHECK}
                 name="showCutoffUnmetIcon"
                 value={showCutoffUnmetIcon}
-                helpText={translate('IconForCutoffUnmetHelpText')}
                 onChange={handleOptionInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('FullColorEvents')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText text={translate('FullColorEventsHelpText')} />
+              <FormInput
                 type={inputTypes.CHECK}
                 name="fullColorEvents"
                 value={fullColorEvents}
-                helpText={translate('FullColorEventsHelpText')}
                 onChange={handleOptionInputChange}
               />
-            </FormGroup>
+            </FormRow>
           </Form>
         </FieldSet>
 
         <FieldSet legend={translate('Global')}>
           <Form>
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('FirstDayOfWeek')}</FormLabel>
 
-              <FormInputGroup
+              <FormInput
                 type={inputTypes.SELECT}
                 name="firstDayOfWeek"
                 values={firstDayOfWeekOptions}
                 value={firstDayOfWeek}
                 onChange={handleGlobalInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('WeekColumnHeader')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText text={translate('WeekColumnHeaderHelpText')} />
+              <FormInput
                 type={inputTypes.SELECT}
                 name="calendarWeekColumnHeader"
                 values={weekColumnOptions}
                 value={calendarWeekColumnHeader}
-                helpText={translate('WeekColumnHeaderHelpText')}
                 onChange={handleGlobalInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('TimeFormat')}</FormLabel>
 
-              <FormInputGroup
+              <FormInput
                 type={inputTypes.SELECT}
                 name="timeFormat"
                 values={timeFormatOptions}
                 value={timeFormat}
                 onChange={handleGlobalInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('EnableColorImpairedMode')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('EnableColorImpairedModeHelpText')}
+              />
+              <FormInput
                 type={inputTypes.CHECK}
                 name="enableColorImpairedMode"
                 value={enableColorImpairedMode}
-                helpText={translate('EnableColorImpairedModeHelpText')}
                 onChange={handleGlobalInputChange}
               />
-            </FormGroup>
+            </FormRow>
           </Form>
         </FieldSet>
       </ModalBody>

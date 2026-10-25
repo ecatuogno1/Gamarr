@@ -1,14 +1,15 @@
 module.exports = {
   // Families
-  defaultFontFamily: 'Roboto, "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif',
-  monoSpaceFontFamily: '"Ubuntu Mono", Menlo, Monaco, Consolas, "Courier New", monospace;',
+  // Mirrors Styles/Variables/variables.css for JS consumers.
+  defaultFontFamily: '"Inter", ui-sans-serif, system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif',
+  monoSpaceFontFamily: '"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Courier New", monospace',
 
   // Sizes
   extraSmallFontSize: '11px',
-  smallFontSize: '12px',
-  defaultFontSize: '14px',
-  intermediateFontSize: '15px',
-  largeFontSize: '16px',
+  smallFontSize: '13px',
+  defaultFontSize: '15px',
+  intermediateFontSize: '16px',
+  largeFontSize: '18px',
 
-  lineHeight: '1.528571429'
+  lineHeight: '1.55'
 };

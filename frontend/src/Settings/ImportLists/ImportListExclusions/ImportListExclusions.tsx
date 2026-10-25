@@ -3,16 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import FieldSet from 'Components/FieldSet';
-import IconButton from 'Components/Link/IconButton';
-import SpinnerButton from 'Components/Link/SpinnerButton';
+import Icon from 'Components/Icon';
+import Link from 'Components/Link/Link';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import PageSectionContent from 'Components/Page/PageSectionContent';
-import TableRowCell from 'Components/Table/Cells/TableRowCell';
 import Column from 'Components/Table/Column';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
 import TablePager from 'Components/Table/TablePager';
-import TableRow from 'Components/Table/TableRow';
 import usePaging from 'Components/Table/usePaging';
 import useCurrentPage from 'Helpers/Hooks/useCurrentPage';
 import useModalOpenState from 'Helpers/Hooks/useModalOpenState';
@@ -150,13 +148,7 @@ function ImportListExclusions() {
     setIsConfirmDeleteModalOpen(false);
   }, [setIsConfirmDeleteModalOpen]);
 
-  const {
-    handleFirstPagePress,
-    handlePreviousPagePress,
-    handleNextPagePress,
-    handleLastPagePress,
-    handlePageSelect,
-  } = usePaging({
+  const { handlePageSelect } = usePaging({
     page,
     totalPages,
     gotoPage: gotoImportListExclusionPage,
@@ -228,7 +220,10 @@ function ImportListExclusions() {
   const isFetchingForFirstTime = isFetching && !isPopulated;
 
   return (
-    <FieldSet legend={translate('ImportListExclusions')}>
+    <FieldSet
+      legend={translate('ImportListExclusions')}
+      caption={translate('ImportListExclusionsCaption')}
+    >
       <PageSectionContent
         errorMessage={translate('ImportListExclusionsLoadError')}
         isFetching={isFetchingForFirstTime}
@@ -259,26 +254,6 @@ function ImportListExclusions() {
                 />
               );
             })}
-
-            <TableRow>
-              <TableRowCell colSpan={4}>
-                <SpinnerButton
-                  kind={kinds.DANGER}
-                  isSpinning={isDeleting}
-                  isDisabled={!selectedIds.length}
-                  onPress={handleDeleteSelectedPress}
-                >
-                  {translate('Delete')}
-                </SpinnerButton>
-              </TableRowCell>
-
-              <TableRowCell>
-                <IconButton
-                  name={icons.ADD}
-                  onPress={setAddImportListExclusionModalOpen}
-                />
-              </TableRowCell>
-            </TableRow>
           </TableBody>
         </Table>
 
@@ -287,12 +262,30 @@ function ImportListExclusions() {
           totalPages={totalPages}
           totalRecords={totalRecords}
           isFetching={isFetching}
-          onFirstPagePress={handleFirstPagePress}
-          onPreviousPagePress={handlePreviousPagePress}
-          onNextPagePress={handleNextPagePress}
-          onLastPagePress={handleLastPagePress}
+          leftActions={
+            <Link
+              className={styles.deleteRow}
+              isDisabled={!selectedIds.length || isDeleting}
+              onPress={handleDeleteSelectedPress}
+            >
+              <Icon
+                name={isDeleting ? icons.SPINNER : icons.DELETE}
+                size={12}
+                isSpinning={isDeleting}
+              />
+              {translate('DeleteSelected')}
+            </Link>
+          }
           onPageSelect={handlePageSelect}
         />
+
+        <Link
+          className={styles.addRow}
+          onPress={setAddImportListExclusionModalOpen}
+        >
+          <Icon name={icons.ADD} size={12} />
+          {translate('AddImportListExclusion')}
+        </Link>
 
         <EditImportListExclusionModal
           isOpen={isAddImportListExclusionModalOpen}

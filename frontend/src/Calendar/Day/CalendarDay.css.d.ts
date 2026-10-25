@@ -3,9 +3,12 @@
 interface CssExports {
   'day': string;
   'dayOfMonth': string;
+  'fullDate': string;
   'isDifferentMonth': string;
   'isSingleDay': string;
   'isToday': string;
+  'isTodayCell': string;
+  'noEvents': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

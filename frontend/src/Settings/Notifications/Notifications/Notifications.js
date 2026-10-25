@@ -1,15 +1,12 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Card from 'Components/Card';
-import FieldSet from 'Components/FieldSet';
-import Icon from 'Components/Icon';
 import PageSectionContent from 'Components/Page/PageSectionContent';
-import { icons } from 'Helpers/Props';
+import AddCard from 'Components/SettingsCard/AddCard';
+import settingsCardStyles from 'Components/SettingsCard/SettingsCard.css';
 import translate from 'Utilities/String/translate';
 import AddNotificationModal from './AddNotificationModal';
 import EditNotificationModalConnector from './EditNotificationModalConnector';
 import Notification from './Notification';
-import styles from './Notifications.css';
 
 class Notifications extends Component {
 
@@ -60,49 +57,40 @@ class Notifications extends Component {
     } = this.state;
 
     return (
-      <FieldSet legend={translate('Connections')}>
-        <PageSectionContent
-          errorMessage={translate('NotificationsLoadError')}
-          {...otherProps}
-        >
-          <div className={styles.notifications}>
-            {
-              items.map((item) => {
-                return (
-                  <Notification
-                    key={item.id}
-                    {...item}
-                    tagList={tagList}
-                    onConfirmDeleteNotification={onConfirmDeleteNotification}
-                  />
-                );
-              })
-            }
-
-            <Card
-              className={styles.addNotification}
-              onPress={this.onAddNotificationPress}
-            >
-              <div className={styles.center}>
-                <Icon
-                  name={icons.ADD}
-                  size={45}
+      <PageSectionContent
+        errorMessage={translate('NotificationsLoadError')}
+        {...otherProps}
+      >
+        <div className={settingsCardStyles.grid}>
+          {
+            items.map((item) => {
+              return (
+                <Notification
+                  key={item.id}
+                  {...item}
+                  tagList={tagList}
+                  onConfirmDeleteNotification={onConfirmDeleteNotification}
                 />
-              </div>
-            </Card>
-          </div>
+              );
+            })
+          }
 
-          <AddNotificationModal
-            isOpen={isAddNotificationModalOpen}
-            onModalClose={this.onAddNotificationModalClose}
+          <AddCard
+            label={translate('AddConnection')}
+            onPress={this.onAddNotificationPress}
           />
+        </div>
 
-          <EditNotificationModalConnector
-            isOpen={isEditNotificationModalOpen}
-            onModalClose={this.onEditNotificationModalClose}
-          />
-        </PageSectionContent>
-      </FieldSet>
+        <AddNotificationModal
+          isOpen={isAddNotificationModalOpen}
+          onModalClose={this.onAddNotificationModalClose}
+        />
+
+        <EditNotificationModalConnector
+          isOpen={isEditNotificationModalOpen}
+          onModalClose={this.onEditNotificationModalClose}
+        />
+      </PageSectionContent>
     );
   }
 }

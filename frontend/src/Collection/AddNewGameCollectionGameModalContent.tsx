@@ -5,11 +5,13 @@ import AppState from 'App/State/AppState';
 import useGameCollection from 'Collection/useGameCollection';
 import CheckInput from 'Components/Form/CheckInput';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import Icon from 'Components/Icon';
-import SpinnerButton from 'Components/Link/SpinnerButton';
+import Button from 'Components/Link/Button';
+import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
 import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
@@ -138,28 +140,31 @@ function AddNewGameCollectionGameModalContent({
       <ModalBody>
         <div className={styles.container}>
           {isSmallScreen ? null : (
-            <div className={styles.poster}>
-              <GamePoster
-                className={styles.poster}
-                images={images}
-                size={250}
-              />
-            </div>
+            <GamePoster
+              className={styles.poster}
+              images={images}
+              size={250}
+              lazy={false}
+            />
           )}
 
           <div className={styles.info}>
-            {overview ? (
-              <div className={styles.overview}>{overview}</div>
-            ) : null}
+            {overview ? <p className={styles.intro}>{overview}</p> : null}
 
             <Form
               validationErrors={validationErrors}
               validationWarnings={validationWarnings}
             >
-              <FormGroup>
+              <FormRow>
                 <FormLabel>{translate('RootFolder')}</FormLabel>
 
-                <FormInputGroup
+                <FormInputHelpText
+                  text={translate('AddNewGameRootFolderHelpText', {
+                    folder,
+                  })}
+                />
+
+                <FormInput
                   type={inputTypes.ROOT_FOLDER_SELECT}
                   name="rootFolderPath"
                   valueOptions={{
@@ -170,26 +175,23 @@ function AddNewGameCollectionGameModalContent({
                     gameFolder: folder,
                     isWindows,
                   }}
-                  helpText={translate('AddNewGameRootFolderHelpText', {
-                    folder,
-                  })}
                   {...rootFolderPath}
                   onChange={handleInputChange}
                 />
-              </FormGroup>
+              </FormRow>
 
-              <FormGroup>
+              <FormRow>
                 <FormLabel>{translate('Monitor')}</FormLabel>
 
-                <FormInputGroup
+                <FormInput
                   type={inputTypes.MONITOR_GAMES_SELECT}
                   name="monitor"
                   {...monitor}
                   onChange={handleInputChange}
                 />
-              </FormGroup>
+              </FormRow>
 
-              <FormGroup>
+              <FormRow>
                 <FormLabel>
                   {translate('MinimumAvailability')}
 
@@ -203,64 +205,71 @@ function AddNewGameCollectionGameModalContent({
                   />
                 </FormLabel>
 
-                <FormInputGroup
+                <FormInputHelpText
+                  text={translate('MoreInfo')}
+                  link="https://github.com/ecatuogno1/Gamarr/wiki/faq#what-is-minimum-availability"
+                />
+
+                <FormInput
                   type={inputTypes.AVAILABILITY_SELECT}
                   name="minimumAvailability"
                   {...minimumAvailability}
-                  helpLink="https://github.com/ecatuogno1/Gamarr/wiki/faq#what-is-minimum-availability"
                   onChange={handleInputChange}
                 />
-              </FormGroup>
+              </FormRow>
 
-              <FormGroup>
+              <FormRow>
                 <FormLabel>{translate('QualityProfile')}</FormLabel>
 
-                <FormInputGroup
+                <FormInput
                   type={inputTypes.QUALITY_PROFILE_SELECT}
                   name="qualityProfileId"
                   {...qualityProfileId}
                   onChange={handleInputChange}
                 />
-              </FormGroup>
+              </FormRow>
 
-              <FormGroup>
+              <FormRow>
                 <FormLabel>{translate('Tags')}</FormLabel>
 
-                <FormInputGroup
+                <FormInput
                   type={inputTypes.TAG}
                   name="tags"
                   {...tags}
                   onChange={handleInputChange}
                 />
-              </FormGroup>
+              </FormRow>
             </Form>
           </div>
         </div>
       </ModalBody>
 
       <ModalFooter className={styles.modalFooter}>
-        <label className={styles.searchForMissingGameLabelContainer}>
-          <span className={styles.searchForMissingGameLabel}>
-            {translate('StartSearchForMissingGame')}
-          </span>
+        <div className={styles.searchOptions}>
+          <span className={styles.searchLabel}>{translate('Search')}</span>
 
           <CheckInput
-            containerClassName={styles.searchForMissingGameContainer}
-            className={styles.searchForMissingGameInput}
+            containerClassName={styles.searchOption}
             name="searchForGame"
+            helpText={translate('StartSearchForMissingGame')}
             {...searchForGame}
             onChange={handleInputChange}
           />
-        </label>
+        </div>
 
-        <SpinnerButton
-          className={styles.addButton}
-          kind={kinds.SUCCESS}
-          isSpinning={isAdding}
-          onPress={handleAddGamePress}
-        >
-          {translate('AddGame')}
-        </SpinnerButton>
+        <div className={styles.actions}>
+          <Button onPress={onModalClose}>{translate('Cancel')}</Button>
+
+          <SpinnerErrorButton
+            className={styles.addButton}
+            kind={kinds.PRIMARY}
+            isSpinning={isAdding}
+            error={addError}
+            onPress={handleAddGamePress}
+          >
+            {translate('AddGame')}
+          </SpinnerErrorButton>
+        </div>
       </ModalFooter>
     </ModalContent>
   );

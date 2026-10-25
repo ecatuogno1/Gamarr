@@ -65,8 +65,11 @@ export interface AppSectionState {
   isSidebarVisible: boolean;
   version: string;
   prevVersion?: string;
+  isRestarting?: boolean;
   dimensions: {
+    isExtraSmallScreen: boolean;
     isSmallScreen: boolean;
+    isMediumScreen: boolean;
     isLargeScreen: boolean;
     width: number;
     height: number;

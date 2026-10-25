@@ -7,7 +7,6 @@ interface CssExports {
   'quality': string;
   'sizeLimit': string;
   'sizeLimitHelpText': string;
-  'sizeLimitHelpTextContainer': string;
   'title': string;
 }
 export const cssExports: CssExports;

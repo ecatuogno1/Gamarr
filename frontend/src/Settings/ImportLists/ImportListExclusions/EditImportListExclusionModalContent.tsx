@@ -4,9 +4,10 @@ import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import Button from 'Components/Link/Button';
 import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -120,67 +121,75 @@ function EditImportListExclusionModalContent({
           : translate('AddImportListExclusion')}
       </ModalHeader>
 
-      <ModalBody className={styles.body}>
-        {isFetching && <LoadingIndicator />}
+      <ModalBody>
+        {isFetching ? <LoadingIndicator /> : null}
 
-        {!isFetching && !!error && (
+        {!isFetching && !!error ? (
           <Alert kind={kinds.DANGER}>
             {translate('AddImportListExclusionError')}
           </Alert>
-        )}
+        ) : null}
 
-        {!isFetching && !error && (
+        {!isFetching && !error ? (
           <Form {...otherProps}>
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('IGDBId')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText text={translate('IgdbIdExcludeHelpText')} />
+
+              <FormInput
                 type={inputTypes.NUMBER}
                 name="igdbId"
-                helpText={translate('IgdbIdExcludeHelpText')}
                 {...igdbId}
                 onChange={onInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('Title')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('GameTitleToExcludeHelpText')}
+              />
+
+              <FormInput
                 type={inputTypes.TEXT}
                 name="gameTitle"
-                helpText={translate('GameTitleToExcludeHelpText')}
                 {...gameTitle}
                 onChange={onInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('Year')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('GameYearToExcludeHelpText')}
+              />
+
+              <FormInput
                 type={inputTypes.NUMBER}
                 name="gameYear"
-                helpText={translate('GameYearToExcludeHelpText')}
                 {...gameYear}
                 onChange={onInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('Platform')}</FormLabel>
-
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('PlatformToExcludeHelpText')}
+              />
+              <FormInput
                 type={inputTypes.PLATFORM_SELECT}
                 name="platformId"
                 includeAny={true}
-                helpText={translate('PlatformToExcludeHelpText')}
                 {...platformId}
                 onChange={onInputChange}
               />
-            </FormGroup>
+            </FormRow>
           </Form>
-        )}
+        ) : null}
       </ModalBody>
 
       <ModalFooter>

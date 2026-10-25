@@ -2,9 +2,10 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import Button from 'Components/Link/Button';
 import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -13,14 +14,14 @@ import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
-import { inputTypes, kinds, sizes } from 'Helpers/Props';
+import { inputTypes, kinds } from 'Helpers/Props';
 import dimensions from 'Styles/Variables/dimensions';
 import translate from 'Utilities/String/translate';
 import QualityProfileFormatItems from './QualityProfileFormatItems';
 import QualityProfileItems from './QualityProfileItems';
 import styles from './EditQualityProfileModalContent.css';
 
-const MODAL_BODY_PADDING = parseInt(dimensions.modalBodyPadding);
+const MODAL_BODY_PADDING = dimensions.modalBodyPadding;
 
 function getCustomFormatRender(formatItems, otherProps) {
   return (
@@ -141,7 +142,7 @@ class EditQualityProfileModalContent extends Component {
           includeMargin={false}
           onMeasure={this.onHeaderMeasure}
         >
-          <ModalHeader>
+          <ModalHeader subtitle={id ? name.previousValue ?? name.value : undefined}>
             {id ? translate('EditQualityProfile') : translate('AddQualityProfile')}
           </ModalHeader>
         </Measure>
@@ -171,125 +172,131 @@ class EditQualityProfileModalContent extends Component {
                   >
                     <div className={styles.formGroupsContainer}>
                       <div className={styles.formGroupWrapper}>
-                        <FormGroup size={sizes.EXTRA_SMALL}>
-                          <FormLabel size={sizes.SMALL}>
+                        <FormRow>
+                          <FormLabel>
                             {translate('Name')}
                           </FormLabel>
 
-                          <FormInputGroup
+                          <FormInput
                             type={inputTypes.TEXT}
                             name="name"
                             {...name}
                             onChange={onInputChange}
                           />
-                        </FormGroup>
+                        </FormRow>
 
-                        <FormGroup size={sizes.EXTRA_SMALL}>
-                          <FormLabel size={sizes.SMALL}>
+                        <FormRow>
+                          <FormLabel>
                             {translate('UpgradesAllowed')}
                           </FormLabel>
 
-                          <FormInputGroup
+                          <FormInputHelpText text={translate('UpgradesAllowedHelpText')} />
+
+                          <FormInput
                             type={inputTypes.CHECK}
                             name="upgradeAllowed"
                             {...upgradeAllowed}
-                            helpText={translate('UpgradesAllowedHelpText')}
                             onChange={onInputChange}
                           />
-                        </FormGroup>
+                        </FormRow>
 
                         {
                           upgradeAllowed.value &&
-                            <FormGroup size={sizes.EXTRA_SMALL}>
-                              <FormLabel size={sizes.SMALL}>
+                            <FormRow>
+                              <FormLabel>
                                 {translate('UpgradeUntil')}
                               </FormLabel>
 
-                              <FormInputGroup
+                              <FormInputHelpText text={translate('UpgradeUntilGameHelpText')} />
+
+                              <FormInput
                                 type={inputTypes.SELECT}
                                 name="cutoff"
                                 {...cutoff}
                                 values={qualities}
-                                helpText={translate('UpgradeUntilGameHelpText')}
                                 onChange={onCutoffChange}
                               />
-                            </FormGroup>
+                            </FormRow>
                         }
 
                         {
                           formatItems.value.length > 0 &&
-                            <FormGroup size={sizes.EXTRA_SMALL}>
-                              <FormLabel size={sizes.SMALL}>
+                            <FormRow>
+                              <FormLabel>
                                 {translate('MinimumCustomFormatScore')}
                               </FormLabel>
 
-                              <FormInputGroup
+                              <FormInputHelpText text={translate('MinimumCustomFormatScoreHelpText')} />
+
+                              <FormInput
                                 type={inputTypes.NUMBER}
                                 name="minFormatScore"
                                 {...minFormatScore}
-                                helpText={translate('MinimumCustomFormatScoreHelpText')}
                                 onChange={onInputChange}
                               />
-                            </FormGroup>
+                            </FormRow>
                         }
 
                         {
                           upgradeAllowed.value && formatItems.value.length > 0 &&
-                            <FormGroup size={sizes.EXTRA_SMALL}>
-                              <FormLabel size={sizes.SMALL}>
+                            <FormRow>
+                              <FormLabel>
                                 {translate('UpgradeUntilCustomFormatScore')}
                               </FormLabel>
 
-                              <FormInputGroup
+                              <FormInputHelpText text={translate('UpgradeUntilCustomFormatScoreGameHelpText')} />
+
+                              <FormInput
                                 type={inputTypes.NUMBER}
                                 name="cutoffFormatScore"
                                 {...cutoffFormatScore}
-                                helpText={translate('UpgradeUntilCustomFormatScoreGameHelpText')}
                                 onChange={onInputChange}
                               />
-                            </FormGroup>
+                            </FormRow>
                         }
 
                         {
                           upgradeAllowed.value && formatItems.value.length > 0 ?
-                            <FormGroup size={sizes.EXTRA_SMALL}>
-                              <FormLabel size={sizes.SMALL}>
+                            <FormRow>
+                              <FormLabel>
                                 {translate('MinimumCustomFormatScoreIncrement')}
                               </FormLabel>
 
-                              <FormInputGroup
+                              <FormInputHelpText text={translate('MinimumCustomFormatScoreIncrementHelpText')} />
+
+                              <FormInput
                                 type={inputTypes.NUMBER}
                                 name="minUpgradeFormatScore"
                                 min={1}
                                 {...minUpgradeFormatScore}
-                                helpText={translate('MinimumCustomFormatScoreIncrementHelpText')}
                                 onChange={onInputChange}
                               />
-                            </FormGroup> :
+                            </FormRow> :
                             null
                         }
 
-                        <FormGroup size={sizes.EXTRA_SMALL}>
-                          <FormLabel size={sizes.SMALL}>
+                        <FormRow>
+                          <FormLabel>
                             {translate('Language')}
                           </FormLabel>
 
-                          <FormInputGroup
+                          <FormInputHelpText text={translate('LanguageHelpText')} />
+
+                          <FormInput
                             type={inputTypes.LANGUAGE_SELECT}
                             name="language"
                             values={languages}
                             value={languageId}
-                            helpText={translate('LanguageHelpText')}
                             onChange={onLanguageChange}
                           />
-                        </FormGroup>
+                        </FormRow>
 
                         <div className={styles.formatItemLarge}>
                           {getCustomFormatRender(formatItems, otherProps)}
                         </div>
                       </div>
 
-                      <div className={styles.formGroupWrapper}>
+                      <div className={styles.qualitiesColumn}>
                         <QualityProfileItems
                           editGroups={editGroups}
                           qualityProfileItems={items.value}

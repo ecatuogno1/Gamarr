@@ -1,17 +1,18 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import Alert from 'Components/Alert';
 import FieldSet from 'Components/FieldSet';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
-import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
+import PageHeading from 'Components/Page/PageHeading';
 import { inputTypes, kinds } from 'Helpers/Props';
-import SettingsToolbar from 'Settings/SettingsToolbar';
-import themes from 'Styles/Themes';
+import settingsStyles from 'Settings/Settings.css';
+import SettingsPage from 'Settings/SettingsPage';
 import titleCase from 'Utilities/String/titleCase';
 import translate from 'Utilities/String/translate';
 
@@ -56,36 +57,53 @@ export const timeFormatOptions = [
   { key: 'HH:mm', value: '17:00/17:30' }
 ];
 
-class UISettings extends Component {
+const headerColorOptions = [
+  {
+    key: 'fullColor',
+    get value() {
+      return translate('FullColor');
+    }
+  },
+  {
+    key: 'gradient',
+    get value() {
+      return translate('Gradient');
+    }
+  }
+];
 
-  //
-  // Render
+function UISettings(props) {
+  const {
+    isFetching,
+    isSaving,
+    error,
+    settings,
+    hasSettings,
+    hasPendingChanges,
+    validationErrors,
+    validationWarnings,
+    languages,
+    onInputChange,
+    onSavePress
+  } = props;
 
-  render() {
-    const {
-      isFetching,
-      error,
-      settings,
-      hasSettings,
-      onInputChange,
-      onSavePress,
-      languages,
-      ...otherProps
-    } = this.props;
+  // Must stay in sync with the theme selectors in Styles/Themes/themes.css.
+  const themeOptions = ['auto', 'light', 'dark']
+    .map((theme) => ({ key: theme, value: titleCase(theme) }));
 
-    const themeOptions = Object.keys(themes)
-      .map((theme) => ({ key: theme, value: titleCase(theme) }));
+  const uiLanguages = languages.filter((item) => item.value !== 'Original');
 
-    const uiLanguages = languages.filter((item) => item.value !== 'Original');
+  return (
+    <SettingsPage
+      title={translate('UiSettings')}
+      hasPendingChanges={hasPendingChanges}
+      isSaving={isSaving}
+      onSavePress={onSavePress}
+    >
+      <PageContentBody>
+        <div className={settingsStyles.section}>
+          <PageHeading scope={translate('Settings')} title={translate('Ui')} />
 
-    return (
-      <PageContent title={translate('UiSettings')}>
-        <SettingsToolbar
-          {...otherProps}
-          onSavePress={onSavePress}
-        />
-
-        <PageContentBody>
           {
             isFetching ?
               <LoadingIndicator /> :
@@ -104,122 +122,141 @@ class UISettings extends Component {
             hasSettings && !isFetching && !error ?
               <Form
                 id="uiSettings"
-                {...otherProps}
+                validationErrors={validationErrors}
+                validationWarnings={validationWarnings}
               >
-                <FieldSet legend={translate('Calendar')}>
-                  <FormGroup>
+                <FieldSet
+                  legend={translate('Calendar')}
+                  caption={translate('CalendarCaption')}
+                >
+                  <FormRow>
                     <FormLabel>{translate('FirstDayOfWeek')}</FormLabel>
-
-                    <FormInputGroup
+                    <FormInput
                       type={inputTypes.SELECT}
                       name="firstDayOfWeek"
                       values={firstDayOfWeekOptions}
                       onChange={onInputChange}
                       {...settings.firstDayOfWeek}
                     />
-                  </FormGroup>
+                  </FormRow>
 
-                  <FormGroup>
+                  <FormRow>
                     <FormLabel>{translate('WeekColumnHeader')}</FormLabel>
-
-                    <FormInputGroup
+                    <FormInputHelpText text={translate('WeekColumnHeaderHelpText')} />
+                    <FormInput
                       type={inputTypes.SELECT}
                       name="calendarWeekColumnHeader"
                       values={weekColumnOptions}
                       onChange={onInputChange}
-                      helpText={translate('WeekColumnHeaderHelpText')}
                       {...settings.calendarWeekColumnHeader}
                     />
-                  </FormGroup>
+                  </FormRow>
                 </FieldSet>
 
                 <FieldSet
                   legend={translate('Dates')}
+                  caption={translate('DatesCaption')}
                 >
-                  <FormGroup>
+                  <FormRow>
                     <FormLabel>{translate('ShortDateFormat')}</FormLabel>
-
-                    <FormInputGroup
+                    <FormInput
                       type={inputTypes.SELECT}
                       name="shortDateFormat"
                       values={shortDateFormatOptions}
                       onChange={onInputChange}
                       {...settings.shortDateFormat}
                     />
-                  </FormGroup>
+                  </FormRow>
 
-                  <FormGroup>
+                  <FormRow>
                     <FormLabel>{translate('LongDateFormat')}</FormLabel>
-
-                    <FormInputGroup
+                    <FormInput
                       type={inputTypes.SELECT}
                       name="longDateFormat"
                       values={longDateFormatOptions}
                       onChange={onInputChange}
                       {...settings.longDateFormat}
                     />
-                  </FormGroup>
+                  </FormRow>
 
-                  <FormGroup>
+                  <FormRow>
                     <FormLabel>{translate('TimeFormat')}</FormLabel>
-
-                    <FormInputGroup
+                    <FormInput
                       type={inputTypes.SELECT}
                       name="timeFormat"
                       values={timeFormatOptions}
                       onChange={onInputChange}
                       {...settings.timeFormat}
                     />
-                  </FormGroup>
+                  </FormRow>
 
-                  <FormGroup>
+                  <FormRow>
                     <FormLabel>{translate('ShowRelativeDates')}</FormLabel>
-                    <FormInputGroup
+                    <FormInputHelpText text={translate('ShowRelativeDatesHelpText')} />
+                    <FormInput
                       type={inputTypes.CHECK}
                       name="showRelativeDates"
-                      helpText={translate('ShowRelativeDatesHelpText')}
                       onChange={onInputChange}
                       {...settings.showRelativeDates}
                     />
-                  </FormGroup>
+                  </FormRow>
                 </FieldSet>
 
                 <FieldSet
                   legend={translate('Style')}
+                  caption={translate('StyleCaption')}
                 >
-                  <FormGroup>
+                  <FormRow>
                     <FormLabel>{translate('Theme')}</FormLabel>
-                    <FormInputGroup
+                    <FormInputHelpText text={translate('ThemeHelpText')} />
+                    <FormInput
                       type={inputTypes.SELECT}
                       name="theme"
-                      helpText={translate('ThemeHelpText')}
                       values={themeOptions}
                       onChange={onInputChange}
                       {...settings.theme}
                     />
-                  </FormGroup>
+                  </FormRow>
 
-                  <FormGroup>
+                  <FormRow>
+                    <FormLabel>{translate('HeaderColor')}</FormLabel>
+                    <FormInputHelpText text={translate('HeaderColorHelpText')} />
+                    <FormInput
+                      type={inputTypes.SELECT}
+                      name="headerColor"
+                      values={headerColorOptions}
+                      onChange={onInputChange}
+                      {...settings.headerColor}
+                    />
+                  </FormRow>
+
+                  <FormRow>
                     <FormLabel>{translate('EnableColorImpairedMode')}</FormLabel>
-                    <FormInputGroup
+                    <FormInputHelpText text={translate('EnableColorImpairedModeHelpText')} />
+                    <FormInput
                       type={inputTypes.CHECK}
                       name="enableColorImpairedMode"
-                      helpText={translate('EnableColorImpairedModeHelpText')}
                       onChange={onInputChange}
                       {...settings.enableColorImpairedMode}
                     />
-                  </FormGroup>
+                  </FormRow>
                 </FieldSet>
 
-                <FieldSet legend={translate('Language')}>
-                  <FormGroup>
+                <FieldSet
+                  legend={translate('Language')}
+                  caption={translate('LanguageCaption')}
+                >
+                  <FormRow>
                     <FormLabel>{translate('GameInfoLanguage')}</FormLabel>
-                    <FormInputGroup
+                    <FormInputHelpText text={translate('GameInfoLanguageHelpText')} />
+                    <FormInputHelpText
+                      text={translate('GameInfoLanguageHelpTextWarning')}
+                      isWarning={true}
+                    />
+                    <FormInput
                       type={inputTypes.LANGUAGE_SELECT}
                       name="gameInfoLanguage"
                       values={languages}
-                      helpText={translate('GameInfoLanguageHelpText')}
-                      helpTextWarning={translate('GameInfoLanguageHelpTextWarning')}
                       onChange={onInputChange}
                       {...settings.gameInfoLanguage}
                       errors={
@@ -230,16 +267,19 @@ class UISettings extends Component {
                             { message: translate('InvalidGameInfoLanguageLanguage') }
                           ]}
                     />
-                  </FormGroup>
+                  </FormRow>
 
-                  <FormGroup>
+                  <FormRow>
                     <FormLabel>{translate('UiLanguage')}</FormLabel>
-                    <FormInputGroup
+                    <FormInputHelpText text={translate('UiLanguageHelpText')} />
+                    <FormInputHelpText
+                      text={translate('BrowserReloadRequired')}
+                      isWarning={true}
+                    />
+                    <FormInput
                       type={inputTypes.LANGUAGE_SELECT}
                       name="uiLanguage"
                       values={uiLanguages}
-                      helpText={translate('UiLanguageHelpText')}
-                      helpTextWarning={translate('BrowserReloadRequired')}
                       onChange={onInputChange}
                       {...settings.uiLanguage}
                       errors={
@@ -250,23 +290,26 @@ class UISettings extends Component {
                             { message: translate('InvalidUILanguage') }
                           ]}
                     />
-                  </FormGroup>
+                  </FormRow>
                 </FieldSet>
               </Form> :
               null
           }
-        </PageContentBody>
-      </PageContent>
-    );
-  }
-
+        </div>
+      </PageContentBody>
+    </SettingsPage>
+  );
 }
 
 UISettings.propTypes = {
   isFetching: PropTypes.bool.isRequired,
+  isSaving: PropTypes.bool,
   error: PropTypes.object,
   settings: PropTypes.object.isRequired,
   hasSettings: PropTypes.bool.isRequired,
+  hasPendingChanges: PropTypes.bool,
+  validationErrors: PropTypes.arrayOf(PropTypes.object),
+  validationWarnings: PropTypes.arrayOf(PropTypes.object),
   languages: PropTypes.arrayOf(PropTypes.object).isRequired,
   onSavePress: PropTypes.func.isRequired,
   onInputChange: PropTypes.func.isRequired

@@ -5,6 +5,7 @@ interface CssExports {
   'center': string;
   'danger': string;
   'default': string;
+  'isDisabled': string;
   'large': string;
   'left': string;
   'medium': string;

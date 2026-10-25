@@ -47,7 +47,10 @@ class RemotePathMappings extends Component {
     } = this.props;
 
     return (
-      <FieldSet legend={translate('RemotePathMappings')}>
+      <FieldSet
+        legend={translate('RemotePathMappings')}
+        caption={translate('RemotePathMappingsCaption')}
+      >
         <PageSectionContent
           errorMessage={translate('RemotePathMappingsLoadError')}
           {...otherProps}
@@ -85,14 +88,16 @@ class RemotePathMappings extends Component {
             }
           </div>
 
-          <div className={styles.addRemotePathMapping}>
-            <Link
-              className={styles.addButton}
-              onPress={this.onAddRemotePathMappingPress}
-            >
-              <Icon name={icons.ADD} />
-            </Link>
-          </div>
+          <Link
+            className={styles.addRow}
+            onPress={this.onAddRemotePathMappingPress}
+          >
+            <Icon
+              name={icons.ADD}
+              size={12}
+            />
+            {translate('AddRemotePathMapping')}
+          </Link>
 
           <EditRemotePathMappingModalConnector
             isOpen={this.state.isAddRemotePathMappingModalOpen}

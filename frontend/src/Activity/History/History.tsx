@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import Alert from 'Components/Alert';
@@ -6,12 +6,14 @@ import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import FilterMenu from 'Components/Menu/FilterMenu';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
+import PageHeading from 'Components/Page/PageHeading';
+import PageMessage from 'Components/Page/PageMessage';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
-import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
-import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
+import PageToolbarSpacer from 'Components/Page/Toolbar/PageToolbarSpacer';
+import ToolbarItem from 'Components/Page/Toolbar/ToolbarItem';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
-import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
+import TableOptionsModal from 'Components/Table/TableOptions/TableOptionsModal';
 import TablePager from 'Components/Table/TablePager';
 import usePaging from 'Components/Table/usePaging';
 import createGamesFetchingSelector from 'Game/createGamesFetchingSelector';
@@ -101,6 +103,16 @@ function History() {
     [dispatch]
   );
 
+  const [isTableOptionsModalOpen, setIsTableOptionsModalOpen] = useState(false);
+
+  const handleTableOptionsPress = useCallback(() => {
+    setIsTableOptionsModalOpen(true);
+  }, []);
+
+  const handleTableOptionsModalClose = useCallback(() => {
+    setIsTableOptionsModalOpen(false);
+  }, []);
+
   useEffect(() => {
     if (requestCurrentPage) {
       dispatch(fetchHistory());
@@ -128,27 +140,28 @@ function History() {
   return (
     <PageContent title={translate('History')}>
       <PageToolbar>
-        <PageToolbarSection>
-          <PageToolbarButton
-            label={translate('Refresh')}
-            iconName={icons.REFRESH}
-            isSpinning={isFetching}
-            onPress={handleFirstPagePress}
-          />
-        </PageToolbarSection>
+        <ToolbarItem
+          id="refresh"
+          priority={1}
+          groupId="left"
+          label={translate('Refresh')}
+          iconName={icons.REFRESH}
+          isSpinning={isFetching}
+          onPress={handleFirstPagePress}
+        />
 
-        <PageToolbarSection alignContent={align.RIGHT}>
-          <TableOptionsModalWrapper
-            columns={columns}
-            pageSize={pageSize}
-            onTableOptionChange={handleTableOptionChange}
-          >
-            <PageToolbarButton
-              label={translate('Options')}
-              iconName={icons.TABLE}
-            />
-          </TableOptionsModalWrapper>
+        <PageToolbarSpacer />
 
+        <ToolbarItem
+          id="options"
+          priority={2}
+          groupId="right"
+          label={translate('Options')}
+          iconName={icons.TABLE}
+          onPress={handleTableOptionsPress}
+        />
+
+        <ToolbarItem id="filter" pinned={true}>
           <FilterMenu
             alignMenu={align.RIGHT}
             selectedFilterKey={selectedFilterKey}
@@ -157,10 +170,15 @@ function History() {
             filterModalConnectorComponent={HistoryFilterModal}
             onFilterSelect={handleFilterSelect}
           />
-        </PageToolbarSection>
+        </ToolbarItem>
       </PageToolbar>
 
       <PageContentBody>
+        <PageHeading
+          scope={translate('Activity')}
+          title={translate('History')}
+        />
+
         {isFetchingAny && !isAllPopulated ? <LoadingIndicator /> : null}
 
         {!isFetchingAny && hasError ? (
@@ -172,7 +190,7 @@ function History() {
           // wait for the games to populate because they are never coming.
 
           isPopulated && !hasError && !items.length ? (
-            <Alert kind={kinds.INFO}>{translate('NoHistoryFound')}</Alert>
+            <PageMessage>{translate('NoHistoryFound')}</PageMessage>
           ) : null
         }
 
@@ -209,6 +227,13 @@ function History() {
           </div>
         ) : null}
       </PageContentBody>
+      <TableOptionsModal
+        isOpen={isTableOptionsModalOpen}
+        columns={columns}
+        pageSize={pageSize}
+        onTableOptionChange={handleTableOptionChange}
+        onModalClose={handleTableOptionsModalClose}
+      />
     </PageContent>
   );
 }

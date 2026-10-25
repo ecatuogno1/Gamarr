@@ -3,13 +3,5 @@
 }
 
 .container {
-  &:hover {
-    .content {
-      background-color: var(--tableRowHoverBackgroundColor);
-    }
-  }
-}
-
-.externalLinks {
-  margin-right: 0.5em;
+  overflow: visible;
 }

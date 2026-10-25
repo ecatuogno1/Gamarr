@@ -3,6 +3,7 @@
 interface CssExports {
   'calendar': string;
   'calendarContent': string;
+  'sticky': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

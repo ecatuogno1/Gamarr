@@ -8,13 +8,16 @@ import FilterMenu from 'Components/Menu/FilterMenu';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
+import PageHeading from 'Components/Page/PageHeading';
+import PageMessage from 'Components/Page/PageMessage';
+import { OverflowDivider } from 'Components/Page/Toolbar/Overflow';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
-import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
-import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
+import PageToolbarSpacer from 'Components/Page/Toolbar/PageToolbarSpacer';
+import ToolbarItem from 'Components/Page/Toolbar/ToolbarItem';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
-import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
+import TableOptionsModal from 'Components/Table/TableOptions/TableOptionsModal';
 import TablePager from 'Components/Table/TablePager';
 import usePaging from 'Components/Table/usePaging';
 import Game from 'Game/Game';
@@ -206,6 +209,16 @@ function CutoffUnmet() {
     [dispatch]
   );
 
+  const [isTableOptionsModalOpen, setIsTableOptionsModalOpen] = useState(false);
+
+  const handleTableOptionsPress = useCallback(() => {
+    setIsTableOptionsModalOpen(true);
+  }, []);
+
+  const handleTableOptionsModalClose = useCallback(() => {
+    setIsTableOptionsModalOpen(false);
+  }, []);
+
   useEffect(() => {
     if (requestCurrentPage) {
       dispatch(fetchCutoffUnmet());
@@ -254,48 +267,52 @@ function CutoffUnmet() {
   return (
     <PageContent title={translate('CutoffUnmet')}>
       <PageToolbar>
-        <PageToolbarSection>
-          <PageToolbarButton
-            label={
-              itemsSelected
-                ? translate('SearchSelected')
-                : translate('SearchAll')
-            }
-            iconName={icons.SEARCH}
-            isDisabled={isSearchingForGames}
-            isSpinning={isSearchingForGames}
-            onPress={
-              itemsSelected ? handleSearchSelectedPress : handleSearchAllPress
-            }
-          />
+        <ToolbarItem
+          id="search"
+          priority={1}
+          groupId="left-a"
+          label={
+            itemsSelected ? translate('SearchSelected') : translate('SearchAll')
+          }
+          iconName={icons.SEARCH}
+          isDisabled={isSearchingForGames}
+          isSpinning={isSearchingForGames}
+          onPress={
+            itemsSelected ? handleSearchSelectedPress : handleSearchAllPress
+          }
+        />
 
+        <OverflowDivider groupId="left-a">
           <PageToolbarSeparator />
+        </OverflowDivider>
 
-          <PageToolbarButton
-            label={
-              isShowingMonitored
-                ? translate('UnmonitorSelected')
-                : translate('MonitorSelected')
-            }
-            iconName={icons.MONITORED}
-            isDisabled={!itemsSelected}
-            isSpinning={isSaving}
-            onPress={handleToggleSelectedPress}
-          />
-        </PageToolbarSection>
+        <ToolbarItem
+          id="toggle-monitored"
+          priority={1}
+          groupId="left-b"
+          label={
+            isShowingMonitored
+              ? translate('UnmonitorSelected')
+              : translate('MonitorSelected')
+          }
+          iconName={icons.MONITORED}
+          isDisabled={!itemsSelected}
+          isSpinning={isSaving}
+          onPress={handleToggleSelectedPress}
+        />
 
-        <PageToolbarSection alignContent={align.RIGHT}>
-          <TableOptionsModalWrapper
-            columns={columns}
-            pageSize={pageSize}
-            onTableOptionChange={handleTableOptionChange}
-          >
-            <PageToolbarButton
-              label={translate('Options')}
-              iconName={icons.TABLE}
-            />
-          </TableOptionsModalWrapper>
+        <PageToolbarSpacer />
 
+        <ToolbarItem
+          id="options"
+          priority={2}
+          groupId="right"
+          label={translate('Options')}
+          iconName={icons.TABLE}
+          onPress={handleTableOptionsPress}
+        />
+
+        <ToolbarItem id="filter" pinned={true}>
           <FilterMenu
             alignMenu={align.RIGHT}
             selectedFilterKey={selectedFilterKey}
@@ -303,10 +320,15 @@ function CutoffUnmet() {
             customFilters={[]}
             onFilterSelect={handleFilterSelect}
           />
-        </PageToolbarSection>
+        </ToolbarItem>
       </PageToolbar>
 
       <PageContentBody>
+        <PageHeading
+          scope={translate('Wanted')}
+          title={translate('CutoffUnmet')}
+        />
+
         {isFetching && !isPopulated ? <LoadingIndicator /> : null}
 
         {!isFetching && error ? (
@@ -314,7 +336,7 @@ function CutoffUnmet() {
         ) : null}
 
         {isPopulated && !error && !items.length ? (
-          <Alert kind={kinds.INFO}>{translate('CutoffUnmetNoItems')}</Alert>
+          <PageMessage>{translate('CutoffUnmetNoItems')}</PageMessage>
         ) : null}
 
         {isPopulated && !error && !!items.length ? (
@@ -379,6 +401,13 @@ function CutoffUnmet() {
           </div>
         ) : null}
       </PageContentBody>
+      <TableOptionsModal
+        isOpen={isTableOptionsModalOpen}
+        columns={columns}
+        pageSize={pageSize}
+        onTableOptionChange={handleTableOptionChange}
+        onModalClose={handleTableOptionsModalClose}
+      />
     </PageContent>
   );
 }

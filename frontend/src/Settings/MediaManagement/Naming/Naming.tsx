@@ -5,10 +5,11 @@ import AppState from 'App/State/AppState';
 import Alert from 'Components/Alert';
 import FieldSet from 'Components/FieldSet';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
+import FormInput from 'Components/Form/FormInput';
 import FormInputButton from 'Components/Form/FormInputButton';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import useModalOpenState from 'Helpers/Hooks/useModalOpenState';
 import { inputTypes, kinds, sizes } from 'Helpers/Props';
@@ -153,7 +154,10 @@ function Naming() {
   }
 
   return (
-    <FieldSet legend={translate('GameNaming')}>
+    <FieldSet
+      legend={translate('GameNaming')}
+      caption={translate('GameNamingCaption')}
+    >
       {isFetching ? <LoadingIndicator /> : null}
 
       {!isFetching && error ? (
@@ -164,50 +168,61 @@ function Naming() {
 
       {hasSettings && !isFetching && !error ? (
         <Form>
-          <FormGroup size={sizes.MEDIUM}>
+          <FormRow size={sizes.MEDIUM}>
             <FormLabel>{translate('RenameGames')}</FormLabel>
 
-            <FormInputGroup
+            <FormInputHelpText text={translate('RenameGamesHelpText')} />
+
+            <FormInput
               type={inputTypes.CHECK}
               name="renameGames"
-              helpText={translate('RenameGamesHelpText')}
               onChange={handleInputChange}
               {...settings.renameGames}
             />
-          </FormGroup>
+          </FormRow>
 
-          <FormGroup size={sizes.MEDIUM}>
+          <FormRow size={sizes.MEDIUM}>
             <FormLabel>{translate('ReplaceIllegalCharacters')}</FormLabel>
 
-            <FormInputGroup
+            <FormInputHelpText
+              text={translate('ReplaceIllegalCharactersHelpText')}
+            />
+
+            <FormInput
               type={inputTypes.CHECK}
               name="replaceIllegalCharacters"
-              helpText={translate('ReplaceIllegalCharactersHelpText')}
               onChange={handleInputChange}
               {...settings.replaceIllegalCharacters}
             />
-          </FormGroup>
+          </FormRow>
 
           {replaceIllegalCharacters ? (
-            <FormGroup size={sizes.MEDIUM}>
+            <FormRow size={sizes.MEDIUM}>
               <FormLabel>{translate('ColonReplacement')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('ColonReplacementFormatHelpText')}
+              />
+
+              <FormInput
                 type={inputTypes.SELECT}
                 name="colonReplacementFormat"
                 values={colonReplacementOptions}
-                helpText={translate('ColonReplacementFormatHelpText')}
                 onChange={handleInputChange}
                 {...settings.colonReplacementFormat}
               />
-            </FormGroup>
+            </FormRow>
           ) : null}
 
           {renameGames ? (
-            <FormGroup size={sizes.LARGE}>
+            <FormRow size={sizes.LARGE}>
               <FormLabel>{translate('StandardGameFormat')}</FormLabel>
 
-              <FormInputGroup
+              {standardGameFormatHelpTexts.map((text, index) => (
+                <FormInputHelpText key={index} text={text} />
+              ))}
+
+              <FormInput
                 inputClassName={styles.namingInput}
                 type={inputTypes.TEXT}
                 name="standardGameFormat"
@@ -218,23 +233,33 @@ function Naming() {
                 }
                 onChange={handleInputChange}
                 {...settings.standardGameFormat}
-                helpTexts={standardGameFormatHelpTexts}
                 errors={[
                   ...standardGameFormatErrors,
                   ...settings.standardGameFormat.errors,
                 ]}
               />
-            </FormGroup>
+            </FormRow>
           ) : null}
 
-          <FormGroup
+          <FormRow
             advancedSettings={advancedSettings}
             isAdvanced={true}
             size={sizes.MEDIUM}
           >
             <FormLabel>{translate('GameFolderFormat')}</FormLabel>
 
-            <FormInputGroup
+            <FormInputHelpText text={translate('GameFolderFormatHelpText')} />
+
+            {gameFolderFormatHelpTexts.map((text, index) => (
+              <FormInputHelpText key={index} text={text} />
+            ))}
+
+            <FormInputHelpText
+              text={translate('GameFolderFormatHelpTextDeprecatedWarning')}
+              isWarning={true}
+            />
+
+            <FormInput
               inputClassName={styles.namingInput}
               type={inputTypes.TEXT}
               name="gameFolderFormat"
@@ -245,19 +270,12 @@ function Naming() {
               }
               onChange={handleInputChange}
               {...settings.gameFolderFormat}
-              helpTexts={[
-                translate('GameFolderFormatHelpText'),
-                ...gameFolderFormatHelpTexts,
-              ]}
-              helpTextWarning={translate(
-                'GameFolderFormatHelpTextDeprecatedWarning'
-              )}
               errors={[
                 ...gameFolderFormatErrors,
                 ...settings.gameFolderFormat.errors,
               ]}
             />
-          </FormGroup>
+          </FormRow>
 
           {namingModalOptions ? (
             <NamingModal

@@ -1,13 +1,13 @@
 .relativePath {
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+  composes: cell from 'Components/Table/Cells/TableRowCell.css';
 
   word-break: break-all;
 }
 
 .companionFiles {
   margin-top: 2px;
-  color: var(--helpTextColor);
-  font-size: $smallFontSize;
+  color: var(--inkMuted);
+  font-size: 12px;
   cursor: default;
 }
 
@@ -19,19 +19,19 @@
 
 .quality,
 .languages {
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+  composes: cell from 'Components/Table/Cells/TableRowCellButton.css';
 
   text-align: center;
 }
 
 .label {
-  composes: label from '~Components/Label.css';
+  composes: label from 'Components/Label.css';
 
   cursor: pointer;
 }
 
 .reprocessing {
-  composes: loading from '~Components/Loading/LoadingIndicator.css';
+  composes: loading from 'Components/Loading/LoadingIndicator.css';
 
   margin-top: 0;
   text-align: start;

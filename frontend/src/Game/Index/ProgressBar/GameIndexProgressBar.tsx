@@ -53,14 +53,23 @@ function GameIndexProgressBar({
     gameStatus = translate('Missing');
   }
 
-  const attachedClassName = bottomRadius
-    ? styles.progressRadius
-    : styles.progress;
-  const containerClassName = isStandAlone ? undefined : attachedClassName;
+  let containerClassName: string | undefined = undefined;
+
+  if (!isStandAlone) {
+    if (detailedProgressBar) {
+      containerClassName = styles.progressDetailed;
+    } else {
+      containerClassName = bottomRadius
+        ? styles.progressRadius
+        : styles.progress;
+    }
+  }
 
   return (
     <ProgressBar
-      className={styles.progressBar}
+      className={
+        detailedProgressBar ? styles.progressBarDetailed : styles.progressBar
+      }
       containerClassName={containerClassName}
       progress={progress}
       kind={getProgressBarKind(

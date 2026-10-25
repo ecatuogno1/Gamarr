@@ -1,8 +1,9 @@
 import moment from 'moment';
-import React, { useMemo } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import Game from 'Game/Game';
+import { useUiSettingsValues } from 'Settings/UI/useUiSettings';
 import AgendaEvent from './AgendaEvent';
 import styles from './Agenda.css';
 
@@ -14,6 +15,7 @@ function Agenda() {
   const { start, end, items } = useSelector(
     (state: AppState) => state.calendar
   );
+  const { longDateFormat } = useUiSettingsValues();
 
   const events = useMemo(() => {
     const result = items.map((item): AgendaGame => {
@@ -53,7 +55,17 @@ function Agenda() {
           index === 0 ||
           !moment(events[index - 1].sortDate).isSame(momentDate, 'day');
 
-        return <AgendaEvent key={item.id} showDate={showDate} {...item} />;
+        return (
+          <Fragment key={item.id}>
+            {showDate ? (
+              <div className={styles.dayHeader}>
+                {momentDate.format(longDateFormat)}
+              </div>
+            ) : null}
+
+            <AgendaEvent {...item} />
+          </Fragment>
+        );
       })}
     </div>
   );

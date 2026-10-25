@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import Button from 'Components/Link/Button';
 import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -104,11 +104,14 @@ class ImportCustomFormatModalContent extends Component {
             {
               !isFetching && !error && specificationsPopulated &&
                 <Form>
-                  <FormGroup size={sizes.MEDIUM}>
+                  <FormRow
+                    size={sizes.MEDIUM}
+                    layout="stacked"
+                  >
                     <FormLabel>
                       {translate('CustomFormatJson')}
                     </FormLabel>
-                    <FormInputGroup
+                    <FormInput
                       key={0}
                       inputClassName={styles.input}
                       type={inputTypes.TEXT_AREA}
@@ -118,7 +121,7 @@ class ImportCustomFormatModalContent extends Component {
                       placeholder={'{\n  "name": "Custom Format"\n}'}
                       errors={parseError ? [parseError] : []}
                     />
-                  </FormGroup>
+                  </FormRow>
                 </Form>
             }
           </div>

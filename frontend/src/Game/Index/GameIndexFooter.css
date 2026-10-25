@@ -2,7 +2,7 @@
   display: flex;
   flex-wrap: wrap;
   margin-top: 20px;
-  font-size: $smallFontSize;
+  font-size: var(--smallFontSize);
 }
 
 .legendItem {
@@ -15,7 +15,7 @@
   margin-right: 8px;
   width: 30px;
   height: 16px;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 .queue {
@@ -27,39 +27,33 @@
 .continuing {
   composes: legendItemColor;
 
-  background-color: var(--primaryColor);
+  background-color: var(--progressBarPrimaryColor);
 }
 
 .availNotMonitored {
   composes: legendItemColor;
 
-  background-color: var(--darkGray);
+  background-color: var(--statusFinished);
 }
 
 .ended {
   composes: legendItemColor;
 
-  background-color: var(--successColor);
+  background-color: var(--progressBarSuccessColor);
 }
 
 .missingMonitored {
   composes: legendItemColor;
 
-  background-color: var(--dangerColor);
-
-  &:global(.colorImpaired) {
-    background: repeating-linear-gradient(90deg, var(--dangerColor), var(--dangerColor) 5px, var(--dangerColor) 5px, var(--dimColor) 10px);
-  }
+  background-color: var(--progressBarDangerColor);
+  background-image: var(--progressBarDangerPattern);
 }
 
 .missingUnmonitored {
   composes: legendItemColor;
 
-  background-color: var(--warningColor);
-
-  &:global(.colorImpaired) {
-    background: repeating-linear-gradient(45deg, var(--warningColor), var(--warningColor) 5px, var(--warningColor) 5px, var(--dimColor) 10px);
-  }
+  background-color: var(--progressBarWarningColor);
+  background-image: var(--progressBarWarningPattern);
 }
 
 .statistics {
@@ -68,13 +62,13 @@
   flex-wrap: wrap;
 }
 
-@media (max-width: $breakpointLarge) {
+@media (--breakpointLarge) {
   .statistics {
     display: block;
   }
 }
 
-@media (max-width: $breakpointSmall) {
+@media (--breakpointSmall) {
   .footer {
     display: block;
   }

@@ -1,17 +1,15 @@
-.delayProfileDragSource {
-  padding: 4px 0;
-}
-
 .delayProfilePlaceholder {
   width: 100%;
-  height: 30px;
-  border-bottom: 1px dotted #aaa;
+  height: 50px;
+  border: 1px dashed color-mix(in oklab, var(--accent) 55%, var(--borderColor));
+  border-radius: 12px;
+  background-color: color-mix(in oklab, var(--accent) 6%, transparent);
 }
 
 .delayProfilePlaceholderBefore {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .delayProfilePlaceholderAfter {
-  margin-top: 8px;
+  margin-top: 12px;
 }

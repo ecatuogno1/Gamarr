@@ -1,11 +1,26 @@
-$fullColorGradient: rgba(244, 245, 246, 0.2);
-
 .event {
   position: relative;
-  margin: 4px 2px;
-  padding: 5px;
-  border-bottom: 1px solid var(--calendarBorderColor);
-  border-left: 4px solid var(--calendarBorderColor);
+  margin: 3px 0;
+  padding: 6px 8px 6px 20px;
+  border-radius: 8px;
+  color: var(--ink);
+  font-family: var(--defaultFontFamily);
+  transition: background-color var(--transitionSmooth);
+
+  &:hover {
+    background-color: var(--paperCard);
+  }
+
+  &::before {
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    left: 8px;
+    width: 4px;
+    border-radius: 2px;
+    background-color: var(--inkMuted);
+    content: "";
+  }
 }
 
 .underlay {
@@ -17,20 +32,21 @@ $fullColorGradient: rgba(244, 245, 246, 0.2);
 
   position: relative;
   overflow-x: hidden;
-  font-size: 12px;
-
-  &:global(.colorImpaired) {
-    border-left-width: 5px;
-  }
 }
 
-.info,
+.info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .gameInfo {
   display: flex;
-}
-
-.gameInfo {
-  color: var(--calendarTextDim);
+  align-items: center;
+  margin-top: 3px;
+  color: var(--inkMuted);
+  font-size: 12px;
+  gap: 8px;
 }
 
 .gameTitle,
@@ -38,114 +54,152 @@ $fullColorGradient: rgba(244, 245, 246, 0.2);
 .eventType {
   @add-mixin truncate;
   flex: 1 0 1px;
-  margin-right: 10px;
 }
 
 .gameTitle {
-  color: var(--calendarTextDimAlternate);
-  font-size: $defaultFontSize;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+  font-weight: 550;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.genres {
+  color: var(--inkSoft);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.eventType {
+  color: var(--inkMuted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.certification {
+  flex-shrink: 0;
 }
 
 .statusContainer {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
+  gap: 4px;
+
+  & > span {
+    display: inline-flex;
+    align-items: center;
+  }
 
   &:global(.fullColor) {
-    filter: var(--calendarFullColorFilter)
+    filter: var(--calendarFullColorFilter);
   }
 }
 
 .statusIcon {
-  margin-left: 3px;
   cursor: default;
   pointer-events: all;
 }
 
-/*
- * Status
- */
-
 .downloaded {
-  border-left-color: var(--successColor) !important;
-
-  &:global(.fullColor) {
-    background-color: rgba(39, 194, 76, 0.4) !important;
+  &::before {
+    background-color: var(--calendarDownloadedColor);
   }
 
-  &:global(.colorImpaired) {
-    border-left-color: color(#27c24c saturation(+15%)) !important;
+  &:global(.fullColor) {
+    background-color: color-mix(in oklch, var(--calendarDownloadedColor) 16%, transparent);
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--calendarDownloadedColor) 26%, transparent);
+    }
   }
 }
 
 .queue {
-  border-left-color: var(--purple) !important;
+  &::before {
+    background-color: var(--calendarDownloadingColor);
+  }
 
   &:global(.fullColor) {
-    background-color: rgba(122, 67, 182, 0.4) !important;
+    background-color: color-mix(in oklch, var(--calendarDownloadingColor) 16%, transparent);
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--calendarDownloadingColor) 26%, transparent);
+    }
   }
 }
 
 .unmonitored {
-  border-left-color: var(--gray) !important;
+  background-image: var(--calendarColorImpairedDiagonalPattern);
+  color: var(--inkMuted);
+
+  &::before {
+    background-color: var(--inkMuted);
+    opacity: 0.5;
+  }
+
+  & .gameTitle {
+    color: var(--inkSoft);
+  }
 
   &:global(.fullColor) {
-    background-color: rgba(173, 173, 173, 0.5) !important;
-  }
+    background-color: color-mix(in oklch, var(--inkMuted) 20%, transparent);
+    background-image: var(--calendarColorImpairedFullColorDiagonalPattern);
 
-  &:global(.colorImpaired) {
-    background: repeating-linear-gradient(45deg, var(--colorImpairedGradientDark), var(--colorImpairedGradientDark) 5px, var(--colorImpairedGradient) 5px, var(--colorImpairedGradient) 10px);
-  }
-
-  &:global(.fullColor.colorImpaired) {
-    background: repeating-linear-gradient(45deg, $fullColorGradient, $fullColorGradient 5px, transparent 5px, transparent 10px);
-  }
-}
-
-.missingUnmonitored {
-  border-left-color: var(--warningColor) !important;
-
-  &:global(.fullColor) {
-    background-color: rgba(255, 165, 0, 0.6) !important;
-  }
-
-  &:global(.colorImpaired) {
-    background: repeating-linear-gradient(90deg, var(--colorImpairedGradientDark), var(--colorImpairedGradientDark) 5px, var(--colorImpairedGradient) 5px, var(--colorImpairedGradient) 10px);
-  }
-
-  &:global(.fullColor.colorImpaired) {
-    background: repeating-linear-gradient(90deg, $fullColorGradient, $fullColorGradient 5px, transparent 5px, transparent 10px);
+    &:hover {
+      background-color: color-mix(in oklch, var(--inkMuted) 30%, transparent);
+    }
   }
 }
 
 .missingMonitored {
-  border-left-color: var(--dangerColor) !important;
+  background-image: var(--calendarColorImpairedPattern);
+
+  &::before {
+    background-color: var(--calendarMissingColor);
+  }
 
   &:global(.fullColor) {
-    background-color: rgba(240, 80, 80, 0.6) !important;
-  }
+    background-color: color-mix(in oklch, var(--calendarMissingColor) 20%, transparent);
+    background-image: var(--calendarColorImpairedFullColorPattern);
 
-  &:global(.colorImpaired) {
-    border-left-color: color(#f05050 saturation(+15%)) !important;
-    background: repeating-linear-gradient(90deg, var(--colorImpairedGradientDark), var(--colorImpairedGradientDark) 5px, var(--colorImpairedGradient) 5px, var(--colorImpairedGradient) 10px);
-  }
-
-  &:global(.fullColor.colorImpaired) {
-    background: repeating-linear-gradient(90deg, $fullColorGradient, $fullColorGradient 5px, transparent 5px, transparent 10px);
+    &:hover {
+      background-color: color-mix(in oklch, var(--calendarMissingColor) 30%, transparent);
+    }
   }
 }
 
 .continuing {
-  border-left-color: var(--primaryColor) !important;
+  background-image: var(--calendarColorImpairedPattern);
+
+  &::before {
+    background-color: var(--calendarUnairedColor);
+  }
 
   &:global(.fullColor) {
-    background-color: rgba(93, 156, 236, 0.4) !important;
+    background-color: color-mix(in oklch, var(--calendarUnairedColor) 16%, transparent);
+    background-image: var(--calendarColorImpairedFullColorPattern);
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--calendarUnairedColor) 26%, transparent);
+    }
+  }
+}
+
+/* Gamarr: missing but not monitored (Sonarr has no equivalent) */
+.missingUnmonitored {
+  background-image: var(--calendarColorImpairedPattern);
+
+  &::before {
+    background-color: var(--warningColor);
   }
 
-  &:global(.colorImpaired) {
-    background: repeating-linear-gradient(90deg, var(--colorImpairedGradientDark), var(--colorImpairedGradientDark) 5px, var(--colorImpairedGradient) 5px, var(--colorImpairedGradient) 10px);
-  }
+  &:global(.fullColor) {
+    background-color: color-mix(in oklch, var(--warningColor) 20%, transparent);
+    background-image: var(--calendarColorImpairedFullColorPattern);
 
-  &:global(.fullColor.colorImpaired) {
-    background: repeating-linear-gradient(90deg, $fullColorGradient, $fullColorGradient 5px, transparent 5px, transparent 10px);
+    &:hover {
+      background-color: color-mix(in oklch, var(--warningColor) 30%, transparent);
+    }
   }
 }

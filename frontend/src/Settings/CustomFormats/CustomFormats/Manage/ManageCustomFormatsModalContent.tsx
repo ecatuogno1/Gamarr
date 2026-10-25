@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CustomFormatAppState } from 'App/State/SettingsAppState';
-import Alert from 'Components/Alert';
 import Button from 'Components/Link/Button';
 import SpinnerButton from 'Components/Link/SpinnerButton';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
@@ -164,7 +163,9 @@ function ManageCustomFormatsModalContent(
         {error ? <div>{errorMessage}</div> : null}
 
         {isPopulated && !error && !items.length ? (
-          <Alert kind={kinds.INFO}>{translate('NoCustomFormatsFound')}</Alert>
+          <p className={styles.filteredMessage}>
+            {translate('NoCustomFormatsFound')}
+          </p>
         ) : null}
 
         {isPopulated && !!items.length && !isFetching && !isFetching ? (

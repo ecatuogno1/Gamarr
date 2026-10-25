@@ -3,14 +3,14 @@ import React, { Component } from 'react';
 import { DragLayer } from 'react-dnd';
 import DragPreviewLayer from 'Components/DragPreviewLayer';
 import { QUALITY_PROFILE_ITEM } from 'Helpers/dragTypes';
-import dimensions from 'Styles/Variables/dimensions.js';
 import QualityProfileItem from './QualityProfileItem';
 import styles from './QualityProfileItemDragPreview.css';
 
-const formGroupExtraSmallWidth = parseInt(dimensions.formGroupExtraSmallWidth);
-const formLabelSmallWidth = parseInt(dimensions.formLabelSmallWidth);
-const formLabelRightMarginWidth = parseInt(dimensions.formLabelRightMarginWidth);
-const dragHandleWidth = parseInt(dimensions.dragHandleWidth);
+// Must match QualityProfileItemDragPreview.css (.dragPreview width) and the
+// drag handle width + right padding in QualityProfileItem.css.
+const PREVIEW_WIDTH = 380;
+const DRAG_HANDLE_WIDTH = 28;
+const ITEM_PADDING = 12;
 
 function collectDragLayer(monitor) {
   return {
@@ -40,7 +40,7 @@ class QualityProfileItemDragPreview extends Component {
     // list item and the preview is wider than the drag handle.
 
     const { x, y } = currentOffset;
-    const handleOffset = formGroupExtraSmallWidth - formLabelSmallWidth - formLabelRightMarginWidth - dragHandleWidth;
+    const handleOffset = PREVIEW_WIDTH - DRAG_HANDLE_WIDTH - ITEM_PADDING;
     const transform = `translate3d(${x - handleOffset}px, ${y}px, 0)`;
 
     const style = {

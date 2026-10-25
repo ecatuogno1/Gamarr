@@ -1,7 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import Button from 'Components/Link/Button';
 import Modal from 'Components/Modal/Modal';
 import ModalBody from 'Components/Modal/ModalBody';
@@ -178,42 +179,45 @@ function RemoveQueueItemModal(props: RemoveQueueItemModalProps) {
         <ModalHeader>{title}</ModalHeader>
 
         <ModalBody>
-          <div className={styles.message}>{message}</div>
+          <p className={styles.intro}>{message}</p>
 
           {isPending ? null : (
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('RemoveQueueItemRemovalMethod')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('RemoveQueueItemRemovalMethodHelpTextWarning')}
+                isWarning={true}
+              />
+
+              <FormInput
                 type={inputTypes.SELECT}
                 name="removalMethod"
                 value={removalMethod}
                 values={removalMethodOptions}
                 isDisabled={!canChangeCategory && !canIgnore}
-                helpTextWarning={translate(
-                  'RemoveQueueItemRemovalMethodHelpTextWarning'
-                )}
                 onChange={handleRemovalMethodChange}
               />
-            </FormGroup>
+            </FormRow>
           )}
 
-          <FormGroup>
+          <FormRow>
             <FormLabel>
               {multipleSelected
                 ? translate('BlocklistReleases')
                 : translate('BlocklistRelease')}
             </FormLabel>
 
-            <FormInputGroup
+            <FormInputHelpText text={translate('BlocklistReleaseHelpText')} />
+
+            <FormInput
               type={inputTypes.SELECT}
               name="blocklistMethod"
               value={blocklistMethod}
               values={blocklistMethodOptions}
-              helpText={translate('BlocklistReleaseHelpText')}
               onChange={handleBlocklistMethodChange}
             />
-          </FormGroup>
+          </FormRow>
         </ModalBody>
 
         <ModalFooter>

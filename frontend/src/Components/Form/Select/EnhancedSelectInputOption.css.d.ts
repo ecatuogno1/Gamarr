@@ -3,6 +3,7 @@
 interface CssExports {
   'iconContainer': string;
   'isDisabled': string;
+  'isFocused': string;
   'isHidden': string;
   'isMobile': string;
   'isSelected': string;

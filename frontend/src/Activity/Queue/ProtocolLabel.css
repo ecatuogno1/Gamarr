@@ -1,17 +1,20 @@
-.torrent {
-  composes: label from '~Components/Label.css';
-
-  border-color: var(--torrentColor);
-  background-color: var(--torrentColor);
-}
-
+.torrent,
 .usenet {
-  composes: label from '~Components/Label.css';
-
-  border-color: var(--usenetColor);
-  background-color: var(--usenetColor);
+  composes: label tinted from 'Components/Label.css';
 }
 
 .unknown {
-  composes: label from '~Components/Label.css';
+  composes: label from 'Components/Label.css';
+}
+
+.torrent {
+  --labelKindColor: var(--torrentColor);
+}
+
+.usenet {
+  --labelKindColor: var(--usenetColor);
+}
+
+.text {
+  translate: 0 -0.09em;
 }

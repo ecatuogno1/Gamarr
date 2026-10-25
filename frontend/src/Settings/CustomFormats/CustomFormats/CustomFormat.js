@@ -1,14 +1,16 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Card from 'Components/Card';
 import Label from 'Components/Label';
-import IconButton from 'Components/Link/IconButton';
+import MiddleTruncate from 'Components/MiddleTruncate';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
+import SettingsCard from 'Components/SettingsCard/SettingsCard';
+import settingsCardStyles from 'Components/SettingsCard/SettingsCard.css';
+import SettingsCardAction from 'Components/SettingsCard/SettingsCardAction';
+import SettingsCardStatus from 'Components/SettingsCard/SettingsCardStatus';
 import { icons, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import EditCustomFormatModalConnector from './EditCustomFormatModalConnector';
 import ExportCustomFormatModal from './ExportCustomFormatModal';
-import styles from './CustomFormat.css';
 
 class CustomFormat extends Component {
 
@@ -79,61 +81,71 @@ class CustomFormat extends Component {
       isDeleting
     } = this.props;
 
-    return (
-      <Card
-        className={styles.customFormat}
-        overlayContent={true}
-        onPress={this.onEditCustomFormatPress}
-      >
-        <div className={styles.nameContainer}>
-          <div className={styles.name}>
-            {name}
-          </div>
+    const conditionCount = specifications.length;
+    const isActive = conditionCount > 0;
 
-          <div className={styles.buttons}>
-            <IconButton
-              className={styles.cloneButton}
+    return (
+      <SettingsCard
+        name={name}
+        aria-label={translate('EditCustomFormatName', { name })}
+        actions={
+          <>
+            <SettingsCardAction
               title={translate('CloneCustomFormat')}
+              aria-label={translate('CloneCustomFormat')}
               name={icons.CLONE}
               onPress={this.onCloneCustomFormatPress}
             />
 
-            <IconButton
-              className={styles.cloneButton}
+            <SettingsCardAction
               title={translate('ExportCustomFormat')}
+              aria-label={translate('ExportCustomFormat')}
               name={icons.EXPORT}
               onPress={this.onExportCustomFormatPress}
             />
-          </div>
-        </div>
+          </>
+        }
+        onPress={this.onEditCustomFormatPress}
+      >
+        <SettingsCardStatus
+          dot={isActive ? 'active' : 'muted'}
+          segments={[translate('ConditionsCount', { count: conditionCount })]}
+        />
 
-        <div>
-          {
-            specifications.map((item, index) => {
-              if (!item) {
-                return null;
-              }
+        {
+          conditionCount ?
+            <div className={settingsCardStyles.labels}>
+              {
+                specifications.map((item, index) => {
+                  if (!item) {
+                    return null;
+                  }
 
-              let kind = kinds.DEFAULT;
-              if (item.required) {
-                kind = kinds.SUCCESS;
-              }
-              if (item.negate) {
-                kind = kinds.DANGER;
-              }
+                  let kind = kinds.DEFAULT;
 
-              return (
-                <Label
-                  className={styles.label}
-                  key={index}
-                  kind={kind}
-                >
-                  {item.name}
-                </Label>
-              );
-            })
-          }
-        </div>
+                  if (item.required) {
+                    kind = kinds.SUCCESS;
+                  }
+
+                  if (item.negate) {
+                    kind = kinds.DANGER;
+                  }
+
+                  return (
+                    <Label
+                      key={index}
+                      className={settingsCardStyles.truncatedLabel}
+                      kind={kind}
+                      dot={item.required || item.negate}
+                    >
+                      <MiddleTruncate text={item.name} />
+                    </Label>
+                  );
+                })
+              }
+            </div> :
+            null
+        }
 
         <EditCustomFormatModalConnector
           id={id}
@@ -158,7 +170,7 @@ class CustomFormat extends Component {
           onConfirm={this.onConfirmDeleteCustomFormat}
           onCancel={this.onDeleteCustomFormatModalClose}
         />
-      </Card>
+      </SettingsCard>
     );
   }
 }

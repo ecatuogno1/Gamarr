@@ -19,7 +19,10 @@ class QualityDefinitions extends Component {
     } = this.props;
 
     return (
-      <FieldSet legend={translate('QualityDefinitions')}>
+      <FieldSet
+        legend={translate('QualityDefinitions')}
+        caption={translate('QualityDefinitionsCaption')}
+      >
         <PageSectionContent
           errorMessage={translate('QualityDefinitionsLoadError')}
           {...otherProps}
@@ -58,11 +61,9 @@ class QualityDefinitions extends Component {
             }
           </div>
 
-          <div className={styles.sizeLimitHelpTextContainer}>
-            <div className={styles.sizeLimitHelpText}>
-              {translate('QualityLimitsGameRuntimeHelpText')}
-            </div>
-          </div>
+          <p className={styles.sizeLimitHelpText}>
+            {translate('QualityLimitsGameRuntimeHelpText')}
+          </p>
         </PageSectionContent>
       </FieldSet>
     );

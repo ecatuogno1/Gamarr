@@ -1,10 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import TextTruncate from 'react-text-truncate';
-import CheckInput from 'Components/Form/CheckInput';
 import Icon from 'Components/Icon';
-import ImportListList from 'Components/ImportListList';
-import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import Popover from 'Components/Tooltip/Popover';
@@ -13,27 +9,19 @@ import ExcludeGameModal from 'DiscoverGame/Exclusion/ExcludeGameModal';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
 import GamePoster from 'Game/GamePoster';
 import LibraryPlatformBadges from 'Game/Title/LibraryPlatformBadges';
-import { icons, kinds } from 'Helpers/Props';
-import dimensions from 'Styles/Variables/dimensions';
-import fonts from 'Styles/Variables/fonts';
+import { icons } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import DiscoverGameOverviewInfo from './DiscoverGameOverviewInfo';
 import styles from './DiscoverGameOverview.css';
 
-const columnPadding = parseInt(dimensions.gameIndexColumnPadding);
-const columnPaddingSmallScreen = parseInt(dimensions.gameIndexColumnPaddingSmallScreen);
-const defaultFontSize = parseInt(fonts.defaultFontSize);
-const lineHeight = parseFloat(fonts.lineHeight);
+// Vertical chrome around a v5 overview row; must match .content in the CSS.
+export const ROW_VERTICAL_PADDING = 16;
+export const ROW_BORDER = 1;
 
-// Hardcoded height beased on line-height of 32 + bottom margin of 10. 19 + 5 for List Row
-// Less side-effecty than using react-measure.
-const titleRowHeight = 66;
-
-function getContentHeight(rowHeight, isSmallScreen) {
-  const padding = isSmallScreen ? columnPaddingSmallScreen : columnPadding;
-
-  return rowHeight - padding;
-}
+const SYNOPSIS_FONT_SIZE = 13.5;
+const SYNOPSIS_LINE_HEIGHT = 1.6;
+const TITLE_HEIGHT = 38;
+const CHIP_STRIP_HEIGHT = 28;
 
 class DiscoverGameOverview extends Component {
 
@@ -68,13 +56,18 @@ class DiscoverGameOverview extends Component {
     this.setState({ isExcludeGameModalOpen: false });
   };
 
-  onChange = ({ value, shiftKey }) => {
+  onSelectPress = (event) => {
     const {
       igdbId,
+      isSelected,
       onSelectedChange
     } = this.props;
 
-    onSelectedChange({ id: igdbId, value, shiftKey });
+    onSelectedChange({
+      id: igdbId,
+      value: !isSelected,
+      shiftKey: !!event?.nativeEvent?.shiftKey
+    });
   };
 
   //
@@ -94,7 +87,6 @@ class DiscoverGameOverview extends Component {
       posterWidth,
       posterHeight,
       rowHeight,
-      isSmallScreen,
       isExisting,
       isExcluded,
       isRecommendation,
@@ -117,22 +109,31 @@ class DiscoverGameOverview extends Component {
 
     const linkProps = isExisting ? { to: `/game/${igdbId}` } : { onPress: this.onPress };
 
-    const contentHeight = getContentHeight(rowHeight, isSmallScreen);
-    const overviewHeight = contentHeight - titleRowHeight;
+    const contentHeight = rowHeight - (ROW_VERTICAL_PADDING * 2 + ROW_BORDER);
+    const synopsisLines = Math.max(
+      1,
+      Math.floor(
+        (contentHeight - TITLE_HEIGHT - CHIP_STRIP_HEIGHT) /
+          (SYNOPSIS_FONT_SIZE * SYNOPSIS_LINE_HEIGHT)
+      )
+    );
 
     return (
-      <div className={styles.container}>
+      <div>
         <div className={styles.content}>
           <div className={styles.poster}>
             <div className={styles.posterContainer}>
-              <div className={styles.editorSelect}>
-                <CheckInput
-                  className={styles.checkInput}
-                  name={igdbId.toString()}
-                  value={isSelected}
-                  onChange={this.onChange}
+              <Link
+                className={styles.selectButton}
+                aria-label={translate('Select')}
+                onPress={this.onSelectPress}
+              >
+                <Icon
+                  className={isSelected ? styles.selected : styles.unselected}
+                  name={isSelected ? icons.CHECK_CIRCLE : icons.CIRCLE}
+                  size={20}
                 />
-              </div>
+              </Link>
 
               <Link
                 className={styles.link}
@@ -140,7 +141,7 @@ class DiscoverGameOverview extends Component {
                 {...linkProps}
               >
                 <GamePoster
-                  className={styles.poster}
+                  className={styles.posterImage}
                   style={elementStyle}
                   images={images}
                   size={250}
@@ -160,13 +161,9 @@ class DiscoverGameOverview extends Component {
                 {title}
 
                 {
-                  isExisting ?
-                    <Icon
-                      className={styles.alreadyExistsIcon}
-                      name={icons.CHECK_CIRCLE}
-                      size={30}
-                      title={translate('AlreadyInYourLibrary')}
-                    /> : null
+                  year && !title.includes(String(year)) ?
+                    <span className={styles.year}>({year})</span> :
+                    null
                 }
                 {
                   isExisting ?
@@ -175,103 +172,51 @@ class DiscoverGameOverview extends Component {
                       igdbId={igdbId}
                     /> : null
                 }
-                {
-                  isExcluded &&
-                    <Icon
-                      className={styles.exclusionIcon}
-                      name={icons.DANGER}
-                      size={30}
-                      title={translate('GameAlreadyExcluded')}
-                    />
-                }
               </Link>
 
               <div className={styles.actions}>
-                <span className={styles.externalLinks}>
-                  <Popover
-                    anchor={
-                      <Icon
-                        name={icons.EXTERNAL_LINK}
-                        size={12}
-                      />
-                    }
-                    title={translate('Links')}
-                    body={
-                      <GameDetailsLinks
-                        igdbId={igdbId}
-                        igdbSlug={igdbSlug}
-                        youTubeTrailerId={youTubeTrailerId}
-                      />
-                    }
-                  />
-                </span>
+                <Popover
+                  className={styles.action}
+                  anchor={<Icon name={icons.EXTERNAL_LINK} />}
+                  title={translate('Links')}
+                  body={
+                    <GameDetailsLinks
+                      igdbId={igdbId}
+                      igdbSlug={igdbSlug}
+                      youTubeTrailerId={youTubeTrailerId}
+                    />
+                  }
+                />
 
                 <IconButton
+                  className={styles.action}
                   name={icons.REMOVE}
                   title={isExcluded ? translate('GameAlreadyExcluded') : translate('ExcludeGame')}
-                  onPress={this.onExcludeGamePress}
                   isDisabled={isExcluded}
+                  onPress={this.onExcludeGamePress}
                 />
               </div>
             </div>
 
-            <div className={styles.lists}>
-              {
-                isRecommendation ?
-                  <Label
-                    kind={kinds.INFO}
-                  >
-                    <Icon
-                      name={icons.RECOMMENDED}
-                      size={10}
-                      title={translate('GameIsRecommend')}
-                    />
-                  </Label> :
-                  null
-              }
+            <Link
+              className={styles.synopsis}
+              style={{ WebkitLineClamp: synopsisLines }}
+              {...linkProps}
+            >
+              {overview}
+            </Link>
 
-              {
-                isPopular ?
-                  <Label
-                    kind={kinds.INFO}
-                  >
-                    {translate('Popular')}
-                  </Label> :
-                  null
-              }
-
-              {
-                isTrending ?
-                  <Label
-                    kind={kinds.INFO}
-                  >
-                    {translate('Trending')}
-                  </Label> :
-                  null
-              }
-
-              <ImportListList
-                lists={lists}
-              />
-            </div>
-
-            <div className={styles.details}>
-              <div className={styles.overviewContainer}>
-                <Link className={styles.overview} {...linkProps}>
-                  <TextTruncate
-                    line={Math.floor(overviewHeight / (defaultFontSize * lineHeight))}
-                    text={overview}
-                  />
-                </Link>
-              </div>
-
-              <DiscoverGameOverviewInfo
-                height={overviewHeight}
-                year={year}
-                {...overviewOptions}
-                {...otherProps}
-              />
-            </div>
+            <DiscoverGameOverviewInfo
+              year={year}
+              lists={lists}
+              isExisting={isExisting}
+              isExcluded={isExcluded}
+              isRecommendation={isRecommendation}
+              isPopular={isPopular}
+              isTrending={isTrending}
+              {...overviewOptions}
+              {...otherProps}
+            />
           </div>
         </div>
 

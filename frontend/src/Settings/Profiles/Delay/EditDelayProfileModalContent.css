@@ -1,5 +1,11 @@
+.intro {
+  composes: alert from 'Components/Alert.css';
+
+  margin-top: 20px;
+}
+
 .deleteButton {
-  composes: button from '~Components/Link/Button.css';
+  composes: button from 'Components/Link/Button.css';
 
   margin-right: auto;
 }

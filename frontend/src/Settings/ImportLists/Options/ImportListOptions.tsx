@@ -3,9 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import Alert from 'Components/Alert';
 import FieldSet from 'Components/FieldSet';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import { EnhancedSelectInputValue } from 'Components/Form/Select/EnhancedSelectInput';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import useShowAdvancedSettings from 'Helpers/Hooks/useShowAdvancedSettings';
@@ -105,7 +106,10 @@ function ImportListOptions({
   }
 
   return (
-    <FieldSet legend={translate('Options')}>
+    <FieldSet
+      legend={translate('Options')}
+      caption={translate('ImportListOptionsCaption')}
+    >
       {isFetching ? <LoadingIndicator /> : null}
 
       {!isFetching && error ? (
@@ -114,17 +118,19 @@ function ImportListOptions({
 
       {hasSettings && !isFetching && !error ? (
         <Form>
-          <FormGroup advancedSettings={showAdvancedSettings} isAdvanced={true}>
+          <FormRow advancedSettings={showAdvancedSettings} isAdvanced={true}>
             <FormLabel>{translate('CleanLibraryLevel')}</FormLabel>
-            <FormInputGroup
+
+            <FormInputHelpText text={translate('ListSyncLevelHelpText')} />
+
+            <FormInput
               type={inputTypes.SELECT}
               name="listSyncLevel"
               values={cleanLibraryLevelOptions}
-              helpText={translate('ListSyncLevelHelpText')}
               onChange={onInputChange}
               {...listSyncLevel}
             />
-          </FormGroup>
+          </FormRow>
         </Form>
       ) : null}
     </FieldSet>

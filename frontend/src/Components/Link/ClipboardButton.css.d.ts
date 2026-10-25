@@ -4,6 +4,7 @@ interface CssExports {
   'button': string;
   'buttonText': string;
   'clipboardIconContainer': string;
+  'labelIconContainer': string;
   'showStateIcon': string;
   'stateIconContainer': string;
 }

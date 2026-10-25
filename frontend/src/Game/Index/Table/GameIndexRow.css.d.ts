@@ -17,6 +17,7 @@ interface CssExports {
   'igdbRating': string;
   'keywords': string;
   'minimumAvailability': string;
+  'movePendingIcon': string;
   'originalLanguage': string;
   'originalTitle': string;
   'path': string;
@@ -24,6 +25,7 @@ interface CssExports {
   'platformBadges': string;
   'popularity': string;
   'publishers': string;
+  'qualityChip': string;
   'qualityProfileId': string;
   'releaseDate': string;
   'releaseGroups': string;

@@ -1,12 +1,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import Modal from 'Components/Modal/Modal';
+import { sizes } from 'Helpers/Props';
 import AddNotificationModalContentConnector from './AddNotificationModalContentConnector';
 
 function AddNotificationModal({ isOpen, onModalClose, ...otherProps }) {
   return (
     <Modal
       isOpen={isOpen}
+      size={sizes.MEDIUM}
       onModalClose={onModalClose}
     >
       <AddNotificationModalContentConnector

@@ -67,7 +67,6 @@ class QualityProfileItemGroup extends Component {
       <div
         className={classNames(
           styles.qualityProfileItemGroup,
-          editGroups && styles.editGroups,
           isDragging && styles.isDragging
         )}
       >
@@ -79,6 +78,7 @@ class QualityProfileItemGroup extends Component {
                   className={styles.deleteGroupButton}
                   name={icons.UNGROUP}
                   title={translate('Ungroup')}
+                  aria-label={translate('Ungroup')}
                   onPress={this.onDeleteGroupPress}
                 />
 
@@ -117,7 +117,7 @@ class QualityProfileItemGroup extends Component {
                     {
                       items.map(({ quality }) => {
                         return (
-                          <Label key={quality.id}>
+                          <Label key={quality.id} outline={true}>
                             {quality.name}
                           </Label>
                         );

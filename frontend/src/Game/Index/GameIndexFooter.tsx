@@ -1,8 +1,6 @@
-import classNames from 'classnames';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
-import { ColorImpairedConsumer } from 'App/ColorImpairedContext';
 import AppState from 'App/State/AppState';
 import DescriptionList from 'Components/DescriptionList/DescriptionList';
 import DescriptionListItem from 'Components/DescriptionList/DescriptionListItem';
@@ -69,92 +67,73 @@ export default function GameIndexFooter() {
   });
 
   return (
-    <ColorImpairedConsumer>
-      {(enableColorImpairedMode) => {
-        return (
-          <div className={styles.footer}>
-            <div>
-              <div className={styles.legendItem}>
-                <div className={styles.ended} />
-                <div>{translate('DownloadedAndMonitored')}</div>
-              </div>
+    <div className={styles.footer}>
+      <div>
+        <div className={styles.legendItem}>
+          <div className={styles.ended} />
+          <div>{translate('DownloadedAndMonitored')}</div>
+        </div>
 
-              <div className={styles.legendItem}>
-                <div className={styles.availNotMonitored} />
-                <div>{translate('DownloadedButNotMonitored')}</div>
-              </div>
+        <div className={styles.legendItem}>
+          <div className={styles.availNotMonitored} />
+          <div>{translate('DownloadedButNotMonitored')}</div>
+        </div>
 
-              <div className={styles.legendItem}>
-                <div
-                  className={classNames(
-                    styles.missingMonitored,
-                    enableColorImpairedMode && 'colorImpaired'
-                  )}
-                />
-                <div>{translate('MissingMonitoredAndConsideredAvailable')}</div>
-              </div>
+        <div className={styles.legendItem}>
+          <div className={styles.missingMonitored} />
+          <div>{translate('MissingMonitoredAndConsideredAvailable')}</div>
+        </div>
 
-              <div className={styles.legendItem}>
-                <div
-                  className={classNames(
-                    styles.missingUnmonitored,
-                    enableColorImpairedMode && 'colorImpaired'
-                  )}
-                />
-                <div>{translate('MissingNotMonitored')}</div>
-              </div>
+        <div className={styles.legendItem}>
+          <div className={styles.missingUnmonitored} />
+          <div>{translate('MissingNotMonitored')}</div>
+        </div>
 
-              <div className={styles.legendItem}>
-                <div className={styles.queue} />
-                <div>{translate('Queued')}</div>
-              </div>
+        <div className={styles.legendItem}>
+          <div className={styles.queue} />
+          <div>{translate('Queued')}</div>
+        </div>
 
-              <div className={styles.legendItem}>
-                <div className={styles.continuing} />
-                <div>{translate('Unreleased')}</div>
-              </div>
-            </div>
+        <div className={styles.legendItem}>
+          <div className={styles.continuing} />
+          <div>{translate('Unreleased')}</div>
+        </div>
+      </div>
 
-            <div className={styles.statistics}>
-              <DescriptionList>
-                <DescriptionListItem
-                  title={translate('Titles')}
-                  data={titleCount}
-                />
+      <div className={styles.statistics}>
+        <DescriptionList>
+          <DescriptionListItem title={translate('Titles')} data={titleCount} />
 
-                <DescriptionListItem
-                  title={translate('PlatformVersions')}
-                  data={count}
-                />
-              </DescriptionList>
+          <DescriptionListItem
+            title={translate('PlatformVersions')}
+            data={count}
+          />
+        </DescriptionList>
 
-              <DescriptionList>
-                <DescriptionListItem
-                  title={translate('GameFiles')}
-                  data={gameFiles}
-                />
+        <DescriptionList>
+          <DescriptionListItem
+            title={translate('GameFiles')}
+            data={gameFiles}
+          />
 
-                <DescriptionListItem
-                  title={translate('Monitored')}
-                  data={monitored}
-                />
+          <DescriptionListItem
+            title={translate('Monitored')}
+            data={monitored}
+          />
 
-                <DescriptionListItem
-                  title={translate('Unmonitored')}
-                  data={count - monitored}
-                />
-              </DescriptionList>
+          <DescriptionListItem
+            title={translate('Unmonitored')}
+            data={count - monitored}
+          />
+        </DescriptionList>
 
-              <DescriptionList>
-                <DescriptionListItem
-                  title={translate('TotalFileSize')}
-                  data={formatBytes(totalFileSize)}
-                />
-              </DescriptionList>
-            </div>
-          </div>
-        );
-      }}
-    </ColorImpairedConsumer>
+        <DescriptionList>
+          <DescriptionListItem
+            title={translate('TotalFileSize')}
+            data={formatBytes(totalFileSize)}
+          />
+        </DescriptionList>
+      </div>
+    </div>
   );
 }

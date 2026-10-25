@@ -4,9 +4,9 @@ import Alert from 'Components/Alert';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
+import PageHeading from 'Components/Page/PageHeading';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
-import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
-import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
+import ToolbarItem from 'Components/Page/Toolbar/ToolbarItem';
 import Table from 'Components/Table/Table';
 import TableBody from 'Components/Table/TableBody';
 import { icons, kinds } from 'Helpers/Props';
@@ -84,23 +84,29 @@ class Backups extends Component {
     return (
       <PageContent title={translate('Backups')}>
         <PageToolbar>
-          <PageToolbarSection>
-            <PageToolbarButton
-              label={translate('BackupNow')}
-              iconName={icons.BACKUP}
-              isSpinning={backupExecuting}
-              onPress={onBackupPress}
-            />
+          <ToolbarItem
+            id="backup-now"
+            priority={1}
+            groupId="left"
+            label={translate('BackupNow')}
+            iconName={icons.BACKUP}
+            isSpinning={backupExecuting}
+            onPress={onBackupPress}
+          />
 
-            <PageToolbarButton
-              label={translate('RestoreBackup')}
-              iconName={icons.RESTORE}
-              onPress={this.onRestorePress}
-            />
-          </PageToolbarSection>
+          <ToolbarItem
+            id="restore-backup"
+            priority={1}
+            groupId="left"
+            label={translate('RestoreBackup')}
+            iconName={icons.RESTORE}
+            onPress={this.onRestorePress}
+          />
         </PageToolbar>
 
         <PageContentBody>
+          <PageHeading scope={translate('System')} title={translate('Backups')} />
+
           {
             isFetching && !isPopulated &&
               <LoadingIndicator />

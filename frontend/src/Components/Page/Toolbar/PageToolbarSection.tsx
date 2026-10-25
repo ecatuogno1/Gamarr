@@ -1,154 +1,55 @@
-import classNames from 'classnames';
-import React, { ReactElement, useMemo } from 'react';
-import Menu from 'Components/Menu/Menu';
-import MenuContent from 'Components/Menu/MenuContent';
-import ToolbarMenuButton from 'Components/Menu/ToolbarMenuButton';
-import useMeasure from 'Helpers/Hooks/useMeasure';
-import { icons } from 'Helpers/Props';
+// Compatibility layer: Sonarr v5 dropped PageToolbarSection in favour of flat
+// ToolbarItem / PageToolbarSpacer children inside PageToolbar. Gamarr pages that
+// have not been rewritten yet keep using sections; this renders them through
+// the v5 primitives so they get v5 buttons and overflow handling.
+import React, {
+  Children,
+  isValidElement,
+  ReactElement,
+  ReactNode,
+  useRef,
+} from 'react';
 import { Align } from 'Helpers/Props/align';
-import dimensions from 'Styles/Variables/dimensions';
-import translate from 'Utilities/String/translate';
-import { PageToolbarButtonProps } from './PageToolbarButton';
-import PageToolbarOverflowMenuItem from './PageToolbarOverflowMenuItem';
-import styles from './PageToolbarSection.css';
-
-const BUTTON_WIDTH = parseInt(dimensions.toolbarButtonWidth);
-const SEPARATOR_MARGIN = parseInt(dimensions.toolbarSeparatorMargin);
-const SEPARATOR_WIDTH = 2 * SEPARATOR_MARGIN + 1;
+import PageToolbarButton, { PageToolbarButtonProps } from './PageToolbarButton';
+import PageToolbarSpacer from './PageToolbarSpacer';
+import ToolbarItem from './ToolbarItem';
 
 export interface PageToolbarSectionProps {
-  children?:
-    | (ReactElement<PageToolbarButtonProps> | ReactElement<never> | null)
-    | (ReactElement<PageToolbarButtonProps> | ReactElement<never> | null)[];
-  alignContent?: Extract<Align, keyof typeof styles>;
+  children?: ReactNode;
+  alignContent?: Align;
   collapseButtons?: boolean;
 }
+
+let sectionId = 0;
 
 function PageToolbarSection({
   children,
   alignContent = 'left',
-  collapseButtons = true,
 }: PageToolbarSectionProps) {
-  const [sectionRef, { width }] = useMeasure();
-  const isMeasured = width > 0;
-
-  const { buttons, buttonCount, overflowItems } = useMemo(() => {
-    let buttonCount = 0;
-    let separatorCount = 0;
-    const validChildren: ReactElement[] = [];
-
-    React.Children.forEach(children, (child) => {
-      if (!child) {
-        return;
-      }
-
-      if (Object.keys(child.props).length === 0) {
-        separatorCount++;
-      } else {
-        buttonCount++;
-      }
-
-      validChildren.push(child);
-    });
-
-    const buttonsWidth = buttonCount * BUTTON_WIDTH;
-    const separatorsWidth = separatorCount + SEPARATOR_WIDTH;
-    const totalWidth = buttonsWidth + separatorsWidth;
-
-    // If the width of buttons and separators is less than
-    // the available width return all valid children.
-
-    if (!isMeasured || !collapseButtons || totalWidth < width) {
-      return {
-        buttons: validChildren,
-        buttonCount,
-        overflowItems: [],
-      };
-    }
-
-    const maxButtons = Math.max(
-      Math.floor((width - separatorsWidth) / BUTTON_WIDTH),
-      1
-    );
-
-    const buttons: ReactElement<PageToolbarButtonProps>[] = [];
-    const overflowItems: PageToolbarButtonProps[] = [];
-
-    let actualButtons = 0;
-
-    // Return all buttons if only one is being pushed to the overflow menu.
-    if (buttonCount - 1 === maxButtons) {
-      const overflowItems: PageToolbarButtonProps[] = [];
-
-      const buttonsWithoutSeparators = validChildren.filter(
-        (child) => Object.keys(child.props).length > 0
-      );
-
-      return {
-        buttons: buttonsWithoutSeparators,
-        buttonCount,
-        overflowItems,
-      };
-    }
-
-    validChildren.forEach((child) => {
-      const isSeparator = Object.keys(child.props).length === 0;
-
-      if (actualButtons < maxButtons) {
-        if (!isSeparator) {
-          buttons.push(child);
-          actualButtons++;
-        }
-      } else if (!isSeparator) {
-        overflowItems.push(child.props);
-      }
-    });
-
-    return {
-      buttons,
-      buttonCount,
-      overflowItems,
-    };
-  }, [children, isMeasured, width, collapseButtons]);
+  const prefix = useRef(`section-${sectionId++}`).current;
 
   return (
-    <div
-      ref={sectionRef}
-      className={styles.sectionContainer}
-      style={{
-        flexGrow: buttonCount,
-      }}
-    >
-      {isMeasured ? (
-        <div className={classNames(styles.section, styles[alignContent])}>
-          {buttons.map((button) => {
-            return button;
-          })}
+    <>
+      {alignContent === 'right' ? <PageToolbarSpacer /> : null}
 
-          {overflowItems.length ? (
-            <Menu>
-              <ToolbarMenuButton
-                className={styles.overflowMenuButton}
-                iconName={icons.OVERFLOW}
-                text={translate('More')}
-              />
+      {Children.map(children, (child, index) => {
+        if (!isValidElement(child)) {
+          return child;
+        }
 
-              <MenuContent>
-                {overflowItems.map((item) => {
-                  const {
-                    label,
-                    overflowComponent:
-                      OverflowComponent = PageToolbarOverflowMenuItem,
-                  } = item;
+        if (child.type === PageToolbarButton) {
+          const { children: _children, ...props } = (
+            child as ReactElement<PageToolbarButtonProps>
+          ).props;
 
-                  return <OverflowComponent key={label} {...item} />;
-                })}
-              </MenuContent>
-            </Menu>
-          ) : null}
-        </div>
-      ) : null}
-    </div>
+          return (
+            <ToolbarItem {...props} id={`${prefix}-${index}-${props.label}`} />
+          );
+        }
+
+        return child;
+      })}
+    </>
   );
 }
 

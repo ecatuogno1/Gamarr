@@ -1,11 +1,13 @@
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import Card from 'Components/Card';
 import Icon from 'Components/Icon';
-import Link from 'Components/Link/Link';
+import Label from 'Components/Label';
+import IconButton from 'Components/Link/IconButton';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import TagList from 'Components/TagList';
-import { icons, kinds } from 'Helpers/Props';
+import { icons, kinds, sizes } from 'Helpers/Props';
 import titleCase from 'Utilities/String/titleCase';
 import translate from 'Utilities/String/translate';
 import EditDelayProfileModalConnector from './EditDelayProfileModalConnector';
@@ -94,41 +96,74 @@ class DelayProfile extends Component {
     }
 
     return (
-      <div
-        className={classNames(
-          styles.delayProfile,
-          isDragging && styles.isDragging
-        )}
-      >
-        <div className={styles.column}>{preferred}</div>
-        <div className={styles.column}>{getDelay(enableUsenet, usenetDelay)}</div>
-        <div className={styles.column}>{getDelay(enableTorrent, torrentDelay)}</div>
+      <div>
+        <Card
+          className={classNames(
+            styles.delayProfile,
+            id === 1 && styles.isDefault,
+            isDragging && styles.isDragging
+          )}
+          overlayClassName={styles.overlay}
+          overlayContent={true}
+          aria-label={translate('EditDelayProfile')}
+          onPress={this.onEditDelayProfilePress}
+        >
+          <div className={styles.colDrag}>
+            {
+              id === 1 ?
+                null :
+                connectDragSource(
+                  <div className={styles.dragHandle}>
+                    <Icon name={icons.REORDER} />
+                  </div>
+                )
+            }
+          </div>
 
-        <TagList
-          tags={tags}
-          tagList={tagList}
-        />
+          <div className={styles.colScope}>
+            {
+              id === 1 ?
+                <Label dot={false} kind={kinds.DEFAULT}
+                  size={sizes.MEDIUM}
+                >
+                  {translate('Default')}
+                </Label> :
+                null
+            }
 
-        <div className={styles.actions}>
-          <Link
-            className={id === 1 ? styles.editButton : undefined}
-            onPress={this.onEditDelayProfilePress}
-          >
-            <Icon name={icons.EDIT} />
-          </Link>
+            {
+              tags.length ?
+                <TagList tags={tags} tagList={tagList} /> :
+                <span className={styles.anyText}>{translate('Any')}</span>
+            }
+          </div>
 
-          {
-            id !== 1 &&
-              connectDragSource(
-                <div className={styles.dragHandle}>
-                  <Icon
-                    className={styles.dragIcon}
-                    name={icons.REORDER}
-                  />
-                </div>
-              )
-          }
-        </div>
+          <div className={styles.colProto}>{preferred}</div>
+
+          <div className={styles.colUsenet}>
+            <span className={styles.colLabel}>{translate('UsenetDelay')}</span>
+            {getDelay(enableUsenet, usenetDelay)}
+          </div>
+
+          <div className={styles.colTorrent}>
+            <span className={styles.colLabel}>{translate('TorrentDelay')}</span>
+            {getDelay(enableTorrent, torrentDelay)}
+          </div>
+
+          <div className={styles.colActions}>
+            {
+              id === 1 ?
+                null :
+                <IconButton
+                  className={styles.actionButton}
+                  title={translate('DeleteDelayProfile')}
+                  aria-label={translate('DeleteDelayProfile')}
+                  name={icons.DELETE}
+                  onPress={this.onDeleteDelayProfilePress}
+                />
+            }
+          </div>
+        </Card>
 
         <EditDelayProfileModalConnector
           id={id}

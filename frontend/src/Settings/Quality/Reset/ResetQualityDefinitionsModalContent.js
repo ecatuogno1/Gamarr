@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import Button from 'Components/Link/Button';
 import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
@@ -63,19 +64,20 @@ class ResetQualityDefinitionsModalContent extends Component {
             {translate('ResetQualityDefinitionsMessageText')}
           </div>
 
-          <FormGroup>
+          <FormRow>
             <FormLabel>
               {translate('ResetTitles')}
             </FormLabel>
 
-            <FormInputGroup
+            <FormInputHelpText text={translate('ResetDefinitionTitlesHelpText')} />
+
+            <FormInput
               type={inputTypes.CHECK}
               name="resetDefinitionTitles"
               value={resetDefinitionTitles}
-              helpText={translate('ResetDefinitionTitlesHelpText')}
               onChange={this.onResetDefinitionTitlesChange}
             />
-          </FormGroup>
+          </FormRow>
 
         </ModalBody>
 

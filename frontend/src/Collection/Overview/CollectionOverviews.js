@@ -3,15 +3,19 @@ import React, { Component } from 'react';
 import { Grid, WindowScroller } from 'react-virtualized';
 import CollectionItemConnector from 'Collection/CollectionItemConnector';
 import Measure from 'Components/Measure';
-import dimensions from 'Styles/Variables/dimensions';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
+import {
+  CHIP_STRIP_HEIGHT,
+  HEADER_HEIGHT,
+  LABELS_HEIGHT,
+  OVERVIEW_HEIGHT,
+  ROW_BORDER,
+  ROW_GAP,
+  ROW_VERTICAL_PADDING
+} from './CollectionOverview';
 import CollectionOverviewConnector from './CollectionOverviewConnector';
 import styles from './CollectionOverviews.css';
-
-// Poster container dimensions
-const columnPadding = parseInt(dimensions.gameIndexColumnPadding);
-const columnPaddingSmallScreen = parseInt(dimensions.gameIndexColumnPaddingSmallScreen);
 
 function calculatePosterWidth(posterSize, isSmallScreen) {
   const maximumPosterWidth = isSmallScreen ? 152 : 162;
@@ -28,12 +32,25 @@ function calculatePosterWidth(posterSize, isSmallScreen) {
 }
 
 function calculateRowHeight(posterHeight, sortKey, isSmallScreen, overviewOptions) {
-  const heights = [
-    overviewOptions.showPosters ? posterHeight : 75,
-    isSmallScreen ? columnPaddingSmallScreen : columnPadding
-  ];
+  const {
+    showDetails,
+    showOverview,
+    showPosters
+  } = overviewOptions;
 
-  return heights.reduce((acc, height) => acc + height + 80, 0);
+  let height = ROW_VERTICAL_PADDING * 2 + ROW_BORDER + HEADER_HEIGHT;
+
+  if (showDetails) {
+    height += ROW_GAP + CHIP_STRIP_HEIGHT;
+  }
+
+  if (showOverview) {
+    height += ROW_GAP + OVERVIEW_HEIGHT;
+  }
+
+  height += ROW_GAP + (showPosters ? posterHeight : LABELS_HEIGHT);
+
+  return height;
 }
 
 function calculatePosterHeight(posterWidth) {

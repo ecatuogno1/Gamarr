@@ -6,7 +6,9 @@ import { createSelector } from 'reselect';
 import AppState from 'App/State/AppState';
 import * as calendarViews from 'Calendar/calendarViews';
 import CalendarEvent from 'Calendar/Events/CalendarEvent';
+import { useUiSettingsValues } from 'Settings/UI/useUiSettings';
 import { CalendarEvent as CalendarEventModel } from 'typings/Calendar';
+import translate from 'Utilities/String/translate';
 import styles from './CalendarDay.css';
 
 function sort(items: CalendarEventModel[]) {
@@ -48,8 +50,10 @@ interface CalendarDayProps {
 function CalendarDay({ date, isTodaysDate }: CalendarDayProps) {
   const { time, view } = useSelector((state: AppState) => state.calendar);
   const events = useSelector(createCalendarEventsConnector(date));
+  const { longDateFormat } = useUiSettingsValues();
+  const momentDate = moment(date);
 
-  const ref = React.useRef<HTMLDivElement>(null);
+  const ref = React.useRef<HTMLTableCellElement>(null);
 
   React.useEffect(() => {
     if (isTodaysDate && view === calendarViews.MONTH && ref.current) {
@@ -58,11 +62,12 @@ function CalendarDay({ date, isTodaysDate }: CalendarDayProps) {
   }, [time, isTodaysDate, view]);
 
   return (
-    <div
+    <td
       ref={ref}
       className={classNames(
         styles.day,
-        view === calendarViews.DAY && styles.isSingleDay
+        view === calendarViews.DAY && styles.isSingleDay,
+        isTodaysDate && styles.isTodayCell
       )}
     >
       {view === calendarViews.MONTH && (
@@ -74,9 +79,20 @@ function CalendarDay({ date, isTodaysDate }: CalendarDayProps) {
               styles.isDifferentMonth
           )}
         >
-          {moment(date).date()}
+          <time
+            dateTime={momentDate.format('YYYY-MM-DD')}
+            aria-current={isTodaysDate ? 'date' : undefined}
+          >
+            <span className={styles.fullDate}>
+              {momentDate.format(longDateFormat)}
+            </span>
+            <span aria-hidden={true}>{momentDate.date()}</span>
+          </time>
         </div>
       )}
+      {!events.length && view === calendarViews.DAY ? (
+        <div className={styles.noEvents}>{translate('NoGameReleases')}</div>
+      ) : null}
       <div>
         {events.map((event) => {
           return (
@@ -84,7 +100,7 @@ function CalendarDay({ date, isTodaysDate }: CalendarDayProps) {
           );
         })}
       </div>
-    </div>
+    </td>
   );
 }
 

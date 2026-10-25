@@ -14,15 +14,19 @@ import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
 import PageContentBody from 'Components/Page/PageContentBody';
 import PageJumpBar, { PageJumpBarItems } from 'Components/Page/PageJumpBar';
+import { OverflowDivider } from 'Components/Page/Toolbar/Overflow';
 import PageToolbar from 'Components/Page/Toolbar/PageToolbar';
-import PageToolbarButton from 'Components/Page/Toolbar/PageToolbarButton';
-import PageToolbarSection from 'Components/Page/Toolbar/PageToolbarSection';
+import PageToolbarButton, {
+  PageToolbarButtonProps,
+} from 'Components/Page/Toolbar/PageToolbarButton';
 import PageToolbarSeparator from 'Components/Page/Toolbar/PageToolbarSeparator';
+import PageToolbarSpacer from 'Components/Page/Toolbar/PageToolbarSpacer';
+import ToolbarItem from 'Components/Page/Toolbar/ToolbarItem';
 import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
 import withScrollPosition from 'Components/withScrollPosition';
 import NoGame from 'Game/NoGame';
 import { selectGameIndexTitles } from 'Game/Title/createGameTitleCollectionSelector';
-import { align, icons, kinds } from 'Helpers/Props';
+import { icons, kinds } from 'Helpers/Props';
 import { DESCENDING } from 'Helpers/Props/sortDirections';
 import InteractiveImportModal from 'InteractiveImport/InteractiveImportModal';
 import { executeCommand } from 'Store/Actions/commandActions';
@@ -230,68 +234,167 @@ const GameIndex = withScrollPosition((props: GameIndexProps) => {
   }, [items, sortKey, sortDirection]);
   const ViewComponent = useMemo(() => getViewComponent(view), [view]);
 
+  const renderRefreshButton = useCallback(
+    () => (
+      <GameIndexRefreshGameButton
+        isSelectMode={isSelectMode}
+        selectedFilterKey={selectedFilterKey}
+      />
+    ),
+    [isSelectMode, selectedFilterKey]
+  );
+
+  const renderSearchButton = useCallback(
+    () => (
+      <GameIndexSearchButton
+        isSelectMode={isSelectMode}
+        selectedFilterKey={selectedFilterKey}
+        overflowComponent={GameIndexSearchMenuItem}
+      />
+    ),
+    [isSelectMode, selectedFilterKey]
+  );
+
+  const renderSearchOverflow = useCallback(
+    () => (
+      <GameIndexSearchMenuItem
+        isSelectMode={isSelectMode}
+        selectedFilterKey={selectedFilterKey}
+      />
+    ),
+    [isSelectMode, selectedFilterKey]
+  );
+
+  const renderSelectButton = useCallback(
+    (buttonProps: PageToolbarButtonProps) => (
+      <GameIndexSelectModeButton
+        label={buttonProps.label}
+        iconName={buttonProps.iconName}
+        isSelectMode={isSelectMode}
+        onPress={onSelectModePress}
+      />
+    ),
+    [isSelectMode, onSelectModePress]
+  );
+
+  const renderSelectOverflow = useCallback(
+    (buttonProps: PageToolbarButtonProps) => (
+      <GameIndexSelectModeMenuItem
+        label={buttonProps.label}
+        iconName={buttonProps.iconName}
+        isSelectMode={isSelectMode}
+        onPress={onSelectModePress}
+      />
+    ),
+    [isSelectMode, onSelectModePress]
+  );
+
+  const renderSelectAllButton = useCallback(
+    () => (
+      <GameIndexSelectAllButton
+        label={translate('SelectAll')}
+        isSelectMode={isSelectMode}
+      />
+    ),
+    [isSelectMode]
+  );
+
+  const renderSelectAllOverflow = useCallback(
+    () => (
+      <GameIndexSelectAllMenuItem
+        label={translate('SelectAll')}
+        isSelectMode={isSelectMode}
+      />
+    ),
+    [isSelectMode]
+  );
+
   const isLoaded = !!(!error && isPopulated && items.length);
   const hasNoGame = !totalItems;
 
   return (
     <SelectProvider items={items}>
-      <PageContent>
+      <PageContent title={translate('Games')}>
         <PageToolbar>
-          <PageToolbarSection>
-            <GameIndexRefreshGameButton
-              isSelectMode={isSelectMode}
-              selectedFilterKey={selectedFilterKey}
-            />
+          <ToolbarItem
+            id="refresh"
+            priority={1}
+            groupId="left-a"
+            label={translate('UpdateAll')}
+            iconName={icons.REFRESH}
+            renderButton={renderRefreshButton}
+          />
 
-            <PageToolbarButton
-              label={translate('RssSync')}
-              iconName={icons.RSS}
-              isSpinning={isRssSyncExecuting}
-              isDisabled={hasNoGame}
-              onPress={onRssSyncPress}
-            />
+          <ToolbarItem
+            id="rss"
+            priority={1}
+            groupId="left-a"
+            label={translate('RssSync')}
+            iconName={icons.RSS}
+            isSpinning={isRssSyncExecuting}
+            isDisabled={hasNoGame}
+            onPress={onRssSyncPress}
+          />
 
+          <OverflowDivider groupId="left-a">
             <PageToolbarSeparator />
+          </OverflowDivider>
 
-            <GameIndexSearchButton
-              isSelectMode={isSelectMode}
-              selectedFilterKey={selectedFilterKey}
-              overflowComponent={GameIndexSearchMenuItem}
-            />
+          <ToolbarItem
+            id="search"
+            priority={1}
+            groupId="left-b"
+            label={translate('SearchAll')}
+            iconName={icons.SEARCH}
+            renderButton={renderSearchButton}
+            renderOverflow={renderSearchOverflow}
+          />
 
-            <PageToolbarButton
-              label={translate('ManualImport')}
-              iconName={icons.INTERACTIVE}
-              isDisabled={hasNoGame}
-              onPress={onInteractiveImportPress}
-            />
+          <ToolbarItem
+            id="manualImport"
+            priority={1}
+            groupId="left-b"
+            label={translate('ManualImport')}
+            iconName={icons.INTERACTIVE}
+            isDisabled={hasNoGame}
+            onPress={onInteractiveImportPress}
+          />
 
+          <OverflowDivider groupId="left-b">
             <PageToolbarSeparator />
+          </OverflowDivider>
 
-            <GameIndexSelectModeButton
-              label={
-                isSelectMode
-                  ? translate('StopSelecting')
-                  : translate('EditGames')
-              }
-              iconName={isSelectMode ? icons.SERIES_ENDED : icons.EDIT}
-              isSelectMode={isSelectMode}
-              overflowComponent={GameIndexSelectModeMenuItem}
-              onPress={onSelectModePress}
-            />
+          <ToolbarItem
+            id="select"
+            priority={1}
+            groupId="left-c"
+            label={
+              isSelectMode
+                ? translate('StopSelecting')
+                : translate('SelectMultipleGames')
+            }
+            iconName={isSelectMode ? icons.SERIES_ENDED : icons.CHECK}
+            renderButton={renderSelectButton}
+            renderOverflow={renderSelectOverflow}
+            onPress={onSelectModePress}
+          />
 
-            <GameIndexSelectAllButton
+          {isSelectMode ? (
+            <ToolbarItem
+              id="selectAll"
+              priority={1}
+              groupId="left-c"
               label={translate('SelectAll')}
-              isSelectMode={isSelectMode}
-              overflowComponent={GameIndexSelectAllMenuItem}
+              iconName={icons.CHECK_SQUARE}
+              renderButton={renderSelectAllButton}
+              renderOverflow={renderSelectAllOverflow}
             />
-          </PageToolbarSection>
+          ) : null}
 
-          <PageToolbarSection
-            alignContent={align.RIGHT}
-            collapseButtons={false}
-          >
-            {view === 'table' ? (
+          <PageToolbarSpacer />
+
+          {view === 'table' ? (
+            <ToolbarItem id="options" priority={2} groupId="right">
               <TableOptionsModalWrapper
                 columns={columns}
                 optionsComponent={GameIndexTableOptions}
@@ -302,30 +405,41 @@ const GameIndex = withScrollPosition((props: GameIndexProps) => {
                   iconName={icons.TABLE}
                 />
               </TableOptionsModalWrapper>
-            ) : (
-              <PageToolbarButton
-                label={translate('Options')}
-                iconName={view === 'posters' ? icons.POSTER : icons.OVERVIEW}
-                isDisabled={hasNoGame}
-                onPress={onOptionsPress}
-              />
-            )}
+            </ToolbarItem>
+          ) : (
+            <ToolbarItem
+              id="options"
+              priority={2}
+              groupId="right"
+              label={translate('Options')}
+              iconName={view === 'posters' ? icons.POSTER : icons.OVERVIEW}
+              isDisabled={hasNoGame}
+              onPress={onOptionsPress}
+            />
+          )}
 
+          <OverflowDivider groupId="right">
             <PageToolbarSeparator />
+          </OverflowDivider>
 
+          <ToolbarItem id="view" pinned={true}>
             <GameIndexViewMenu
               view={view}
               isDisabled={hasNoGame}
               onViewSelect={onViewSelect}
             />
+          </ToolbarItem>
 
+          <ToolbarItem id="sort" pinned={true}>
             <GameIndexSortMenu
               sortKey={sortKey}
               sortDirection={sortDirection}
               isDisabled={hasNoGame}
               onSortSelect={onSortSelect}
             />
+          </ToolbarItem>
 
+          <ToolbarItem id="filter" pinned={true}>
             <GameIndexFilterMenu
               selectedFilterKey={selectedFilterKey}
               filters={filters}
@@ -333,7 +447,7 @@ const GameIndex = withScrollPosition((props: GameIndexProps) => {
               isDisabled={hasNoGame}
               onFilterSelect={onFilterSelect}
             />
-          </PageToolbarSection>
+          </ToolbarItem>
         </PageToolbar>
         <div className={styles.pageContentBodyWrapper}>
           <PageContentBody

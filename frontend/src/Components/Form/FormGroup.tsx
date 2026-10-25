@@ -1,43 +1,7 @@
-import classNames from 'classnames';
-import React, { Children, ComponentPropsWithoutRef, ReactNode } from 'react';
-import { Size } from 'Helpers/Props/sizes';
-import styles from './FormGroup.css';
+// Sonarr v5 replaced FormGroup with FormRow. Kept as an alias so Gamarr forms
+// that have not been converted yet get the v5 row layout.
+import FormRow from './FormRow';
 
-interface FormGroupProps extends ComponentPropsWithoutRef<'div'> {
-  className?: string;
-  children: ReactNode;
-  size?: Extract<Size, keyof typeof styles>;
-  advancedSettings?: boolean;
-  isAdvanced?: boolean;
-}
-
-function FormGroup(props: FormGroupProps) {
-  const {
-    className = styles.group,
-    children,
-    size = 'small',
-    advancedSettings = false,
-    isAdvanced = false,
-    ...otherProps
-  } = props;
-
-  if (!advancedSettings && isAdvanced) {
-    return null;
-  }
-
-  const childProps = isAdvanced ? { isAdvanced } : {};
-
-  return (
-    <div className={classNames(className, styles[size])} {...otherProps}>
-      {Children.map(children, (child) => {
-        if (!React.isValidElement(child)) {
-          return child;
-        }
-
-        return React.cloneElement(child, childProps);
-      })}
-    </div>
-  );
-}
+const FormGroup = FormRow;
 
 export default FormGroup;

@@ -2,12 +2,14 @@
 // Please do not change this file!
 interface CssExports {
   'addSelectedButton': string;
-  'buttonContainer': string;
-  'buttonContainerContent': string;
   'buttons': string;
-  'excludeSelectedButton': string;
-  'inputContainer': string;
-  'selectedGameLabel': string;
+  'footerContent': string;
+  'footerRow': string;
+  'footerShell': string;
+  'selectionLabel': string;
+  'setting': string;
+  'settingsBar': string;
+  'settingsContent': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

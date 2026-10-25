@@ -1,12 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import FormGroup from 'Components/Form/FormGroup';
 import FormInputHelpText from 'Components/Form/FormInputHelpText';
-import FormLabel from 'Components/Form/FormLabel';
-import Icon from 'Components/Icon';
-import Button from 'Components/Link/Button';
 import Measure from 'Components/Measure';
-import { icons, kinds, sizes } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import QualityProfileItemDragPreview from './QualityProfileItemDragPreview';
 import QualityProfileItemDragSource from './QualityProfileItemDragSource';
@@ -68,97 +63,98 @@ class QualityProfileItems extends Component {
     const minHeight = editGroups ? qualitiesHeightEditGroups : qualitiesHeight;
 
     return (
-      <FormGroup size={sizes.EXTRA_SMALL}>
-        <FormLabel size={sizes.SMALL}>
-          {translate('Qualities')}
-        </FormLabel>
+      <div className={styles.qualitiesSection}>
+        <div className={styles.headingRow}>
+          <div className={styles.headingCluster}>
+            <h3 className={styles.heading}>{translate('Qualities')}</h3>
+          </div>
 
-        <div>
-          <FormInputHelpText
-            text={translate('QualitiesHelpText')}
-          />
-
-          {
-            errors.map((error, index) => {
-              return (
-                <FormInputHelpText
-                  key={index}
-                  text={error.message}
-                  isError={true}
-                  isCheckInput={false}
-                />
-              );
-            })
-          }
-
-          {
-            warnings.map((warning, index) => {
-              return (
-                <FormInputHelpText
-                  key={index}
-                  text={warning.message}
-                  isWarning={true}
-                  isCheckInput={false}
-                />
-              );
-            })
-          }
-
-          <Button
-            className={styles.editGroupsButton}
-            kind={kinds.PRIMARY}
-            onPress={this.onToggleEditGroupsMode}
-          >
-            <div>
-              <Icon
-                className={styles.editGroupsButtonIcon}
-                name={editGroups ? icons.REORDER : icons.GROUP}
-              />
-
-              {
-                editGroups ? translate('DoneEditingGroups') : translate('EditGroups')
-              }
-            </div>
-          </Button>
-
-          <Measure
-            whitelist={['height']}
-            includeMargin={false}
-            onMeasure={this.onMeasure}
-          >
-            <div
-              className={styles.qualities}
-              style={{ minHeight: `${minHeight}px` }}
+          <div className={styles.modeCluster} role="group">
+            <button
+              type="button"
+              className={editGroups ? styles.modeCell : styles.modeCellActive}
+              aria-pressed={!editGroups}
+              onClick={editGroups ? this.onToggleEditGroupsMode : undefined}
             >
-              {
-                qualityProfileItems.map(({ id, name, allowed, quality, items }, index) => {
-                  const identifier = quality ? quality.id : id;
+              {translate('Qualities')}
+            </button>
 
-                  return (
-                    <QualityProfileItemDragSource
-                      key={identifier}
-                      editGroups={editGroups}
-                      groupId={id}
-                      qualityId={quality && quality.id}
-                      name={quality ? quality.name : name}
-                      allowed={allowed}
-                      items={items}
-                      qualityIndex={`${index + 1}`}
-                      isInGroup={false}
-                      isDragging={isDragging}
-                      isDraggingUp={isDraggingUp}
-                      isDraggingDown={isDraggingDown}
-                      {...otherProps}
-                    />
-                  );
-                }).reverse()
-              }
-
-              <QualityProfileItemDragPreview />
-            </div>
-          </Measure>
+            <button
+              type="button"
+              className={editGroups ? styles.modeCellActive : styles.modeCell}
+              aria-pressed={editGroups}
+              onClick={editGroups ? undefined : this.onToggleEditGroupsMode}
+            >
+              {translate('Groups')}
+            </button>
+          </div>
         </div>
-      </FormGroup>
+
+        <FormInputHelpText text={translate('QualitiesHelpText')} />
+
+        {
+          errors.map((error, index) => {
+            return (
+              <FormInputHelpText
+                key={index}
+                text={error.message}
+                isError={true}
+                isCheckInput={false}
+              />
+            );
+          })
+        }
+
+        {
+          warnings.map((warning, index) => {
+            return (
+              <FormInputHelpText
+                key={index}
+                text={warning.message}
+                isWarning={true}
+                isCheckInput={false}
+              />
+            );
+          })
+        }
+
+        <Measure
+          whitelist={['height']}
+          includeMargin={false}
+          onMeasure={this.onMeasure}
+        >
+          <div
+            className={styles.qualities}
+            style={{ minHeight: `${minHeight}px` }}
+          >
+            {
+              qualityProfileItems.map(({ id, name, allowed, quality, items }, index) => {
+                const identifier = quality ? quality.id : id;
+
+                return (
+                  <QualityProfileItemDragSource
+                    key={identifier}
+                    editGroups={editGroups}
+                    groupId={id}
+                    qualityId={quality && quality.id}
+                    name={quality ? quality.name : name}
+                    allowed={allowed}
+                    items={items}
+                    qualityIndex={`${index + 1}`}
+                    isInGroup={false}
+                    isDragging={isDragging}
+                    isDraggingUp={isDraggingUp}
+                    isDraggingDown={isDraggingDown}
+                    {...otherProps}
+                  />
+                );
+              }).reverse()
+            }
+
+            <QualityProfileItemDragPreview />
+          </div>
+        </Measure>
+      </div>
     );
   }
 }

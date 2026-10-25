@@ -3,9 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import ProviderFieldFormGroup from 'Components/Form/ProviderFieldFormGroup';
 import Button from 'Components/Link/Button';
 import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
@@ -83,7 +84,6 @@ function EditMetadataModalContent({
       <ModalHeader>
         {translate('EditMetadata', { metadataType: name.value })}
       </ModalHeader>
-
       <ModalBody>
         <Form {...otherSettings}>
           {message ? (
@@ -92,17 +92,16 @@ function EditMetadataModalContent({
             </Alert>
           ) : null}
 
-          <FormGroup>
+          <FormRow>
             <FormLabel>{translate('Enable')}</FormLabel>
-
-            <FormInputGroup
+            <FormInputHelpText text={translate('EnableMetadataHelpText')} />
+            <FormInput
               type={inputTypes.CHECK}
               name="enable"
-              helpText={translate('EnableMetadataHelpText')}
               {...enable}
               onChange={handleInputChange}
             />
-          </FormGroup>
+          </FormRow>
 
           {fields.map((field) => {
             return (
@@ -118,7 +117,6 @@ function EditMetadataModalContent({
           })}
         </Form>
       </ModalBody>
-
       <ModalFooter>
         <Button onPress={onModalClose}>{translate('Cancel')}</Button>
 

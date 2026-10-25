@@ -1,33 +1,25 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import AppState from 'App/State/AppState';
+import { toggleIsSidebarVisible } from 'App/appStore';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import useKeyboardShortcuts from 'Helpers/Hooks/useKeyboardShortcuts';
 import { icons } from 'Helpers/Props';
-import { setIsSidebarVisible } from 'Store/Actions/appActions';
+import translate from 'Utilities/String/translate';
 import GameSearchInput from './GameSearchInput';
 import KeyboardShortcutsModal from './KeyboardShortcutsModal';
 import PageHeaderActionsMenu from './PageHeaderActionsMenu';
+import PageHeaderToolsMenu from './PageHeaderToolsMenu';
 import styles from './PageHeader.css';
 
-interface PageHeaderProps {
-  isSmallScreen: boolean;
-}
-
-function PageHeader({ isSmallScreen }: PageHeaderProps) {
-  const dispatch = useDispatch();
-
-  const { isSidebarVisible } = useSelector((state: AppState) => state.app);
-
+function PageHeader() {
   const [isKeyboardShortcutsModalOpen, setIsKeyboardShortcutsModalOpen] =
     useState(false);
 
   const { bindShortcut, unbindShortcut } = useKeyboardShortcuts();
 
   const handleSidebarToggle = useCallback(() => {
-    dispatch(setIsSidebarVisible({ isSidebarVisible: !isSidebarVisible }));
-  }, [isSidebarVisible, dispatch]);
+    toggleIsSidebarVisible();
+  }, []);
 
   const handleOpenKeyboardShortcutsModal = useCallback(() => {
     setIsKeyboardShortcutsModalOpen(true);
@@ -51,23 +43,22 @@ function PageHeader({ isSmallScreen }: PageHeaderProps) {
   return (
     <div className={styles.header}>
       <div className={styles.logoContainer}>
-        <Link className={styles.logoLink} to="/">
+        <Link className={styles.logoLink} to="/" aria-label={translate('Home')}>
           <img
-            className={isSmallScreen ? styles.logo : styles.logoFull}
-            src={
-              isSmallScreen
-                ? `${window.Gamarr.urlBase}/Content/Images/logo.png`
-                : `${window.Gamarr.urlBase}/Content/Images/logo-full.png`
-            }
-            alt="Gamarr Logo"
+            className={styles.logo}
+            src={`${window.Gamarr.urlBase}/Content/Images/logo.svg`}
+            alt=""
           />
+          <span className={styles.brandName}>Gamarr</span>
         </Link>
       </div>
 
       <div className={styles.sidebarToggleContainer}>
         <IconButton
           id="sidebar-toggle-button"
+          className={styles.sidebarToggle}
           name={icons.NAVBAR_COLLAPSE}
+          aria-label={translate('Menu')}
           onPress={handleSidebarToggle}
         />
       </div>
@@ -75,6 +66,8 @@ function PageHeader({ isSmallScreen }: PageHeaderProps) {
       <GameSearchInput />
 
       <div className={styles.right}>
+        <PageHeaderToolsMenu />
+
         <PageHeaderActionsMenu
           onKeyboardShortcutsPress={handleOpenKeyboardShortcutsModal}
         />

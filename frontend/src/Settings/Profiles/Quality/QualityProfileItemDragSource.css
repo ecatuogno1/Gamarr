@@ -1,18 +1,21 @@
 .qualityProfileItemDragSource {
-  padding: $qualityProfileItemDragSourcePadding 0;
+  &:first-child > :first-child {
+    border-top: 0;
+  }
 }
 
 .qualityProfileItemPlaceholder {
   width: 100%;
-  height: $qualityProfileItemHeight;
-  border: 1px dotted #aaa;
-  border-radius: 4px;
+  height: 38px;
+  border: 1px dashed color-mix(in oklab, var(--accent) 55%, var(--borderColor));
+  border-radius: 8px;
+  background-color: color-mix(in oklab, var(--accent) 6%, transparent);
 }
 
 .qualityProfileItemPlaceholderBefore {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .qualityProfileItemPlaceholderAfter {
-  margin-top: 8px;
+  margin-top: 4px;
 }

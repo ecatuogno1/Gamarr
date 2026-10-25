@@ -1,13 +1,13 @@
+import classNames from 'classnames';
 import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import TextTruncate from 'react-text-truncate';
-import GameTagList from 'Components/GameTagList';
 import Icon from 'Components/Icon';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
 import Popover from 'Components/Tooltip/Popover';
 import GameDetailsLinks from 'Game/Details/GameDetailsLinks';
+import { GameStatus } from 'Game/Game';
 import GamePoster from 'Game/GamePoster';
 import GameIndexPosterSelect from 'Game/Index/Select/GameIndexPosterSelect';
 import GamePlatformBadges from 'Game/Title/GamePlatformBadges';
@@ -15,24 +15,37 @@ import { getTitleLink } from 'Game/Title/gameTitle';
 import GameTitleModals from 'Game/Title/GameTitleModals';
 import GameTitleProgressBar from 'Game/Title/GameTitleProgressBar';
 import useGameTitleIndexItem from 'Game/Title/useGameTitleIndexItem';
+import useMeasure from 'Helpers/Hooks/useMeasure';
 import { icons } from 'Helpers/Props';
-import dimensions from 'Styles/Variables/dimensions';
-import fonts from 'Styles/Variables/fonts';
 import translate from 'Utilities/String/translate';
 import GameIndexOverviewInfo from './GameIndexOverviewInfo';
+import { ROW_BORDER, ROW_VERTICAL_PADDING } from './overviewLayout';
 import selectOverviewOptions from './selectOverviewOptions';
 import styles from './GameIndexOverview.css';
 
-const columnPadding = parseInt(dimensions.gameIndexColumnPadding);
-const columnPaddingSmallScreen = parseInt(
-  dimensions.gameIndexColumnPaddingSmallScreen
-);
-const defaultFontSize = parseInt(fonts.defaultFontSize);
-const lineHeight = parseFloat(fonts.lineHeight);
+// Mirrors .synopsis font-size/line-height in GameIndexOverview.css.
+const SYNOPSIS_FONT_SIZE = 13.5;
+const SYNOPSIS_LINE_HEIGHT = 1.6;
 
-// Hardcoded height beased on line-height of 32 + bottom margin of 10.
-// Less side-effecty than using react-measure.
-const titleRowHeight = 42;
+const TITLE_HEIGHT = 38;
+const CHIP_STRIP_HEIGHT = 28;
+
+// Sonarr v5 shows the series status as a pill on the overview poster; games
+// map tba/announced/released/deleted onto the same status colours.
+function getStatusBadge(status: GameStatus) {
+  switch (status) {
+    case 'deleted':
+      return { label: translate('Deleted'), statusClass: styles.deleted };
+    case 'tba':
+      return { label: translate('Tba'), statusClass: styles.upcoming };
+    case 'announced':
+      return { label: translate('Announced'), statusClass: styles.upcoming };
+    case 'released':
+      return { label: translate('Released'), statusClass: styles.ended };
+    default:
+      return null;
+  }
+}
 
 interface GameIndexOverviewProps {
   gameIds: number[];
@@ -41,7 +54,6 @@ interface GameIndexOverviewProps {
   posterHeight: number;
   rowHeight: number;
   isSelectMode: boolean;
-  isSmallScreen: boolean;
 }
 
 function GameIndexOverview(props: GameIndexOverviewProps) {
@@ -52,7 +64,6 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
     posterHeight,
     rowHeight,
     isSelectMode,
-    isSmallScreen,
   } = props;
 
   const {
@@ -73,10 +84,19 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
   const overviewOptions = useSelector(selectOverviewOptions);
 
   const contentHeight = useMemo(() => {
-    const padding = isSmallScreen ? columnPaddingSmallScreen : columnPadding;
+    return rowHeight - (ROW_VERTICAL_PADDING * 2 + ROW_BORDER);
+  }, [rowHeight]);
 
-    return rowHeight - padding;
-  }, [rowHeight, isSmallScreen]);
+  const [chipStripRef, chipStripBounds] = useMeasure();
+  const chipStripHeight = chipStripBounds.height || CHIP_STRIP_HEIGHT;
+
+  const synopsisLines = Math.max(
+    1,
+    Math.floor(
+      (contentHeight - TITLE_HEIGHT - chipStripHeight) /
+        (SYNOPSIS_FONT_SIZE * SYNOPSIS_LINE_HEIGHT)
+    )
+  );
 
   if (!summary) {
     return null;
@@ -88,7 +108,7 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
     path,
     overview,
     images,
-    tags,
+    tags = [],
     igdbId,
     igdbSlug,
     added,
@@ -102,7 +122,7 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
     height: `${posterHeight}px`,
   };
 
-  const overviewHeight = contentHeight - titleRowHeight;
+  const statusBadge = getStatusBadge(status);
 
   return (
     <div>
@@ -113,13 +133,20 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
               <GameIndexPosterSelect gameId={igdbId} titleSlug={`${igdbId}`} />
             ) : null}
 
-            {status === 'deleted' ? (
-              <div className={styles.deleted} title={translate('Deleted')} />
+            {statusBadge ? (
+              <div
+                className={classNames(
+                  styles.statusPill,
+                  statusBadge.statusClass
+                )}
+              >
+                <span className={styles.statusLabel}>{statusBadge.label}</span>
+              </div>
             ) : null}
 
             <Link className={styles.link} style={elementStyle} to={link}>
               <GamePoster
-                className={styles.poster}
+                className={styles.posterImage}
                 style={elementStyle}
                 images={images}
                 size={250}
@@ -151,21 +178,21 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
             ) : null}
 
             <div className={styles.actions}>
-              <span className={styles.externalLinks}>
-                <Popover
-                  anchor={<Icon name={icons.EXTERNAL_LINK} size={12} />}
-                  title={translate('Links')}
-                  body={
-                    <GameDetailsLinks
-                      igdbId={igdbId}
-                      igdbSlug={igdbSlug}
-                      youTubeTrailerId={youTubeTrailerId}
-                    />
-                  }
-                />
-              </span>
+              <Popover
+                className={styles.action}
+                anchor={<Icon name={icons.EXTERNAL_LINK} />}
+                title={translate('Links')}
+                body={
+                  <GameDetailsLinks
+                    igdbId={igdbId}
+                    igdbSlug={igdbSlug}
+                    youTubeTrailerId={youTubeTrailerId}
+                  />
+                }
+              />
 
               <SpinnerIconButton
+                className={styles.action}
                 name={icons.REFRESH}
                 title={translate('RefreshGame')}
                 isSpinning={isRefreshingGame}
@@ -174,7 +201,7 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
 
               {overviewOptions.showSearchAction ? (
                 <SpinnerIconButton
-                  className={styles.actions}
+                  className={styles.action}
                   name={icons.SEARCH}
                   title={translate('SearchForGame')}
                   isSpinning={isSearchingGame}
@@ -183,45 +210,44 @@ function GameIndexOverview(props: GameIndexOverviewProps) {
               ) : null}
 
               <IconButton
+                className={styles.action}
                 name={icons.EDIT}
                 title={translate('EditGame')}
+                aria-label={translate('EditGame')}
                 onPress={onEditGamePress}
               />
             </div>
           </div>
 
-          <div className={styles.details}>
-            <div className={styles.overviewContainer}>
-              <Link className={styles.overview} to={link}>
-                <TextTruncate
-                  line={Math.floor(
-                    overviewHeight / (defaultFontSize * lineHeight)
-                  )}
-                  text={overview}
-                />
-              </Link>
+          <Link
+            className={styles.synopsis}
+            to={link}
+            style={{ WebkitLineClamp: synopsisLines }}
+          >
+            {overview}
+          </Link>
 
-              {overviewOptions.showTags ? (
-                <div className={styles.tags}>
-                  <GameTagList tags={tags} />
-                </div>
-              ) : null}
-            </div>
-            <GameIndexOverviewInfo
-              height={overviewHeight}
-              monitored={summary.monitored}
-              qualityProfile={{ name: qualityProfileNames.join(', ') }}
-              platform={summary.versions
-                .map((v) => v.game.platform?.name)
-                .filter((name) => !!name)
-                .join(', ')}
-              sizeOnDisk={summary.sizeOnDisk}
-              added={added}
-              path={path}
-              sortKey={sortKey}
-              {...overviewOptions}
-            />
-          </div>
+          <GameIndexOverviewInfo
+            ref={chipStripRef}
+            monitored={summary.monitored}
+            qualityProfile={{ name: qualityProfileNames.join(', ') }}
+            platform={summary.versions
+              .map((v) => v.game.platform?.name)
+              .filter((name) => !!name)
+              .join(', ')}
+            sizeOnDisk={summary.sizeOnDisk}
+            added={added}
+            path={path}
+            tags={tags}
+            sortKey={sortKey}
+            showPlatform={overviewOptions.showPlatform}
+            showMonitored={overviewOptions.showMonitored}
+            showQualityProfile={overviewOptions.showQualityProfile}
+            showAdded={overviewOptions.showAdded}
+            showPath={overviewOptions.showPath}
+            showSizeOnDisk={overviewOptions.showSizeOnDisk}
+            showTags={overviewOptions.showTags}
+          />
         </div>
       </div>
 

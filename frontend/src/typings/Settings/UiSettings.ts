@@ -9,4 +9,5 @@ export default interface UiSettings {
   calendarWeekColumnHeader: string;
   gameInfoLanguage: number;
   uiLanguage: number;
+  headerColor: 'fullColor' | 'gradient';
 }

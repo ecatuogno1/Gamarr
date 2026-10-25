@@ -1,12 +1,13 @@
 import React, { useCallback, useState } from 'react';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import Button from 'Components/Link/Button';
 import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
+import ModalSection from 'Components/ModalSection';
 import { inputTypes } from 'Helpers/Props';
 import { InputChanged } from 'typings/inputs';
 import translate from 'Utilities/String/translate';
@@ -122,48 +123,51 @@ function ManageIndexersEditModalContent(
   return (
     <ModalContent onModalClose={onModalClose}>
       <ModalHeader>{translate('EditSelectedIndexers')}</ModalHeader>
-
       <ModalBody>
-        <FormGroup>
-          <FormLabel>{translate('EnableRss')}</FormLabel>
+        <ModalSection
+          title={translate('ManageIndexersEditModalContentSearchSection')}
+        >
+          <FormRow>
+            <FormLabel>{translate('EnableRss')}</FormLabel>
 
-          <FormInputGroup
-            type={inputTypes.SELECT}
-            name="enableRss"
-            value={enableRss}
-            values={enableOptions}
-            onChange={onInputChange}
-          />
-        </FormGroup>
+            <FormInput
+              type={inputTypes.SELECT}
+              name="enableRss"
+              value={enableRss}
+              values={enableOptions}
+              onChange={onInputChange}
+            />
+          </FormRow>
 
-        <FormGroup>
-          <FormLabel>{translate('EnableAutomaticSearch')}</FormLabel>
+          <FormRow>
+            <FormLabel>{translate('EnableAutomaticSearch')}</FormLabel>
 
-          <FormInputGroup
-            type={inputTypes.SELECT}
-            name="enableAutomaticSearch"
-            value={enableAutomaticSearch}
-            values={enableOptions}
-            onChange={onInputChange}
-          />
-        </FormGroup>
+            <FormInput
+              type={inputTypes.SELECT}
+              name="enableAutomaticSearch"
+              value={enableAutomaticSearch}
+              values={enableOptions}
+              onChange={onInputChange}
+            />
+          </FormRow>
 
-        <FormGroup>
-          <FormLabel>{translate('EnableInteractiveSearch')}</FormLabel>
+          <FormRow>
+            <FormLabel>{translate('EnableInteractiveSearch')}</FormLabel>
 
-          <FormInputGroup
-            type={inputTypes.SELECT}
-            name="enableInteractiveSearch"
-            value={enableInteractiveSearch}
-            values={enableOptions}
-            onChange={onInputChange}
-          />
-        </FormGroup>
+            <FormInput
+              type={inputTypes.SELECT}
+              name="enableInteractiveSearch"
+              value={enableInteractiveSearch}
+              values={enableOptions}
+              onChange={onInputChange}
+            />
+          </FormRow>
+        </ModalSection>
 
-        <FormGroup>
+        <FormRow>
           <FormLabel>{translate('Priority')}</FormLabel>
 
-          <FormInputGroup
+          <FormInput
             type={inputTypes.NUMBER}
             name="priority"
             value={priority}
@@ -171,7 +175,7 @@ function ManageIndexersEditModalContent(
             max={50}
             onChange={onInputChange}
           />
-        </FormGroup>
+        </FormRow>
       </ModalBody>
 
       <ModalFooter className={styles.modalFooter}>
@@ -179,7 +183,7 @@ function ManageIndexersEditModalContent(
           {translate('CountIndexersSelected', { count: selectedCount })}
         </div>
 
-        <div>
+        <div className={styles.buttons}>
           <Button onPress={onModalClose}>{translate('Cancel')}</Button>
 
           <Button onPress={save}>{translate('ApplyChanges')}</Button>

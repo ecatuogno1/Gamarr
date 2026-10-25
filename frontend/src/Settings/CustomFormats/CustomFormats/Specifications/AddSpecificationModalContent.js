@@ -31,7 +31,7 @@ class AddSpecificationModalContent extends Component {
     return (
       <ModalContent onModalClose={onModalClose}>
         <ModalHeader>
-          Add Condition
+          {translate('AddCondition')}
         </ModalHeader>
 
         <ModalBody>
@@ -49,17 +49,11 @@ class AddSpecificationModalContent extends Component {
 
           {
             isSchemaPopulated && !schemaError &&
-              <div>
-
-                <Alert kind={kinds.INFO}>
-                  <div>
-                    {translate('SupportedCustomConditions')}
-                  </div>
-                  <div>
-                    {translate('VisitTheWikiForMoreDetails')}
-                    <Link to="https://github.com/ecatuogno1/Gamarr/wiki/settings#custom-formats-2">{translate('Wiki')}</Link>
-                  </div>
-                </Alert>
+              <>
+                <p className={styles.wikiNote}>
+                  {translate('VisitTheWikiForMoreDetails')}
+                  <Link to="https://github.com/ecatuogno1/Gamarr/wiki/settings#custom-formats-2">{translate('Wiki')}</Link>
+                </p>
 
                 <div className={styles.specifications}>
                   {
@@ -74,8 +68,7 @@ class AddSpecificationModalContent extends Component {
                     })
                   }
                 </div>
-
-              </div>
+              </>
           }
         </ModalBody>
         <ModalFooter>

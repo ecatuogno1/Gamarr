@@ -8,6 +8,7 @@ import { CalendarItem } from 'typings/Calendar';
 interface CalendarOptions {
   showGameInformation: boolean;
   showReleaseDate: boolean;
+  showCoverArt: boolean;
   showCutoffUnmetIcon: boolean;
   fullColorEvents: boolean;
 }

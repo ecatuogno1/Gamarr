@@ -1,14 +1,11 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Card from 'Components/Card';
-import FieldSet from 'Components/FieldSet';
-import Icon from 'Components/Icon';
 import PageSectionContent from 'Components/Page/PageSectionContent';
-import { icons } from 'Helpers/Props';
+import AddCard from 'Components/SettingsCard/AddCard';
+import settingsCardStyles from 'Components/SettingsCard/SettingsCard.css';
 import translate from 'Utilities/String/translate';
 import CustomFormat from './CustomFormat';
 import EditCustomFormatModalConnector from './EditCustomFormatModalConnector';
-import styles from './CustomFormats.css';
 
 class CustomFormats extends Component {
 
@@ -59,47 +56,37 @@ class CustomFormats extends Component {
     } = this.props;
 
     return (
-      <FieldSet legend={translate('CustomFormats')}>
-        <PageSectionContent
-          errorMessage={translate('CustomFormatsLoadError')}
-          {...otherProps}
-        >
-          <div className={styles.customFormats}>
-            {
-              items.map((item) => {
-                return (
-                  <CustomFormat
-                    key={item.id}
-                    {...item}
-                    isDeleting={isDeleting}
-                    onConfirmDeleteCustomFormat={onConfirmDeleteCustomFormat}
-                    onCloneCustomFormatPress={this.onCloneCustomFormatPress}
-                  />
-                );
-              })
-            }
-
-            <Card
-              className={styles.addCustomFormat}
-              onPress={this.onEditCustomFormatPress}
-            >
-              <div className={styles.center}>
-                <Icon
-                  name={icons.ADD}
-                  size={45}
+      <PageSectionContent
+        errorMessage={translate('CustomFormatsLoadError')}
+        {...otherProps}
+      >
+        <div className={settingsCardStyles.grid}>
+          {
+            items.map((item) => {
+              return (
+                <CustomFormat
+                  key={item.id}
+                  {...item}
+                  isDeleting={isDeleting}
+                  onConfirmDeleteCustomFormat={onConfirmDeleteCustomFormat}
+                  onCloneCustomFormatPress={this.onCloneCustomFormatPress}
                 />
-              </div>
-            </Card>
-          </div>
+              );
+            })
+          }
 
-          <EditCustomFormatModalConnector
-            isOpen={this.state.isCustomFormatModalOpen}
-            tagsFromId={this.state.tagsFromId}
-            onModalClose={this.onModalClose}
+          <AddCard
+            label={translate('AddCustomFormat')}
+            onPress={this.onEditCustomFormatPress}
           />
+        </div>
 
-        </PageSectionContent>
-      </FieldSet>
+        <EditCustomFormatModalConnector
+          isOpen={this.state.isCustomFormatModalOpen}
+          tagsFromId={this.state.tagsFromId}
+          onModalClose={this.onModalClose}
+        />
+      </PageSectionContent>
     );
   }
 }

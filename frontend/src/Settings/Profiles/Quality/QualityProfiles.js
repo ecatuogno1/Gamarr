@@ -1,98 +1,68 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import Card from 'Components/Card';
-import FieldSet from 'Components/FieldSet';
-import Icon from 'Components/Icon';
+import React, { useCallback, useState } from 'react';
 import PageSectionContent from 'Components/Page/PageSectionContent';
-import { icons } from 'Helpers/Props';
+import AddCard from 'Components/SettingsCard/AddCard';
+import settingsCardStyles from 'Components/SettingsCard/SettingsCard.css';
 import translate from 'Utilities/String/translate';
 import EditQualityProfileModalConnector from './EditQualityProfileModalConnector';
 import QualityProfile from './QualityProfile';
-import styles from './QualityProfiles.css';
 
-class QualityProfiles extends Component {
+function QualityProfiles(props) {
+  const {
+    items,
+    isDeleting,
+    onConfirmDeleteQualityProfile,
+    onCloneQualityProfilePress,
+    ...otherProps
+  } = props;
 
-  //
-  // Lifecycle
+  const [isQualityProfileModalOpen, setIsQualityProfileModalOpen] = useState(false);
 
-  constructor(props, context) {
-    super(props, context);
+  const handleCloneQualityProfilePress = useCallback((id) => {
+    onCloneQualityProfilePress(id);
+    setIsQualityProfileModalOpen(true);
+  }, [onCloneQualityProfilePress]);
 
-    this.state = {
-      isQualityProfileModalOpen: false
-    };
-  }
+  const handleAddQualityProfilePress = useCallback(() => {
+    setIsQualityProfileModalOpen(true);
+  }, []);
 
-  //
-  // Listeners
+  const handleModalClose = useCallback(() => {
+    setIsQualityProfileModalOpen(false);
+  }, []);
 
-  onCloneQualityProfilePress = (id) => {
-    this.props.onCloneQualityProfilePress(id);
-    this.setState({ isQualityProfileModalOpen: true });
-  };
+  return (
+    <PageSectionContent
+      errorMessage={translate('QualityProfilesLoadError')}
+      {...otherProps}
+    >
+      <div className={settingsCardStyles.grid}>
+        {
+          items.map((item) => {
+            return (
+              <QualityProfile
+                key={item.id}
+                {...item}
+                isDeleting={isDeleting}
+                onConfirmDeleteQualityProfile={onConfirmDeleteQualityProfile}
+                onCloneQualityProfilePress={handleCloneQualityProfilePress}
+              />
+            );
+          })
+        }
 
-  onEditQualityProfilePress = () => {
-    this.setState({ isQualityProfileModalOpen: true });
-  };
+        <AddCard
+          label={translate('AddQualityProfile')}
+          onPress={handleAddQualityProfilePress}
+        />
+      </div>
 
-  onModalClose = () => {
-    this.setState({ isQualityProfileModalOpen: false });
-  };
-
-  //
-  // Render
-
-  render() {
-    const {
-      items,
-      isDeleting,
-      onConfirmDeleteQualityProfile,
-      onCloneQualityProfilePress,
-      ...otherProps
-    } = this.props;
-
-    return (
-      <FieldSet legend={translate('QualityProfiles')}>
-        <PageSectionContent
-          errorMessage={translate('QualityProfilesLoadError')}
-          {...otherProps}
-        >
-          <div className={styles.qualityProfiles}>
-            {
-              items.map((item) => {
-                return (
-                  <QualityProfile
-                    key={item.id}
-                    {...item}
-                    isDeleting={isDeleting}
-                    onConfirmDeleteQualityProfile={onConfirmDeleteQualityProfile}
-                    onCloneQualityProfilePress={this.onCloneQualityProfilePress}
-                  />
-                );
-              })
-            }
-
-            <Card
-              className={styles.addQualityProfile}
-              onPress={this.onEditQualityProfilePress}
-            >
-              <div className={styles.center}>
-                <Icon
-                  name={icons.ADD}
-                  size={45}
-                />
-              </div>
-            </Card>
-          </div>
-
-          <EditQualityProfileModalConnector
-            isOpen={this.state.isQualityProfileModalOpen}
-            onModalClose={this.onModalClose}
-          />
-        </PageSectionContent>
-      </FieldSet>
-    );
-  }
+      <EditQualityProfileModalConnector
+        isOpen={isQualityProfileModalOpen}
+        onModalClose={handleModalClose}
+      />
+    </PageSectionContent>
+  );
 }
 
 QualityProfiles.propTypes = {

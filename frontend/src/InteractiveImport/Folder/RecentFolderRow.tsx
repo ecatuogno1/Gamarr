@@ -68,7 +68,8 @@ function RecentFolderRow({
               : translate('FavoriteFolderAdd')
           }
           kind={isFavorite ? 'danger' : 'default'}
-          name={isFavorite ? icons.HEART : icons.HEART_OUTLINE}
+          name={icons.HEART}
+          filled={isFavorite}
           onPress={handleFavoritePress}
         />
 

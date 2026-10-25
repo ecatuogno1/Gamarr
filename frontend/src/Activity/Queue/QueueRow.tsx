@@ -195,7 +195,7 @@ function QueueRow(props: QueueRowProps) {
                   platform={game.platform}
                 />
               ) : (
-                title
+                <span className={styles.unmatchedTitle}>{title}</span>
               )}
             </TableRowCell>
           );
@@ -313,6 +313,7 @@ function QueueRow(props: QueueRowProps) {
               {showInteractiveImport ? (
                 <IconButton
                   name={icons.INTERACTIVE}
+                  aria-label={translate('InteractiveImport')}
                   onPress={handleInteractiveImportPress}
                 />
               ) : null}

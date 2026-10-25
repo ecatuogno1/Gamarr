@@ -1,11 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AutoTaggingAppState } from 'App/State/SettingsAppState';
-import Card from 'Components/Card';
-import FieldSet from 'Components/FieldSet';
-import Icon from 'Components/Icon';
 import PageSectionContent from 'Components/Page/PageSectionContent';
-import { icons } from 'Helpers/Props';
+import AddCard from 'Components/SettingsCard/AddCard';
+import settingsCardStyles from 'Components/SettingsCard/SettingsCard.css';
 import { fetchRootFolders } from 'Store/Actions/rootFolderActions';
 import {
   cloneAutoTagging,
@@ -19,7 +17,6 @@ import sortByProp from 'Utilities/Array/sortByProp';
 import translate from 'Utilities/String/translate';
 import AutoTagging from './AutoTagging';
 import EditAutoTaggingModal from './EditAutoTaggingModal';
-import styles from './AutoTaggings.css';
 
 export default function AutoTaggings() {
   const { error, items, isDeleting, isFetching, isPopulated } = useSelector(
@@ -65,40 +62,34 @@ export default function AutoTaggings() {
   }, [dispatch]);
 
   return (
-    <FieldSet legend={translate('AutoTagging')}>
-      <PageSectionContent
-        errorMessage={translate('AutoTaggingLoadError')}
-        error={error}
-        isFetching={isFetching}
-        isPopulated={isPopulated}
-      >
-        <div className={styles.autoTaggings}>
-          {items.map((item) => {
-            return (
-              <AutoTagging
-                key={item.id}
-                {...item}
-                isDeleting={isDeleting}
-                tagList={tagList}
-                onConfirmDeleteAutoTagging={onConfirmDelete}
-                onCloneAutoTaggingPress={onClonePress}
-              />
-            );
-          })}
+    <PageSectionContent
+      errorMessage={translate('AutoTaggingLoadError')}
+      error={error}
+      isFetching={isFetching}
+      isPopulated={isPopulated}
+    >
+      <div className={settingsCardStyles.grid}>
+        {items.map((item) => {
+          return (
+            <AutoTagging
+              key={item.id}
+              {...item}
+              isDeleting={isDeleting}
+              tagList={tagList}
+              onConfirmDeleteAutoTagging={onConfirmDelete}
+              onCloneAutoTaggingPress={onClonePress}
+            />
+          );
+        })}
 
-          <Card className={styles.addAutoTagging} onPress={onEditPress}>
-            <div className={styles.center}>
-              <Icon name={icons.ADD} size={45} />
-            </div>
-          </Card>
-        </div>
+        <AddCard label={translate('AddAutoTag')} onPress={onEditPress} />
+      </div>
 
-        <EditAutoTaggingModal
-          isOpen={isEditModalOpen}
-          tagsFromId={tagsFromId}
-          onModalClose={onEditModalClose}
-        />
-      </PageSectionContent>
-    </FieldSet>
+      <EditAutoTaggingModal
+        isOpen={isEditModalOpen}
+        tagsFromId={tagsFromId}
+        onModalClose={onEditModalClose}
+      />
+    </PageSectionContent>
   );
 }

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import CheckInput from 'Components/Form/CheckInput';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
 import SpinnerButton from 'Components/Link/SpinnerButton';
 import PageContentFooter from 'Components/Page/PageContentFooter';
 import { inputTypes, kinds } from 'Helpers/Props';
@@ -136,112 +136,113 @@ class DiscoverGameFooter extends Component {
     } = this.state;
 
     return (
-      <PageContentFooter>
-        <div className={styles.inputContainer}>
-          <DiscoverGameFooterLabel
-            label={translate('MonitorGame')}
-            isSaving={isAdding}
-          />
+      <PageContentFooter className={styles.footerShell}>
+        <div className={styles.settingsBar}>
+          <div className={styles.settingsContent}>
+            <div className={styles.setting}>
+              <DiscoverGameFooterLabel
+                label={translate('MonitorGame')}
+                isSaving={isAdding}
+              />
 
-          <FormInputGroup
-            type={inputTypes.SELECT}
-            name="monitor"
-            value={monitor}
-            values={monitorOptions}
-            isDisabled={!selectedCount}
-            onChange={onInputChange}
-          />
+              <FormInput
+                type={inputTypes.SELECT}
+                name="monitor"
+                value={monitor}
+                values={monitorOptions}
+                isDisabled={!selectedCount}
+                onChange={onInputChange}
+              />
+            </div>
+
+            <div className={styles.setting}>
+              <DiscoverGameFooterLabel
+                label={translate('QualityProfile')}
+                isSaving={isAdding}
+              />
+
+              <FormInput
+                type={inputTypes.QUALITY_PROFILE_SELECT}
+                name="qualityProfileId"
+                value={qualityProfileId}
+                isDisabled={!selectedCount}
+                onChange={onInputChange}
+              />
+            </div>
+
+            <div className={styles.setting}>
+              <DiscoverGameFooterLabel
+                label={translate('MinimumAvailability')}
+                isSaving={isAdding}
+              />
+
+              <FormInput
+                type={inputTypes.AVAILABILITY_SELECT}
+                name="minimumAvailability"
+                value={minimumAvailability}
+                isDisabled={!selectedCount}
+                onChange={onInputChange}
+              />
+            </div>
+
+            <div className={styles.setting}>
+              <DiscoverGameFooterLabel
+                label={translate('RootFolder')}
+                isSaving={isAdding}
+              />
+
+              <FormInput
+                type={inputTypes.ROOT_FOLDER_SELECT}
+                name="rootFolderPath"
+                value={rootFolderPath}
+                isDisabled={!selectedCount}
+                selectedValueOptions={{ includeFreeSpace: false }}
+                onChange={onInputChange}
+              />
+            </div>
+
+            <div className={styles.checkSetting}>
+              <DiscoverGameFooterLabel
+                label={translate('SearchOnAdd')}
+                isSaving={isAdding}
+              />
+
+              <CheckInput
+                name="searchForGame"
+                isDisabled={!selectedCount}
+                value={searchForGame}
+                onChange={onInputChange}
+              />
+            </div>
+          </div>
         </div>
 
-        <div className={styles.inputContainer}>
-          <DiscoverGameFooterLabel
-            label={translate('QualityProfile')}
-            isSaving={isAdding}
-          />
-
-          <FormInputGroup
-            type={inputTypes.QUALITY_PROFILE_SELECT}
-            name="qualityProfileId"
-            value={qualityProfileId}
-            isDisabled={!selectedCount}
-            onChange={onInputChange}
-          />
-        </div>
-
-        <div className={styles.inputContainer}>
-          <DiscoverGameFooterLabel
-            label={translate('MinimumAvailability')}
-            isSaving={isAdding}
-          />
-
-          <FormInputGroup
-            type={inputTypes.AVAILABILITY_SELECT}
-            name="minimumAvailability"
-            value={minimumAvailability}
-            isDisabled={!selectedCount}
-            onChange={onInputChange}
-          />
-        </div>
-
-        <div className={styles.inputContainer}>
-          <DiscoverGameFooterLabel
-            label={translate('RootFolder')}
-            isSaving={isAdding}
-          />
-
-          <FormInputGroup
-            type={inputTypes.ROOT_FOLDER_SELECT}
-            name="rootFolderPath"
-            value={rootFolderPath}
-            isDisabled={!selectedCount}
-            selectedValueOptions={{ includeFreeSpace: false }}
-            onChange={onInputChange}
-          />
-        </div>
-
-        <div className={styles.inputContainer}>
-          <DiscoverGameFooterLabel
-            label={translate('SearchOnAdd')}
-            isSaving={isAdding}
-          />
-
-          <CheckInput
-            name="searchForGame"
-            isDisabled={!selectedCount}
-            value={searchForGame}
-            onChange={onInputChange}
-          />
-        </div>
-
-        <div className={styles.buttonContainer}>
-          <div className={styles.buttonContainerContent}>
-            <DiscoverGameFooterLabel
-              label={translate('GamesSelectedInterp', { count: selectedCount })}
-              isSaving={false}
-            />
+        <div className={styles.footerContent}>
+          <div className={styles.footerRow}>
+            <span className={styles.selectionLabel}>
+              {translate('GamesSelectedInterp', { count: selectedCount })}
+            </span>
 
             <div className={styles.buttons}>
-              <div>
-                <SpinnerButton
-                  className={styles.addSelectedButton}
-                  kind={kinds.PRIMARY}
-                  isSpinning={isAdding}
-                  isDisabled={!selectedCount || isAdding}
-                  onPress={this.onAddGamesPress}
-                >
-                  {translate('AddGames')}
-                </SpinnerButton>
+              <SpinnerButton
+                className={styles.excludeSelectedButton}
+                kind={kinds.DANGER}
+                isSpinning={isExcluding}
+                isDisabled={!selectedCount || isExcluding}
+                onPress={this.props.onExcludeGamesPress}
+              >
+                {translate('AddExclusion')}
+              </SpinnerButton>
 
-                <SpinnerButton
-                  className={styles.excludeSelectedButton}
-                  kind={kinds.DANGER}
-                  isSpinning={isExcluding}
-                  isDisabled={!selectedCount || isExcluding}
-                  onPress={this.props.onExcludeGamesPress}
-                >
-                  {translate('AddExclusion')}
-                </SpinnerButton>
-              </div>
+              <SpinnerButton
+                className={styles.addSelectedButton}
+                kind={kinds.PRIMARY}
+                isSpinning={isAdding}
+                isDisabled={!selectedCount || isAdding}
+                onPress={this.onAddGamesPress}
+              >
+                {translate('AddGames')}
+              </SpinnerButton>
             </div>
           </div>
         </div>

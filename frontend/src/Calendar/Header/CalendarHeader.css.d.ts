@@ -2,11 +2,14 @@
 // Please do not change this file!
 interface CssExports {
   'header': string;
+  'isDisabled': string;
   'loading': string;
+  'navButton': string;
   'navigationButtons': string;
   'titleDesktop': string;
   'titleMobile': string;
   'todayButton': string;
+  'viewButton': string;
   'viewButtonsContainer': string;
   'viewMenu': string;
 }

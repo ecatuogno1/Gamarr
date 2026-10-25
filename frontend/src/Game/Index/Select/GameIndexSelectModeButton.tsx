@@ -5,12 +5,13 @@ import PageToolbarButton, {
 } from 'Components/Page/Toolbar/PageToolbarButton';
 
 interface GameIndexSelectModeButtonProps extends PageToolbarButtonProps {
+  overflowComponent?: React.ElementType;
   isSelectMode: boolean;
   onPress: () => void;
 }
 
 function GameIndexSelectModeButton(props: GameIndexSelectModeButtonProps) {
-  const { label, iconName, isSelectMode, overflowComponent, onPress } = props;
+  const { label, iconName, isSelectMode, onPress } = props;
   const [, selectDispatch] = useSelect();
 
   const onPressWrapper = useCallback(() => {
@@ -27,7 +28,6 @@ function GameIndexSelectModeButton(props: GameIndexSelectModeButtonProps) {
     <PageToolbarButton
       label={label}
       iconName={iconName}
-      overflowComponent={overflowComponent}
       onPress={onPressWrapper}
     />
   );

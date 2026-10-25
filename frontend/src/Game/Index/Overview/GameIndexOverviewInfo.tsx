@@ -1,200 +1,149 @@
-import React, { useMemo } from 'react';
+import classNames from 'classnames';
+import React, { forwardRef, ReactNode } from 'react';
 import { useSelector } from 'react-redux';
-import { IconName } from 'Components/Icon';
-import { icons } from 'Helpers/Props';
+import createSortedTagsSelector from 'Store/Selectors/createSortedTagsSelector';
 import createUISettingsSelector from 'Store/Selectors/createUISettingsSelector';
-import dimensions from 'Styles/Variables/dimensions';
 import QualityProfile from 'typings/QualityProfile';
-import UiSettings from 'typings/Settings/UiSettings';
 import formatDateTime from 'Utilities/Date/formatDateTime';
 import getRelativeDate from 'Utilities/Date/getRelativeDate';
 import formatBytes from 'Utilities/Number/formatBytes';
-import GameIndexOverviewInfoRow from './GameIndexOverviewInfoRow';
+import translate from 'Utilities/String/translate';
 import styles from './GameIndexOverviewInfo.css';
 
-interface RowProps {
-  name: string;
-  showProp: string;
-  valueProp: string;
-}
-
-interface RowInfoProps {
-  title: string;
-  iconName: IconName;
-  label: string;
-}
-
 interface GameIndexOverviewInfoProps {
-  height: number;
   showPlatform: boolean;
   showMonitored: boolean;
   showQualityProfile: boolean;
   showAdded: boolean;
   showPath: boolean;
   showSizeOnDisk: boolean;
+  showTags: boolean;
   monitored: boolean;
   platform?: string;
   qualityProfile?: Pick<QualityProfile, 'name'>;
   added?: string;
   path: string;
   sizeOnDisk?: number;
+  tags: number[];
   sortKey: string;
 }
 
-const infoRowHeight = parseInt(dimensions.gameIndexOverviewInfoRowHeight);
+const selectSortedTags = createSortedTagsSelector();
 
-const rows = [
-  {
-    name: 'monitored',
-    showProp: 'showMonitored',
-    valueProp: 'monitored',
-  },
-  {
-    name: 'platform',
-    showProp: 'showPlatform',
-    valueProp: 'platform',
-  },
-  {
-    name: 'qualityProfileId',
-    showProp: 'showQualityProfile',
-    valueProp: 'qualityProfile',
-  },
-  {
-    name: 'added',
-    showProp: 'showAdded',
-    valueProp: 'added',
-  },
-  {
-    name: 'path',
-    showProp: 'showPath',
-    valueProp: 'path',
-  },
-  {
-    name: 'sizeOnDisk',
-    showProp: 'showSizeOnDisk',
-    valueProp: 'sizeOnDisk',
-  },
-];
+const GameIndexOverviewInfo = forwardRef<
+  HTMLDivElement,
+  GameIndexOverviewInfoProps
+>((props, ref) => {
+  const {
+    showPlatform,
+    showMonitored,
+    showQualityProfile,
+    showAdded,
+    showPath,
+    showSizeOnDisk,
+    showTags,
+    monitored,
+    platform,
+    qualityProfile,
+    added,
+    path,
+    sizeOnDisk = 0,
+    tags,
+    sortKey,
+  } = props;
 
-function getInfoRowProps(
-  row: RowProps,
-  props: GameIndexOverviewInfoProps,
-  uiSettings: UiSettings
-): RowInfoProps | null {
-  const { name } = row;
+  const { shortDateFormat, showRelativeDates, longDateFormat, timeFormat } =
+    useSelector(createUISettingsSelector());
+  const tagList = useSelector(selectSortedTags);
 
-  if (name === 'monitored') {
-    const monitoredText = props.monitored ? 'Monitored' : 'Unmonitored';
+  const chips: ReactNode[] = [];
 
-    return {
-      title: monitoredText,
-      iconName: props.monitored ? icons.MONITORED : icons.UNMONITORED,
-      label: monitoredText,
-    };
+  if (platform && (showPlatform || sortKey === 'platform')) {
+    chips.push(
+      <span key="platform" className={styles.chip}>
+        {platform}
+      </span>
+    );
   }
 
-  if (name === 'platform') {
-    return {
-      title: 'Platform',
-      iconName: icons.STUDIO,
-      label: props.platform ?? '',
-    };
+  if (showMonitored || sortKey === 'monitored') {
+    chips.push(
+      <span key="monitored" className={styles.chip}>
+        {monitored ? translate('Monitored') : translate('Unmonitored')}
+      </span>
+    );
   }
 
-  if (name === 'qualityProfileId' && !!props.qualityProfile?.name) {
-    return {
-      title: 'Quality Profile',
-      iconName: icons.PROFILE,
-      label: props.qualityProfile.name,
-    };
+  if (
+    qualityProfile?.name &&
+    (showQualityProfile || sortKey === 'qualityProfileId')
+  ) {
+    chips.push(
+      <span key="qualityProfile" className={styles.chip}>
+        {qualityProfile.name}
+      </span>
+    );
   }
 
-  if (name === 'added') {
-    const added = props.added;
-    const { showRelativeDates, shortDateFormat, longDateFormat, timeFormat } =
-      uiSettings;
-
-    return {
-      title: `Added: ${formatDateTime(added, longDateFormat, timeFormat)}`,
-      iconName: icons.ADD,
-      label: getRelativeDate({
-        date: added,
-        shortDateFormat,
-        showRelativeDates,
-        timeFormat,
-        timeForToday: true,
-      }),
-    };
+  if (added && (showAdded || sortKey === 'added')) {
+    chips.push(
+      <span
+        key="added"
+        className={styles.chip}
+        title={formatDateTime(added, longDateFormat, timeFormat)}
+      >
+        <span className={styles.dateLabel}>{translate('Added')}</span>
+        {getRelativeDate({
+          date: added,
+          shortDateFormat,
+          showRelativeDates,
+          timeFormat,
+          timeForToday: true,
+        })}
+      </span>
+    );
   }
 
-  if (name === 'path') {
-    return {
-      title: 'Path',
-      iconName: icons.FOLDER,
-      label: props.path,
-    };
+  if (sizeOnDisk > 0 && (showSizeOnDisk || sortKey === 'sizeOnDisk')) {
+    chips.push(
+      <span key="sizeOnDisk" className={styles.chip}>
+        {formatBytes(sizeOnDisk)}
+      </span>
+    );
   }
 
-  if (name === 'sizeOnDisk') {
-    const { sizeOnDisk = 0 } = props;
-
-    return {
-      title: 'Size on Disk',
-      iconName: icons.DRIVE,
-      label: formatBytes(sizeOnDisk),
-    };
+  if (showTags && tags.length > 0) {
+    tagList
+      .filter((tag) => tags.includes(tag.id))
+      .forEach((tag) => {
+        chips.push(
+          <span
+            key={`tag-${tag.id}`}
+            className={classNames(styles.chip, styles.chipTag)}
+          >
+            {tag.label}
+          </span>
+        );
+      });
   }
 
-  return null;
-}
+  if (path && (showPath || sortKey === 'path')) {
+    chips.push(
+      <span key="path" className={styles.chipPath} title={path}>
+        {path}
+      </span>
+    );
+  }
 
-function GameIndexOverviewInfo(props: GameIndexOverviewInfoProps) {
-  const height = props.height;
-
-  const uiSettings = useSelector(createUISettingsSelector());
-
-  let shownRows = 1;
-  const maxRows = Math.floor(height / (infoRowHeight + 4));
-
-  const rowInfo = useMemo(() => {
-    return rows.map((row) => {
-      const { name, showProp, valueProp } = row;
-
-      const isVisible =
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore ts(7053)
-        props[valueProp] != null && (props[showProp] || props.sortKey === name);
-
-      return {
-        ...row,
-        isVisible,
-      };
-    });
-  }, [props]);
+  if (chips.length === 0) {
+    return null;
+  }
 
   return (
-    <div className={styles.infos}>
-      {rowInfo.map((row) => {
-        if (!row.isVisible) {
-          return null;
-        }
-
-        if (shownRows >= maxRows) {
-          return null;
-        }
-
-        shownRows++;
-
-        const infoRowProps = getInfoRowProps(row, props, uiSettings);
-
-        if (infoRowProps == null) {
-          return null;
-        }
-
-        return <GameIndexOverviewInfoRow key={row.name} {...infoRowProps} />;
-      })}
+    <div ref={ref} className={styles.chipStrip}>
+      {chips}
     </div>
   );
-}
+});
 
 export default GameIndexOverviewInfo;

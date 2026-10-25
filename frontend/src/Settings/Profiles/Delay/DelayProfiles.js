@@ -1,12 +1,10 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import FieldSet from 'Components/FieldSet';
 import Icon from 'Components/Icon';
 import Link from 'Components/Link/Link';
 import Measure from 'Components/Measure';
 import PageSectionContent from 'Components/Page/PageSectionContent';
-import Scroller from 'Components/Scroller/Scroller';
-import { icons, scrollDirections } from 'Helpers/Props';
+import { icons } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import DelayProfile from './DelayProfile';
 import DelayProfileDragPreview from './DelayProfileDragPreview';
@@ -67,90 +65,74 @@ class DelayProfiles extends Component {
     const isDraggingDown = isDragging && dropIndex > dragIndex;
 
     return (
-      <Measure onMeasure={this.onMeasure}>
-        <FieldSet legend={translate('DelayProfiles')}>
-          <PageSectionContent
-            errorMessage={translate('DelayProfilesLoadError')}
-            {...otherProps}
-          >
-            <Scroller
-              className={styles.horizontalScroll}
-              scrollDirection={
-                scrollDirections.HORIZONTAL
-              }
-              autoFocus={false}
-            >
-              <div>
-                <div className={styles.delayProfilesHeader}>
-                  <div className={styles.column}>
-                    {translate('PreferredProtocol')}
-                  </div>
-                  <div className={styles.column}>
-                    {translate('UsenetDelay')}
-                  </div>
-                  <div className={styles.column}>
-                    {translate('TorrentDelay')}
-                  </div>
-                  <div className={styles.tags}>
-                    {translate('Tags')}
-                  </div>
-                </div>
+      <PageSectionContent
+        errorMessage={translate('DelayProfilesLoadError')}
+        {...otherProps}
+      >
+        <div className={styles.headerRow}>
+          <div className={styles.colDrag} />
 
-                <div className={styles.delayProfiles}>
-                  {
-                    items.map((item, index) => {
-                      return (
-                        <DelayProfileDragSource
-                          key={item.id}
-                          tagList={tagList}
-                          {...item}
-                          {...otherProps}
-                          index={index}
-                          isDragging={isDragging}
-                          isDraggingUp={isDraggingUp}
-                          isDraggingDown={isDraggingDown}
-                          onConfirmDeleteDelayProfile={onConfirmDeleteDelayProfile}
-                        />
-                      );
-                    })
-                  }
+          <div className={styles.colScope}>{translate('Tags')}</div>
 
-                  <DelayProfileDragPreview
-                    width={width}
+          <div className={styles.colProto}>{translate('PreferredProtocol')}</div>
+
+          <div className={styles.colUsenet}>{translate('UsenetDelay')}</div>
+
+          <div className={styles.colTorrent}>{translate('TorrentDelay')}</div>
+
+          <div className={styles.colActions} />
+        </div>
+
+        <Measure onMeasure={this.onMeasure}>
+          <div className={styles.delayList}>
+            {
+              items.map((item, index) => {
+                return (
+                  <DelayProfileDragSource
+                    key={item.id}
+                    tagList={tagList}
+                    {...item}
+                    {...otherProps}
+                    index={index}
+                    isDragging={isDragging}
+                    isDraggingUp={isDraggingUp}
+                    isDraggingDown={isDraggingDown}
+                    onConfirmDeleteDelayProfile={onConfirmDeleteDelayProfile}
                   />
-                </div>
+                );
+              })
+            }
 
-                {
-                  defaultProfile ?
-                    <div>
-                      <DelayProfile
-                        tagList={tagList}
-                        isDragging={false}
-                        onConfirmDeleteDelayProfile={onConfirmDeleteDelayProfile}
-                        {...defaultProfile}
-                      />
-                    </div> :
-                    null
-                }
-              </div>
-            </Scroller>
-
-            <div className={styles.addDelayProfile}>
-              <Link
-                className={styles.addButton}
-                onPress={this.onAddDelayProfilePress}
-              >
-                <Icon name={icons.ADD} />
-              </Link>
-            </div>
-
-            <EditDelayProfileModalConnector
-              isOpen={isAddDelayProfileModalOpen}
-              onModalClose={this.onModalClose}
+            <DelayProfileDragPreview
+              width={width}
             />
-          </PageSectionContent>
-        </FieldSet>
-      </Measure>
+
+            {
+              defaultProfile ?
+                <DelayProfile
+                  tagList={tagList}
+                  isDragging={false}
+                  onConfirmDeleteDelayProfile={onConfirmDeleteDelayProfile}
+                  {...defaultProfile}
+                /> :
+                null
+            }
+
+            <Link
+              className={styles.addRow}
+              onPress={this.onAddDelayProfilePress}
+            >
+              <Icon name={icons.ADD} size={12} />
+              {translate('AddDelayProfile')}
+            </Link>
+          </div>
+        </Measure>
+
+        <EditDelayProfileModalConnector
+          isOpen={isAddDelayProfileModalOpen}
+          onModalClose={this.onModalClose}
+        />
+      </PageSectionContent>
     );
   }
 }

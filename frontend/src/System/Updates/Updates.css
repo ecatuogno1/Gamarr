@@ -4,7 +4,7 @@
 }
 
 .upToDateIcon {
-  color: #37bc9b;
+  color: var(--successColor);
   font-size: 30px;
 }
 
@@ -15,7 +15,7 @@
 }
 
 .loading {
-  composes: loading from '~Components/Loading/LoadingIndicator.css';
+  composes: loading from 'Components/Loading/LoadingIndicator.css';
 
   margin-top: 5px;
   margin-left: auto;
@@ -30,11 +30,12 @@
   align-items: center;
   margin-bottom: 10px;
   padding-bottom: 5px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--borderColor);
 }
 
 .version {
-  font-size: 21px;
+  font-weight: 600;
+  font-size: var(--largeFontSize);
 }
 
 .space {
@@ -46,7 +47,7 @@
 }
 
 .label {
-  composes: label from '~Components/Label.css';
+  composes: label from 'Components/Label.css';
 
   margin-left: 10px;
   font-size: 14px;

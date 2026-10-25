@@ -35,6 +35,20 @@ namespace NzbDrone.Core.Test.Configuration
         }
 
         [Test]
+        public void header_color_should_default_to_full_color()
+        {
+            Subject.HeaderColor.Should().Be("fullColor");
+        }
+
+        [Test]
+        public void header_color_should_be_saved()
+        {
+            Subject.HeaderColor = "gradient";
+
+            AssertUpsert("HeaderColor", "gradient");
+        }
+
+        [Test]
         public void get_value_with_persist_should_store_default_value()
         {
             var salt = Subject.HmacSalt;

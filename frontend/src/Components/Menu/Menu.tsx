@@ -1,40 +1,23 @@
+import {
+  autoUpdate,
+  flip,
+  FloatingPortal,
+  shift,
+  useClick,
+  useDismiss,
+  useFloating,
+  useInteractions,
+} from '@floating-ui/react';
 import React, {
   ReactElement,
   useCallback,
   useEffect,
   useId,
-  useRef,
+  useMemo,
   useState,
 } from 'react';
-import { Manager, Popper, PopperProps, Reference } from 'react-popper';
-import Portal from 'Components/Portal';
+import MenuContext from './MenuContext';
 import styles from './Menu.css';
-
-const sharedPopperOptions = {
-  modifiers: {
-    preventOverflow: {
-      padding: 0,
-    },
-    flip: {
-      padding: 0,
-    },
-  },
-};
-
-const popperOptions: {
-  right: Partial<PopperProps>;
-  left: Partial<PopperProps>;
-} = {
-  right: {
-    ...sharedPopperOptions,
-    placement: 'bottom-end',
-  },
-
-  left: {
-    ...sharedPopperOptions,
-    placement: 'bottom-start',
-  },
-};
 
 interface MenuProps {
   className?: string;
@@ -49,9 +32,7 @@ function Menu({
   alignMenu = 'left',
   enforceMaxHeight = true,
 }: MenuProps) {
-  const updater = useRef<(() => void) | null>(null);
   const menuButtonId = useId();
-  const menuContentId = useId();
   const [maxHeight, setMaxHeight] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -70,45 +51,14 @@ function Menu({
     setMaxHeight(height);
   }, [menuButtonId]);
 
-  const handleWindowClick = useCallback(
-    (event: MouseEvent) => {
-      const menuButton = document.getElementById(menuButtonId);
+  const handleMenuButtonPress = useCallback(() => {
+    setIsMenuOpen((isOpen) => !isOpen);
+  }, []);
 
-      if (!menuButton) {
-        return;
-      }
-
-      if (!menuButton.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    },
-    [menuButtonId]
-  );
-
-  const handleTouchStart = useCallback(
-    (event: TouchEvent) => {
-      const menuButton = document.getElementById(menuButtonId);
-      const menuContent = document.getElementById(menuContentId);
-
-      if (!menuButton || !menuContent) {
-        return;
-      }
-
-      if (event.targetTouches.length !== 1) {
-        return;
-      }
-
-      const target = event.targetTouches[0].target;
-
-      if (
-        !menuButton.contains(target as Node) &&
-        !menuContent.contains(target as Node)
-      ) {
-        setIsMenuOpen(false);
-      }
-    },
-    [menuButtonId, menuContentId]
-  );
+  const childrenArray = React.Children.toArray(children);
+  const button = React.cloneElement(childrenArray[0] as ReactElement, {
+    onPress: handleMenuButtonPress,
+  });
 
   const handleWindowResize = useCallback(() => {
     updateMaxHeight();
@@ -120,15 +70,6 @@ function Menu({
     }
   }, [isMenuOpen, updateMaxHeight]);
 
-  const handleMenuButtonPress = useCallback(() => {
-    setIsMenuOpen((isOpen) => !isOpen);
-  }, []);
-
-  const childrenArray = React.Children.toArray(children);
-  const button = React.cloneElement(childrenArray[0] as ReactElement, {
-    onPress: handleMenuButtonPress,
-  });
-
   useEffect(() => {
     if (enforceMaxHeight) {
       updateMaxHeight();
@@ -136,16 +77,8 @@ function Menu({
   }, [enforceMaxHeight, updateMaxHeight]);
 
   useEffect(() => {
-    if (updater.current && isMenuOpen) {
-      updater.current();
-    }
-  }, [isMenuOpen]);
-
-  useEffect(() => {
     // Listen to resize events on the window and scroll events
     // on all elements to ensure the menu is the best size possible.
-    // Listen for click events on the window to support closing the
-    // menu on clicks outside.
 
     if (!isMenuOpen) {
       return;
@@ -153,52 +86,73 @@ function Menu({
 
     window.addEventListener('resize', handleWindowResize);
     window.addEventListener('scroll', handleWindowScroll, { capture: true });
-    window.addEventListener('click', handleWindowClick);
-    window.addEventListener('touchstart', handleTouchStart);
 
     return () => {
       window.removeEventListener('resize', handleWindowResize);
       window.removeEventListener('scroll', handleWindowScroll, {
         capture: true,
       });
-      window.removeEventListener('click', handleWindowClick);
-      window.removeEventListener('touchstart', handleTouchStart);
     };
-  }, [
-    isMenuOpen,
-    handleWindowResize,
-    handleWindowScroll,
-    handleWindowClick,
-    handleTouchStart,
+  }, [isMenuOpen, handleWindowResize, handleWindowScroll]);
+
+  const { refs, context, floatingStyles } = useFloating({
+    middleware: [
+      flip({
+        crossAxis: false,
+        mainAxis: true,
+      }),
+      // offset({ mainAxis: 10 }),
+      shift(),
+    ],
+    open: isMenuOpen,
+    placement: alignMenu === 'left' ? 'bottom-start' : 'bottom-end',
+    whileElementsMounted: autoUpdate,
+    onOpenChange: setIsMenuOpen,
+  });
+
+  const click = useClick(context);
+  const dismiss = useDismiss(context, {
+    outsidePressEvent: 'click',
+  });
+
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    click,
+    dismiss,
   ]);
 
+  const closeMenu = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
+
+  const menuContext = useMemo(() => ({ closeMenu }), [closeMenu]);
+
   return (
-    <Manager>
-      <Reference>
-        {({ ref }) => (
-          <div ref={ref} id={menuButtonId} className={className}>
-            {button}
-          </div>
-        )}
-      </Reference>
+    <>
+      <div
+        ref={refs.setReference}
+        {...getReferenceProps()}
+        id={menuButtonId}
+        className={className}
+      >
+        {button}
+      </div>
 
-      <Portal>
-        <Popper {...popperOptions[alignMenu]}>
-          {({ ref, style, scheduleUpdate }) => {
-            updater.current = scheduleUpdate;
-
-            return React.cloneElement(childrenArray[1] as ReactElement, {
-              forwardedRef: ref,
+      {isMenuOpen ? (
+        <FloatingPortal id="portal-root">
+          <MenuContext.Provider value={menuContext}>
+            {React.cloneElement(childrenArray[1] as ReactElement, {
+              forwardedRef: refs.setFloating,
               style: {
-                ...style,
-                maxHeight,
+                maxHeight: enforceMaxHeight ? maxHeight : undefined,
+                ...floatingStyles,
               },
               isOpen: isMenuOpen,
-            });
-          }}
-        </Popper>
-      </Portal>
-    </Manager>
+              ...getFloatingProps(),
+            })}
+          </MenuContext.Provider>
+        </FloatingPortal>
+      ) : null}
+    </>
   );
 }
 

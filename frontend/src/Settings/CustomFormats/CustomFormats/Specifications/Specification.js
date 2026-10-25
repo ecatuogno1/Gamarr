@@ -4,7 +4,7 @@ import Card from 'Components/Card';
 import Label from 'Components/Label';
 import IconButton from 'Components/Link/IconButton';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
-import { icons, kinds } from 'Helpers/Props';
+import { icons, kinds, sizes } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 import EditSpecificationModalConnector from './EditSpecificationModal';
 import styles from './Specification.css';
@@ -68,7 +68,9 @@ class Specification extends Component {
     return (
       <Card
         className={styles.customFormat}
+        overlayClassName={styles.overlay}
         overlayContent={true}
+        aria-label={translate('EditConditionImplementation', { implementationName })}
         onPress={this.onEditSpecificationPress}
       >
         <div className={styles.nameContainer}>
@@ -76,31 +78,46 @@ class Specification extends Component {
             {name}
           </div>
 
-          <IconButton
-            className={styles.cloneButton}
-            title={translate('CloneCondition')}
-            name={icons.CLONE}
-            onPress={this.onCloneSpecificationPress}
-          />
+          <div className={styles.rightCluster}>
+            <IconButton
+              className={styles.cloneButton}
+              title={translate('CloneCondition')}
+              aria-label={translate('CloneCondition')}
+              name={icons.CLONE}
+              onPress={this.onCloneSpecificationPress}
+            />
+          </div>
         </div>
 
         <div className={styles.labels}>
-          <Label kind={kinds.DEFAULT}>
+          <Label
+            dot={false}
+            kind={kinds.DEFAULT}
+            size={sizes.MEDIUM}
+          >
             {implementationName}
           </Label>
 
           {
-            negate &&
-              <Label kind={kinds.DANGER}>
+            negate ?
+              <Label
+                kind={kinds.DANGER}
+                size={sizes.MEDIUM}
+              >
                 {translate('Negated')}
-              </Label>
+              </Label> :
+              null
           }
 
           {
-            required &&
-              <Label kind={kinds.SUCCESS}>
+            required ?
+              <Label
+                kind={kinds.SUCCESS}
+                size={sizes.MEDIUM}
+              >
                 {translate('Required')}
-              </Label>
+              </Label> :
+              null
           }
         </div>
 

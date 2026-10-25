@@ -1,16 +1,34 @@
-import React from 'react';
+import classNames from 'classnames';
+import React, { ForwardedRef, forwardRef, ReactNode } from 'react';
+import { useModalContext } from './ModalContext';
 import styles from './ModalHeader.css';
 
 interface ModalHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  children?: React.ReactNode;
+  children: ReactNode;
+  subtitle?: ReactNode;
 }
 
-function ModalHeader({ children, ...otherProps }: ModalHeaderProps) {
-  return (
-    <div className={styles.modalHeader} {...otherProps}>
-      {children}
-    </div>
-  );
-}
+const ModalHeader = forwardRef(
+  (
+    { className, children, subtitle, ...otherProps }: ModalHeaderProps,
+    ref: ForwardedRef<HTMLDivElement>
+  ) => {
+    const { headerId } = useModalContext();
+
+    return (
+      <div
+        ref={ref}
+        id={headerId}
+        className={classNames(styles.modalHeader, className)}
+        {...otherProps}
+        role="heading"
+        aria-level={2}
+      >
+        {children}
+        {subtitle ? <span className={styles.subtitle}>{subtitle}</span> : null}
+      </div>
+    );
+  }
+);
 
 export default ModalHeader;

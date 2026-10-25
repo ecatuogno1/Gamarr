@@ -3,11 +3,11 @@
 interface CssExports {
   'checkContainer': string;
   'column': string;
+  'columnContainer': string;
   'dragHandle': string;
-  'dragIcon': string;
+  'hidden': string;
   'isDragging': string;
   'label': string;
-  'notDragable': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

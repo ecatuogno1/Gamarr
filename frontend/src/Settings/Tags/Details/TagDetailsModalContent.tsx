@@ -3,13 +3,16 @@ import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import ModelBase from 'App/ModelBase';
 import AppState from 'App/State/AppState';
-import FieldSet from 'Components/FieldSet';
 import Label from 'Components/Label';
 import Button from 'Components/Link/Button';
+import MiddleTruncate from 'Components/MiddleTruncate';
 import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
+import ModalSection from 'Components/ModalSection';
+import settingsCardStyles from 'Components/SettingsCard/SettingsCard.css';
+import GameTitleLink from 'Game/GameTitleLink';
 import { kinds } from 'Helpers/Props';
 import createAllGamesSelector from 'Store/Selectors/createAllGamesSelector';
 import translate from 'Utilities/String/translate';
@@ -140,18 +143,27 @@ function TagDetailsModalContent({
       <ModalHeader>{translate('TagDetails', { label })}</ModalHeader>
 
       <ModalBody>
-        {!isTagUsed && <div>{translate('TagIsNotUsedAndCanBeDeleted')}</div>}
+        {isTagUsed ? null : (
+          <div>{translate('TagIsNotUsedAndCanBeDeleted')}</div>
+        )}
 
         {games.length ? (
-          <FieldSet legend={translate('Games')}>
+          <ModalSection title={translate('Games')}>
             {games.map((item) => {
-              return <div key={item.id}>{item.title}</div>;
+              return (
+                <div key={item.id}>
+                  <GameTitleLink
+                    titleSlug={item.titleSlug}
+                    title={item.title}
+                  />
+                </div>
+              );
             })}
-          </FieldSet>
+          </ModalSection>
         ) : null}
 
         {delayProfiles.length ? (
-          <FieldSet legend={translate('DelayProfile')}>
+          <ModalSection title={translate('DelayProfile')}>
             {delayProfiles.map((item) => {
               const {
                 id,
@@ -173,35 +185,39 @@ function TagDetailsModalContent({
                 />
               );
             })}
-          </FieldSet>
+          </ModalSection>
         ) : null}
 
         {notifications.length ? (
-          <FieldSet legend={translate('Connections')}>
+          <ModalSection title={translate('Connections')}>
             {notifications.map((item) => {
               return <div key={item.id}>{item.name}</div>;
             })}
-          </FieldSet>
+          </ModalSection>
         ) : null}
 
         {importLists.length ? (
-          <FieldSet legend={translate('ImportLists')}>
+          <ModalSection title={translate('ImportLists')}>
             {importLists.map((item) => {
               return <div key={item.id}>{item.name}</div>;
             })}
-          </FieldSet>
+          </ModalSection>
         ) : null}
 
         {releaseProfiles.length ? (
-          <FieldSet legend={translate('ReleaseProfiles')}>
+          <ModalSection title={translate('ReleaseProfiles')}>
             {releaseProfiles.map((item) => {
               return (
                 <div key={item.id} className={styles.restriction}>
                   <div>
                     {item.required.map((r) => {
                       return (
-                        <Label key={r} kind={kinds.SUCCESS}>
-                          {r}
+                        <Label
+                          key={r}
+                          className={settingsCardStyles.truncatedLabel}
+                          kind={kinds.SUCCESS}
+                        >
+                          <MiddleTruncate text={r} />
                         </Label>
                       );
                     })}
@@ -210,8 +226,12 @@ function TagDetailsModalContent({
                   <div>
                     {item.ignored.map((i) => {
                       return (
-                        <Label key={i} kind={kinds.DANGER}>
-                          {i}
+                        <Label
+                          key={i}
+                          className={settingsCardStyles.truncatedLabel}
+                          kind={kinds.DANGER}
+                        >
+                          <MiddleTruncate text={i} />
                         </Label>
                       );
                     })}
@@ -219,31 +239,31 @@ function TagDetailsModalContent({
                 </div>
               );
             })}
-          </FieldSet>
+          </ModalSection>
         ) : null}
 
         {indexers.length ? (
-          <FieldSet legend={translate('Indexers')}>
+          <ModalSection title={translate('Indexers')}>
             {indexers.map((item) => {
               return <div key={item.id}>{item.name}</div>;
             })}
-          </FieldSet>
+          </ModalSection>
         ) : null}
 
         {downloadClients.length ? (
-          <FieldSet legend={translate('DownloadClients')}>
+          <ModalSection title={translate('DownloadClients')}>
             {downloadClients.map((item) => {
               return <div key={item.id}>{item.name}</div>;
             })}
-          </FieldSet>
+          </ModalSection>
         ) : null}
 
         {autoTags.length ? (
-          <FieldSet legend={translate('AutoTagging')}>
+          <ModalSection title={translate('AutoTagging')}>
             {autoTags.map((item) => {
               return <div key={item.id}>{item.name}</div>;
             })}
-          </FieldSet>
+          </ModalSection>
         ) : null}
       </ModalBody>
 

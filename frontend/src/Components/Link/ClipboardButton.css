@@ -1,5 +1,5 @@
 .button {
-  composes: button from '~Components/Form/FormInputButton.css';
+  composes: button from 'Components/Form/FormInputButton.css';
 
   position: relative;
 }
@@ -8,20 +8,26 @@
   margin: 0 5px;
 }
 
+.labelIconContainer {
+  display: inline-flex;
+  justify-content: center;
+  width: 1.25em;
+}
+
 .stateIconContainer {
   position: absolute;
   top: 50%;
   left: -100%;
   display: inline-flex;
   visibility: hidden;
-  transition: left $defaultSpeed;
+  transition: left var(--defaultSpeed);
   transform: translateX(-50%) translateY(-50%);
 }
 
 .clipboardIconContainer {
   position: relative;
   left: 0;
-  transition: left $defaultSpeed, opacity $defaultSpeed;
+  transition: left var(--defaultSpeed), opacity var(--defaultSpeed);
 }
 
 .showStateIcon {

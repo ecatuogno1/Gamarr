@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Alert from 'Components/Alert';
-import FieldSet from 'Components/FieldSet';
 import Button from 'Components/Link/Button';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import ModalBody from 'Components/Modal/ModalBody';
@@ -49,52 +48,43 @@ class AddDownloadClientModalContent extends Component {
           }
 
           {
-            isSchemaPopulated && !schemaError &&
-              <div>
+            isSchemaPopulated && !schemaError ?
+              <div className={styles.downloadClients}>
+                <div className={styles.groupLegend}>{translate('Usenet')}</div>
 
-                <Alert kind={kinds.INFO}>
-                  <div>
-                    {translate('SupportedDownloadClients')}
-                  </div>
-                  <div>
-                    {translate('SupportedDownloadClientsMoreInfo')}
-                  </div>
-                </Alert>
+                <div>
+                  {
+                    usenetDownloadClients.map((downloadClient) => {
+                      return (
+                        <AddDownloadClientItem
+                          key={downloadClient.implementation}
+                          implementation={downloadClient.implementation}
+                          {...downloadClient}
+                          onDownloadClientSelect={onDownloadClientSelect}
+                        />
+                      );
+                    })
+                  }
+                </div>
 
-                <FieldSet legend={translate('Usenet')}>
-                  <div className={styles.downloadClients}>
-                    {
-                      usenetDownloadClients.map((downloadClient) => {
-                        return (
-                          <AddDownloadClientItem
-                            key={downloadClient.implementation}
-                            implementation={downloadClient.implementation}
-                            {...downloadClient}
-                            onDownloadClientSelect={onDownloadClientSelect}
-                          />
-                        );
-                      })
-                    }
-                  </div>
-                </FieldSet>
+                <div className={styles.groupLegend}>{translate('Torrents')}</div>
 
-                <FieldSet legend={translate('Torrents')}>
-                  <div className={styles.downloadClients}>
-                    {
-                      torrentDownloadClients.map((downloadClient) => {
-                        return (
-                          <AddDownloadClientItem
-                            key={downloadClient.implementation}
-                            implementation={downloadClient.implementation}
-                            {...downloadClient}
-                            onDownloadClientSelect={onDownloadClientSelect}
-                          />
-                        );
-                      })
-                    }
-                  </div>
-                </FieldSet>
-              </div>
+                <div>
+                  {
+                    torrentDownloadClients.map((downloadClient) => {
+                      return (
+                        <AddDownloadClientItem
+                          key={downloadClient.implementation}
+                          implementation={downloadClient.implementation}
+                          {...downloadClient}
+                          onDownloadClientSelect={onDownloadClientSelect}
+                        />
+                      );
+                    })
+                  }
+                </div>
+              </div> :
+              null
           }
         </ModalBody>
         <ModalFooter>

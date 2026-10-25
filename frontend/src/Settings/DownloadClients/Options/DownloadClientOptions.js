@@ -3,11 +3,12 @@ import React from 'react';
 import Alert from 'Components/Alert';
 import FieldSet from 'Components/FieldSet';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
-import { inputTypes, kinds, sizes } from 'Helpers/Props';
+import { inputTypes, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
 
 function DownloadClientOptions(props) {
@@ -23,106 +24,121 @@ function DownloadClientOptions(props) {
   return (
     <div>
       {
-        isFetching &&
-          <LoadingIndicator />
+        isFetching ?
+          <LoadingIndicator /> :
+          null
       }
 
       {
-        !isFetching && error &&
+        !isFetching && error ?
           <Alert kind={kinds.DANGER}>
             {translate('DownloadClientOptionsLoadError')}
-          </Alert>
+          </Alert> :
+          null
       }
 
       {
-        hasSettings && !isFetching && !error && advancedSettings &&
+        hasSettings && !isFetching && !error && advancedSettings ?
           <div>
-            <FieldSet legend={translate('CompletedDownloadHandling')}>
-
+            <FieldSet
+              legend={translate('CompletedDownloadHandling')}
+              caption={translate('CompletedDownloadHandlingCaption')}
+            >
               <Form>
-                <FormGroup
+                <FormRow
                   advancedSettings={advancedSettings}
                   isAdvanced={true}
-                  size={sizes.MEDIUM}
                 >
                   <FormLabel>{translate('Enable')}</FormLabel>
 
-                  <FormInputGroup
+                  <FormInputHelpText
+                    text={translate('EnableCompletedDownloadHandlingHelpText')}
+                  />
+
+                  <FormInput
                     type={inputTypes.CHECK}
                     name="enableCompletedDownloadHandling"
-                    helpText={translate('EnableCompletedDownloadHandlingHelpText')}
                     onChange={onInputChange}
                     {...settings.enableCompletedDownloadHandling}
                   />
-                </FormGroup>
+                </FormRow>
 
-                <FormGroup
+                <FormRow
                   advancedSettings={advancedSettings}
                   isAdvanced={true}
-                  size={sizes.MEDIUM}
                 >
                   <FormLabel>{translate('CheckForFinishedDownloadsInterval')}</FormLabel>
 
-                  <FormInputGroup
+                  <FormInputHelpText
+                    text={translate('RefreshMonitoredIntervalHelpText')}
+                  />
+
+                  <FormInput
                     type={inputTypes.NUMBER}
                     name="checkForFinishedDownloadInterval"
                     min={1}
                     max={120}
                     unit="minutes"
-                    helpText={translate('RefreshMonitoredIntervalHelpText')}
                     onChange={onInputChange}
                     {...settings.checkForFinishedDownloadInterval}
                   />
-                </FormGroup>
+                </FormRow>
               </Form>
             </FieldSet>
 
             <FieldSet
               legend={translate('FailedDownloadHandling')}
+              caption={translate('FailedDownloadHandlingCaption')}
+              notice={
+                <Alert kind={kinds.INFO}>
+                  {translate('RemoveDownloadsAlert')}
+                </Alert>
+              }
             >
               <Form>
-                <FormGroup
+                <FormRow
                   advancedSettings={advancedSettings}
                   isAdvanced={true}
-                  size={sizes.MEDIUM}
                 >
                   <FormLabel>{translate('AutoRedownloadFailed')}</FormLabel>
 
-                  <FormInputGroup
+                  <FormInputHelpText
+                    text={translate('AutoRedownloadFailedHelpText')}
+                  />
+
+                  <FormInput
                     type={inputTypes.CHECK}
                     name="autoRedownloadFailed"
-                    helpText={translate('AutoRedownloadFailedHelpText')}
                     onChange={onInputChange}
                     {...settings.autoRedownloadFailed}
                   />
-                </FormGroup>
+                </FormRow>
 
                 {
                   settings.autoRedownloadFailed.value ?
-                    <FormGroup
+                    <FormRow
                       advancedSettings={advancedSettings}
                       isAdvanced={true}
-                      size={sizes.MEDIUM}
                     >
                       <FormLabel>{translate('AutoRedownloadFailedFromInteractiveSearch')}</FormLabel>
 
-                      <FormInputGroup
+                      <FormInputHelpText
+                        text={translate('AutoRedownloadFailedFromInteractiveSearchHelpText')}
+                      />
+
+                      <FormInput
                         type={inputTypes.CHECK}
                         name="autoRedownloadFailedFromInteractiveSearch"
-                        helpText={translate('AutoRedownloadFailedFromInteractiveSearchHelpText')}
                         onChange={onInputChange}
                         {...settings.autoRedownloadFailedFromInteractiveSearch}
                       />
-                    </FormGroup> :
+                    </FormRow> :
                     null
                 }
               </Form>
-
-              <Alert kind={kinds.INFO}>
-                {translate('RemoveDownloadsAlert')}
-              </Alert>
             </FieldSet>
-          </div>
+          </div> :
+          null
       }
     </div>
   );

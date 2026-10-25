@@ -2,8 +2,6 @@
 // Please do not change this file!
 interface CssExports {
   'container': string;
-  'content': string;
-  'externalLinks': string;
   'grid': string;
 }
 export const cssExports: CssExports;

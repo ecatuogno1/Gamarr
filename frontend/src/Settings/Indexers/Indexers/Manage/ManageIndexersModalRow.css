@@ -1,11 +1,18 @@
 .name,
-.tags,
+.implementation,
+.tags {
+  composes: cell from 'Components/Table/Cells/TableRowCell.css';
+
+  word-break: break-all;
+}
+
+.protocol,
 .enableRss,
 .enableAutomaticSearch,
 .enableInteractiveSearch,
-.priority,
-.implementation {
-  composes: cell from '~Components/Table/Cells/TableRowCell.css';
+.priority {
+  composes: cell from 'Components/Table/Cells/TableRowCell.css';
 
-  word-break: break-all;
+  width: 1%;
+  white-space: nowrap;
 }

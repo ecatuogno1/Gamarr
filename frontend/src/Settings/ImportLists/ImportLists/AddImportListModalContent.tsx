@@ -2,7 +2,6 @@ import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import AppState from 'App/State/AppState';
 import Alert from 'Components/Alert';
-import FieldSet from 'Components/FieldSet';
 import Button from 'Components/Link/Button';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import ModalBody from 'Components/Modal/ModalBody';
@@ -67,34 +66,23 @@ function AddImportListModalContent({
         ) : null}
 
         {isSchemaPopulated && !schemaError ? (
-          <div>
-            <Alert kind={kinds.INFO}>
-              <div>{translate('SupportedListsGame')}</div>
-              <div>{translate('SupportedListsMoreInfo')}</div>
-            </Alert>
-            {Object.keys(listGroups).map((key) => {
-              return (
-                <FieldSet
-                  key={key}
-                  legend={translate('TypeOfList', {
-                    typeOfList: titleCase(key),
-                  })}
-                >
-                  <div className={styles.lists}>
-                    {listGroups[key].map((list) => {
-                      return (
-                        <AddImportListItem
-                          key={list.implementation}
-                          {...list}
-                          implementation={list.implementation}
-                          onImportListSelect={onImportListSelect}
-                        />
-                      );
-                    })}
-                  </div>
-                </FieldSet>
-              );
-            })}
+          <div className={styles.lists}>
+            {Object.keys(listGroups).map((key) => (
+              <div key={key} className={styles.group}>
+                <h3 className={styles.groupHeading}>
+                  {translate('TypeOfList', { typeOfList: titleCase(key) })}
+                </h3>
+
+                {listGroups[key].map((list) => (
+                  <AddImportListItem
+                    key={list.implementation}
+                    {...list}
+                    implementation={list.implementation}
+                    onImportListSelect={onImportListSelect}
+                  />
+                ))}
+              </div>
+            ))}
           </div>
         ) : null}
       </ModalBody>

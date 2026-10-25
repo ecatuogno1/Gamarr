@@ -3,15 +3,11 @@ import React, { Component } from 'react';
 import { Grid, WindowScroller } from 'react-virtualized';
 import Measure from 'Components/Measure';
 import DiscoverGameItemConnector from 'DiscoverGame/DiscoverGameItemConnector';
-import dimensions from 'Styles/Variables/dimensions';
 import getIndexOfFirstCharacter from 'Utilities/Array/getIndexOfFirstCharacter';
 import hasDifferentItemsOrOrder from 'Utilities/Object/hasDifferentItemsOrOrder';
+import { ROW_BORDER, ROW_VERTICAL_PADDING } from './DiscoverGameOverview';
 import DiscoverGameOverviewConnector from './DiscoverGameOverviewConnector';
 import styles from './DiscoverGameOverviews.css';
-
-// Poster container dimensions
-const columnPadding = parseInt(dimensions.gameIndexColumnPadding);
-const columnPaddingSmallScreen = parseInt(dimensions.gameIndexColumnPaddingSmallScreen);
 
 function calculatePosterWidth(posterSize, isSmallScreen) {
   const maximumPosterWidth = isSmallScreen ? 152 : 162;
@@ -27,14 +23,8 @@ function calculatePosterWidth(posterSize, isSmallScreen) {
   return Math.floor(maximumPosterWidth * 0.5);
 }
 
-function calculateRowHeight(posterHeight, sortKey, isSmallScreen, overviewOptions) {
-
-  const heights = [
-    posterHeight,
-    isSmallScreen ? columnPaddingSmallScreen : columnPadding
-  ];
-
-  return heights.reduce((acc, height) => acc + height, 0);
+function calculateRowHeight(posterHeight) {
+  return posterHeight + ROW_VERTICAL_PADDING * 2 + ROW_BORDER;
 }
 
 function calculatePosterHeight(posterWidth) {
@@ -54,7 +44,7 @@ class DiscoverGameOverviews extends Component {
       columnCount: 1,
       posterWidth: 162,
       posterHeight: 238,
-      rowHeight: calculateRowHeight(238, null, props.isSmallScreen, {})
+      rowHeight: calculateRowHeight(238)
     };
 
     this._grid = null;
@@ -112,13 +102,12 @@ class DiscoverGameOverviews extends Component {
 
   calculateGrid = (width = this.state.width, isSmallScreen) => {
     const {
-      sortKey,
       overviewOptions
     } = this.props;
 
     const posterWidth = calculatePosterWidth(overviewOptions.size, isSmallScreen);
     const posterHeight = calculatePosterHeight(posterWidth);
-    const rowHeight = calculateRowHeight(posterHeight, sortKey, isSmallScreen, overviewOptions);
+    const rowHeight = calculateRowHeight(posterHeight);
 
     this.setState({
       width,

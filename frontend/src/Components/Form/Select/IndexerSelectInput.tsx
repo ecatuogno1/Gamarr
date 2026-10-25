@@ -39,6 +39,7 @@ function createIndexersSelector(includeAny: boolean) {
 }
 
 export interface IndexerSelectInputProps {
+  id?: string;
   name: string;
   value: number;
   includeAny?: boolean;
@@ -46,6 +47,7 @@ export interface IndexerSelectInputProps {
 }
 
 function IndexerSelectInput({
+  id,
   name,
   value,
   includeAny = false,
@@ -64,6 +66,7 @@ function IndexerSelectInput({
 
   return (
     <EnhancedSelectInput
+      id={id}
       name={name}
       value={value}
       isFetching={isFetching}

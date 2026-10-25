@@ -1,8 +1,7 @@
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Icon from 'Components/Icon';
-import Link from 'Components/Link/Link';
+import IconButton from 'Components/Link/IconButton';
 import ConfirmModal from 'Components/Modal/ConfirmModal';
 import { icons, kinds } from 'Helpers/Props';
 import translate from 'Utilities/String/translate';
@@ -71,11 +70,12 @@ class RemotePathMapping extends Component {
         <div className={styles.path}>{localPath}</div>
 
         <div className={styles.actions}>
-          <Link
+          <IconButton
+            name={icons.EDIT}
+            aria-label={translate('EditRemotePathMapping')}
+            title={translate('EditRemotePathMapping')}
             onPress={this.onEditRemotePathMappingPress}
-          >
-            <Icon name={icons.EDIT} />
-          </Link>
+          />
         </div>
 
         <EditRemotePathMappingModalConnector

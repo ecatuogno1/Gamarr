@@ -2,18 +2,12 @@
 // Please do not change this file!
 interface CssExports {
   'arrow': string;
-  'arrowDisabled': string;
   'body': string;
-  'bottom': string;
   'default': string;
-  'horizontalContainer': string;
   'inverse': string;
-  'left': string;
-  'right': string;
+  'reference': string;
   'tooltip': string;
   'tooltipContainer': string;
-  'top': string;
-  'verticalContainer': string;
 }
 export const cssExports: CssExports;
 export default cssExports;

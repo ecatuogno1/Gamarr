@@ -1,9 +1,9 @@
 import classNames from 'classnames';
 import React from 'react';
-import IconButton from 'Components/Link/IconButton';
 import Scroller from 'Components/Scroller/Scroller';
+import TableOptionsButton from 'Components/Table/TableOptions/TableOptionsButton';
 import TableOptionsModalWrapper from 'Components/Table/TableOptions/TableOptionsModalWrapper';
-import { icons, scrollDirections } from 'Helpers/Props';
+import { scrollDirections } from 'Helpers/Props';
 import { SortDirection } from 'Helpers/Props/sortDirections';
 import { CheckInputChanged } from 'typings/inputs';
 import { TableOptionsChangePayload } from 'typings/Table';
@@ -16,6 +16,8 @@ import styles from './Table.css';
 interface TableProps {
   className?: string;
   horizontalScroll?: boolean;
+  // Gamarr: keep the actions column visible while scrolling horizontally.
+  stickyActions?: boolean;
   selectAll?: boolean;
   allSelected?: boolean;
   allUnselected?: boolean;
@@ -94,7 +96,7 @@ function Table({
                     canModifyColumns={canModifyColumns}
                     onTableOptionChange={onTableOptionChange}
                   >
-                    <IconButton name={icons.ADVANCED_SETTINGS} />
+                    <TableOptionsButton />
                   </TableOptionsModalWrapper>
                 </TableHeaderCell>
               );

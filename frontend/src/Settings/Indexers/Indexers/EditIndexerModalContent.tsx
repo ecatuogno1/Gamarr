@@ -3,9 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { IndexerAppState } from 'App/State/SettingsAppState';
 import Alert from 'Components/Alert';
 import Form from 'Components/Form/Form';
-import FormGroup from 'Components/Form/FormGroup';
-import FormInputGroup from 'Components/Form/FormInputGroup';
+import FormInput from 'Components/Form/FormInput';
+import FormInputHelpText from 'Components/Form/FormInputHelpText';
 import FormLabel from 'Components/Form/FormLabel';
+import FormRow from 'Components/Form/FormRow';
 import ProviderFieldFormGroup from 'Components/Form/ProviderFieldFormGroup';
 import Button from 'Components/Link/Button';
 import SpinnerErrorButton from 'Components/Link/SpinnerErrorButton';
@@ -14,6 +15,7 @@ import ModalBody from 'Components/Modal/ModalBody';
 import ModalContent from 'Components/Modal/ModalContent';
 import ModalFooter from 'Components/Modal/ModalFooter';
 import ModalHeader from 'Components/Modal/ModalHeader';
+import ModalSection from 'Components/ModalSection';
 import usePrevious from 'Helpers/Hooks/usePrevious';
 import useShowAdvancedSettings from 'Helpers/Hooks/useShowAdvancedSettings';
 import { inputTypes, kinds } from 'Helpers/Props';
@@ -106,7 +108,7 @@ function EditIndexerModalContent({
 
   return (
     <ModalContent onModalClose={onModalClose}>
-      <ModalHeader>
+      <ModalHeader subtitle={id ? name.previousValue ?? name.value : undefined}>
         {id
           ? translate('EditIndexerImplementation', { implementationName })
           : translate('AddIndexerImplementation', { implementationName })}
@@ -124,80 +126,85 @@ function EditIndexerModalContent({
             validationErrors={validationErrors}
             validationWarnings={validationWarnings}
           >
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('Name')}</FormLabel>
 
-              <FormInputGroup
+              <FormInput
                 type={inputTypes.TEXT}
                 name="name"
                 {...name}
                 onChange={handleInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
-              <FormLabel>{translate('EnableRss')}</FormLabel>
+            <ModalSection title={translate('Search')}>
+              <FormRow>
+                <FormLabel>{translate('EnableRss')}</FormLabel>
 
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="enableRss"
-                helpText={
-                  supportsRss.value ? translate('EnableRssHelpText') : undefined
-                }
-                helpTextWarning={
-                  supportsRss.value
-                    ? undefined
-                    : translate('RssIsNotSupportedWithThisIndexer')
-                }
-                isDisabled={!supportsRss.value}
-                {...enableRss}
-                onChange={handleInputChange}
-              />
-            </FormGroup>
+                {supportsRss.value ? (
+                  <FormInputHelpText text={translate('EnableRssHelpText')} />
+                ) : (
+                  <FormInputHelpText
+                    text={translate('RssIsNotSupportedWithThisIndexer')}
+                    isWarning={true}
+                  />
+                )}
 
-            <FormGroup>
-              <FormLabel>{translate('EnableAutomaticSearch')}</FormLabel>
+                <FormInput
+                  type={inputTypes.CHECK}
+                  name="enableRss"
+                  isDisabled={!supportsRss.value}
+                  {...enableRss}
+                  onChange={handleInputChange}
+                />
+              </FormRow>
 
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="enableAutomaticSearch"
-                helpText={
-                  supportsSearch.value
-                    ? translate('EnableAutomaticSearchHelpText')
-                    : undefined
-                }
-                helpTextWarning={
-                  supportsSearch.value
-                    ? undefined
-                    : translate('SearchIsNotSupportedWithThisIndexer')
-                }
-                isDisabled={!supportsSearch.value}
-                {...enableAutomaticSearch}
-                onChange={handleInputChange}
-              />
-            </FormGroup>
+              <FormRow>
+                <FormLabel>{translate('EnableAutomaticSearch')}</FormLabel>
 
-            <FormGroup>
-              <FormLabel>{translate('EnableInteractiveSearch')}</FormLabel>
+                {supportsSearch.value ? (
+                  <FormInputHelpText
+                    text={translate('EnableAutomaticSearchHelpText')}
+                  />
+                ) : (
+                  <FormInputHelpText
+                    text={translate('SearchIsNotSupportedWithThisIndexer')}
+                    isWarning={true}
+                  />
+                )}
 
-              <FormInputGroup
-                type={inputTypes.CHECK}
-                name="enableInteractiveSearch"
-                helpText={
-                  supportsSearch.value
-                    ? translate('EnableInteractiveSearchHelpText')
-                    : undefined
-                }
-                helpTextWarning={
-                  supportsSearch.value
-                    ? undefined
-                    : translate('SearchIsNotSupportedWithThisIndexer')
-                }
-                isDisabled={!supportsSearch.value}
-                {...enableInteractiveSearch}
-                onChange={handleInputChange}
-              />
-            </FormGroup>
+                <FormInput
+                  type={inputTypes.CHECK}
+                  name="enableAutomaticSearch"
+                  isDisabled={!supportsSearch.value}
+                  {...enableAutomaticSearch}
+                  onChange={handleInputChange}
+                />
+              </FormRow>
+
+              <FormRow>
+                <FormLabel>{translate('EnableInteractiveSearch')}</FormLabel>
+
+                {supportsSearch.value ? (
+                  <FormInputHelpText
+                    text={translate('EnableInteractiveSearchHelpText')}
+                  />
+                ) : (
+                  <FormInputHelpText
+                    text={translate('SearchIsNotSupportedWithThisIndexer')}
+                    isWarning={true}
+                  />
+                )}
+
+                <FormInput
+                  type={inputTypes.CHECK}
+                  name="enableInteractiveSearch"
+                  isDisabled={!supportsSearch.value}
+                  {...enableInteractiveSearch}
+                  onChange={handleInputChange}
+                />
+              </FormRow>
+            </ModalSection>
 
             {fields?.map((field) => {
               return (
@@ -212,51 +219,50 @@ function EditIndexerModalContent({
               );
             })}
 
-            <FormGroup
-              advancedSettings={showAdvancedSettings}
-              isAdvanced={true}
-            >
+            <FormRow advancedSettings={showAdvancedSettings} isAdvanced={true}>
               <FormLabel>{translate('IndexerPriority')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText text={translate('IndexerPriorityHelpText')} />
+
+              <FormInput
                 type={inputTypes.NUMBER}
                 name="priority"
-                helpText={translate('IndexerPriorityHelpText')}
                 min={1}
                 max={50}
                 {...priority}
                 onChange={handleInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup
-              advancedSettings={showAdvancedSettings}
-              isAdvanced={true}
-            >
+            <FormRow advancedSettings={showAdvancedSettings} isAdvanced={true}>
               <FormLabel>{translate('DownloadClient')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText
+                text={translate('IndexerDownloadClientHelpText')}
+              />
+
+              <FormInput
                 type={inputTypes.DOWNLOAD_CLIENT_SELECT}
                 name="downloadClientId"
-                helpText={translate('IndexerDownloadClientHelpText')}
                 {...downloadClientId}
                 includeAny={true}
                 protocol={protocol.value}
                 onChange={handleInputChange}
               />
-            </FormGroup>
+            </FormRow>
 
-            <FormGroup>
+            <FormRow>
               <FormLabel>{translate('Tags')}</FormLabel>
 
-              <FormInputGroup
+              <FormInputHelpText text={translate('IndexerTagGameHelpText')} />
+
+              <FormInput
                 type={inputTypes.TAG}
                 name="tags"
-                helpText={translate('IndexerTagGameHelpText')}
                 {...tags}
                 onChange={handleInputChange}
               />
-            </FormGroup>
+            </FormRow>
           </Form>
         ) : null}
       </ModalBody>

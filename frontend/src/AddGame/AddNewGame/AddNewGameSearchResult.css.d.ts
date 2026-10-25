@@ -3,13 +3,20 @@
 interface CssExports {
   'addedPlatform': string;
   'alreadyExistsIcon': string;
+  'chip': string;
+  'chipDot': string;
+  'chipDotAiring': string;
+  'chipDotEnded': string;
+  'chipDotFinished': string;
+  'chipDotUpcoming': string;
+  'chipExcluded': string;
+  'chips': string;
   'content': string;
-  'exclusionIcon': string;
+  'excludedIcon': string;
+  'externalLink': string;
   'genres': string;
   'icons': string;
   'inLibrary': string;
-  'links': string;
-  'originalLanguage': string;
   'overlay': string;
   'overview': string;
   'platform': string;
@@ -17,8 +24,7 @@ interface CssExports {
   'poster': string;
   'posterContainer': string;
   'searchResult': string;
-  'statusContainer': string;
-  'studio': string;
+  'searchResultExcluded': string;
   'title': string;
   'titleContainer': string;
   'titleRow': string;

@@ -17,7 +17,7 @@
 }
 
 .input {
-  composes: input from '~Components/Form/TextInput.css';
+  composes: input from 'Components/Form/TextInput.css';
 
   height: 46px;
   border-radius: 0;
@@ -36,10 +36,22 @@
   margin-top: 30px;
   text-align: center;
   font-weight: 300;
-  font-size: $largeFontSize;
+  font-size: var(--largeFontSize);
 }
 
 .helpText {
   margin-bottom: 10px;
   font-size: 24px;
+}
+
+.modalFooter {
+  composes: modalFooter from 'Components/Modal/ModalFooter.css';
+
+  justify-content: space-between;
+}
+
+.loading {
+  composes: loading from 'Components/Loading/LoadingIndicator.css';
+
+  margin-top: 0;
 }

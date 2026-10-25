@@ -1,5 +1,5 @@
 .jumpBar {
-  z-index: $pageJumpBarZIndex;
+  z-index: var(--pageJumpBarZIndex);
   display: flex;
   align-items: stretch;
   align-self: stretch;
@@ -9,13 +9,13 @@
 
 .jumpBarItems {
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   flex: 0 0 100%;
   flex-direction: column;
   overflow: hidden;
 }
 
-@media only screen and (max-width: $breakpointSmall) {
+@media (--breakpointSmall) {
   .jumpBar {
     display: none;
   }

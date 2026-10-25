@@ -25,7 +25,7 @@ export default function EditAutoTaggingModal({
   }, [dispatch, onModalClose]);
 
   return (
-    <Modal isOpen={isOpen} size={sizes.LARGE} onModalClose={handleModalClose}>
+    <Modal isOpen={isOpen} size={sizes.MEDIUM} onModalClose={handleModalClose}>
       <EditAutoTaggingModalContent
         {...otherProps}
         onModalClose={handleModalClose}

@@ -114,6 +114,12 @@ module.exports = (env) => {
                 destination: distFolder
               },
 
+              // Theme tokens for the login/logout pages (Sonarr v5 ships the same file)
+              {
+                source: 'frontend/src/Styles/Themes/themes.css',
+                destination: path.join(distFolder, 'Content/theme.css')
+              },
+
               // Fonts
               {
                 source: 'frontend/src/Content/Fonts/*.*',
@@ -222,7 +228,18 @@ module.exports = (env) => {
           use: [
             'style-loader',
             {
-              loader: 'css-loader'
+              loader: 'css-loader',
+              options: {
+                importLoaders: 1
+              }
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                postcssOptions: {
+                  config: 'frontend/postcss.config.js'
+                }
+              }
             }
           ]
         },

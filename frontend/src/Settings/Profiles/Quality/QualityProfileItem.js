@@ -42,7 +42,6 @@ class QualityProfileItem extends Component {
       name,
       allowed,
       isDragging,
-      isOverCurrent,
       connectDragSource
     } = this.props;
 
@@ -51,9 +50,7 @@ class QualityProfileItem extends Component {
         className={classNames(
           styles.qualityProfileItem,
           isDragging && styles.isDragging,
-          isPreview && styles.isPreview,
-          isOverCurrent && styles.isOverCurrent,
-          groupId && styles.isInGroup
+          isPreview && styles.isPreview
         )}
       >
         <label
@@ -65,6 +62,7 @@ class QualityProfileItem extends Component {
                 className={styles.createGroupButton}
                 name={icons.GROUP}
                 title={translate('Group')}
+                aria-label={translate('Group')}
                 onPress={this.onCreateGroupPress}
               />
           }
@@ -83,7 +81,6 @@ class QualityProfileItem extends Component {
 
           <div className={classNames(
             styles.qualityName,
-            groupId && styles.isInGroup,
             !allowed && styles.notAllowed
           )}
           >

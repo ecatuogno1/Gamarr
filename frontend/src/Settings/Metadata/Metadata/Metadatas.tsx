@@ -2,15 +2,14 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import MetadataAppState from 'App/State/MetadataAppState';
-import FieldSet from 'Components/FieldSet';
 import PageSectionContent from 'Components/Page/PageSectionContent';
+import settingsCardStyles from 'Components/SettingsCard/SettingsCard.css';
 import { fetchMetadata } from 'Store/Actions/settingsActions';
 import createSortedSectionSelector from 'Store/Selectors/createSortedSectionSelector';
 import MetadataType from 'typings/Metadata';
 import sortByProp from 'Utilities/Array/sortByProp';
 import translate from 'Utilities/String/translate';
 import Metadata from './Metadata';
-import styles from './Metadatas.css';
 
 function createMetadatasSelector() {
   return createSelector(
@@ -24,7 +23,7 @@ function createMetadatasSelector() {
 
 function Metadatas() {
   const dispatch = useDispatch();
-  const { isFetching, error, items, ...otherProps } = useSelector(
+  const { isFetching, isPopulated, error, items } = useSelector(
     createMetadatasSelector()
   );
 
@@ -33,19 +32,18 @@ function Metadatas() {
   }, [dispatch]);
 
   return (
-    <FieldSet legend={translate('Metadata')}>
-      <PageSectionContent
-        isFetching={isFetching}
-        errorMessage={translate('MetadataLoadError')}
-        {...otherProps}
-      >
-        <div className={styles.metadatas}>
-          {items.map((item) => {
-            return <Metadata key={item.id} {...item} />;
-          })}
-        </div>
-      </PageSectionContent>
-    </FieldSet>
+    <PageSectionContent
+      error={error}
+      errorMessage={translate('MetadataLoadError')}
+      isFetching={isFetching}
+      isPopulated={isPopulated}
+    >
+      <div className={settingsCardStyles.grid}>
+        {items.map((item) => {
+          return <Metadata key={item.id} {...item} />;
+        })}
+      </div>
+    </PageSectionContent>
   );
 }
 

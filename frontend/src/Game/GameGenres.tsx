@@ -27,7 +27,7 @@ function GameGenres({ className, genres }: GameGenresProps) {
             })}
           </div>
         }
-        kind={kinds.INVERSE}
+        kind={kinds.DEFAULT}
         position={tooltipPositions.TOP}
       />
     );

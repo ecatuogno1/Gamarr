@@ -1,37 +1,71 @@
 .legendItem {
+  display: flex;
+  align-items: center;
   margin: 3px 0;
-  margin-right: 6px;
-  padding-left: 5px;
-  width: 220px;
-  border-left-width: 4px;
-  border-left-style: solid;
+  margin-right: 8px;
+  padding: 4px 8px;
+  /* Gamarr: min-width so "Missing (Unmonitored)" stays on one line */
+  min-width: 160px;
+  color: var(--inkSoft);
+  white-space: nowrap;
+  font-size: 12px;
+  font-family: var(--defaultFontFamily);
   cursor: default;
+  gap: 8px;
+
+  &.unmonitored {
+    background-image: var(--calendarColorImpairedDiagonalPattern);
+  }
+
+  &.missingMonitored,
+  &.missingUnmonitored,
+  &.continuing {
+    background-image: var(--calendarColorImpairedPattern);
+  }
 }
 
-/*
- * Status
- */
-
-.downloaded {
-  composes: downloaded from '~Calendar/Events/CalendarEvent.css';
+.indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
 }
 
-.queue {
-  composes: queue from '~Calendar/Events/CalendarEvent.css';
+.bar {
+  width: 8px;
+  height: 15px;
+  border-radius: 2px;
+  background-color: var(--inkMuted);
+
+  &.downloaded {
+    background-color: var(--calendarDownloadedColor);
+  }
+
+  &.queue {
+    background-color: var(--calendarDownloadingColor);
+  }
+
+  &.unmonitored {
+    background-color: var(--inkMuted);
+    opacity: 0.5;
+  }
+
+  &.missingMonitored {
+    background-color: var(--calendarMissingColor);
+  }
+
+  &.missingUnmonitored {
+    background-color: var(--warningColor);
+  }
+
+  &.continuing {
+    background-color: var(--calendarUnairedColor);
+  }
 }
 
-.unmonitored {
-  composes: unmonitored from '~Calendar/Events/CalendarEvent.css';
-}
-
-.missingUnmonitored {
-  composes: missingUnmonitored from '~Calendar/Events/CalendarEvent.css';
-}
-
-.missingMonitored {
-  composes: missingMonitored from '~Calendar/Events/CalendarEvent.css';
-}
-
-.continuing {
-  composes: continuing from '~Calendar/Events/CalendarEvent.css';
+.icon {
+  &.fullColor {
+    filter: var(--calendarFullColorFilter);
+  }
 }

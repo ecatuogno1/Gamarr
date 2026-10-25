@@ -1,19 +1,15 @@
 .info {
-  background-color: var(--gameBackgroundColor);
-  text-align: center;
-  font-size: $smallFontSize;
-}
-
-.title {
   @add-mixin truncate;
 
-  composes: info;
+  background-color: transparent;
+  color: var(--inkMuted);
+  text-align: left;
+  font-weight: 400;
+  font-size: 11.5px;
+  font-family: var(--defaultFontFamily);
+  line-height: 1.5;
 }
 
 .tags {
-  composes: tags from '~./GameIndexPoster.css';
-}
-
-.tagsList {
-  composes: tagsList from '~./GameIndexPoster.css';
+  composes: tags from './GameIndexPoster.css';
 }
