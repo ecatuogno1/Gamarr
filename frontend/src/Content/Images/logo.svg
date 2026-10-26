@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <title>Gamarr</title>
-  <g fill="#FFC230">
+  <g fill="#9B70DD">
     <rect x="72" y="146" width="368" height="178" rx="89"/>
     <ellipse cx="138" cy="302" rx="72" ry="100" transform="rotate(24 138 302)"/>
     <ellipse cx="374" cy="302" rx="72" ry="100" transform="rotate(-24 374 302)"/>
