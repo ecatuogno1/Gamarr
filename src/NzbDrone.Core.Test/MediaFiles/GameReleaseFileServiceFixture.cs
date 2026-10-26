@@ -215,5 +215,106 @@ namespace NzbDrone.Core.Test.MediaFiles
 
             Subject.FindCompanions(cue).Should().BeEquivalentTo(new[] { bin1, bin2 });
         }
+
+        [Test]
+        public void should_ignore_rooted_sheet_references()
+        {
+            var config = Path.Combine(@"C:\Config".AsOsAgnostic(), "gamarr.db");
+            _sizes[config] = 1;
+
+            var bin = GivenFile("Game (USA).bin");
+            var cue = GivenFile("Game (USA).cue", $"FILE \"Game (USA).bin\" BINARY\nFILE \"{config}\" BINARY\n");
+
+            var release = Subject.GetRelease(new List<string> { cue, bin });
+
+            release.PrimaryFile.Should().Be(cue);
+            release.CompanionFiles.Should().BeEquivalentTo(new[] { bin });
+        }
+
+        [Test]
+        public void should_ignore_sheet_references_going_up_out_of_the_release()
+        {
+            var otherDisc = Path.Combine(Path.GetDirectoryName(_folder), "Other Game", "disc.iso");
+            _sizes[otherDisc] = 1;
+
+            var disc = GivenFile("Game (USA).chd");
+            var m3u = GivenFile("Game (USA).m3u", "Game (USA).chd\n../Other Game/disc.iso\nsub/../../Other Game/disc.iso\n..\\Other Game\\disc.iso\n");
+
+            var release = Subject.GetRelease(new List<string> { m3u, disc });
+
+            release.PrimaryFile.Should().Be(m3u);
+            release.CompanionFiles.Should().BeEquivalentTo(new[] { disc });
+        }
+
+        [Test]
+        public void should_not_take_files_of_other_folders_referenced_by_a_loose_sheet()
+        {
+            var otherDownload = GivenFile(@"Other Download\disc.chd");
+            var track = GivenFile("Game (USA).bin");
+            var cue = GivenFile("Game (USA).cue", "FILE \"Game (USA).bin\" BINARY\nFILE \"Other Download/disc.chd\" BINARY\n");
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.GetFiles(_folder, false))
+                  .Returns(new[] { cue, track });
+
+            Subject.FindCompanions(cue).Should().BeEquivalentTo(new[] { track });
+            Subject.FindCompanions(cue).Should().NotContain(otherDownload);
+        }
+
+        [Test]
+        public void should_read_cyclic_playlists_once()
+        {
+            var disc = GivenFile("Game (USA) (Disc 1).chd");
+            var a = GivenFile("A.m3u", "B.m3u\nGame (USA) (Disc 1).chd\n");
+            var b = GivenFile("B.m3u", "A.m3u\nB.m3u\n");
+
+            var release = Subject.GetRelease(new List<string> { a, b, disc });
+
+            release.CompanionFiles.Should().HaveCount(2);
+            release.CompanionFiles.Concat(new[] { release.PrimaryFile }).Should().BeEquivalentTo(new[] { a, b, disc });
+
+            Subject.GroupReleases(new List<string> { a, b, disc }).Should().ContainSingle();
+        }
+
+        [Test]
+        public void should_not_read_oversized_sheets()
+        {
+            GivenFile("Game (USA) (Track 2).bin");
+            var cue = GivenFile("Game (USA).cue", "FILE \"Game (USA) (Track 2).bin\" BINARY\n", 2 * 1024 * 1024);
+
+            Subject.FindCompanions(cue).Should().BeEmpty();
+            Mocker.GetMock<IDiskProvider>().Verify(v => v.ReadAllText(cue), Times.Never());
+        }
+
+        [Test]
+        [Platform(Exclude = "Win")]
+        public void should_ignore_sheet_references_that_are_symlinks_out_of_the_release()
+        {
+            var release = Path.Combine(TempFolder, "Release");
+            var outside = Path.Combine(TempFolder, "Config");
+            Directory.CreateDirectory(release);
+            Directory.CreateDirectory(outside);
+
+            var secret = Path.Combine(outside, "gamarr.db");
+            File.WriteAllText(secret, "secret");
+
+            var bin = Path.Combine(release, "Game (USA).bin");
+            File.WriteAllText(bin, "track");
+            File.CreateSymbolicLink(Path.Combine(release, "Game (USA) (Track 2).bin"), secret);
+            Directory.CreateSymbolicLink(Path.Combine(release, "Linked"), outside);
+
+            var cue = Path.Combine(release, "Game (USA).cue");
+            File.WriteAllText(cue, "FILE \"Game (USA).bin\" BINARY\nFILE \"Game (USA) (Track 2).bin\" BINARY\nFILE \"Linked/gamarr.db\" BINARY\n");
+
+            var disk = Mocker.GetMock<IDiskProvider>();
+            disk.Setup(s => s.FileExists(It.IsAny<string>())).Returns<string>(File.Exists);
+            disk.Setup(s => s.ReadAllText(It.IsAny<string>())).Returns<string>(File.ReadAllText);
+            disk.Setup(s => s.GetFileSize(It.IsAny<string>())).Returns<string>(p => new FileInfo(p).Length);
+            disk.Setup(s => s.GetFiles(release, false)).Returns(new[] { cue, bin, Path.Combine(release, "Game (USA) (Track 2).bin") });
+
+            var result = Subject.GetRelease(new List<string> { cue, bin });
+
+            result.CompanionFiles.Should().BeEquivalentTo(new[] { bin });
+        }
     }
 }

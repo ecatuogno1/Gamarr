@@ -188,8 +188,15 @@ namespace NzbDrone.Core.MediaFiles
             fileInfoStopwatch.Stop();
             _logger.Trace("Reprocessing existing files complete for: {0} [{1}]", game, fileInfoStopwatch.Elapsed);
 
+            // Companions already known stay in the inventory, also the ones with a game file extension (.bin, .chd) that
+            // aren't in the non-game files, or the extra file cleanup would unregister them
             var filesOnDisk = GetNonVideoFiles(game.Path);
-            var possibleExtraFiles = possibleCompanionFiles.Concat(FilterPaths(game.Path, filesOnDisk)).ToList();
+            var existingCompanionFiles = companionFiles.Where(f => _diskProvider.FileExists(f));
+            var possibleExtraFiles = possibleCompanionFiles
+                .Concat(existingCompanionFiles)
+                .Concat(FilterPaths(game.Path, filesOnDisk))
+                .Distinct(PathEqualityComparer.Instance)
+                .ToList();
 
             RemoveEmptyGameFolder(game.Path);
             CompletedScanning(game, possibleExtraFiles);

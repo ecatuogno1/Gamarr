@@ -8,6 +8,8 @@ using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Download;
+using NzbDrone.Core.Extras;
+using NzbDrone.Core.Extras.Companions;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.History;
 using NzbDrone.Core.MediaFiles;
@@ -345,6 +347,27 @@ namespace NzbDrone.Core.Test.MediaFiles.GameImport
             Mocker.GetMock<IUpgradeMediaFiles>()
                   .Verify(v => v.UpgradeGameFile(It.Is<GameFile>(e => e.SceneName == firstDecision.LocalGame.SceneName), _approvedDecisions.First().LocalGame, false),
                       Times.Once());
+        }
+
+        [Test]
+        public void should_not_report_import_when_companion_files_failed()
+        {
+            GivenNewDownload();
+
+            Mocker.GetMock<IExtraService>()
+                  .Setup(s => s.ImportGame(It.IsAny<LocalGame>(), It.IsAny<GameFile>(), It.IsAny<bool>()))
+                  .Throws(new CompanionImportException(new List<string> { "Game (USA) (Track 2).bin" }));
+
+            var results = Subject.Import(new List<ImportDecision> { _approvedDecisions.First() }, true, _downloadClientItem);
+
+            results.Should().ContainSingle();
+            results.Single().Result.Should().NotBe(ImportResultType.Imported);
+            results.Single().Errors.Single().Should().Contain("Game (USA) (Track 2).bin");
+
+            Mocker.GetMock<IEventAggregator>()
+                  .Verify(v => v.PublishEvent(It.IsAny<GameFileImportedEvent>()), Times.Never());
+
+            ExceptionVerification.ExpectedWarns(1);
         }
     }
 }

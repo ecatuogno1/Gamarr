@@ -7,6 +7,7 @@ using NUnit.Framework;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Configuration;
+using NzbDrone.Core.Extras.Companions;
 using NzbDrone.Core.Games;
 using NzbDrone.Core.MediaFiles;
 using NzbDrone.Core.MediaFiles.Events;
@@ -446,6 +447,39 @@ namespace NzbDrone.Core.Test.MediaFiles.DiskScanServiceTests
 
             Mocker.GetMock<IEventAggregator>()
                 .Verify(v => v.PublishEvent(It.Is<GameScannedEvent>(c => c.Game != null && c.PossibleExtraFiles.Count == 0)), Times.Once());
+        }
+
+        [Test]
+        public void should_keep_registered_companion_files_with_game_file_extensions_on_rescan()
+        {
+            GivenGameFolder();
+
+            var cue = Path.Combine(_game.Path, "Game (USA).cue").AsOsAgnostic();
+            var bin1 = Path.Combine(_game.Path, "Game (USA) (Track 1).bin").AsOsAgnostic();
+            var bin2 = Path.Combine(_game.Path, "Game (USA) (Track 2).bin").AsOsAgnostic();
+
+            GivenFiles(new List<string> { cue, bin1, bin2 });
+
+            Mocker.GetMock<IMediaFileService>()
+                  .Setup(s => s.GetFilesByGame(It.IsAny<int>()))
+                  .Returns(new List<GameFile> { new GameFile { Id = 1, GameId = _game.Id, RelativePath = "Game (USA).cue" } });
+
+            Mocker.GetMock<ICompanionFileService>()
+                  .Setup(s => s.GetFilesByGame(_game.Id))
+                  .Returns(new List<CompanionFile>
+                  {
+                      new CompanionFile { Id = 1, GameId = _game.Id, GameFileId = 1, RelativePath = "Game (USA) (Track 1).bin" },
+                      new CompanionFile { Id = 2, GameId = _game.Id, GameFileId = 1, RelativePath = "Game (USA) (Track 2).bin" }
+                  });
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Setup(s => s.FileExists(It.IsIn(bin1, bin2)))
+                  .Returns(true);
+
+            Subject.Scan(_game);
+
+            Mocker.GetMock<IEventAggregator>()
+                  .Verify(v => v.PublishEvent(It.Is<GameScannedEvent>(c => c.PossibleExtraFiles.Count == 2 && c.PossibleExtraFiles.Contains(bin1) && c.PossibleExtraFiles.Contains(bin2))), Times.Once());
         }
     }
 }

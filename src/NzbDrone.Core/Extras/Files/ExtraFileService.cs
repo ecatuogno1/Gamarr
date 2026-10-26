@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NLog;
+using NzbDrone.Common;
 using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Games;
@@ -26,7 +27,7 @@ namespace NzbDrone.Core.Extras.Files
     }
 
     public abstract class ExtraFileService<TExtraFile> : IExtraFileService<TExtraFile>,
-                                                         IHandleAsync<GameFileDeletedEvent>,
+                                                         IHandle<GameFileDeletedEvent>,
                                                          IHandleAsync<GamesDeletedEvent>
         where TExtraFile : ExtraFile, new()
     {
@@ -100,7 +101,9 @@ namespace NzbDrone.Core.Extras.Files
             _repository.DeleteForGames(message.Games.Select(m => m.Id).ToList());
         }
 
-        public void HandleAsync(GameFileDeletedEvent message)
+        // Handled synchronously: when a game file is upgraded its extras (companion tracks, discs) are removed before the
+        // new release's files are put in place, often at the same paths. Done later, it would delete the new files.
+        public void Handle(GameFileDeletedEvent message)
         {
             var gameFile = message.GameFile;
 
@@ -111,16 +114,36 @@ namespace NzbDrone.Core.Extras.Files
             else
             {
                 var game = _gameService.GetGame(message.GameFile.GameId);
+                var extras = _repository.GetFilesByGameFile(gameFile.Id);
 
-                foreach (var extra in _repository.GetFilesByGameFile(gameFile.Id))
+                // A path that's also an extra of another game file is that file's now, it isn't deleted
+                var otherPaths = _repository.GetFilesByGame(game.Id)
+                    .Where(e => e.GameFileId != gameFile.Id)
+                    .Select(e => Path.Combine(game.Path, e.RelativePath))
+                    .ToHashSet(PathEqualityComparer.Instance);
+
+                foreach (var extra in extras)
                 {
                     var path = Path.Combine(game.Path, extra.RelativePath);
 
-                    if (_diskProvider.FileExists(path))
+                    if (otherPaths.Contains(path))
                     {
-                        // Send to the recycling bin so they can be recovered if necessary
-                        var subfolder = _diskProvider.GetParentFolder(game.Path).GetRelativePath(_diskProvider.GetParentFolder(path));
-                        _recycleBinProvider.DeleteFile(path, subfolder);
+                        _logger.Debug("Extra file {0} belongs to another game file, not deleting it", path);
+                        continue;
+                    }
+
+                    try
+                    {
+                        if (_diskProvider.FileExists(path))
+                        {
+                            // Send to the recycling bin so they can be recovered if necessary
+                            var subfolder = _diskProvider.GetParentFolder(game.Path).GetRelativePath(_diskProvider.GetParentFolder(path));
+                            _recycleBinProvider.DeleteFile(path, subfolder);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Warn(ex, "Unable to delete extra file {0}", path);
                     }
                 }
             }

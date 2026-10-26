@@ -471,6 +471,73 @@ namespace NzbDrone.Core.Test.MediaFiles
             result.First().Result.Should().Be(ImportResultType.Rejected);
         }
 
+        [Test]
+        public void should_not_delete_folder_when_a_companion_file_was_left_behind()
+        {
+            GivenValidGame();
+
+            var dll = Path.Combine(_droneFactory, "Game", "steam_api64.dll");
+            var localGame = new LocalGame { Path = Path.Combine(_droneFactory, "Game", "setup.exe"), CompanionFiles = new List<string> { dll } };
+            var imported = new List<ImportDecision> { new ImportDecision(localGame) };
+
+            Mocker.GetMock<IMakeImportDecision>()
+                  .Setup(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), null, true, true))
+                  .Returns(imported);
+
+            Mocker.GetMock<IImportApprovedGame>()
+                  .Setup(s => s.Import(It.IsAny<List<ImportDecision>>(), It.IsAny<bool>(), It.IsAny<DownloadClientItem>(), It.IsAny<ImportMode>()))
+                  .Returns(imported.Select(i => new ImportResult(i)).ToList())
+                  .Callback(() => WasImportedResponse());
+
+            // The companion's transfer failed, it's still in the download
+            Mocker.GetMock<IDiskProvider>().Setup(s => s.FileExists(dll)).Returns(true);
+
+            Subject.ProcessPath(_droneFactory, ImportMode.Move, _trackedDownload.RemoteGame.Game, _trackedDownload.DownloadItem);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(v => v.DeleteFolder(It.IsAny<string>(), true), Times.Never());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_not_take_files_next_to_a_single_file_download()
+        {
+            GivenValidGame();
+
+            var folder = @"C:\Downloads\Torrents".AsOsAgnostic();
+            var disc1 = Path.Combine(folder, "Game (USA) (Disc 1).chd");
+            var disc2 = Path.Combine(folder, "Game (USA) (Disc 2).chd");
+
+            Mocker.GetMock<IDiskProvider>().Setup(c => c.FolderExists(disc1)).Returns(false);
+            Mocker.GetMock<IDiskProvider>().Setup(c => c.FileExists(It.IsAny<string>())).Returns(true);
+            Mocker.GetMock<IDiskProvider>().Setup(c => c.GetFiles(folder, false)).Returns(new[] { disc1, disc2 });
+
+            Subject.ProcessPath(disc1, ImportMode.Auto, _trackedDownload.RemoteGame.Game, _trackedDownload.DownloadItem);
+
+            Mocker.GetMock<IMakeImportDecision>()
+                  .Verify(s => s.GetImportDecisions(It.Is<List<string>>(l => l.Count == 1 && l[0] == disc1), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), null, true), Times.Once());
+        }
+
+        [Test]
+        public void should_reject_a_single_file_download_that_is_only_a_sheet()
+        {
+            GivenValidGame();
+
+            var folder = @"C:\Downloads\Torrents".AsOsAgnostic();
+            var m3u = Path.Combine(folder, "Game (USA).m3u");
+
+            Mocker.GetMock<IDiskProvider>().Setup(c => c.FolderExists(m3u)).Returns(false);
+            Mocker.GetMock<IDiskProvider>().Setup(c => c.FileExists(It.IsAny<string>())).Returns(true);
+
+            var result = Subject.ProcessPath(m3u, ImportMode.Auto, _trackedDownload.RemoteGame.Game, _trackedDownload.DownloadItem);
+
+            result.Should().ContainSingle().Which.Result.Should().Be(ImportResultType.Rejected);
+
+            Mocker.GetMock<IMakeImportDecision>()
+                  .Verify(s => s.GetImportDecisions(It.IsAny<List<string>>(), It.IsAny<Game>(), It.IsAny<DownloadClientItem>(), It.IsAny<ParsedGameInfo>(), It.IsAny<bool>()), Times.Never());
+        }
+
         private void VerifyNoImport()
         {
             Mocker.GetMock<IImportApprovedGame>().Verify(c => c.Import(It.IsAny<List<ImportDecision>>(), true, null, ImportMode.Auto),

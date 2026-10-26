@@ -55,11 +55,19 @@ namespace NzbDrone.Core.MediaFiles
     // archive > installer executable > largest file. All other files of the release are its companions.
     public class GameReleaseFileService : IGameReleaseFileService
     {
+        // Limits for reading sheets, they're small text files
+        private const long MaxSheetSize = 1024 * 1024;
+        private const int MaxSheetLineLength = 4096;
+        private const int MaxSheetReferences = 1000;
+        private const int MaxSheetDepth = 4;
+
         private static readonly Regex InstallerNameRegex = new(@"^(?:setup|install(?:er)?|autorun)(?:[_. -].*)?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex DiscTokenRegex = new(@"[ ._-]*[(\[]?(?:Disc|Disk|CD)[ ._-]?(?<disc>\d{1,2})(?:[ ._-]?of[ ._-]?\d{1,2})?[)\]]?", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex CueFileRegex = new(@"^\s*FILE\s+(?:""(?<file>[^""]+)""|(?<file>\S+))", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline);
         private static readonly Regex GdiTrackRegex = new(@"^\s*\d+\s+\d+\s+\d+\s+\d+\s+(?:""(?<file>[^""]+)""|(?<file>\S+))", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly Regex JunkFileRegex = new(@"^(?:\._.*|\.DS_Store|Thumbs\.db|desktop\.ini|.*\.(?:par2|nzb|url|lnk|torrent|!qb|part|tmp|srr|srs))$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex DriveLetterRegex = new(@"^[a-zA-Z]:", RegexOptions.Compiled);
 
         private static readonly HashSet<string> SheetExtensions = new(StringComparer.OrdinalIgnoreCase) { ".m3u", ".cue", ".gdi", ".ccd", ".mds", ".cdi" };
         private static readonly HashSet<string> InstallerExtensions = new(StringComparer.OrdinalIgnoreCase) { ".exe", ".msi", ".sh", ".dmg" };
@@ -97,16 +105,19 @@ namespace NzbDrone.Core.MediaFiles
 
                 var folderFiles = GetFiles(release.Root).Where(f => !IsJunkFile(f));
 
+                // Files of the download outside of the installer's folder aren't part of it
                 release.CompanionFiles = folderFiles
-                    .Concat(files)
+                    .Concat(files.Where(f => release.Root.IsParentPath(f)))
                     .Where(f => !f.PathEquals(primary))
                     .Distinct(PathEqualityComparer.Instance)
                     .ToList();
             }
             else
             {
+                var knownFiles = files.ToHashSet(PathEqualityComparer.Instance);
+
                 release.CompanionFiles = files
-                    .Concat(files.SelectMany(GetReferencedFiles))
+                    .Concat(files.SelectMany(f => GetReferencedFiles(f, knownFiles)))
                     .Where(f => !f.PathEquals(primary))
                     .Distinct(PathEqualityComparer.Instance)
                     .ToList();
@@ -158,9 +169,11 @@ namespace NzbDrone.Core.MediaFiles
                 }
             }
 
+            var knownFiles = files.ToHashSet(PathEqualityComparer.Instance);
+
             foreach (var file in files.Where(f => SheetExtensions.Contains(Path.GetExtension(f))))
             {
-                foreach (var referenced in GetReferencedFiles(file).Where(r => parent.ContainsKey(r)))
+                foreach (var referenced in GetReferencedFiles(file, knownFiles).Where(r => parent.ContainsKey(r)))
                 {
                     Union(file, referenced);
                 }
@@ -205,7 +218,7 @@ namespace NzbDrone.Core.MediaFiles
 
             if (release == null)
             {
-                return GetReferencedFiles(primaryFile);
+                return GetReferencedFiles(primaryFile, gameFiles.ToHashSet(PathEqualityComparer.Instance));
             }
 
             return release.CompanionFiles.Concat(new[] { release.PrimaryFile })
@@ -216,6 +229,14 @@ namespace NzbDrone.Core.MediaFiles
         public bool IsJunkFile(string path)
         {
             return JunkFileRegex.IsMatch(Path.GetFileName(path));
+        }
+
+        // A sheet that references other files (a .cdi is a whole disc image)
+        public static bool IsSheet(string path)
+        {
+            var extension = Path.GetExtension(path);
+
+            return SheetExtensions.Contains(extension) && !extension.Equals(".cdi", StringComparison.OrdinalIgnoreCase);
         }
 
         public static bool IsInstaller(string path)
@@ -296,17 +317,37 @@ namespace NzbDrone.Core.MediaFiles
             }
         }
 
-        private List<string> GetReferencedFiles(string sheet)
+        // The files a sheet references (an m3u its discs or cue sheets, a cue or gdi its tracks), and theirs. A sheet comes
+        // from the release, so it's untrusted: a reference has to stay below the folder of the first sheet (no rooted
+        // paths, no "..", no symbolic links out of it), and has to be in the referencing sheet's own folder or one of the
+        // release's known files. Sheets are read once each (playlists can reference each other) with size limits.
+        private List<string> GetReferencedFiles(string sheet, ICollection<string> knownFiles)
         {
-            var extension = Path.GetExtension(sheet);
+            var referenced = new List<string>();
 
-            if (!SheetExtensions.Contains(extension))
+            if (!SheetExtensions.Contains(Path.GetExtension(sheet)))
             {
-                return new List<string>();
+                return referenced;
             }
 
+            var root = Path.GetDirectoryName(sheet);
+
+            if (root.IsNullOrWhiteSpace())
+            {
+                return referenced;
+            }
+
+            var visited = new HashSet<string>(PathEqualityComparer.Instance) { GetVisitedKey(sheet) };
+
+            CollectReferencedFiles(sheet, root, knownFiles ?? Array.Empty<string>(), visited, referenced, 0);
+
+            return referenced;
+        }
+
+        private void CollectReferencedFiles(string sheet, string root, ICollection<string> knownFiles, HashSet<string> visited, List<string> referenced, int depth)
+        {
+            var extension = Path.GetExtension(sheet);
             var folder = Path.GetDirectoryName(sheet) ?? string.Empty;
-            var referenced = new List<string>();
 
             try
             {
@@ -315,19 +356,35 @@ namespace NzbDrone.Core.MediaFiles
                     // CloneCD/Alcohol images: same name, other extensions (.img/.sub, .mdf)
                     var baseName = Path.GetFileNameWithoutExtension(sheet);
 
-                    referenced.AddRange(new[] { ".img", ".sub", ".mdf" }
-                        .Select(e => Path.Combine(folder, baseName + e))
-                        .Where(f => _diskProvider.FileExists(f)));
+                    foreach (var file in new[] { ".img", ".sub", ".mdf" }.Select(e => Path.Combine(folder, baseName + e)))
+                    {
+                        if (IsAllowedReference(file, folder, root, knownFiles) && visited.Add(GetVisitedKey(file)) && _diskProvider.FileExists(file))
+                        {
+                            referenced.Add(file);
+                        }
+                    }
 
-                    return referenced;
+                    return;
                 }
 
                 if (!_diskProvider.FileExists(sheet))
                 {
-                    return referenced;
+                    return;
                 }
 
-                var content = _diskProvider.ReadAllText(sheet);
+                var size = _diskProvider.GetFileSize(sheet);
+
+                if (size > MaxSheetSize)
+                {
+                    _logger.Debug("{0} is too large for a {1} sheet ({2} bytes), not reading it", sheet, extension, size);
+                    return;
+                }
+
+                var lines = _diskProvider.ReadAllText(sheet)
+                    .Split('\n')
+                    .Select(l => l.TrimEnd('\r'))
+                    .Where(l => l.Length <= MaxSheetLineLength);
+                var content = string.Join("\n", lines);
 
                 var names = extension.ToLowerInvariant() switch
                 {
@@ -339,17 +396,31 @@ namespace NzbDrone.Core.MediaFiles
 
                 foreach (var name in names)
                 {
-                    var path = Path.GetFullPath(Path.Combine(folder, name.Replace('\\', Path.DirectorySeparatorChar)));
-
-                    if (_diskProvider.FileExists(path))
+                    if (referenced.Count >= MaxSheetReferences)
                     {
-                        referenced.Add(path);
+                        _logger.Debug("{0} references too many files, ignoring the rest", sheet);
+                        return;
+                    }
 
-                        // An m3u lists cue sheets, which list their tracks
-                        if (!path.PathEquals(sheet))
-                        {
-                            referenced.AddRange(GetReferencedFiles(path));
-                        }
+                    var path = ResolveReference(folder, name);
+
+                    if (path == null || !IsAllowedReference(path, folder, root, knownFiles))
+                    {
+                        _logger.Debug("{0} references {1}, which is outside of the release, ignoring it", sheet, name);
+                        continue;
+                    }
+
+                    if (!_diskProvider.FileExists(path) || !visited.Add(GetVisitedKey(path)))
+                    {
+                        continue;
+                    }
+
+                    referenced.Add(path);
+
+                    // An m3u lists cue sheets, which list their tracks
+                    if (SheetExtensions.Contains(Path.GetExtension(path)) && depth < MaxSheetDepth)
+                    {
+                        CollectReferencedFiles(path, root, knownFiles, visited, referenced, depth + 1);
                     }
                 }
             }
@@ -357,8 +428,58 @@ namespace NzbDrone.Core.MediaFiles
             {
                 _logger.Debug(ex, "Unable to read {0}", sheet);
             }
+        }
 
-            return referenced;
+        // A reference relative to the sheet's folder, null if it's rooted, goes up a folder or isn't a valid path
+        private static string ResolveReference(string folder, string name)
+        {
+            var reference = name.Trim().Replace('\\', '/');
+
+            if (reference.IsNullOrWhiteSpace() || reference.IndexOf('\0') >= 0 || reference.Contains("://") ||
+                reference.StartsWith('/') || DriveLetterRegex.IsMatch(reference) || Path.IsPathRooted(reference))
+            {
+                return null;
+            }
+
+            var parts = reference.Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Any(p => p.Trim() == ".."))
+            {
+                return null;
+            }
+
+            try
+            {
+                return Path.GetFullPath(Path.Combine(new[] { folder }.Concat(parts.Where(p => p != ".")).ToArray()));
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        private static bool IsAllowedReference(string path, string folder, string root, ICollection<string> knownFiles)
+        {
+            if (!PathContainment.IsWithin(root, path))
+            {
+                return false;
+            }
+
+            // Below the referencing sheet's folder only if it's one of the release's files: a loose sheet in a shared
+            // folder (a download client's root) mustn't take other downloads' files
+            return (Path.GetDirectoryName(path) ?? string.Empty).PathEquals(folder) || knownFiles.Contains(path);
+        }
+
+        private static string GetVisitedKey(string path)
+        {
+            try
+            {
+                return PathContainment.GetRealPath(path);
+            }
+            catch (Exception)
+            {
+                return Path.GetFullPath(path);
+            }
         }
 
         private IEnumerable<string> GetFiles(string folder)

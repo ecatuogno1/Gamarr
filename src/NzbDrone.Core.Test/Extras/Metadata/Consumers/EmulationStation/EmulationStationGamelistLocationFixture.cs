@@ -237,5 +237,81 @@ namespace NzbDrone.Core.Test.Extras.Metadata.Consumers.EmulationStation
 
             Games(Path.Combine(Root, "sfc", "gamelist.xml")).Should().ContainSingle();
         }
+
+        private string GivenEsDeGamelistEntry(string romPath)
+        {
+            var gamelistPath = Path.Combine(EsDe, "gamelists", "snes", "gamelist.xml");
+
+            _files[gamelistPath] = $@"<?xml version=""1.0""?>
+<gameList>
+	<game id=""1070"" source=""IGDB"">
+		<path>{romPath}</path>
+		<name>Super Mario World</name>
+	</game>
+</gameList>";
+
+            return gamelistPath;
+        }
+
+        [Test]
+        public void should_not_delete_files_outside_of_es_de_media_when_game_list_path_goes_up()
+        {
+            GivenEsDeGamelistEntry("./Super Mario World (1990)/../../../../../Secret/config.sfc");
+
+            // Where the media of that path would be, outside of downloaded_media
+            var outside = Path.Combine(Media("snes", "covers"), "Super Mario World (1990)", "..", "..", "..", "..", "..", "Secret", "config.jpg");
+            _files[outside] = "secret";
+            _files[Path.GetFullPath(outside)] = "secret";
+
+            Subject.RemoveGame(_game, _esDe);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(v => v.DeleteFile(It.Is<string>(p => !Path.GetFullPath(p).StartsWith(Media()))), Times.Never());
+
+            _files[outside].Should().Be("secret");
+        }
+
+        [Test]
+        public void should_not_move_files_from_outside_of_es_de_media_when_game_list_path_goes_up()
+        {
+            GivenEsDeGamelistEntry("./Super Mario World (1990)/../../../../../Secret/config.sfc");
+
+            var outside = Path.Combine(Media("snes", "covers"), "Super Mario World (1990)", "..", "..", "..", "..", "..", "Secret", "config.jpg");
+            _files[outside] = "secret";
+
+            Subject.UpdateGame(_game, _gameFile, new List<ImageFileResult>(), _esDe);
+
+            Mocker.GetMock<IDiskProvider>()
+                  .Verify(v => v.MoveFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
+
+            _files[outside].Should().Be("secret");
+        }
+
+        [Test]
+        [Platform(Exclude = "Win")]
+        public void should_not_delete_files_through_a_symlink_out_of_es_de_media()
+        {
+            var media = Path.Combine(TempFolder, "downloaded_media");
+            var outside = Path.Combine(TempFolder, "outside");
+            Directory.CreateDirectory(Path.Combine(media, "snes", "covers"));
+            Directory.CreateDirectory(outside);
+
+            var secret = Path.Combine(outside, "Super Mario World (USA).jpg");
+            File.WriteAllText(secret, "secret");
+
+            // downloaded_media/snes/covers/<game folder> links to a folder outside of the media folder
+            Directory.CreateSymbolicLink(Path.Combine(media, "snes", "covers", "Super Mario World (1990)"), outside);
+
+            _esDe.MediaDirectory = media;
+            GivenEsDeGamelistEntry("./Super Mario World (1990)/Super Mario World (USA).sfc");
+
+            var disk = Mocker.GetMock<IDiskProvider>();
+            disk.Setup(s => s.FileExists(It.IsAny<string>())).Returns<string>(p => _files.ContainsKey(p) || File.Exists(p));
+            disk.Setup(s => s.DeleteFile(It.IsAny<string>())).Callback<string>(File.Delete);
+
+            Subject.RemoveGame(_game, _esDe);
+
+            File.Exists(secret).Should().BeTrue();
+        }
     }
 }

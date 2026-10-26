@@ -7,6 +7,7 @@ using NzbDrone.Common.Disk;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Core.Download;
 using NzbDrone.Core.Extras;
+using NzbDrone.Core.Extras.Companions;
 using NzbDrone.Core.History;
 using NzbDrone.Core.MediaFiles.Commands;
 using NzbDrone.Core.MediaFiles.Events;
@@ -176,6 +177,17 @@ namespace NzbDrone.Core.MediaFiles.GameImport
                     }
 
                     _eventAggregator.PublishEvent(new GameFileImportedEvent(localGame, gameFile, oldFiles, newDownload, downloadClientItem));
+                }
+                catch (CompanionImportException e)
+                {
+                    // The game file is in the library, but without all of its companion files the game is incomplete:
+                    // the import isn't reported as done, so the download is held (not removed or cleaned up) and the
+                    // remaining source files are kept for a manual import
+                    _logger.Warn(e, "Couldn't import all files of game " + localGame);
+                    importResults.RemoveAll(r => r.ImportDecision == importDecision);
+                    _eventAggregator.PublishEvent(new GameImportFailedEvent(e, localGame, newDownload, downloadClientItem));
+
+                    importResults.Add(new ImportResult(importDecision, $"Failed to import game, {e.Message}. The source files were kept."));
                 }
                 catch (RootFolderNotFoundException e)
                 {

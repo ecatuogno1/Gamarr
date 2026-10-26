@@ -91,13 +91,24 @@ namespace NzbDrone.Core.Extras.Companions
                 transferMode = _configService.CopyUsingHardlinks ? TransferMode.HardLinkOrCopy : TransferMode.Copy;
             }
 
+            var failed = new List<string>();
+
             foreach (var file in files.Distinct(PathEqualityComparer.Instance))
             {
                 try
                 {
+                    // A companion outside of the release (a path taken from a sheet or sent by a client) is never
+                    // moved or copied, it could be any file Gamarr can read or another game's file
+                    if (!PathContainment.IsWithin(sourceFolder, file) && !PathContainment.IsWithin(releaseRoot, file))
+                    {
+                        _logger.Warn("Companion file {0} is outside of the release folder {1}, not importing it", file, releaseRoot);
+                        failed.Add(file);
+                        continue;
+                    }
+
                     var relativePath = sourceFolder.IsParentPath(file)
                         ? sourceFolder.GetRelativePath(file)
-                        : releaseRoot.IsParentPath(file) ? releaseRoot.GetRelativePath(file) : Path.GetFileName(file);
+                        : releaseRoot.GetRelativePath(file);
 
                     var destination = Path.Combine(destinationFolder, relativePath);
 
@@ -122,12 +133,18 @@ namespace NzbDrone.Core.Extras.Companions
                 catch (Exception ex)
                 {
                     _logger.Warn(ex, "Failed to import companion file: {0}", file);
+                    failed.Add(file);
                 }
             }
 
             _companionFileService.Upsert(imported);
 
             _logger.Debug("Imported {0} companion files for {1}", imported.Count, gameFile);
+
+            if (failed.Any())
+            {
+                throw new CompanionImportException(failed);
+            }
 
             return imported;
         }

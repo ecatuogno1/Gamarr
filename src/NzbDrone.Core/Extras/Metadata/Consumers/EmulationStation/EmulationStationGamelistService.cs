@@ -327,15 +327,28 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.EmulationStation
                 return EsDeMediaFolders.Keys.ToDictionary(k => k, _ => new List<string>());
             }
 
-            var relative = romPath.Substring(2).Split('/', StringSplitOptions.RemoveEmptyEntries);
+            var relative = NormalizePath(romPath)?.Substring(2).Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+            // The ROM path comes from the game list, which anything can write: it must not lead out of the media folders
+            if (relative == null || relative.Length == 0 || relative.Any(p => !IsSafePathSegment(p)))
+            {
+                return EsDeMediaFolders.Keys.ToDictionary(k => k, _ => new List<string>());
+            }
+
             var stem = Path.GetFileNameWithoutExtension(relative.Last());
             var folders = relative.SkipLast(1).ToArray();
 
             foreach (var (name, folder) in EsDeMediaFolders)
             {
-                var directory = Path.Combine(new[] { mediaDirectory, system, folder }.Concat(folders).ToArray());
+                var mediaFolder = Path.Combine(mediaDirectory, system, folder);
+                var directory = Path.Combine(new[] { mediaFolder }.Concat(folders).ToArray());
 
-                result[name] = new[] { ".jpg", ".png", ".webp" }.Select(e => Path.Combine(directory, stem + e)).ToList();
+                result[name] = stem.IsNullOrWhiteSpace()
+                    ? new List<string>()
+                    : new[] { ".jpg", ".png", ".webp" }
+                        .Select(e => Path.Combine(directory, stem + e))
+                        .Where(f => PathContainment.IsWithin(mediaFolder, f))
+                        .ToList();
             }
 
             return result;
@@ -531,8 +544,19 @@ namespace NzbDrone.Core.Extras.Metadata.Consumers.EmulationStation
             }
 
             path = path.Trim().Replace('\\', '/');
+            path = path.StartsWith("./") ? path : "./" + path.TrimStart('/');
 
-            return path.StartsWith("./") ? path : "./" + path.TrimStart('/');
+            // A path going up a folder doesn't point inside the system's folder
+            return path.Substring(2).Split('/', StringSplitOptions.RemoveEmptyEntries).Any(p => p.Trim() == "..") ? null : path;
+        }
+
+        private static bool IsSafePathSegment(string segment)
+        {
+            return segment.IsNotNullOrWhiteSpace() &&
+                   segment.Trim() != "." &&
+                   segment.Trim() != ".." &&
+                   segment.IndexOf('\0') < 0 &&
+                   segment.IndexOfAny(Path.GetInvalidFileNameChars()) < 0;
         }
 
         private static string GetImagePath(string folder, List<ImageFileResult> images, string name)

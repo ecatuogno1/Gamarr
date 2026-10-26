@@ -223,6 +223,7 @@ namespace NzbDrone.Core.MediaFiles
 
             if (importMode == ImportMode.Move &&
                 importResults.Any(i => i.Result == ImportResultType.Imported) &&
+                !HasLeftoverReleaseFiles(importResults) &&
                 ShouldDeleteFolder(directoryInfo, game))
             {
                 _logger.Debug("Deleting folder after importing valid files");
@@ -242,6 +243,23 @@ namespace NzbDrone.Core.MediaFiles
             }
 
             return importResults;
+        }
+
+        // A moved release leaves nothing behind, a file of it that's still there wasn't imported and the folder is kept
+        private bool HasLeftoverReleaseFiles(List<ImportResult> importResults)
+        {
+            var leftover = importResults
+                .Where(i => i.ImportDecision.LocalGame != null)
+                .SelectMany(i => i.ImportDecision.LocalGame.CompanionFiles ?? new List<string>())
+                .FirstOrDefault(f => _diskProvider.FileExists(f));
+
+            if (leftover != null)
+            {
+                _logger.Warn("Release file {0} wasn't imported, not deleting the download folder", leftover);
+                return true;
+            }
+
+            return false;
         }
 
         private List<ImportResult> ProcessFile(FileInfo fileInfo, ImportMode importMode, DownloadClientItem downloadClientItem)
@@ -309,8 +327,24 @@ namespace NzbDrone.Core.MediaFiles
             }
 
             // A file can be the primary file of a multi-file release (a cue sheet with its tracks, an m3u with its discs)
+            // A download that is a single file has no companions: the files next to it (in the download client's folder)
+            // belong to other downloads
             var releaseFiles = new List<string> { fileInfo.FullName };
-            releaseFiles.AddRange(_releaseFileService.FindCompanions(fileInfo.FullName));
+
+            if (downloadClientItem == null)
+            {
+                releaseFiles.AddRange(_releaseFileService.FindCompanions(fileInfo.FullName));
+            }
+            else if (GameReleaseFileService.IsSheet(fileInfo.FullName))
+            {
+                // A lone cue/m3u/gdi sheet has none of the files it references, they'd be taken from other downloads
+                return new List<ImportResult>
+                {
+                    new ImportResult(new ImportDecision(new LocalGame { Path = fileInfo.FullName },
+                            new ImportRejection(ImportRejectionReason.InvalidFilePath, "The download is only a sheet, without the files it references")),
+                        "The download is only a sheet, without the files it references")
+                };
+            }
 
             var decisions = _importDecisionMaker.GetImportDecisions(releaseFiles, game, downloadClientItem, null, true);
 

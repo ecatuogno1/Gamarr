@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -80,6 +81,47 @@ namespace NzbDrone.Core.Test.Extras.Companions
         {
             Subject.CanImportFile(_localGame, _gameFile, _localGame.CompanionFiles[0], ".cue", false).Should().BeTrue();
             Subject.CanImportFile(_localGame, _gameFile, Path.Combine(_releaseFolder, "Game.nfo"), ".nfo", false).Should().BeFalse();
+        }
+
+        [Test]
+        public void should_fail_when_a_companion_transfer_fails_keeping_the_imported_ones()
+        {
+            var failing = _localGame.CompanionFiles[1];
+
+            Mocker.GetMock<IDiskTransferService>()
+                  .Setup(s => s.TransferFile(failing, It.IsAny<string>(), It.IsAny<TransferMode>(), It.IsAny<bool>()))
+                  .Throws(new IOException("Disk full"));
+
+            Action import = () => Subject.ImportFiles(_localGame, _gameFile, _localGame.CompanionFiles, false).ToList();
+
+            import.Should().Throw<Exception>().Where(e => e.GetType().Name == "CompanionImportException" && e.Message.Contains("Game (USA) (Disc 1).bin"));
+
+            Mocker.GetMock<ICompanionFileService>()
+                  .Verify(v => v.Upsert(It.Is<List<CompanionFile>>(l => l.Count == 2)), Times.Once());
+
+            ExceptionVerification.ExpectedWarns(1);
+        }
+
+        [Test]
+        public void should_not_transfer_companion_outside_of_release()
+        {
+            var config = Path.Combine(@"C:\Config".AsOsAgnostic(), "gamarr.db");
+            var otherGame = Path.Combine(Path.GetDirectoryName(_releaseFolder), "Other Game (USA)", "disc.chd");
+            var traversal = Path.Combine(_releaseFolder, "..", "Other Game (USA)", "disc.chd");
+
+            _localGame.CompanionFiles.AddRange(new[] { config, otherGame, traversal });
+
+            Action import = () => Subject.ImportFiles(_localGame, _gameFile, _localGame.CompanionFiles, false).ToList();
+
+            import.Should().Throw<Exception>().Where(e => e.GetType().Name == "CompanionImportException");
+
+            Mocker.GetMock<IDiskTransferService>()
+                  .Verify(v => v.TransferFile(It.IsIn(config, otherGame, traversal), It.IsAny<string>(), It.IsAny<TransferMode>(), It.IsAny<bool>()), Times.Never());
+
+            Mocker.GetMock<IDiskTransferService>()
+                  .Verify(v => v.TransferFile(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<TransferMode>(), It.IsAny<bool>()), Times.Exactly(3));
+
+            ExceptionVerification.ExpectedWarns(2);
         }
     }
 }
