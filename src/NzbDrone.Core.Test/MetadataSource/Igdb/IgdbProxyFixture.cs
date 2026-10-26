@@ -330,6 +330,124 @@ namespace NzbDrone.Core.Test.MetadataSource.Igdb
         }
 
         [Test]
+        public void should_search_when_videos_have_no_name()
+        {
+            GivenGames("game_sparse.json");
+
+            var results = Subject.SearchForNewGame("Action Boy");
+
+            results.Should().HaveCount(3);
+            results.First().Title.Should().Be("Action Boy");
+            results.First().GameMetadata.Value.YouTubeTrailerId.Should().Be("trailer333");
+        }
+
+        [Test]
+        public void should_use_first_video_when_no_video_is_named_trailer()
+        {
+            var resource = new IgdbGameResource
+            {
+                Id = 1,
+                Name = "Action Boy",
+                Videos = new List<IgdbVideo> { new() { Id = 1, VideoId = "first" }, new() { Id = 2, Name = "Gameplay", VideoId = "second" } }
+            };
+
+            Subject.MapGame(resource).YouTubeTrailerId.Should().Be("first");
+        }
+
+        [Test]
+        public void should_map_game_with_missing_and_null_fields()
+        {
+            GivenGames("game_sparse.json");
+
+            var game = Subject.GetBulkGameInfo(new List<int> { 300001 }).Single(g => g.IgdbId == 300001);
+
+            game.Title.Should().Be("Action Boy");
+            game.ReleaseDate.Should().BeNull();
+            game.Year.Should().Be(0);
+            game.Genres.Should().BeEquivalentTo("Adventure");
+            game.Themes.Should().BeEmpty();
+            game.Keywords.Should().BeEmpty();
+            game.Developers.Should().BeEmpty();
+            game.Publishers.Should().BeEmpty();
+            game.CollectionIgdbId.Should().Be(0);
+            game.CollectionTitle.Should().BeNull();
+            game.AlternativeTitles.Should().BeEmpty();
+            game.AgeRatings.Should().BeEmpty();
+            game.Websites.Should().ContainSingle().Which.Type.Should().Be("Other");
+            game.Website.Should().BeNull();
+            game.Recommendations.Should().BeEquivalentTo(new[] { 300002 });
+            game.AvailablePlatformIgdbIds.Should().BeEquivalentTo(new[] { 24 });
+            game.PlatformReleaseDates.Should().ContainSingle().Which.Date.Should().BeNull();
+
+            // The release date without a platform still counts
+            game.Status.Should().Be(GameStatusType.Released);
+            game.Ratings.Igdb.Should().BeNull();
+            game.Ratings.Critic.Should().BeNull();
+
+            game.Images.Should().NotContain(i => i.CoverType == MediaCoverTypes.Poster);
+            game.Images.Should().ContainSingle(i => i.CoverType == MediaCoverTypes.Fanart)
+                .Which.RemoteUrl.Should().Be("https://images.igdb.com/igdb/image/upload/t_1080p/scab.jpg");
+        }
+
+        [Test]
+        public void should_name_games_without_a_name_after_slug_or_id()
+        {
+            GivenGames("game_sparse.json");
+
+            var games = Subject.GetBulkGameInfo(new List<int> { 300002, 300003 });
+
+            games.Should().HaveCount(3);
+            games.Single(g => g.IgdbId == 300002).Title.Should().Be("nameless-game");
+            games.Single(g => g.IgdbId == 300003).Title.Should().Be("IGDB 300003");
+            games.Single(g => g.IgdbId == 300003).SortTitle.Should().NotBeNull();
+        }
+
+        [Test]
+        public void should_map_game_with_only_an_id()
+        {
+            var minimal = Subject.MapGame(new IgdbGameResource { Id = 42 });
+
+            minimal.Title.Should().Be("IGDB 42");
+            minimal.Images.Should().BeEmpty();
+            minimal.YouTubeTrailerId.Should().BeNull();
+            Subject.MapCredits(new IgdbGameResource { Id = 42 }).Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_tolerate_null_and_out_of_range_values_in_mappings()
+        {
+            IgdbMappings.MapAgeRating(null).Should().BeNull();
+            IgdbMappings.MapWebsite(null).Should().BeNull();
+            IgdbMappings.FromUnixTime(long.MaxValue).Should().BeNull();
+            IgdbMappings.FromUnixTime(long.MinValue).Should().BeNull();
+            IgdbMappings.GetStatusKey(new IgdbGameResource { GameStatus = new IgdbReference() }).Should().BeNull();
+            IgdbMappings.MapStatus(new IgdbGameResource { ReleaseDates = new List<IgdbReleaseDate> { null } }, DateTime.UtcNow)
+                .Should().Be(GameStatusType.Announced);
+        }
+
+        [Test]
+        public void should_skip_credits_with_missing_company()
+        {
+            GivenGames("game_sparse.json");
+
+            Subject.GetGameInfo(300001).Item2.Should().BeEmpty();
+        }
+
+        [Test]
+        public void should_get_collection_without_name_or_games()
+        {
+            Mocker.GetMock<IIgdbClient>()
+                  .Setup(s => s.Query<IgdbCollectionResource>("collections", It.IsAny<string>()))
+                  .Returns(new List<IgdbCollectionResource> { new() { Id = 7, Slug = "series", Games = new List<IgdbReference> { null } } });
+
+            var collection = Subject.GetCollectionInfo(7);
+
+            collection.Title.Should().Be("series");
+            collection.Games.Should().BeEmpty();
+            collection.Images.Should().BeEmpty();
+        }
+
+        [Test]
         public void should_return_existing_metadata_when_mapping_known_igdb_id()
         {
             var existing = new GameMetadata { IgdbId = 1103, Title = "Existing" };

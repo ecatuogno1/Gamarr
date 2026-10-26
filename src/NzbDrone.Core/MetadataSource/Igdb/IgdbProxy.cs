@@ -101,20 +101,21 @@ namespace NzbDrone.Core.MetadataSource.Igdb
                 throw new GameNotFoundException(igdbCollectionId, "Collection with IGDB id {0} was not found, it may have been removed from IGDB.", igdbCollectionId);
             }
 
-            var gameIds = collection.Games?.Select(g => g.Id).Where(id => id > 0).ToList() ?? new List<int>();
+            var gameIds = NotNull(collection.Games).Select(g => g.Id).Where(id => id > 0).ToList();
             var games = gameIds.Any() ? GetBulkGameInfo(gameIds) : new List<GameMetadata>();
 
             // Only keep the main entries of the series, not versions/editions of them
             games = games.OrderBy(g => g.ReleaseDate ?? DateTime.MaxValue).ToList();
 
-            var poster = games.SelectMany(g => g.Images).FirstOrDefault(i => i.CoverType == MediaCoverTypes.Poster);
+            var poster = games.SelectMany(g => g.Images ?? new List<MediaCover.MediaCover>()).FirstOrDefault(i => i.CoverType == MediaCoverTypes.Poster);
+            var title = TitleOf(collection.Name, collection.Slug, collection.Id);
 
             return new GameCollection
             {
                 IgdbId = collection.Id,
-                Title = collection.Name,
-                CleanTitle = collection.Name.CleanGameTitle(),
-                SortTitle = Parser.Parser.NormalizeTitle(collection.Name),
+                Title = title,
+                CleanTitle = title.CleanGameTitle(),
+                SortTitle = Parser.Parser.NormalizeTitle(title),
                 Images = poster == null ? new List<MediaCover.MediaCover>() : new List<MediaCover.MediaCover> { new(MediaCoverTypes.Poster, poster.RemoteUrl) },
                 Games = games
             };
@@ -125,9 +126,7 @@ namespace NzbDrone.Core.MetadataSource.Igdb
             // Upcoming games with the most hype
             var now = IgdbMappings.ToUnixTime(DateTime.UtcNow);
 
-            return QueryGames($"where version_parent = null & hypes > 0 & first_release_date > {now}; sort hypes desc; limit 50;")
-                .Select(MapGame)
-                .ToList();
+            return MapAll(QueryGames($"where version_parent = null & hypes > 0 & first_release_date > {now}; sort hypes desc; limit 50;"));
         }
 
         public List<GameMetadata> GetPopularGames()
@@ -136,9 +135,7 @@ namespace NzbDrone.Core.MetadataSource.Igdb
             var since = IgdbMappings.ToUnixTime(DateTime.UtcNow.AddYears(-1));
             var now = IgdbMappings.ToUnixTime(DateTime.UtcNow);
 
-            return QueryGames($"where version_parent = null & first_release_date > {since} & first_release_date <= {now} & total_rating_count > 5; sort total_rating_count desc; limit 50;")
-                .Select(MapGame)
-                .ToList();
+            return MapAll(QueryGames($"where version_parent = null & first_release_date > {since} & first_release_date <= {now} & total_rating_count > 5; sort total_rating_count desc; limit 50;"));
         }
 
         public HashSet<int> GetChangedGames(DateTime startTime, IEnumerable<int> igdbIds)
@@ -149,7 +146,7 @@ namespace NzbDrone.Core.MetadataSource.Igdb
             foreach (var chunk in igdbIds.Distinct().Chunk(BulkLimit))
             {
                 var results = Query<IgdbReference>("games", $"fields id; where id = ({string.Join(",", chunk)}) & updated_at > {since}; limit {BulkLimit};");
-                changed.UnionWith(results.Select(r => r.Id));
+                changed.UnionWith(NotNull(results).Select(r => r.Id));
             }
 
             return changed;
@@ -172,7 +169,7 @@ namespace NzbDrone.Core.MetadataSource.Igdb
                 {
                     var slug = urlMatch.Groups["slug"].Value.ToLowerInvariant();
 
-                    return QueryGames($"where slug = \"{slug}\"; limit 1;").Select(MapSearchResult).ToList();
+                    return MapAll(QueryGames($"where slug = \"{slug}\"; limit 1;")).Select(ToGame).ToList();
                 }
 
                 var term = title.Trim();
@@ -198,8 +195,8 @@ namespace NzbDrone.Core.MetadataSource.Igdb
                     where += $" & platforms = ({igdbPlatformId})";
                 }
 
-                var results = QueryGames($"search \"{EscapeSearchTerm(term)}\"; {where}; limit {SearchLimit};")
-                    .Select(MapSearchResult)
+                var results = MapAll(QueryGames($"search \"{EscapeSearchTerm(term)}\"; {where}; limit {SearchLimit};"))
+                    .Select(ToGame)
                     .ToList();
 
                 return RankSearchResults(results, term, year);
@@ -286,16 +283,19 @@ namespace NzbDrone.Core.MetadataSource.Igdb
 
         public GameMetadata MapGame(IgdbGameResource resource)
         {
+            // Every field of an IGDB record is optional: a field without a value is left out of the response, and
+            // lists can be missing, empty or hold nulls. Nothing here may assume a value is present.
             var now = DateTime.UtcNow;
+            var title = TitleOf(resource.Name, resource.Slug, resource.Id);
             var game = new GameMetadata
             {
                 IgdbId = resource.Id,
                 IgdbSlug = resource.Slug,
-                Title = resource.Name,
-                OriginalTitle = resource.Name,
-                CleanTitle = resource.Name.CleanGameTitle(),
-                CleanOriginalTitle = resource.Name.CleanGameTitle(),
-                SortTitle = GameTitleNormalizer.Normalize(resource.Name, resource.Id),
+                Title = title,
+                OriginalTitle = title,
+                CleanTitle = title.CleanGameTitle(),
+                CleanOriginalTitle = title.CleanGameTitle(),
+                SortTitle = GameTitleNormalizer.Normalize(title, resource.Id),
                 Overview = resource.Summary,
                 Storyline = resource.Storyline,
                 ReleaseDate = IgdbMappings.FromUnixTime(resource.FirstReleaseDate),
@@ -304,13 +304,13 @@ namespace NzbDrone.Core.MetadataSource.Igdb
                 Themes = Names(resource.Themes),
                 GameModes = Names(resource.GameModes),
                 Keywords = Names(resource.Keywords),
-                Recommendations = resource.SimilarGames?.Select(g => g.Id).Where(id => id > 0).ToList() ?? new List<int>(),
+                Recommendations = NotNull(resource.SimilarGames).Select(g => g.Id).Where(id => id > 0).Distinct().ToList(),
                 Popularity = resource.TotalRatingCount ?? 0
             };
 
             game.Year = game.ReleaseDate?.Year ?? 0;
 
-            game.PlatformReleaseDates = (resource.ReleaseDates ?? new List<IgdbReleaseDate>())
+            game.PlatformReleaseDates = NotNull(resource.ReleaseDates)
                 .Where(d => d.Platform != null && d.Platform.Id > 0)
                 .GroupBy(d => d.Platform.Id)
                 .Select(g => new PlatformReleaseDate
@@ -320,18 +320,18 @@ namespace NzbDrone.Core.MetadataSource.Igdb
                 })
                 .ToList();
 
-            game.AvailablePlatformIgdbIds = (resource.Platforms ?? new List<IgdbReference>())
+            game.AvailablePlatformIgdbIds = NotNull(resource.Platforms)
                 .Select(p => p.Id)
                 .Concat(game.PlatformReleaseDates.Select(d => d.IgdbPlatformId))
                 .Where(id => id > 0)
                 .Distinct()
                 .ToList();
 
-            var companies = resource.InvolvedCompanies?.Where(c => c.Company?.Name != null).ToList() ?? new List<IgdbInvolvedCompany>();
+            var companies = NotNull(resource.InvolvedCompanies).Where(c => c.Company?.Name.IsNotNullOrWhiteSpace() == true).ToList();
             game.Developers = companies.Where(c => c.Developer).Select(c => c.Company.Name).Distinct().ToList();
             game.Publishers = companies.Where(c => c.Publisher).Select(c => c.Company.Name).Distinct().ToList();
 
-            var collection = resource.Collections?.FirstOrDefault(c => c.Name.IsNotNullOrWhiteSpace()) ??
+            var collection = NotNull(resource.Collections).FirstOrDefault(c => c.Name.IsNotNullOrWhiteSpace()) ??
                              (resource.Collection?.Name.IsNotNullOrWhiteSpace() == true ? resource.Collection : null);
 
             if (collection != null)
@@ -340,8 +340,8 @@ namespace NzbDrone.Core.MetadataSource.Igdb
                 game.CollectionTitle = collection.Name;
             }
 
-            game.AlternativeTitles = (resource.AlternativeNames ?? new List<IgdbAlternativeName>())
-                .Where(a => a.Name.IsNotNullOrWhiteSpace() && a.Name != resource.Name)
+            game.AlternativeTitles = NotNull(resource.AlternativeNames)
+                .Where(a => a.Name.IsNotNullOrWhiteSpace() && a.Name != title)
                 .DistinctBy(a => a.Name)
                 .Select(a => new AlternativeTitle
                 {
@@ -351,21 +351,22 @@ namespace NzbDrone.Core.MetadataSource.Igdb
                 })
                 .ToList();
 
-            game.AgeRatings = (resource.AgeRatings ?? new List<IgdbAgeRating>())
+            game.AgeRatings = NotNull(resource.AgeRatings)
                 .Select(IgdbMappings.MapAgeRating)
                 .Where(r => r != null)
                 .Distinct()
                 .ToList();
 
-            game.Websites = (resource.Websites ?? new List<IgdbWebsite>())
+            game.Websites = NotNull(resource.Websites)
                 .Select(IgdbMappings.MapWebsite)
                 .Where(w => w != null)
                 .ToList();
 
             game.Website = game.Websites.FirstOrDefault(w => w.Type == "Official")?.Url;
 
-            var videos = resource.Videos?.Where(v => v.VideoId.IsNotNullOrWhiteSpace()).ToList() ?? new List<IgdbVideo>();
-            game.YouTubeTrailerId = (videos.FirstOrDefault(v => v.Name.ContainsIgnoreCase("trailer")) ?? videos.FirstOrDefault())?.VideoId;
+            // IGDB videos often have no name
+            var videos = NotNull(resource.Videos).Where(v => v.VideoId.IsNotNullOrWhiteSpace()).ToList();
+            game.YouTubeTrailerId = (videos.FirstOrDefault(v => v.Name?.ContainsIgnoreCase("trailer") == true) ?? videos.FirstOrDefault())?.VideoId;
 
             game.Ratings = new Ratings
             {
@@ -387,9 +388,9 @@ namespace NzbDrone.Core.MetadataSource.Igdb
             var credits = new List<Credit>();
             var order = 0;
 
-            foreach (var involved in resource.InvolvedCompanies ?? new List<IgdbInvolvedCompany>())
+            foreach (var involved in NotNull(resource.InvolvedCompanies))
             {
-                if (involved.Company?.Name == null)
+                if (involved.Company?.Name.IsNotNullOrWhiteSpace() != true)
                 {
                     continue;
                 }
@@ -446,8 +447,8 @@ namespace NzbDrone.Core.MetadataSource.Igdb
                 images.Add(new MediaCover.MediaCover(MediaCoverTypes.Poster, cover));
             }
 
-            var artworks = resource.Artworks?.Where(a => a.ImageId.IsNotNullOrWhiteSpace()).ToList() ?? new List<IgdbImage>();
-            var screenshots = resource.Screenshots?.Where(a => a.ImageId.IsNotNullOrWhiteSpace()).ToList() ?? new List<IgdbImage>();
+            var artworks = NotNull(resource.Artworks).Where(a => a.ImageId.IsNotNullOrWhiteSpace()).ToList();
+            var screenshots = NotNull(resource.Screenshots).Where(a => a.ImageId.IsNotNullOrWhiteSpace()).ToList();
 
             // Fanart is the first artwork, or the first screenshot when there is no artwork
             var fanart = artworks.FirstOrDefault() ?? screenshots.FirstOrDefault();
@@ -467,7 +468,44 @@ namespace NzbDrone.Core.MetadataSource.Igdb
 
         private static List<string> Names(List<IgdbReference> references)
         {
-            return references?.Select(r => r.Name).Where(n => n.IsNotNullOrWhiteSpace()).Distinct().ToList() ?? new List<string>();
+            return NotNull(references).Select(r => r.Name).Where(n => n.IsNotNullOrWhiteSpace()).Distinct().ToList();
+        }
+
+        private static IEnumerable<T> NotNull<T>(IEnumerable<T> items)
+            where T : class
+        {
+            return items?.Where(i => i != null) ?? Enumerable.Empty<T>();
+        }
+
+        // IGDB records without a name exist (stubs, removed games): fall back to the slug, then to the id
+        private static string TitleOf(string name, string slug, int igdbId)
+        {
+            if (name.IsNotNullOrWhiteSpace())
+            {
+                return name;
+            }
+
+            return slug.IsNotNullOrWhiteSpace() ? slug : $"IGDB {igdbId}";
+        }
+
+        // Search and list results: a record that still can't be mapped is skipped instead of failing every result
+        private List<GameMetadata> MapAll(IEnumerable<IgdbGameResource> resources)
+        {
+            var games = new List<GameMetadata>();
+
+            foreach (var resource in NotNull(resources))
+            {
+                try
+                {
+                    games.Add(MapGame(resource));
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Skipping IGDB game {0} ('{1}'), its data couldn't be read", resource.Id, resource.Name);
+                }
+            }
+
+            return games;
         }
 
         private static string EscapeSearchTerm(string term)
@@ -487,12 +525,17 @@ namespace NzbDrone.Core.MetadataSource.Igdb
             }
         }
 
-        private Game MapSearchResult(IgdbGameResource resource)
+        private static Game ToGame(GameMetadata metadata)
         {
-            return new Game { GameMetadata = MapGame(resource) };
+            return new Game { GameMetadata = metadata };
         }
 
         private List<IgdbGameResource> QueryGames(string query)
+        {
+            return NotNull(QueryGamesWithFields(query)).ToList();
+        }
+
+        private List<IgdbGameResource> QueryGamesWithFields(string query)
         {
             if (!_useModernFields)
             {

@@ -1,0 +1,32 @@
+[
+  {
+    "id": 300001,
+    "name": "Action Boy",
+    "slug": "action-boy",
+    "platforms": [24, null],
+    "release_dates": [{ "id": 1, "platform": 24 }, null, { "id": 2, "date": 1000000000 }],
+    "videos": [
+      { "id": 11, "video_id": "noname111" },
+      { "id": 12, "name": null, "video_id": "noname222" },
+      null,
+      { "id": 13, "name": "Launch Trailer", "video_id": "trailer333" }
+    ],
+    "genres": [null, { "id": 8 }, { "id": 31, "name": "Adventure" }],
+    "themes": null,
+    "keywords": [],
+    "involved_companies": [null, { "id": 5 }, { "id": 6, "company": { "id": 7 }, "developer": true }],
+    "alternative_names": [null, { "id": 3 }],
+    "age_ratings": [null, { "id": 4 }],
+    "websites": [null, { "id": 9 }, { "id": 10, "url": "https://example.com/actionboy" }],
+    "collections": [null, { "id": 20 }],
+    "similar_games": [null, 300002, 300002],
+    "artworks": [null, { "id": 1 }],
+    "screenshots": [null, { "id": 2, "image_id": "scab" }],
+    "cover": {},
+    "game_status": {},
+    "first_release_date": 99999999999999
+  },
+  null,
+  { "id": 300002, "slug": "nameless-game" },
+  { "id": 300003 }
+]

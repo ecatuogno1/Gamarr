@@ -14,6 +14,9 @@ namespace NzbDrone.Core.MetadataSource.Igdb
     {
         public const string ImageUrlFormat = "https://images.igdb.com/igdb/image/upload/t_{0}/{1}.jpg";
 
+        private static readonly long MinUnixSeconds = DateTimeOffset.MinValue.ToUnixTimeSeconds();
+        private static readonly long MaxUnixSeconds = DateTimeOffset.MaxValue.ToUnixTimeSeconds();
+
         private static readonly Dictionary<int, string> AgeRatingOrganizations = new()
         {
             { 1, "ESRB" },
@@ -77,7 +80,8 @@ namespace NzbDrone.Core.MetadataSource.Igdb
 
         public static DateTime? FromUnixTime(long? seconds)
         {
-            if (!seconds.HasValue)
+            // Out of range timestamps would throw, treat them as unknown
+            if (!seconds.HasValue || seconds.Value < MinUnixSeconds || seconds.Value > MaxUnixSeconds)
             {
                 return null;
             }
@@ -92,14 +96,14 @@ namespace NzbDrone.Core.MetadataSource.Igdb
 
         public static string GetStatusKey(IgdbGameResource resource)
         {
-            var status = resource.GameStatus?.Status;
+            var status = resource?.GameStatus?.Status;
 
             if (status.IsNotNullOrWhiteSpace())
             {
                 return Normalize(status);
             }
 
-            if (resource.Status.HasValue && GameStatuses.TryGetValue(resource.Status.Value, out var oldStatus))
+            if (resource?.Status != null && GameStatuses.TryGetValue(resource.Status.Value, out var oldStatus))
             {
                 return oldStatus;
             }
@@ -119,11 +123,11 @@ namespace NzbDrone.Core.MetadataSource.Igdb
                     return GameStatusType.Announced;
             }
 
-            var releaseDates = new List<DateTime?> { FromUnixTime(resource.FirstReleaseDate) };
+            var releaseDates = new List<DateTime?> { FromUnixTime(resource?.FirstReleaseDate) };
 
-            if (resource.ReleaseDates != null)
+            if (resource?.ReleaseDates != null)
             {
-                releaseDates.AddRange(resource.ReleaseDates.Select(d => FromUnixTime(d.Date)));
+                releaseDates.AddRange(resource.ReleaseDates.Where(d => d != null).Select(d => FromUnixTime(d.Date)));
             }
 
             if (releaseDates.Any(d => d.HasValue && d.Value <= now))
@@ -141,6 +145,11 @@ namespace NzbDrone.Core.MetadataSource.Igdb
 
         public static AgeRating MapAgeRating(IgdbAgeRating resource)
         {
+            if (resource == null)
+            {
+                return null;
+            }
+
             var organization = resource.Organization?.Name;
 
             if (organization.IsNullOrWhiteSpace())
@@ -174,7 +183,7 @@ namespace NzbDrone.Core.MetadataSource.Igdb
 
         public static GameWebsite MapWebsite(IgdbWebsite resource)
         {
-            if (resource.Url.IsNullOrWhiteSpace())
+            if (resource == null || resource.Url.IsNullOrWhiteSpace())
             {
                 return null;
             }
